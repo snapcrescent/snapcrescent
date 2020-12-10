@@ -1,8 +1,15 @@
 package com.codeinsight.snap_crescent.userManagement;
 
+import java.util.Optional;
+
+import javax.security.auth.login.CredentialNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
+import com.codeinsight.snap_crescent.userManagement.bean.ResetPasswordRequest;
+import com.codeinsight.snap_crescent.userManagement.bean.UserLoginBean;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -22,8 +29,38 @@ public class UserServiceImpl implements UserService {
 		return savedUser;
 	}
 
+	@Override
+	public User login(UserLoginBean userLoginBean) throws CredentialNotFoundException {
+
+		Optional<User> user = userRepository.findByUsernameAndPassword(userLoginBean.getUsername(),
+				userLoginBean.getPassword());
+
+		if (!user.isPresent()) {
+			throw new CredentialNotFoundException("Invalid Username or Password.");
+		}
+
+		return user.get();
+	}
+
+	@Override
+	public String resetPassword(ResetPasswordRequest resetPasswordRequest) throws CredentialNotFoundException {
+
+		Optional<User> userToRetrive = userRepository.findByUsernameAndPassword(resetPasswordRequest.getUsername(),
+				resetPasswordRequest.getOldPassword());
+
+		if (!userToRetrive.isPresent()) {
+			throw new CredentialNotFoundException("Old password did not match.");
+		}
+
+		User user = userToRetrive.get();
+		user.setPassword(resetPasswordRequest.getNewPassword());
+		userRepository.save(user);
+
+		return "Password successfully updated.";
+	}
+
 	private boolean validateUser(User user) {
-		boolean exists = userRepository.existsByEmail(user.getEmail());
+		boolean exists = userRepository.existsByUsername(user.getUsername());
 		return !exists;
 	}
 

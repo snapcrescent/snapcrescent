@@ -1,5 +1,7 @@
 package com.codeinsight.snap_crescent.userManagement;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
@@ -10,5 +12,9 @@ import org.springframework.data.rest.core.annotation.RestResource;
 public interface UserRepository extends JpaRepository<User, Long>, QuerydslPredicateExecutor<User> {
 
 	@RestResource(exported = false)
-	public boolean existsByEmail(@Param("email") String email);
+	public boolean existsByUsername(@Param("username") String username);
+
+	@RestResource(exported = false)
+	public Optional<User> findByUsernameAndPassword(@Param("username") String username,
+			@Param("password") String password);
 }
