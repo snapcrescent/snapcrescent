@@ -1,0 +1,46 @@
+@import 'helper';
+
+a{
+    text-decoration: none;
+}
+
+.signup-signin{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100%;
+    padding: 20px;
+    background-image: url("../background.jpg");
+
+    height: 100vh;
+
+    main {
+        border-radius: 10px;
+        background: #ffffff6b;
+        padding: 3rem;
+        max-width: 30rem;
+        position: relative;
+        box-shadow: 0 30px 60px 0 rgba(0,0,0,.3);
+
+        .card {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+
+            .logo {
+                height: 4rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        .form {
+            width: '100%';
+            margin-top: .5rem;
+        }
+
+        .submit {
+            margin: 1.5rem 0px 1rem;
+        }
+    }
+}

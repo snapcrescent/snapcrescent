@@ -8,17 +8,17 @@ export const Header = () => {
         <div className="header">
             <h2> SnapCrescent</h2>
             <ul className="header-list">
-                <Link to="/photos">
+                <Link to="/home/photos">
                     <li>
                         Photos
                     </li>
                 </Link>
-                <Link to="favourites">
+                <Link to="/home/favourites">
                     <li>
                         Favourites
                     </li>
                 </Link>
-                <Link to="/videos">
+                <Link to="/home/videos">
                     <li>
                         Videos
                     </li>
