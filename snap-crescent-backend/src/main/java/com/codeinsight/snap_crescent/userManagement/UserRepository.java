@@ -17,4 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long>, QuerydslPredi
 	@RestResource(exported = false)
 	public Optional<User> findByUsernameAndPassword(@Param("username") String username,
 			@Param("password") String password);
+	
+	@RestResource(exported = false)
+	public Optional<User> findByUsername(@Param("username") String username);
+	
 }

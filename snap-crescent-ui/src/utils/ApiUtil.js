@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import { error } from './ToastUtil';
 
 const client = axios.create({
   baseURL: 'http://localhost:8080/',
@@ -14,7 +14,7 @@ export const getData = (url) => {
    .then( res=> {
         return res.data;
     }).catch( res =>{
-        return res.data;
+        error(res.response.data);
     });
 }
 
@@ -23,6 +23,15 @@ export const postData = (url, props) => {
    .then( res=> {
         return res.data;
     }).catch( res =>{
+        error(res.response.data);
+    });
+}
+
+export const putData = (url, props) => {
+   return client.put(url, props)
+   .then( res=> {
         return res.data;
+    }).catch( res =>{
+        error(res.response.data);
     });
 }

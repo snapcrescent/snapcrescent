@@ -6,23 +6,19 @@ import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
-import { signup } from '../../actions/AuthAction';
-import './Signup.scss';
+import { resetPassword } from '../../actions/AuthAction';
+import './ResetPassword.scss';
 
-export class Signup extends Component {
+export class ResetPassword extends Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
-            firstName: "",
-            lastName: "",
             username: "",
             password: "",
             confirmPassword: "",
             formErrors: {
-                firstName: "",
-                lastName: "",
                 username: "",
                 password: "",
                 confirmPassword: ""
@@ -35,12 +31,10 @@ export class Signup extends Component {
 
         if (this.validate()) {
             const requestObject = {
-                firstName: this.state.firstName,
-                lastName: this.state.lastName,
                 username: this.state.username,
                 password: this.state.password
             };
-            signup(requestObject)
+            resetPassword(requestObject)
             .then(res => {
                 if(res) {
                     this.props.history.push('/signin');
@@ -82,10 +76,6 @@ export class Signup extends Component {
 
         const formErrors = this.state.formErrors;
         switch (name) {
-            case 'firstName':
-                formErrors.firstName = value.length === 0
-                    ? 'First name is required field.' : '';
-                break;
             case 'username':
                 formErrors.username = value.length === 0
                     ? 'User name is required field.' : '';
@@ -111,37 +101,9 @@ export class Signup extends Component {
                     <div className="card">
                     <img className="logo" src={'/logo.png'}/>
                         <Typography component="h1" variant="h5">
-                            Sign Up
+                            Reset Password
                         </Typography>
                         <form className="form" noValidate>
-                            <Grid container spacing={2}>
-                                <Grid item xs>
-                                    <TextField
-                                        margin="normal"
-                                        required
-                                        fullWidth
-                                        id="firstName"
-                                        label="First Name"
-                                        name="firstName"
-                                        autoFocus
-                                        onChange={this.handleChange}
-                                        error={!!this.state.formErrors.firstName}
-                                        helperText={this.state.formErrors.firstName}
-                                    />
-                                </Grid>
-                                <Grid item xs>
-                                    <TextField
-                                        margin="normal"
-                                        fullWidth
-                                        id="lastName"
-                                        label="Last Name"
-                                        name="lastName"
-                                        onChange={this.handleChange}
-                                        error={!!this.state.formErrors.lastName}
-                                        helperText={this.state.formErrors.lastName}
-                                    />
-                                </Grid>
-                            </Grid>
                             <TextField
                                 margin="normal"
                                 required
@@ -185,12 +147,12 @@ export class Signup extends Component {
                                 className="submit"
                                 onClick={this.handleSubmit}
                             >
-                                Sign Up
+                                Reset Password
                             </Button>
 
-                            <Link to="signin">
+                            {/* <Link to="signin">
                                 <small>Already have an account?</small>
-                            </Link>
+                            </Link> */}
                         </form>
                     </div>
                 </Container>

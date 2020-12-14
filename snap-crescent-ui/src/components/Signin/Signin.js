@@ -136,8 +136,10 @@ export class Signin extends Component {
                 onClick={this.handleSubmit}
               >
                 Sign In
-          </Button>
-
+              </Button>
+              <Link to="reset-password">
+                <small>Reset Password</small>
+              </Link>
               <div className="separator" />
 
               <Link to="signup">
@@ -146,7 +148,7 @@ export class Signin extends Component {
                   className="newAccount"
                 >
                   Create New Account
-            </Button>
+                </Button>
               </Link>
             </form>
           </div>

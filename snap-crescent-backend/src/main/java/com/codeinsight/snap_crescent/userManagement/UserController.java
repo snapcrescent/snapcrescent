@@ -2,8 +2,8 @@ package com.codeinsight.snap_crescent.userManagement;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,11 +38,21 @@ public class UserController {
 		}
 	}
 
-	@PutMapping(path = "reset-password")
+	@PostMapping(path = "/reset-password")
 	public @ResponseBody ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetRequest) {
 		try {
 			String successMessage = userService.resetPassword(resetRequest);
 			return ResponseEntity.ok(successMessage);
+		} catch (Exception exception) {
+			return ResponseEntity.badRequest().body(exception.getLocalizedMessage());
+		}
+	}
+	
+	@GetMapping(path = "/user-exists")
+	public @ResponseBody ResponseEntity<?> doesUserExist() {
+		try {
+			Boolean exist = userService.doesUserExists();
+			return ResponseEntity.ok(exist);
 		} catch (Exception exception) {
 			return ResponseEntity.badRequest().body(exception.getLocalizedMessage());
 		}
