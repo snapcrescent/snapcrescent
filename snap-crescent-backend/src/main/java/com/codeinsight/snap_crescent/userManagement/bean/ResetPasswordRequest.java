@@ -4,9 +4,7 @@ public class ResetPasswordRequest {
 
 	private String username;
 
-	private String oldPassword;
-
-	private String newPassword;
+	private String password;
 
 	public String getUsername() {
 		return username;
@@ -16,20 +14,11 @@ public class ResetPasswordRequest {
 		this.username = username;
 	}
 
-	public String getOldPassword() {
-		return oldPassword;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setOldPassword(String oldPassword) {
-		this.oldPassword = oldPassword;
+	public void setPassword(String password) {
+		this.password = password;
 	}
-
-	public String getNewPassword() {
-		return newPassword;
-	}
-
-	public void setNewPassword(String newPassword) {
-		this.newPassword = newPassword;
-	}
-
 }

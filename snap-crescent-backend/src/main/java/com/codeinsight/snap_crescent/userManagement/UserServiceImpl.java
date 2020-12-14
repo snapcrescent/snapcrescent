@@ -45,23 +45,33 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String resetPassword(ResetPasswordRequest resetPasswordRequest) throws CredentialNotFoundException {
 
-		Optional<User> userToRetrive = userRepository.findByUsernameAndPassword(resetPasswordRequest.getUsername(),
-				resetPasswordRequest.getOldPassword());
+		Optional<User> userToRetrive = userRepository.findByUsername(resetPasswordRequest.getUsername());
 
 		if (!userToRetrive.isPresent()) {
-			throw new CredentialNotFoundException("Old password did not match.");
+			throw new CredentialNotFoundException("User not exist.");
 		}
 
 		User user = userToRetrive.get();
-		user.setPassword(resetPasswordRequest.getNewPassword());
+		user.setPassword(resetPasswordRequest.getPassword());
 		userRepository.save(user);
-
-		return "Password successfully updated.";
+		
+        return "Password successfully updated.";
 	}
 
 	private boolean validateUser(User user) {
 		boolean exists = userRepository.existsByUsername(user.getUsername());
 		return !exists;
+	}
+
+	@Override
+	public Boolean doesUserExists() throws Exception {
+		boolean exists = false;
+		
+		if(userRepository.count() > 0) {
+			exists = true;
+		}
+		
+		return exists;
 	}
 
 }

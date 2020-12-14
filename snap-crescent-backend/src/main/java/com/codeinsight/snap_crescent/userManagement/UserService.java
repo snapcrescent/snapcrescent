@@ -14,4 +14,6 @@ public interface UserService {
 	public User login(UserLoginBean userLoginBean) throws CredentialNotFoundException;
 
 	public String resetPassword(ResetPasswordRequest resetPasswordRequest) throws CredentialNotFoundException;
+
+	public Boolean doesUserExists() throws Exception;
 }
