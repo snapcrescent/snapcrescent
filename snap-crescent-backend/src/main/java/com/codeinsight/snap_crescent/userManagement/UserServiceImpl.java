@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.codeinsight.snap_crescent.userManagement.bean.ResetPasswordRequest;
 import com.codeinsight.snap_crescent.userManagement.bean.UserLoginBean;
+import com.codeinsight.snap_crescent.utils.StringHasher;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -18,11 +19,12 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Override
-	public User saveUser(User user) throws DuplicateKeyException {
+	public User saveUser(User user) throws Exception {
 		User savedUser = null;
 		if (!validateUser(user)) {
 			throw new DuplicateKeyException("Username already exists.");
 		} else {
+			user.setPassword(StringHasher.getBCrpytHash(user.getPassword()));
 			savedUser = userRepository.save(user);
 		}
 
@@ -30,7 +32,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User login(UserLoginBean userLoginBean) throws CredentialNotFoundException {
+	public User login(UserLoginBean userLoginBean) throws Exception {
 
 		Optional<User> user = userRepository.findByUsernameAndPassword(userLoginBean.getUsername(),
 				userLoginBean.getPassword());
@@ -43,7 +45,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public String resetPassword(ResetPasswordRequest resetPasswordRequest) throws CredentialNotFoundException {
+	public String resetPassword(ResetPasswordRequest resetPasswordRequest) throws Exception {
 
 		Optional<User> userToRetrive = userRepository.findByUsername(resetPasswordRequest.getUsername());
 
@@ -52,7 +54,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		User user = userToRetrive.get();
-		user.setPassword(resetPasswordRequest.getPassword());
+		user.setPassword(StringHasher.getBCrpytHash(resetPasswordRequest.getPassword()));
 		userRepository.save(user);
 		
         return "Password successfully updated.";
