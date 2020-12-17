@@ -36,8 +36,9 @@ export class Signin extends Component {
       signin(requestObject)
       .then(res => {
         if(res) {
-          localStorage.setItem('user', JSON.stringify(res));
+          localStorage.setItem('user', JSON.stringify(res.user));
           localStorage.setItem('authenticated', true);
+          localStorage.setItem('token', res.token);
           this.props.history.push('/home');
         }
       })

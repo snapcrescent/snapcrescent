@@ -5,7 +5,8 @@ const client = axios.create({
   baseURL: 'http://localhost:8080/',
   headers: {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*'
+    'Access-Control-Allow-Origin': '*',
+    'Authorization': 'Bearer ' + localStorage.getItem("token")
   },
 });
 
@@ -14,7 +15,7 @@ export const getData = (url) => {
    .then( res=> {
         return res.data;
     }).catch( res =>{
-        error(res.response.data);
+        // error(res.response.data);
     });
 }
 
@@ -23,7 +24,7 @@ export const postData = (url, props) => {
    .then( res=> {
         return res.data;
     }).catch( res =>{
-        error(res.response.data);
+        // error(res.response.data);
     });
 }
 
@@ -32,6 +33,6 @@ export const putData = (url, props) => {
    .then( res=> {
         return res.data;
     }).catch( res =>{
-        error(res.response.data);
+        // error(res.response.data);
     });
 }

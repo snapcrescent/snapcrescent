@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codeinsight.snap_crescent.userManagement.bean.ResetPasswordRequest;
-import com.codeinsight.snap_crescent.userManagement.bean.UserLoginBean;
 
 @RestController
 public class UserController {
@@ -26,16 +25,6 @@ public class UserController {
 			return ResponseEntity.badRequest().body(exception.getLocalizedMessage());
 		}
 
-	}
-
-	@PostMapping(path = "/login")
-	public @ResponseBody ResponseEntity<?> login(@RequestBody UserLoginBean userLoginBean) {
-		try {
-			User user = userService.login(userLoginBean);
-			return ResponseEntity.ok(user);
-		} catch (Exception exception) {
-			return ResponseEntity.badRequest().body(exception.getLocalizedMessage());
-		}
 	}
 
 	@PostMapping(path = "/reset-password")
