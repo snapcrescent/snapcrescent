@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 
 import { Header } from '../Header/Header';
+import { Sidebar } from '../Sidebar/Sidebar';
 import { Photo } from '../Photo/Photo';
 import { Video } from '../Video/Video';
 import { Favourite } from '../Favourite/Favourite';
@@ -10,7 +11,8 @@ export const Home = () => {
 
     return (
         <Router>
-            <Header />
+            {/* <Header /> */}
+            <Sidebar />
             <Route
                 exact
                 path="/home"
