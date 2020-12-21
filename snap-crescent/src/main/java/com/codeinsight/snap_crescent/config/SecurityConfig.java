@@ -38,12 +38,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private RestAuthenticationFailureHandler restAuthenticationFailureHandler;
 	
-	public static final String JWT_TOKEN_HEADER_PARAM = "Authorization";
-	public static final String FORM_BASED_LOGIN_ENTRY_POINT = "/volredirect";
-	public static final String TOKEN_BASED_AUTH_ENTRY_POINT = "/**";
-
-	public static final String FORM_BASED_LOGOUT_EXIT_POINT = "/logout";
-
 	@Autowired
 	private UserAuthDetailsService userDetailsService;
 	@Override
@@ -65,8 +59,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll();
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-		http.authorizeRequests().antMatchers("/user-exists").permitAll();
-		http.authorizeRequests().antMatchers("/logout").permitAll();
+		http.authorizeRequests().antMatchers("/").permitAll()
+		.antMatchers("/*.html").permitAll()
+		.antMatchers("/static/**").permitAll()
+		.antMatchers("/favicon.ico").permitAll()
+		.antMatchers("/manifest.json").permitAll()
+		.antMatchers("/**/*.html").permitAll()
+		.antMatchers("/**/*.css").permitAll()
+		.antMatchers("/**/*.js").permitAll()
+		.antMatchers("/**/*.js.map").permitAll()
+		.antMatchers("/**/*.png").permitAll()
+		.antMatchers("/**/*.gif").permitAll()
+		.antMatchers("/user-exists").permitAll()
+		.antMatchers("/sign-up").permitAll()
+		.antMatchers("/logout").permitAll();
 		http.formLogin().authenticationDetailsSource(authenticationDetailsSource).loginPage("/login").permitAll();
 
 		http.logout().logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler);

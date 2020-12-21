@@ -1,2 +1,15 @@
-snap-crescent-backend/.settings/
-snap-crescent-backend/target/
+snap-crescent/.settings/
+snap-crescent/target/
+
+snap-crescent/src/main/webapp/node_modules
+snap-crescent/src/main/webapp/build
+snap-crescent/src/main/webapp/node
+snap-crescent/src/main/webapp/npm-debug.log*
+snap-crescent/src/main/webapp/yarn-debug.log*
+snap-crescent/src/main/webapp/yarn-error.log*
+snap-crescent/src/main/webapp/DS_Store
+snap-crescent/src/main/webapp/env.local
+snap-crescent/src/main/webapp/env.development.local
+snap-crescent/src/main/webapp/env.test.local
+snap-crescent/src/main/webapp/env.production.local
+
