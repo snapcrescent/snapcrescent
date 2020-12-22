@@ -1,7 +1,13 @@
-.root {
-  display: flex;
+.primary-color {
+  color: #fff !important;
 }
 
-.primary-color {
-  color: #15C57E;
+.sidebar-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.list-item-text {
+  color: #fff;
+  font-weight: bold !important;
 }

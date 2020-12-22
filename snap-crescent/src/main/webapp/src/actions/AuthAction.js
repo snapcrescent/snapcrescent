@@ -2,6 +2,7 @@ import { postData, getData } from '../utils/ApiUtil';
 
 const SIGNUP_URL = 'sign-up';
 const SIGNIN_URL = 'login';
+const SIGN_OUT_URL = "sign-out";
 const RESET_PASSWORD_URL = 'reset-password';
 const USER_EXISTS_URL = 'user-exists';
 
@@ -11,6 +12,10 @@ export const signup = (props) => {
 
 export const signin = (props) => {  
   return postData(SIGNIN_URL, props);
+}
+
+export const signOut = (props) => {
+  return postData(SIGN_OUT_URL, props);
 }
 
 export const resetPassword = (props) => {  

@@ -4,6 +4,7 @@ import './Header.scss';
 import { Link } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
+import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import IconButton from '@material-ui/core/IconButton';
@@ -13,6 +14,7 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import ReplayIcon from '@material-ui/icons/Replay';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import { makeStyles } from '@material-ui/core/styles';
+import { signOut } from '../../actions/AuthAction';
 
 const drawerWidth = 240;
 
@@ -54,9 +56,21 @@ const useStyles = makeStyles((theme) => ({
 export const Header = (props) => {
 
   const classes = useStyles();
+  
   const handleDrawerOpen = () => {
     props.onMenuClick();
   }
+
+  const signOutUser = (event) => {
+    const requestObject = {};
+    signOut(requestObject).then(res => {
+      console.log("sign-out");
+    }).catch(error => {
+      console.log(error);
+      localStorage.setItem('authenticated', false);
+    });
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -97,7 +111,6 @@ export const Header = (props) => {
         </div>
 
         <div className="grow" />
-
         <IconButton color="inherit" aria-label="reload" >
           <ReplayIcon />
         </IconButton>
@@ -107,6 +120,9 @@ export const Header = (props) => {
         <IconButton color="inherit" aria-label="upload">
           <CloudUploadIcon />
         </IconButton>
+        
+        <div className="grow" />
+        <Button variant="contained" onClick={signOutUser}>SIGN OUT</Button>
       </Toolbar>
 
     </AppBar>
