@@ -165,7 +165,7 @@
 						<phase>generate-resources</phase>
 						<configuration>
 							<target>
-								<copy todir="target/classes/static">
+								<copy todir="target/classes/public">
 									<fileset dir="src/main/webapp/build" />
 								</copy>
 							</target>

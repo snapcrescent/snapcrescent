@@ -1,6 +1,6 @@
 import React from 'react';
 import './Home.scss';
-import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import { HashRouter, Route, Redirect } from 'react-router-dom';
 
 import { Header } from '../Header/Header';
 import { Sidebar } from '../Sidebar/Sidebar';
@@ -11,7 +11,7 @@ import { Favorite } from '../Favorite/Favorite';
 export const Home = () => {
 
     return (
-        <Router>
+        <HashRouter>
             {/* <Header /> */}
             <div className="root">
                 <Sidebar />
@@ -31,6 +31,6 @@ export const Home = () => {
                 </div>
             </div>
             
-        </Router>
+        </HashRouter>
     );
 }
