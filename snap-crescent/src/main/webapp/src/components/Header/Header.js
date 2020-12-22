@@ -15,6 +15,8 @@ import ReplayIcon from '@material-ui/icons/Replay';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import { makeStyles } from '@material-ui/core/styles';
 import { signOut } from '../../actions/AuthAction';
+import { useHistory } from "react-router";
+
 
 const drawerWidth = 240;
 
@@ -55,6 +57,7 @@ const useStyles = makeStyles((theme) => ({
 
 export const Header = (props) => {
 
+  const history = useHistory();
   const classes = useStyles();
   
   const handleDrawerOpen = () => {
@@ -64,10 +67,10 @@ export const Header = (props) => {
   const signOutUser = (event) => {
     const requestObject = {};
     signOut(requestObject).then(res => {
-      console.log("sign-out");
+      history.push({pathname: '/signin'});
+      localStorage.clear();
     }).catch(error => {
       console.log(error);
-      localStorage.setItem('authenticated', false);
     });
   };
 

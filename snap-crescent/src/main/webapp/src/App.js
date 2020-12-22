@@ -3,7 +3,7 @@ import './App.css';
 import { Signup } from './components/Signup/Signup';
 import { Signin } from './components/Signin/Signin';
 import { Home } from './components/Home/Home';
-import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import { HashRouter, Route, Redirect } from 'react-router-dom';
 import { ResetPassword } from './components/ResetPassword/ResetPassword';
 import { doesUserExists } from './actions/AuthAction';
 
@@ -32,7 +32,7 @@ export class App extends Component {
     }
     return (
       <div className="App">
-        <Router>
+        <HashRouter>
           <Route
             exact
             path="/"
@@ -50,7 +50,7 @@ export class App extends Component {
           <Route path='/signup' component={Signup} />
           <Route path='/signin' component={Signin} />
           <Route path='/reset-password' component={ResetPassword} />
-        </Router>
+        </HashRouter>
       </div>
     );
   }

@@ -2,7 +2,7 @@ import { postData, getData } from '../utils/ApiUtil';
 
 const SIGNUP_URL = 'sign-up';
 const SIGNIN_URL = 'login';
-const SIGN_OUT_URL = "sign-out";
+const SIGN_OUT_URL = "logout";
 const RESET_PASSWORD_URL = 'reset-password';
 const USER_EXISTS_URL = 'user-exists';
 
