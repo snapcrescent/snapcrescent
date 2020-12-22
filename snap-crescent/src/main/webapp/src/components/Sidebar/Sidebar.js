@@ -1,4 +1,5 @@
 import React from 'react';
+import './Sidebar.scss';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -16,8 +17,10 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import LockIcon from '@material-ui/icons/Lock';
 import MovieIcon from '@material-ui/icons/Movie';
 import { Header } from '../Header/Header';
+import { Link } from 'react-router-dom';
 
 const drawerWidth = 240;
+const bgImgUrl = `https://images.unsplash.com/photo-1564352969906-8b7f46ba4b8b?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1534&q=80`;
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
@@ -31,6 +34,8 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+    backgroundImage: `url(${bgImgUrl})`,
+    backgroundSize: 'cover'
   },
   drawerClose: {
     transition: theme.transitions.create('width', {
@@ -42,6 +47,8 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('sm')]: {
       width: theme.spacing(9) + 1,
     },
+    backgroundImage: `url(${bgImgUrl})`,
+    backgroundSize: 'cover'
   },
   toolbar: {
     display: 'flex',
@@ -51,10 +58,10 @@ const useStyles = makeStyles((theme) => ({
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
   },
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing(3),
-  },
+  listItemText: {
+    color: '#fff',
+    fontWeight: 'bold'
+  }
 }));
 
 export const Sidebar = () => {
@@ -73,24 +80,28 @@ export const Sidebar = () => {
   const sideNavItems = [
     {
       title: 'Photos',
-      icon: <PhotoIcon />
+      icon: <PhotoIcon />,
+      url: '/home/photos'
     },
     {
       title: 'Favorites',
-      icon: <FavoriteIcon />
+      icon: <FavoriteIcon />,
+      url: '/home/favorites'
     },
-    {
-      title: 'Private',
-      icon: <LockIcon />
-    },
+    // {
+    //   title: 'Private',
+    //   icon: <LockIcon />,
+    //   url: '/home/private'
+    // },
     {
       title: 'Videos',
-      icon: <MovieIcon />
+      icon: <MovieIcon />,
+      url: '/home/videos'
     },
   ];
   return (
-    <div className='root'>
-      <CssBaseline />
+    <div>
+      {/* <CssBaseline /> */}
       <Header open={open} onMenuClick={handleDrawerOpen} />
       <Drawer
         variant="permanent"
@@ -113,16 +124,15 @@ export const Sidebar = () => {
         <Divider />
         <List>
           {sideNavItems.map((item, index) => (
-            <ListItem button key={item.title}>
-              <ListItemIcon className='primary-color'>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.title} />
-            </ListItem>
+            <Link to={item.url} key={index} className="sidebar-link">
+              <ListItem button>
+                <ListItemIcon className='primary-color'>{item.icon}</ListItemIcon>
+                <ListItemText classes={{primary: classes.listItemText}} primary={item.title} />
+              </ListItem>
+            </Link>
           ))}
         </List>
       </Drawer>
-      <main className={classes.content}>
-        <div className={classes.toolbar} />
-      </main>
     </div>
   );
 }
