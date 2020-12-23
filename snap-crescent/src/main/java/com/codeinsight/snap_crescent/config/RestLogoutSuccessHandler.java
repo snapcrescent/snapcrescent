@@ -42,7 +42,6 @@ public class RestLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
 
 			BaseResponse jsonResponse = new BaseResponse();
 			jsonResponse.setLogoutResponse(true);
-			jsonResponse.setSuccess(true);
 
 			response.getWriter().print(JsonUtils.writeJsonString(jsonResponse));
 			response.getWriter().flush();

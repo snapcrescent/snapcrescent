@@ -16,19 +16,19 @@ public class User implements Serializable {
 	private static final long serialVersionUID = -5417001592780159971L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@Column(name = "firstName", nullable = false)
+	@Column(name = "FIRST_NAME", nullable = false)
 	private String firstName;
 
-	@Column(name = "lastName")
+	@Column(name = "LAST_NAME")
 	private String lastName;
 
-	@Column(name = "username", unique = true, nullable = false)
+	@Column(name = "USERNAME", unique = true, nullable = false)
 	private String username;
 
-	@Column(name = "password", nullable = false)
+	@Column(name = "PASSWORD", nullable = false)
 	private String password;
 
 	public long getId() {
