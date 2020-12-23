@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { error } from './ToastUtil';
 
 const client = axios.create({
   baseURL: 'http://localhost:8080/',
@@ -15,7 +14,7 @@ export const getData = (url) => {
    .then( res=> {
         return res.data;
     }).catch( res =>{
-        // error(res.response.data);
+        return res.data;
     });
 }
 
@@ -24,7 +23,16 @@ export const postData = (url, props) => {
    .then( res=> {
         return res.data;
     }).catch( res =>{
-        // error(res.response.data);
+        return res.data;
+    });
+}
+
+export const multipartData = (url, props) => {
+   return client.post(url, props, {headers : {'Content-Type': 'multipart/form-data' }})
+   .then( res=> {
+        return res.data;
+    }).catch( res =>{
+        return res.data;
     });
 }
 
@@ -33,6 +41,6 @@ export const putData = (url, props) => {
    .then( res=> {
         return res.data;
     }).catch( res =>{
-        // error(res.response.data);
+        return res.data;
     });
 }

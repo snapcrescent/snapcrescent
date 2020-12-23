@@ -41,7 +41,6 @@ static final String ORIGIN = "Origin";
 			
 			
 			BaseResponse jsonResponse = new BaseResponse();
-			jsonResponse.setSuccess(false);
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			
 			response.getWriter().print(JsonUtils.writeJsonString(jsonResponse));

@@ -1,7 +1,7 @@
-import { postData } from '../utils/ApiUtil';
+import { multipartData } from '../utils/ApiUtil';
 
 const UPLOAD_URL = 'upload';
 
 export const upload = (props) => {
-  return postData(UPLOAD_URL, props);
+  return multipartData(UPLOAD_URL, props);
 }

@@ -9,7 +9,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import { DialogContent, makeStyles } from '@material-ui/core';
 import { upload } from '../../services/UploadService';
-import {success, error} from '../../utils/ToastUtil';
+import {showSuccess, showError} from '../../utils/ToastUtil';
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -30,16 +30,16 @@ export const UploadDialog = (props) => {
     const { title, openDialog, fullScreen, setOpenDialog } = props;
 
     const uploadFile = (event) => {
-        console.log(event.target.files);
-        const formData = new FormData(); 
-        const files = event.target.files;
-        formData.append("file", files);
+        const formData = new FormData();
+        for (var fileIndex = 0; fileIndex < event.target.files.length; fileIndex++) {
+            formData.append("files", event.target.files[fileIndex]);    
+        }
         upload(formData).then(res => {
-            console.log(res);
-            success("File uploaded successfully.")
-        }).catch(error => {
-            error("Error uploading file.")
-        })
+            if(res) {
+                setOpenDialog(false);
+                showSuccess(res.message);
+            }
+        });
     }
 
     return (
