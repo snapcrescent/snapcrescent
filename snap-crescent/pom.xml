@@ -125,7 +125,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<nodeVersion>v10.18.1</nodeVersion>
+							<nodeVersion>v14.15.3</nodeVersion>
 							<npmVersion>6.13.4</npmVersion>
 						</configuration>
 					</execution>
@@ -153,9 +153,11 @@
 					</execution>
 				</executions>
 				<configuration>
-					<nodeVersion>v10.18.1</nodeVersion>
+					<nodeVersion>v14.15.3</nodeVersion>
 					<workingDirectory>src/main/webapp</workingDirectory>
+					<skip>true</skip>
 				</configuration>
+				
 			</plugin>
 
 			<plugin>
@@ -164,6 +166,7 @@
 					<execution>
 						<phase>generate-resources</phase>
 						<configuration>
+							<skip>true</skip>
 							<target>
 								<copy todir="target/classes/public">
 									<fileset dir="src/main/webapp/build" />
