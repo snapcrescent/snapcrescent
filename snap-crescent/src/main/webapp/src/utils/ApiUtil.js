@@ -28,7 +28,7 @@ export const postData = (url, props) => {
 }
 
 export const multipartData = (url, props) => {
-   return client.post(url, props, {headers : {'Content-Type': 'multipart/form-data' }})
+   return client.post(url, props, {headers : getmultipartHeader()})
    .then( res=> {
         return res.data;
     }).catch( res =>{
@@ -43,4 +43,12 @@ export const putData = (url, props) => {
     }).catch( res =>{
         return res.data;
     });
+}
+
+const getmultipartHeader = () => {
+        return {
+            'Content-Type': 'multipart/form-data',
+            'Access-Control-Allow-Origin': '*',
+            'Authorization': 'Bearer ' + localStorage.getItem("token")
+          }
 }

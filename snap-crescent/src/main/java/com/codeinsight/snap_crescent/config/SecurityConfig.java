@@ -54,12 +54,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		
-		http.csrf().disable();
-		http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
-		http.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll();
-		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-		http.authorizeRequests().antMatchers("/").permitAll()
+		http
+		.cors()
+		.and()
+		.csrf().disable()
+		.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+		.and()
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+		.and()
+		.authorizeRequests()
+		.antMatchers(HttpMethod.OPTIONS).permitAll()
+		.antMatchers("/").permitAll()
 		.antMatchers("/*.html").permitAll()
 		.antMatchers("/static/**").permitAll()
 		.antMatchers("/favicon.ico").permitAll()
