@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
 import './Header.scss';
-import { Link } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import IconButton from '@material-ui/core/IconButton';
@@ -14,10 +12,11 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ReplayIcon from '@material-ui/icons/Replay';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { signOut } from '../../actions/AuthAction';
 import { useHistory } from "react-router";
 import { UploadDialog } from '../UploadDialog/UploadDialog';
+import { Grid, useMediaQuery } from '@material-ui/core';
 
 
 const drawerWidth = 240;
@@ -47,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
   },
   inputRoot: {
     color: 'inherit',
+    display: 'flex'
   },
   inputInput: {
     padding: theme.spacing(1, 1, 1, 0),
@@ -61,8 +61,10 @@ export const Header = (props) => {
 
   const history = useHistory();
   const classes = useStyles();
+  const theme = useTheme();
+  const isMobileView = useMediaQuery(theme.breakpoints.down('sm'));
   const [openUploadPhotoDialog, setOpenUploadPhotoDialog] = useState(false);
-  
+
   const handleDrawerOpen = () => {
     props.onMenuClick();
   }
@@ -70,7 +72,7 @@ export const Header = (props) => {
   const signOutUser = (event) => {
     const requestObject = {};
     signOut(requestObject).then(res => {
-      history.push({pathname: '/signin'});
+      history.push({ pathname: '/signin' });
       localStorage.clear();
     }).catch(error => {
       console.log(error);
@@ -84,55 +86,38 @@ export const Header = (props) => {
         className={clsx(classes.appBar, {
           [classes.appBarShift]: props.open,
         })}
-  
+
       >
         <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            className={clsx(classes.menuButton, {
-              [classes.hide]: props.open,
-            })}
-          >
-            <MenuIcon />
-          </IconButton>
-  
-          <Typography variant="h6" noWrap>
-            Snap Crescent
-            </Typography>
-  
-          <div className="search">
-            <div className="searchIcon">
-              <SearchIcon />
-            </div>
-            <InputBase
-              placeholder="Search…"
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput,
-              }}
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </div>
-  
-          <div className="grow" />
-          <IconButton color="inherit" aria-label="reload" >
-            <ReplayIcon />
-          </IconButton>
-          <IconButton color="inherit" aria-label="toggle view">
-            <ViewModuleIcon />
-          </IconButton>
-          <IconButton color="inherit" aria-label="upload" onClick={() => setOpenUploadPhotoDialog(true)}>
-            <CloudUploadIcon />
-          </IconButton>
-          <IconButton color="inherit" aria-label="logout" onClick={signOutUser}>
-            <ExitToAppIcon />
-          </IconButton>
-          
+          <Grid container>
+            <Grid item>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+                edge="start"
+                className={clsx(classes.menuButton, {
+                  [classes.hide]: props.open,
+                })}
+              >
+                <MenuIcon />
+              </IconButton>
+            </Grid>
+
+            <Grid item className='center-content'>
+              <Typography variant="h6" noWrap>
+                Snap Crescent
+              </Typography>
+            </Grid>
+
+            {!isMobileView
+              ? showAppBarTools(classes, setOpenUploadPhotoDialog, signOutUser)
+              : <></>
+            }
+          </Grid>
+
         </Toolbar>
-  
+
       </AppBar>
       <UploadDialog
         openDialog={openUploadPhotoDialog}
@@ -142,4 +127,41 @@ export const Header = (props) => {
       ></UploadDialog>
     </div>
   )
+}
+
+function showAppBarTools(classes, setOpenUploadPhotoDialog, signOutUser) {
+  return (
+    <>
+      <Grid item sm={4} className='center-content'>
+        <div className="search">
+          <div className="searchIcon">
+            <SearchIcon />
+          </div>
+          <InputBase
+            placeholder="Search…"
+            classes={{
+              root: classes.inputRoot,
+              input: classes.inputInput,
+            }}
+            inputProps={{ 'aria-label': 'search' }} />
+        </div>
+      </Grid>
+      <Grid item sm></Grid>
+
+      <Grid item>
+        <IconButton color="inherit" aria-label="reload">
+          <ReplayIcon />
+        </IconButton>
+        <IconButton color="inherit" aria-label="toggle view">
+          <ViewModuleIcon />
+        </IconButton>
+        <IconButton color="inherit" aria-label="upload" onClick={() => setOpenUploadPhotoDialog(true)}>
+          <CloudUploadIcon />
+        </IconButton>
+        <IconButton color="inherit" aria-label="logout" onClick={signOutUser}>
+          <ExitToAppIcon />
+        </IconButton>
+      </Grid>
+    </>
+  );
 }

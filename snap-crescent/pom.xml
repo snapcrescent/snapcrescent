@@ -13,9 +13,9 @@
 	<groupId>com.codeinsight</groupId>
 	<artifactId>snap-crescent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>SANP-CRESCENT</name>
+	<name>SNAP-CRESCENT</name>
 	<packaging>jar</packaging>
-	<description>SANP-CRESCENT</description>
+	<description>SNAP-CRESCENT</description>
 
 	<properties>
 		<java.version>1.8</java.version>

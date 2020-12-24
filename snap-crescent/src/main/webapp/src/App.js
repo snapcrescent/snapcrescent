@@ -6,6 +6,7 @@ import { Home } from './components/Home/Home';
 import { HashRouter, Route, Redirect } from 'react-router-dom';
 import { ResetPassword } from './components/ResetPassword/ResetPassword';
 import { doesUserExists } from './actions/AuthAction';
+import { CssBaseline } from '@material-ui/core';
 
 export class App extends Component {
 
@@ -32,6 +33,7 @@ export class App extends Component {
     }
     return (
       <div className="App">
+        <CssBaseline />
         <HashRouter>
           <Route
             exact
