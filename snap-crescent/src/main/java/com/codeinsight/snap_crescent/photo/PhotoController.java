@@ -1,6 +1,8 @@
 package com.codeinsight.snap_crescent.photo;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,7 +39,7 @@ public class PhotoController {
 
 		BaseResponse response = new BaseResponse();
 		try {
-			photoService.upload(files);
+			photoService.upload(new ArrayList<MultipartFile>(Arrays.asList(files)));
 			response.setMessage("Image uploaded successfully.");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
