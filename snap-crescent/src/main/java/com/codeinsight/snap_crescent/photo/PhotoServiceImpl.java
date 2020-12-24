@@ -3,7 +3,6 @@ package com.codeinsight.snap_crescent.photo;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -43,15 +42,21 @@ public class PhotoServiceImpl implements PhotoService {
 	private ThumbnailRepository thumbnailRepository;
 
 	@Transactional
-	public void processImages() throws Exception {
+	public List<Photo> search() throws Exception {
+		return photoRepository.findAll();
+	}
 
-		File input = new File(PHOTO_PATH);
+	@Override
+	public void upload(ArrayList<MultipartFile> multipartFiles) throws Exception {
+		File directory = new File(PHOTO_PATH);
+		if (!directory.exists()) {
+			directory.mkdir();
+		}
+		for (MultipartFile multipartFile : multipartFiles) {
+			String path = PHOTO_PATH + multipartFile.getOriginalFilename();
+			multipartFile.transferTo(new File(path));
 
-		List<File> files = new ArrayList<>();
-		readFiles(input, files);
-
-		for (File file : files) {
-
+			File file = new File(path);
 			if (isAlreadyExist(file)) {
 				continue;
 			}
@@ -67,19 +72,9 @@ public class PhotoServiceImpl implements PhotoService {
 			image.setThumbnailId(thumbnail.getId());
 
 			photoRepository.save(image);
+
 		}
 
-	}
-
-	private void readFiles(File file, List<File> files) {
-
-		if (file.isFile()) {
-			files.add(file);
-		} else {
-			for (File f : file.listFiles()) {
-				readFiles(f, files);
-			}
-		}
 	}
 
 	private boolean isAlreadyExist(File file) throws Exception {
@@ -91,27 +86,5 @@ public class PhotoServiceImpl implements PhotoService {
 			exist = photoMetadataRepository.existsByNameAndModifiedDate(fileName, modifiedDate);
 		}
 		return exist;
-	}
-
-	@Transactional
-	public List<Photo> search() throws Exception {
-		return photoRepository.findAll();
-	}
-
-	@Override
-	public void upload(MultipartFile[] multipartFiles) throws Exception {
-		File directory = new File(PHOTO_PATH);
-		if (!directory.exists()) {
-			directory.mkdir();
-		}
-		Arrays.asList(multipartFiles).stream().forEach(file -> {
-			String path = PHOTO_PATH + file.getOriginalFilename();
-			try {
-				file.transferTo(new File(path));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		});
-
 	}
 }

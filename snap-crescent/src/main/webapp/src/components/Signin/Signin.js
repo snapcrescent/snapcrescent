@@ -43,7 +43,6 @@ export class Signin extends Component {
         }
       })
       .catch(error => {
-        console.log(error);
         localStorage.setItem('authenticated', false);
       })
     }

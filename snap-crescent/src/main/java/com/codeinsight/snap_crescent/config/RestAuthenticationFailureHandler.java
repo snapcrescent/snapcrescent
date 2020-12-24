@@ -30,6 +30,7 @@ public class RestAuthenticationFailureHandler extends SimpleUrlAuthenticationFai
 		if (exception instanceof BadCredentialsException) {
 			jsonResponse.setMessage(
 					"Incorrect username or password");
+	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		}
 
 		if (request.getHeader(ORIGIN) != null) {
@@ -41,7 +42,6 @@ public class RestAuthenticationFailureHandler extends SimpleUrlAuthenticationFai
 			response.setHeader("Access-Control-Allow-Credentials", "true");
 			response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"));
 		}
-		
 		response.getWriter().print(JsonUtils.writeJsonString(jsonResponse));
 		response.getWriter().flush();
 
