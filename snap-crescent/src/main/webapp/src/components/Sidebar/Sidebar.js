@@ -18,6 +18,7 @@ import LockIcon from '@material-ui/icons/Lock';
 import MovieIcon from '@material-ui/icons/Movie';
 import { Header } from '../Header/Header';
 import { Link } from 'react-router-dom';
+import { useMediaQuery } from '@material-ui/core';
 
 const drawerWidth = 240;
 const bgImgUrl = `https://images.unsplash.com/photo-1564352969906-8b7f46ba4b8b?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1534&q=80`;
@@ -61,12 +62,16 @@ const useStyles = makeStyles((theme) => ({
   listItemText: {
     color: '#fff',
     fontWeight: 'bold'
+  },
+  hide: {
+    display: 'none'
   }
 }));
 
 export const Sidebar = () => {
   const classes = useStyles();
   const theme = useTheme();
+  const isMobileView = useMediaQuery(theme.breakpoints.down('sm'));
   const [open, setOpen] = React.useState(false);
 
   const handleDrawerOpen = () => {
@@ -108,11 +113,13 @@ export const Sidebar = () => {
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: open,
           [classes.drawerClose]: !open,
+          [classes.hide]: isMobileView && !open
         })}
         classes={{
           paper: clsx({
             [classes.drawerOpen]: open,
             [classes.drawerClose]: !open,
+            [classes.hide]: isMobileView && !open
           }),
         }}
       >
