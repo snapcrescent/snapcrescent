@@ -6,7 +6,7 @@ import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import { Link } from 'react-router-dom';
 
-import { signin } from '../../actions/AuthAction';
+import { signin } from '../../services/AuthService';
 
 import './Signin.scss';
 
@@ -98,7 +98,7 @@ export class Signin extends Component {
         <Container component="main" maxWidth="xs">
           <CssBaseline />
           <div className="card">
-            <img className="logo" src={'/logo.png'} />
+            <img className="logo" src={'/logo.png'} alt="logo"/>
             <Typography component="h1" variant="h5">
               Sign In
             </Typography>

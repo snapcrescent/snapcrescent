@@ -5,7 +5,7 @@ import { Signin } from './components/Signin/Signin';
 import { Home } from './components/Home/Home';
 import { HashRouter, Route, Redirect } from 'react-router-dom';
 import { ResetPassword } from './components/ResetPassword/ResetPassword';
-import { doesUserExists } from './actions/AuthAction';
+import { doesUserExists, authenticate } from './services/AuthService';
 import { CssBaseline } from '@material-ui/core';
 
 export class App extends Component {
@@ -15,17 +15,28 @@ export class App extends Component {
 
     this.state = {
       dataFetched: false,
-      userExists: null,
-      isAuthenticated: localStorage.getItem('authenticated')
+      userExists: false,
+      isAuthenticated: false
     }
   }
 
   componentDidMount() {
     doesUserExists()
-      .then(res => {
-        this.setState({ dataFetched: true, userExists: res });
+      .then(exists => {
+        if(localStorage.getItem('token')) {
+          authenticate() 
+          .then( res => {
+            if(res) {
+              this.setState({ dataFetched: true, userExists: exists, isAuthenticated: true});
+            } else {
+              this.setState({ dataFetched: true, userExists: exists, isAuthenticated: false});
+            }
+          });
+        } else {
+          this.setState({ dataFetched: true, userExists: exists, isAuthenticated: false});
+        }     
+        
       });
-
   }
   render() {
     if (!this.state.dataFetched) {

@@ -13,7 +13,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ReplayIcon from '@material-ui/icons/Replay';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { signOut } from '../../actions/AuthAction';
+import { signOut } from '../../services/AuthService';
 import { useHistory } from "react-router";
 import { UploadDialog } from '../UploadDialog/UploadDialog';
 import { Grid, useMediaQuery } from '@material-ui/core';

@@ -6,7 +6,7 @@ import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
-import { signup } from '../../actions/AuthAction';
+import { signup } from '../../services/AuthService';
 import './Signup.scss';
 
 export class Signup extends Component {
@@ -96,7 +96,8 @@ export class Signup extends Component {
                 break;
             case 'confirmPassword':
                 formErrors.confirmPassword = this.state.password !== value
-                ? 'Password do not match.' : '';    
+                ? 'Password do not match.' : '';
+                break;    
             default:
                 break;
         }
@@ -109,7 +110,7 @@ export class Signup extends Component {
                 <Container component="main" maxWidth="xs">
                     <CssBaseline />
                     <div className="card">
-                    <img className="logo" src={'/logo.png'}/>
+                    <img className="logo" src={'/logo.png'} alt="logo"/>
                         <Typography component="h1" variant="h5">
                             Sign Up
                         </Typography>
