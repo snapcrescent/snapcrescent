@@ -1,63 +1,100 @@
 import React from 'react';
-import { TextInput, View, StyleSheet, Button } from 'react-native';
-import { postData } from '../../utils/ApiUtil';
+import { TextInput, View, Button, Text } from 'react-native';
+import { signin } from '../../utils/AuthUtil';
+import { isNotNull } from '../../utils/CoreUtil';
+import AuthStyle from './Auth-Styles';
 
 class Login extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
 
         this.state = {
             username: '',
-            password: ''
+            password: '',
+            formError: {
+                username: '',
+                password: ''
+            }
         }
     }
 
     login() {
-        const resp = postData('login', this.state);
-        console.warn(resp);
+        if (this.validate()) {
+            const payload = this.state;
+            delete payload.formError;
+            signin(payload).then(resp => {
+                console.warn(resp);
+            });
+        } else {
+            console.warn('Please fill valid values.');
+        }
+    }
+
+    validate() {
+        let valid = true;
+
+        Object.keys(this.state).forEach(key => {
+            if (!['formError'].includes(key)) {
+                this.setErrors(key, this.state[key]);
+            }
+        });
+
+        Object.keys(this.state.formError).forEach(formErrorKey => {
+            if (isNotNull(this.state.formError[formErrorKey])) {
+                valid = false;
+            }
+        });
+
+        return valid;
+    }
+
+    setErrors(name, value) {
+        const formErrors = this.state.formError;
+        if (!isNotNull(value)) {
+            formErrors[name] = 'Please enter a valid ' + name.toUpperCase();
+        } else {
+            formErrors[name] = '';
+        }
+
+        this.setState({ ...this.state, formError: formErrors });
     }
 
     render() {
         return (
-            <View style={styles.container}>
+            <View style={AuthStyle.container}>
                 <TextInput
-                    style={styles.textInput}
-                    placeholder="Username"
+                    style={[AuthStyle.textInput, AuthStyle.marginY10]}
+                    placeholder="Username *"
+                    onBlur={() => this.setErrors('username', this.state.username)}
                     onChangeText={(text) => this.setState({ username: text })} />
+                {
+                    this.state.formError.username != ''
+                        ? <Text style={AuthStyle.error}>{this.state.formError.username}</Text>
+                        : null
+                }
 
                 <TextInput
-                    style={[styles.textInput, styles.marginTop10, styles.marginBottom10]}
+                    style={[AuthStyle.textInput, AuthStyle.marginY10]}
                     secureTextEntry={true}
-                    placeholder="Password"
+                    placeholder="Password *"
+                    onBlur={() => this.setErrors('password', this.state.password)}
                     onChangeText={(text) => this.setState({ password: text })} />
+                {
+                    this.state.formError.password != ''
+                        ? <Text style={AuthStyle.error}>{this.state.formError.password}</Text>
+                        : null
+                }
 
-                <Button title="login" onPress={() => { this.login() }} />
+                <View style={{ marginTop: 10, width: '80%' }}>
+                    <Button title="Login" onPress={() => { this.login() }} />
+                </View>
+                <View style={{ marginTop: 10, width: '80%' }}>
+                    <Button title="Go to Signup" onPress={() => this.props.navigation.navigate('Signup')}></Button>
+                </View>
             </View>
         );
     }
 }
-
-const styles = StyleSheet.create({
-    container: {
-        margin: 10,
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    textInput: {
-        height: 40,
-        width: '80%',
-        borderColor: 'gray',
-        borderWidth: 1,
-        borderRadius: 5
-    },
-    marginTop10: {
-        marginTop: 10
-    },
-    marginBottom10: {
-        marginBottom: 10
-    }
-});
 
 export default Login;

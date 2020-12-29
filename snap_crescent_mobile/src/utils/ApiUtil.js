@@ -1,41 +1,42 @@
-import React from 'react';
+import axios from 'axios';
 
-const BASE_URL = "http://192.168.48.139:8080/"
-const HEADERS = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Authorization': 'Bearer '
-};
+const client = axios.create({
+    baseURL: 'http://192.168.43.139:8080/',
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
+});
 
-export const getData = async (url) => {
-    let resp = await fetch(BASE_URL + url, {
-        method: 'GET',
-        headers: HEADERS
-    });
-
-    resp = resp.json();
-    return resp;
+export const getData = (url) => {
+    return client.get(url)
+        .then(res => {
+            return res.data;
+        }).catch(error => {
+            if (error && error.response.data.message) {
+                console.warn(error.response.data.message);
+            }
+        });
 }
 
-export const postData = async (url, body) => {
-    console.log('Signup data', body);
-    let resp = await fetch(BASE_URL + url, {
-        method: 'POST',
-        headers: HEADERS,
-        body
-    });
-
-    resp = resp.json();
-    return resp;
+export const postData = (url, body) => {
+    return client.post(url, body)
+        .then(res => {
+            return res.data;
+        }).catch(error => {
+            if (error && error.response.data.message) {
+                console.warn(error.response.data.message);
+            }
+        });
 }
 
-export const putData = async (url, body) => {
-    let resp = await fetch(BASE_URL + url, {
-        method: 'PUT',
-        headers: HEADERS,
-        body
-    });
-
-    resp = resp.json();
-    return resp;
+export const putData = (url, body) => {
+    return client.put(url, body)
+        .then(res => {
+            return res.data;
+        }).catch(error => {
+            if (error && error.response.data.message) {
+                console.warn(error.response.data.message);
+            }
+        });
 }
