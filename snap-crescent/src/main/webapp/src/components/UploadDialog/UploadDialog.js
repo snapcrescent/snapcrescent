@@ -9,7 +9,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import { DialogContent, makeStyles } from '@material-ui/core';
 import { upload } from '../../services/UploadService';
-import {showSuccess, showError} from '../../utils/ToastUtil';
+import {showSuccess} from '../../utils/ToastUtil';
 
 const useStyles = makeStyles((theme) => ({
     appBar: {

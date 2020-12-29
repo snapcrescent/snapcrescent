@@ -2,11 +2,11 @@ import React from 'react';
 import './Home.scss';
 import { HashRouter, Route, Redirect } from 'react-router-dom';
 
-import { Header } from '../Header/Header';
 import { Sidebar } from '../Sidebar/Sidebar';
 import { Photo } from '../Photo/Photo';
 import { Video } from '../Video/Video';
 import { Favorite } from '../Favorite/Favorite';
+import { Loader } from '../Loader/Loader';
 
 export const Home = () => {
 
@@ -14,6 +14,7 @@ export const Home = () => {
         <HashRouter>
             {/* <Header /> */}
             <div className="root">
+                <Loader />
                 <Sidebar />
                 <div className="m-t-4">
                     <Route

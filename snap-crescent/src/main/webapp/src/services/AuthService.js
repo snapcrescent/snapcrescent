@@ -5,6 +5,7 @@ const SIGNIN_URL = 'login';
 const SIGN_OUT_URL = "logout";
 const RESET_PASSWORD_URL = 'reset-password';
 const USER_EXISTS_URL = 'user-exists';
+const AUTHENTICATION_URL = 'authentication';
 
 export const signup = (props) => {  
   return postData(SIGNUP_URL, props);
@@ -23,4 +24,8 @@ export const resetPassword = (props) => {
 }
 export const doesUserExists = () => {  
   return getData(USER_EXISTS_URL);
+}
+
+export const authenticate = () => {  
+  return getData(AUTHENTICATION_URL);
 }

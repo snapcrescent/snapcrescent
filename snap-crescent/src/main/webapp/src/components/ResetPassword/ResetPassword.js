@@ -4,9 +4,7 @@ import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
-import { Link } from 'react-router-dom';
-import { resetPassword } from '../../actions/AuthAction';
+import { resetPassword } from '../../services/AuthService';
 import './ResetPassword.scss';
 
 export class ResetPassword extends Component {
@@ -86,7 +84,8 @@ export class ResetPassword extends Component {
                 break;
             case 'confirmPassword':
                 formErrors.confirmPassword = this.state.password !== value
-                ? 'Password do not match.' : '';    
+                ? 'Password do not match.' : '';
+                break;    
             default:
                 break;
         }
@@ -99,7 +98,7 @@ export class ResetPassword extends Component {
                 <Container component="main" maxWidth="xs">
                     <CssBaseline />
                     <div className="card">
-                    <img className="logo" src={'/logo.png'}/>
+                    <img className="logo" src={'/logo.png'} alt ="logo" />
                         <Typography component="h1" variant="h5">
                             Reset Password
                         </Typography>
