@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useEffect, useState } from 'react'
 import './App.css';
 import { Signup } from './components/Signup/Signup';
 import { Signin } from './components/Signin/Signin';
@@ -8,65 +8,62 @@ import { ResetPassword } from './components/ResetPassword/ResetPassword';
 import { doesUserExists, authenticate } from './services/AuthService';
 import { CssBaseline } from '@material-ui/core';
 
-export class App extends Component {
+const appModel = {
+  dataFetched: false,
+  userExists: null,
+  isAuthenticated: localStorage.getItem('authenticated')
+}
 
-  constructor(props) {
-    super(props);
+export const App = () => {
+  const [formData, setFormData] = useState(appModel);
 
-    this.state = {
-      dataFetched: false,
-      userExists: false,
-      isAuthenticated: false
-    }
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     doesUserExists()
       .then(exists => {
-        if(localStorage.getItem('token')) {
-          authenticate() 
-          .then( res => {
-            if(res) {
-              this.setState({ dataFetched: true, userExists: exists, isAuthenticated: true});
-            } else {
-              this.setState({ dataFetched: true, userExists: exists, isAuthenticated: false});
-            }
-          });
+        if (localStorage.getItem('token')) {
+          authenticate()
+            .then(res => {
+              if (res) {
+                setFormData({ dataFetched: true, userExists: exists, isAuthenticated: true });
+              } else {
+                setFormData({ dataFetched: true, userExists: exists, isAuthenticated: false });
+              }
+            });
         } else {
-          this.setState({ dataFetched: true, userExists: exists, isAuthenticated: false});
-        }     
-        
+          setFormData({ dataFetched: true, userExists: exists, isAuthenticated: false });
+        }
+
       });
+  }, []);
+
+
+  if (!formData.dataFetched) {
+    return null;
   }
-  render() {
-    if (!this.state.dataFetched) {
-      return null;
-    }
-    return (
-      <div className="App">
-        <CssBaseline />
-        <HashRouter>
-          <Route
-            exact
-            path="/"
-            render={() => {
-              return (
-                this.state.isAuthenticated ?
-                  <Redirect to="/home" /> :
-                  this.state.userExists ?
-                    <Redirect to="/signin" /> :
-                    <Redirect to="/signup" />
-              )
-            }}
-          />
-          <Route path='/home' component={Home} />
-          <Route path='/signup' component={Signup} />
-          <Route path='/signin' component={Signin} />
-          <Route path='/reset-password' component={ResetPassword} />
-        </HashRouter>
-      </div>
-    );
-  }
+  return (
+    <div className="App">
+      <CssBaseline />
+      <HashRouter>
+        <Route
+          exact
+          path="/"
+          render={() => {
+            return (
+              formData.isAuthenticated ?
+                <Redirect to="/home" /> :
+                formData.userExists ?
+                  <Redirect to="/signin" /> :
+                  <Redirect to="/signup" />
+            )
+          }}
+        />
+        <Route path='/home' component={Home} />
+        <Route path='/signup' component={Signup} />
+        <Route path='/signin' component={Signin} />
+        <Route path='/reset-password' component={ResetPassword} />
+      </HashRouter>
+    </div>
+  );
 }
 
 export default App;
