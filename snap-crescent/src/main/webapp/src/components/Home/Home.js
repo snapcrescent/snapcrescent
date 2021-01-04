@@ -26,9 +26,11 @@ export const Home = () => {
                             )
                         }}
                     />
-                    <Route path='/home/photos' component={Photo} />
-                    <Route path='/home/favorites' component={Favorite} />
-                    <Route path='/home/videos' component={Video} />
+                    <div className="container">
+                        <Route path='/home/photos' component={Photo} />
+                        <Route path='/home/favorites' component={Favorite} />
+                        <Route path='/home/videos' component={Video} />
+                    </div>
                 </div>
             </div>
             

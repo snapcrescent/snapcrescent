@@ -5,7 +5,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import { Link, useHistory } from 'react-router-dom';
-
 import { signin } from '../../services/AuthService';
 
 import './Signin.scss';
@@ -34,13 +33,9 @@ export const Signin = () => {
         .then(res => {
           if (res) {
             localStorage.setItem('user', JSON.stringify(res.user));
-            localStorage.setItem('authenticated', true);
             localStorage.setItem('token', res.token);
             history.push({ pathname: '/home' });
           }
-        })
-        .catch(error => {
-          localStorage.setItem('authenticated', false);
         })
     }
   }
@@ -96,7 +91,7 @@ export const Signin = () => {
     <div className="signup-signin">
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <div className="card">
+        <div className="signup-signin-card">
           <img className="logo" src={'/logo.png'} alt="logo" />
           <Typography component="h1" variant="h5">
             Sign In

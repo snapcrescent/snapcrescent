@@ -5,4 +5,6 @@ import java.io.File;
 public interface ThumbnailService {
 
 	public Thumbnail generateThumbnail(File file) throws Exception;
+
+	public byte[] getById(Long id);
 }

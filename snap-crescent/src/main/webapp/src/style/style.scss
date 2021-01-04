@@ -1,4 +1,5 @@
 @import 'helper';
+@import 'bootstrap/dist/css/bootstrap.css';
 
 a{
     text-decoration: none;
@@ -23,7 +24,7 @@ a{
         position: relative;
         box-shadow: 0 30px 60px 0 rgba(0,0,0,.3);
 
-        .card {
+        .signup-signin-card {
             display: flex;
             align-items: center;
             flex-direction: column;
