@@ -1,11 +1,16 @@
 package com.codeinsight.snap_crescent.photo;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.ServletContext;
+
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,13 +45,18 @@ public class PhotoServiceImpl implements PhotoService {
 
 	@Autowired
 	private ThumbnailRepository thumbnailRepository;
+	
+	 @Autowired
+    private ServletContext servletContext;
 
 	@Transactional
 	public List<Photo> search() throws Exception {
+		System.out.println(servletContext.getContextPath());
 		return photoRepository.findAll();
 	}
 
 	@Override
+	@Transactional
 	public void upload(ArrayList<MultipartFile> multipartFiles) throws Exception {
 		File directory = new File(PHOTO_PATH);
 		if (!directory.exists()) {
@@ -86,5 +96,21 @@ public class PhotoServiceImpl implements PhotoService {
 			exist = photoMetadataRepository.existsByNameAndModifiedDate(fileName, modifiedDate);
 		}
 		return exist;
+	}
+
+	@Override
+	@Transactional
+	public byte[] getById(Long id) throws Exception {
+		Photo photo = photoRepository.findById(id).get();
+		String path = photo.getMetadata().getPath();
+		File file = new File(path);
+		byte[] image = null;
+		try {
+			InputStream in = new FileInputStream(file);
+			image = IOUtils.toByteArray(in);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return image;
 	}
 }

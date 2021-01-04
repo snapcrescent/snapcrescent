@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +22,7 @@ public class PhotoController {
 	@Autowired
 	private PhotoService photoService;
 
-	@GetMapping("/photos")
+	@GetMapping("/photo")
 	public ResponseEntity<?> search() {
 
 		String msg = "";
@@ -32,6 +33,16 @@ public class PhotoController {
 			msg = e.getMessage();
 		}
 		return new ResponseEntity<>(msg, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@GetMapping("/photo/{id}")
+	public ResponseEntity<byte[]> get(@PathVariable Long id) {
+		try {
+			return new ResponseEntity<>(photoService.getById(id), HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@PostMapping("/upload")

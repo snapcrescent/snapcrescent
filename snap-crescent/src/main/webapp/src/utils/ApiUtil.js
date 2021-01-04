@@ -4,7 +4,7 @@ import { increment, decrement } from '../actions/LoadingAction';
 import { store } from '../index' 
 
 const client = axios.create({
-    baseURL: 'http://localhost:8080/',
+    baseURL: process.env.REACT_APP_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',

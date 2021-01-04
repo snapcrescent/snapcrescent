@@ -10,4 +10,6 @@ public interface PhotoService {
 	public List<Photo> search() throws Exception;
 	
 	public void upload(ArrayList<MultipartFile> multipartFiles) throws Exception;
+	
+	public byte[] getById(Long id) throws Exception;
 }
