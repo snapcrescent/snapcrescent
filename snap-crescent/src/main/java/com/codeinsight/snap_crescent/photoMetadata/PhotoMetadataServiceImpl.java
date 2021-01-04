@@ -58,8 +58,10 @@ public class PhotoMetadataServiceImpl implements PhotoMetadataService {
 		Collection<GpsDirectory> gpsDirectories = metadata.getDirectoriesOfType(GpsDirectory.class);
 		for (GpsDirectory gpsDirectory : gpsDirectories) {
 			GeoLocation geoLocation = gpsDirectory.getGeoLocation();
-			imageMetadata.setGeoLocation(geoLocation.toString());
-			break;
+			if (geoLocation != null) {
+				imageMetadata.setGeoLocation(geoLocation.toString());
+				break;
+			}
 		}
 		return imageMetadata;
 	}

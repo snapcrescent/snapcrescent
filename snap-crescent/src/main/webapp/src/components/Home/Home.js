@@ -16,7 +16,7 @@ export const Home = () => {
             <div className="root">
                 <Loader />
                 <Sidebar />
-                <div className="m-t-4">
+                <div className="m-t-4 w-100">
                     <Route
                         exact
                         path="/home"

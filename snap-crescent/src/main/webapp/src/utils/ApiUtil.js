@@ -40,14 +40,20 @@ export const postData = (url, props) => {
         });
 }
 
-export const multipartData = (url, props) => {
-    ShowLoader();
-    return client.post(url, props, { headers: getmultipartHeader() })
+export const multipartData = (url, props, options, showLoader) => {
+    if(showLoader) {
+        ShowLoader();
+    }
+    return client.post(url, props, options, { headers: getmultipartHeader() })
         .then(res => {
-            HideLoader();
+            if(showLoader) {
+                HideLoader();
+            }
             return res.data;
         }).catch(error => {
-            HideLoader();
+            if(showLoader) {
+                HideLoader();
+            }
             if (error && error.response.data.message) {
                 showError(error.response.data.message);
             }
