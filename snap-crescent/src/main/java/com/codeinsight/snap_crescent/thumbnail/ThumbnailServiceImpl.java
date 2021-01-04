@@ -38,6 +38,9 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 	@Autowired
 	private PhotoRepository photoRepository;
+	
+	@Autowired
+	private ThumbnailRepository thumbnailRepository;
 
 	private final String FILE_TYPE_SEPARATOR = ".";
 
@@ -86,8 +89,8 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	@Override
 	@Transactional
 	public byte[] getById(Long id) {
-		Photo photo = photoRepository.findById(id).get();
-		String path = photo.getThumbnail().getPath();
+		Thumbnail thumbnail = thumbnailRepository.findById(id).get();
+		String path = thumbnail.getPath();
 		File file = new File(path);
 		byte[] image = null;
 		try {
