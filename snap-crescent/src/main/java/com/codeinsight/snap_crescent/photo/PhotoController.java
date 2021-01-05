@@ -3,6 +3,7 @@ package com.codeinsight.snap_crescent.photo;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,11 +24,14 @@ public class PhotoController {
 	private PhotoService photoService;
 
 	@GetMapping("/photo")
-	public ResponseEntity<?> search() {
+	public ResponseEntity<?> search(@RequestParam Map<String, String> searchParams) {
 
+		PhotoSearchCriteria searchCriteria = new PhotoSearchCriteria();
+
+		parseSearchParams(searchParams, searchCriteria);
 		String msg = "";
 		try {
-			return new ResponseEntity<>(photoService.search(), HttpStatus.OK);
+			return new ResponseEntity<>(photoService.search(searchCriteria), HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			msg = e.getMessage();
@@ -35,6 +39,17 @@ public class PhotoController {
 		return new ResponseEntity<>(msg, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+	private void parseSearchParams(Map<String, String> searchParams, PhotoSearchCriteria searchCriteria) {
+
+		if (searchParams.get("page") != null) {
+			searchCriteria.setPage(Integer.parseInt(searchParams.get("page")));
+		}
+		
+		if (searchParams.get("size") != null) {
+			searchCriteria.setSize(Integer.parseInt(searchParams.get("size")));
+		}
+	}
+	
 	@GetMapping("/photo/{id}")
 	public ResponseEntity<byte[]> get(@PathVariable Long id) {
 		try {

@@ -1,9 +1,19 @@
 import React, { useEffect, useState } from 'react'
+import { makeStyles } from '@material-ui/core/styles';
 import './Photo.scss';
 import { SearchTable } from '../SearchTable/SearchTable';
 import { search } from '../../services/PhotoService';
+import InfiniteScroll from 'react-infinite-scroll-component';
+
+const useStyles = makeStyles({
+    scrollContainer: {
+        overflow: 'hidden !important'
+    }
+});
 
 export const Photo = () => {
+
+    const classes = useStyles();
 
     const columns = [
         { field: 'createdDate', headerName: 'Created Date', width: 400 },
@@ -12,24 +22,33 @@ export const Photo = () => {
       ];
     
     const [rows, setRows] = useState([]);
+    const [pageSize, setPageSize] = useState(50);
+    const [totalElements, setTotalElements] = useState(0);
 
+    const getPhotos = () => {
+        const searchRequest = {
+            size: pageSize
+        }
+        search(searchRequest)
+        .then(res => {
+          if (res) {
+            setTotalElements(res.totalElements)
+          const photos = res.content.map(item => {
+                  return {
+                      id: item.id,
+                      createdDate: item.metadata.createdDate,
+                      device: item.metadata.model ? item.metadata.model : 'Unknown',
+                      size: item.metadata.size,
+                      thumbnail: getThumbnailPath(item.thumbnailId)
+                  }
+              });
+              setRows(photos);
+          } 
+        });
+    }
       useEffect(() => {
-        search()
-          .then(res => {
-            if (res) {
-            const photos = res.map(item => {
-                    return {
-                        id: item.id,
-                        createdDate: item.metadata.createdDate,
-                        device: item.metadata.model ? item.metadata.model : 'Unknown',
-                        size: item.metadata.size,
-                        thumbnail: getThumbnailPath(item.thumbnailId)
-                    }
-                });
-                setRows(photos);
-            } 
-          });
-      }, []);
+        getPhotos();
+      }, [pageSize]);
 
       const getThumbnailPath = (props) => {
         return process.env.REACT_APP_BASE_URL + '/thumbnail/' + props
@@ -37,7 +56,14 @@ export const Photo = () => {
 
     return (
         <div>
-            <SearchTable rows={rows} columns={columns} />
+            <InfiniteScroll
+                dataLength={rows.length}
+                next={()=>{setPageSize(pageSize+10)}}
+                hasMore={totalElements > rows.length}
+                className={classes.scrollContainer}
+            >
+                <SearchTable rows={rows} columns={columns} view="GRID"/>
+            </InfiniteScroll>
         </div>
     )
 }

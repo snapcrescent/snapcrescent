@@ -6,13 +6,13 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
-import javax.servlet.ServletContext;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,14 +45,11 @@ public class PhotoServiceImpl implements PhotoService {
 
 	@Autowired
 	private ThumbnailRepository thumbnailRepository;
-	
-	 @Autowired
-    private ServletContext servletContext;
 
 	@Transactional
-	public List<Photo> search() throws Exception {
-		System.out.println(servletContext.getContextPath());
-		return photoRepository.findAll();
+	public Page<Photo> search(PhotoSearchCriteria photoSearchCriteria) throws Exception {
+		Pageable pageable = PageRequest.of(photoSearchCriteria.getPage(), photoSearchCriteria.getSize());
+		return photoRepository.search(pageable);
 	}
 
 	@Override
