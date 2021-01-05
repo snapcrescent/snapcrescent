@@ -8,4 +8,7 @@ snap-crescent/src/main/webapp/.eslintcache
 snap-crescent/src/main/webapp/npm-debug.log*
 snap-crescent/src/main/webapp/yarn-debug.log*
 snap-crescent/src/main/webapp/yarn-error.log*
+snap-crescent/src/main/webapp/debug.log
+snap-crescent/src/main/webapp/package-lock.json
+snap-crescent/src/main/webapp/.eslintcache
 

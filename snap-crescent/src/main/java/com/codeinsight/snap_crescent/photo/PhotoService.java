@@ -1,13 +1,13 @@
 package com.codeinsight.snap_crescent.photo;
 
 import java.util.ArrayList;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface PhotoService {
 	
-	public List<Photo> search() throws Exception;
+	public Page<Photo> search(PhotoSearchCriteria photoSearchCriteria) throws Exception;
 	
 	public void upload(ArrayList<MultipartFile> multipartFiles) throws Exception;
 	

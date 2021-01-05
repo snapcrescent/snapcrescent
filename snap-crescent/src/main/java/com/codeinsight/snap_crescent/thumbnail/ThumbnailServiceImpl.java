@@ -15,9 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.codeinsight.snap_crescent.photo.Photo;
-import com.codeinsight.snap_crescent.photo.PhotoRepository;
-
 @Service
 public class ThumbnailServiceImpl implements ThumbnailService {
 
@@ -35,9 +32,6 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 	@Value("${thumbnail.output.type}")
 	private String THUMBNAIL_OUTPUT_TYPE;
-
-	@Autowired
-	private PhotoRepository photoRepository;
 	
 	@Autowired
 	private ThumbnailRepository thumbnailRepository;

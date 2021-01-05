@@ -12,9 +12,9 @@ const client = axios.create({
     },
 });
 
-export const getData = (url) => {
+export const getData = (url, params) => {
     ShowLoader();
-    return client.get(url)
+    return client.get(url, {params: {...params}})
         .then(res => {
             HideLoader();
             return res.data;
