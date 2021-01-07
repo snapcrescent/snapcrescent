@@ -1,4 +1,4 @@
-import { getData, postData } from "./ApiUtil";
+import { getData, postData } from "./ApiService";
 
 const SIGNUP_URL = 'sign-up';
 const SIGNIN_URL = 'login';
