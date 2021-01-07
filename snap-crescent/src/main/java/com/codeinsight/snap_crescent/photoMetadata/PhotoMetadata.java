@@ -5,58 +5,64 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.codeinsight.snap_crescent.location.Location;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
-@Table(name = "METADATA")
+@Table(name = "metadata")
 public class PhotoMetadata implements Serializable {
 
 	private static final long serialVersionUID = 1567235158787189351L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ID")
 	private long id;
 
-	@Column(name = "NAME", nullable = false)
+	@Column(nullable = false)
 	private String name;
 
-	@Column(name = "PATH", nullable = false)
+	@Column(nullable = false)
 	private String path;
 
-	@Column(name = "SIZE", nullable = false)
+	@Column(nullable = false)
 	private String size;
 
-	@Column(name = "CREATED_DATE")
 	private Date createdDate;
 
-	@Column(name = "MODIFIED_DATE")
-	private Date modifiedDate;
-
-	@Column(name = "FILE_TYPE_NAME")
 	private String fileTypeName;
 
-	@Column(name = "FILE_TYPE_LONG_NAME")
 	private String fileTypeLongName;
 
-	@Column(name = "MIME_TYPE")
 	private String mimeType;
 
-	@Column(name = "FILE_EXTENSION", nullable = false)
+	@Column(nullable = false)
 	private String fileExtension;
 
-	@Column(name = "GEO_LOCATION")
-	private String geoLocation;
-
-	@Column(name = "MODEL")
 	private String model;
 
 	private String height;
 
 	private String width;
+	
+	private int orientation;
+	
+	private String fspot;
+	
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "Location_Id", insertable = false, updatable = false)
+	private Location location;
+
+	@Column(name = "Location_Id", insertable = true, updatable = true)
+	private Long locationId;
 
 	public long getId() {
 		return id;
@@ -98,14 +104,6 @@ public class PhotoMetadata implements Serializable {
 		this.createdDate = createdDate;
 	}
 
-	public Date getModifiedDate() {
-		return modifiedDate;
-	}
-
-	public void setModifiedDate(Date modifiedDate) {
-		this.modifiedDate = modifiedDate;
-	}
-
 	public String getFileTypeName() {
 		return fileTypeName;
 	}
@@ -138,14 +136,6 @@ public class PhotoMetadata implements Serializable {
 		this.fileExtension = fileExtension;
 	}
 
-	public String getGeoLocation() {
-		return geoLocation;
-	}
-
-	public void setGeoLocation(String geoLocation) {
-		this.geoLocation = geoLocation;
-	}
-
 	public String getHeight() {
 		return height;
 	}
@@ -168,5 +158,37 @@ public class PhotoMetadata implements Serializable {
 
 	public void setModel(String model) {
 		this.model = model;
+	}
+
+	public int getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(int orientation) {
+		this.orientation = orientation;
+	}
+
+	public String getFspot() {
+		return fspot;
+	}
+
+	public void setFspot(String fspot) {
+		this.fspot = fspot;
+	}
+
+	public Location getLocation() {
+		return location;
+	}
+
+	public void setLocation(Location location) {
+		this.location = location;
+	}
+
+	public Long getLocationId() {
+		return locationId;
+	}
+
+	public void setLocationId(Long locationId) {
+		this.locationId = locationId;
 	}
 }

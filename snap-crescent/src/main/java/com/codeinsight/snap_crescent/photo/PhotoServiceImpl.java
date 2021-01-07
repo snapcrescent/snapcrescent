@@ -3,9 +3,7 @@ package com.codeinsight.snap_crescent.photo;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +21,6 @@ import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadataService;
 import com.codeinsight.snap_crescent.thumbnail.Thumbnail;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailRepository;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailService;
-import com.codeinsight.snap_crescent.utils.Constant;
 
 @Service
 public class PhotoServiceImpl implements PhotoService {
@@ -70,7 +67,7 @@ public class PhotoServiceImpl implements PhotoService {
 			Photo image = new Photo();
 
 			PhotoMetadata photoMetadata = photoMetadataService.extractMetaData(file);
-			Thumbnail thumbnail = thumbnailService.generateThumbnail(file);
+			Thumbnail thumbnail = thumbnailService.generateThumbnail(file, photoMetadata);
 
 			photoMetadataRepository.save(photoMetadata);
 			thumbnailRepository.save(thumbnail);
@@ -87,11 +84,7 @@ public class PhotoServiceImpl implements PhotoService {
 	private boolean isAlreadyExist(File file) throws Exception {
 		boolean exist = false;
 		String fileName = file.getName();
-		String modifiedDateString = new SimpleDateFormat(Constant.SIMPLE_DATE_FORMAT).format(file.lastModified());
-		Date modifiedDate = new SimpleDateFormat(Constant.SIMPLE_DATE_FORMAT).parse(modifiedDateString);
-		if (modifiedDate != null) {
-			exist = photoMetadataRepository.existsByNameAndModifiedDate(fileName, modifiedDate);
-		}
+		exist = photoMetadataRepository.existsByName(fileName);
 		return exist;
 	}
 

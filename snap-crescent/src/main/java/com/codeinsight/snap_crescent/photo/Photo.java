@@ -17,14 +17,13 @@ import com.codeinsight.snap_crescent.thumbnail.Thumbnail;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name = "PHOTO")
+@Table(name = "photo")
 public class Photo implements Serializable {
 
 	private static final long serialVersionUID = -4250460739319965956L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ID")
 	private long id;
 
 	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })

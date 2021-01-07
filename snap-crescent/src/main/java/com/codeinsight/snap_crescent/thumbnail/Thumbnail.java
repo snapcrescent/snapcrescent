@@ -17,13 +17,12 @@ public class Thumbnail implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ID")
 	private long id;
 
-	@Column(name = "NAME", nullable = false)
+	@Column(nullable = false)
 	private String name;
 
-	@Column(name = "PATH", nullable = false)
+	@Column(nullable = false)
 	private String path;
 
 	public long getId() {

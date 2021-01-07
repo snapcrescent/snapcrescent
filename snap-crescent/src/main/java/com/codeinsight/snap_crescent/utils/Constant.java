@@ -13,6 +13,7 @@ public class Constant {
 	public static final String METADATA_IMAGE_WIDTH = "Image Width";
 	public static final String METADATA_CREATED_DATE = "Date/Time";
 	public static final String METADATA_MODEL = "Model";
+	public static final String METADATA_FSPOT = "F-Number";
 
 	public static final String SIMPLE_DATE_FORMAT = "yyyy:mm:dd hh:mm:ss";
 
