@@ -1,64 +1,54 @@
-import React from 'react';
-import 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect } from 'react';
 import { View } from 'react-native';
-import Login from './src/component/user-auth/Login';
-import Signup from './src/component/user-auth/Signup';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { doesUserExists } from './src/utils/AuthUtil';
+import { useSelector } from 'react-redux';
+import ServerUrl from './src/component/user-authentication/ServerUrl';
+import UserAuthentication from './src/component/user-authentication/UserAuthentication';
+import { updateServerUrl } from './src/core/action/serverUrl';
+import { isNotNull, isNull } from './src/utils/CoreUtil';
+import store from './src/core';
+import { updateAuthState } from './src/core/action/authentication';
+import { useState } from 'react';
+import Lodder from './src/component/Lodder';
+import Tabs from './src/component/tabs/Tabs';
 
-const Stack = createStackNavigator();
-class App extends React.Component {
-
-  constructor() {
-    super();
-
-    this.state = {
-      dataFetched: false,
-      userExists: false
-    }
-  }
-
-  headerOptions = {
-    headerStyle: {
-      backgroundColor: '#15c57e',
-    },
-    headerTintColor: '#fff',
-    headerTitleStyle: {
-      fontWeight: 'bold',
-    }
-  }
-
-  componentDidMount() {
-    this.checkUserExists();
-  }
-
-  checkUserExists() {
-    doesUserExists().then(resp => {
-      this.setState({
-        dataFetched: true,
-        userExists: resp
-      });
-    });
-  }
-
-  render() {
-    if (!this.state.dataFetched) {
-      return null;
-    } else {
-      return (
-        <View style={{ flex: 1 }}>
-          <NavigationContainer>
-            <Stack.Navigator initialRouteName={this.state.userExists ? 'Login' : 'Signup'}>
-              <Stack.Screen name="Login" component={Login} options={this.headerOptions}></Stack.Screen>
-              <Stack.Screen name="Signup" component={Signup} options={this.headerOptions}></Stack.Screen>
-            </Stack.Navigator>
-          </NavigationContainer>
-        </View>
-      );
-    }
-
-  }
+const initialState = {
+  dataFetched: false
 };
 
-export default App; 
+function App() {
+
+  const serverUrl = useSelector(state => state.serverUrl);
+  const isUserAuthenticated = useSelector(state => state.isAuthenticated);
+
+  const [state, setState] = useState(initialState);
+
+  useEffect(() => {
+    AsyncStorage.getItem('serverUrl').then(serverUrl => {
+      if (isNotNull(serverUrl)) {
+        store.dispatch(updateServerUrl(serverUrl));
+      } else {
+        store.dispatch(updateServerUrl(null));
+        store.dispatch(updateAuthState(false));
+      }
+
+      setState({ ...state, dataFetched: true });
+    });
+  }, []);
+
+  return (
+    <View style={{ flex: 1 }}>
+      {
+        !state.dataFetched
+          ? <Lodder />
+          : isNull(serverUrl)
+            ? <ServerUrl />
+            : (!isUserAuthenticated)
+              ? <UserAuthentication />
+              : <Tabs />
+      }
+    </View>
+  );
+}
+
+export default App;
