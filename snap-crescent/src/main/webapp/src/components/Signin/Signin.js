@@ -6,6 +6,7 @@ import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import { Link, useHistory } from 'react-router-dom';
 import { signin } from '../../services/AuthService';
+import { updateAuthHeader } from '../../utils/ApiUtil';
 
 import './Signin.scss';
 
@@ -34,6 +35,7 @@ export const Signin = () => {
           if (res) {
             localStorage.setItem('user', JSON.stringify(res.user));
             localStorage.setItem('token', res.token);
+            updateAuthHeader(res.token);
             history.push({ pathname: '/home' });
           }
         })

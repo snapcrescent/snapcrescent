@@ -10,6 +10,7 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import { DialogContent, Grid, LinearProgress, makeStyles } from '@material-ui/core';
 import * as uploadService from '../../services/UploadService';
 import {showSuccess} from '../../utils/ToastUtil';
+import { useHistory } from "react-router";
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -33,6 +34,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const UploadDialog = (props) => {
+
+    const history = useHistory();
+
     const [uploadPercent, setUploadPercent] = useState(0);
     const classes = useStyles();
     const { title, openDialog, fullScreen, setOpenDialog } = props;
@@ -61,9 +65,11 @@ export const UploadDialog = (props) => {
                 setUploadPercent(100);
                 setTimeout(() => {
                     setUploadPercent(0);
-                    setOpenDialog(false);
                     showSuccess(res.message);
+                    history.go(0);
                 }, 1000);
+            } else {
+                setUploadPercent(0);
             }
         });
     }
@@ -83,22 +89,6 @@ export const UploadDialog = (props) => {
                 </AppBar>
                 <DialogContent dividers className={classes.content}>
                     <Grid container className='grid-container'>
-                        <Grid item>
-                            <Typography variant="h6">
-                                Please don't upload photos containing offensive content. Uploads that may contain such images will be rejected automatically.
-                                Non-photographic and low-quality images require a review before they appear in search results.
-                            </Typography>
-                        </Grid>
-                    </Grid>
-                    <Grid container className='grid-container'>
-                        <Grid item>
-                            <label htmlFor='upload' className='file-upload-button'>
-                                <CloudUploadIcon className='m-r-10' /> <Typography variant="h6">Upload File</Typography>
-                            </label>
-                            <input type='file' onChange={uploadFile} id='upload' multiple/>
-                        </Grid>
-                    </Grid>
-                    <Grid container className='grid-container'>
                         <Grid item className="center-content">
                             {uploadPercent > 0 ? 
                                 <LinearProgress 
@@ -106,6 +96,14 @@ export const UploadDialog = (props) => {
                                     value={uploadPercent}
                                     classes={{root: classes.progressBarRoot, bar: classes.primaryColor}} 
                                 /> : <></>}
+                        </Grid>
+                    </Grid>
+                    <Grid container className='grid-container'>
+                        <Grid item>
+                            <label htmlFor='upload' className='file-upload-button'>
+                                <CloudUploadIcon className='m-r-10' /> <Typography variant="h6">Upload File</Typography>
+                            </label>
+                            <input type='file' onChange={uploadFile} id='upload' accept="image/*" multiple/>
                         </Grid>
                     </Grid>
                 </DialogContent>
