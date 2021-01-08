@@ -1,16 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from '@react-navigation/native';
 import Login from './Login';
 import Signup from './Signup';
-import Lodder from '../Lodder'
-import { useState } from 'react';
+import Lodder from '../Lodder';
 import { doesUserExists } from '../../core/service/AuthService';
 import { View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { isNotNull } from '../../utils/CoreUtil';
 import store from '../../core';
-import { updateAuthState } from '../../core/action/authentication';
+import { updateAuthState, updateAuthToken } from '../../core/action/authentication';
+import { ImageBackground } from 'react-native';
+import FormControlStyle, { BACKGROUND_IAMGE } from './formControlStyles';
 
 const Stack = createStackNavigator();
 
@@ -36,6 +37,7 @@ function UserAuthentication() {
         try {
             AsyncStorage.getItem('authToken').then(authToken => {
                 if (isNotNull(authToken)) {
+                    store.dispatch(updateAuthToken(authToken));
                     store.dispatch(updateAuthState(true));
                 } else {
                     doesUserExists().then(response => {
@@ -62,7 +64,7 @@ function UserAuthentication() {
                         </Stack.Navigator>
                     </NavigationContainer>
             }
-        </View>
+        </View >
 
     );
 }

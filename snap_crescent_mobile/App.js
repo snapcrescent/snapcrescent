@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useSelector } from 'react-redux';
 import ServerUrl from './src/component/user-authentication/ServerUrl';
@@ -8,7 +8,6 @@ import { updateServerUrl } from './src/core/action/serverUrl';
 import { isNotNull, isNull } from './src/utils/CoreUtil';
 import store from './src/core';
 import { updateAuthState } from './src/core/action/authentication';
-import { useState } from 'react';
 import Lodder from './src/component/Lodder';
 import Tabs from './src/component/tabs/Tabs';
 
