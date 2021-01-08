@@ -1,0 +1,18 @@
+.search {
+    width: 100%;
+    position: relative;
+    margin-left: 32px;
+    margin-right: 32px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+  
+  .searchIcon {
+    height: 100%;
+    display: flex;
+    padding: 0px 16px;
+    position: absolute;
+    align-items: center;
+    pointer-events: none;
+    justify-content: center;
+  }

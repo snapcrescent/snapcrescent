@@ -4,14 +4,10 @@ import './Header.scss';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import InputBase from '@material-ui/core/InputBase';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
-import SearchIcon from '@material-ui/icons/Search';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import ReplayIcon from '@material-ui/icons/Replay';
-import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { signOut } from '../../services/AuthService';
 import { useHistory } from "react-router";
@@ -43,17 +39,6 @@ const useStyles = makeStyles((theme) => ({
   },
   hide: {
     display: 'none',
-  },
-  inputRoot: {
-    color: 'inherit',
-    display: 'flex'
-  },
-  inputInput: {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
   },
 }));
 
@@ -132,29 +117,9 @@ export const Header = (props) => {
 function showAppBarTools(classes, setOpenUploadPhotoDialog, signOutUser) {
   return (
     <>
-      <Grid item sm={4} className='center-content'>
-        <div className="search">
-          <div className="searchIcon">
-            <SearchIcon />
-          </div>
-          <InputBase
-            placeholder="Search…"
-            classes={{
-              root: classes.inputRoot,
-              input: classes.inputInput,
-            }}
-            inputProps={{ 'aria-label': 'search' }} />
-        </div>
-      </Grid>
       <Grid item sm></Grid>
 
       <Grid item>
-        <IconButton color="inherit" aria-label="reload">
-          <ReplayIcon />
-        </IconButton>
-        <IconButton color="inherit" aria-label="toggle view">
-          <ViewModuleIcon />
-        </IconButton>
         <IconButton color="inherit" aria-label="upload" onClick={() => setOpenUploadPhotoDialog(true)}>
           <CloudUploadIcon />
         </IconButton>
