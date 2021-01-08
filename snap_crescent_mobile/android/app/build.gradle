@@ -151,6 +151,12 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+		release {
+			storeFile file('snap-crescent.keystore')
+			storePassword SNAP_CRSCENT_RELEASE_STORE_PASSWORD
+			keyAlias SNAP_CRSCENT_RELEASE_KEY_ALIAS
+			keyPassword SNAP_CRSCENT_RELEASE_KEY_PASSWORD
+		}
     }
     buildTypes {
         debug {
@@ -159,7 +165,7 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
