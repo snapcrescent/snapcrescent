@@ -1,11 +1,13 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { ImageBackground } from 'react-native';
 import { Button, Text, TextInput, View } from "react-native";
+import { Card } from 'react-native-elements';
 import store from '../../core';
 import { updateServerUrl } from '../../core/action/serverUrl';
 import { testStorageUrl } from '../../core/service/ApiService';
+import { showToast } from '../../core/service/ToastService';
 import { isNotNull } from '../../utils/CoreUtil';
-import FormControlStyle from './formControlStyles';
+import FormControlStyle, { BACKGROUND_IAMGE } from './formControlStyles';
 import FormError from './FormError';
 
 const formControlIntitalState = {
@@ -24,13 +26,13 @@ function ServerUrl() {
             testStorageUrl(serverUrl).then(res => {
                 if (res) {
                     store.dispatch(updateServerUrl(serverUrl));
-                    alert('Whoooo you are now connected.');
+                    showToast('Whoooo you are now connected.');
                 } else {
-                    alert('Invalid URL.');
+                    showToast('Invalid URL.');
                 }
             });
         } else {
-            alert('Please fill all the mandatory fields.');
+            showToast('Please fill all the mandatory fields.');
         }
     };
 
@@ -65,17 +67,22 @@ function ServerUrl() {
 
     return (
         <View style={FormControlStyle.container}>
-            <Text style={{ fontSize: 14 }}>Please enter a Server URL</Text>
-            <TextInput
-                style={[FormControlStyle.textInput]}
-                placeholder="Server URL *"
-                onChangeText={(text) => setState({ ...formControl, serverUrl: text })} />
-            <FormError errorMessage={formControl.formError.serverUrl} />
+            <ImageBackground source={BACKGROUND_IAMGE} style={FormControlStyle.background}>
+                <Card containerStyle={FormControlStyle.cardContainer}>
+                    <Card.Title>Please enter a Server URL</Card.Title>
+                    <Card.Divider />
+                    <TextInput
+                        style={[FormControlStyle.textInput]}
+                        placeholder="Server URL *"
+                        onBlur={() => setErrors(formControl, 'serverUrl', formControl.serverUrl)}
+                        onChangeText={(text) => setState({ ...formControl, serverUrl: text })} />
+                    <FormError errorMessage={formControl.formError.serverUrl} />
 
-            <View style={FormControlStyle.submitButton}>
-                <Button title="Set Server" onPress={() => { setStorage(formControl) }} />
-            </View>
-
+                    <View style={FormControlStyle.submitButton}>
+                        <Button title="Set Server" onPress={() => { setStorage(formControl) }} color="#3f51bf" />
+                    </View>
+                </Card>
+            </ImageBackground>
         </View>
     );
 }

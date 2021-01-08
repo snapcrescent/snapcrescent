@@ -1,20 +1,20 @@
 import { StyleSheet } from 'react-native';
 
+export const BACKGROUND_IAMGE = require('../../assets/background.jpg');
+
 const FormControlStyle = StyleSheet.create({
     container: {
-        margin: 10,
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
+        flexDirection: 'column'
     },
     background: {
         flex: 1,
         resizeMode: "cover",
-        justifyContent: "center"
+        justifyContent: "center",
+        alignItems: "center"
     },
     textInput: {
         height: 40,
-        width: '80%',
         borderColor: 'gray',
         borderWidth: 1,
         borderRadius: 5,
@@ -34,7 +34,11 @@ const FormControlStyle = StyleSheet.create({
     },
     submitButton: {
         marginTop: 10,
-        width: '80%'
+    },
+    cardContainer: {
+        width: '80%',
+        justifyContent: 'center',
+        borderRadius: 10
     }
 });
 

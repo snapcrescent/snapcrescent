@@ -7,10 +7,15 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 
 const Tab = createBottomTabNavigator();
 
+const tabBarOptions = {
+    activeBackgroundColor: '#15c57e',
+    activeTintColor: '#000000'
+};
+
 function Tabs() {
     return (
         <NavigationContainer>
-            <Tab.Navigator>
+            <Tab.Navigator tabBarOptions={tabBarOptions}>
                 <Tab.Screen name="Home" component={Home} options={{
                     tabBarIcon: ({ focused, color, size }) => {
                         return <FontAwesome5 name="home" style={{ fontSize: 20 }} />
@@ -22,7 +27,7 @@ function Tabs() {
                     }
                 }} />
             </Tab.Navigator>
-        </NavigationContainer>
+        </NavigationContainer >
     );
 }
 

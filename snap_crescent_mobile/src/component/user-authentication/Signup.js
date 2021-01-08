@@ -1,9 +1,11 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { ImageBackground } from 'react-native';
 import { TextInput, View, Button, Text, TouchableOpacity } from 'react-native';
+import { Card } from 'react-native-elements';
 import { signup } from '../../core/service/AuthService';
+import { showToast } from '../../core/service/ToastService';
 import { isNotNull } from '../../utils/CoreUtil';
-import FormControlStyle from './formControlStyles';
+import FormControlStyle, { BACKGROUND_IAMGE } from './formControlStyles';
 
 const initialFormState = {
     firstName: '',
@@ -34,7 +36,7 @@ function Signup(props) {
                 }
             });
         } else {
-            alert('Please fill all the mandatory fields.');
+            showToast('Please fill all the mandatory fields.');
         }
     }
 
@@ -75,66 +77,74 @@ function Signup(props) {
 
     return (
         <View style={FormControlStyle.container}>
-            <TextInput
-                style={[FormControlStyle.textInput]}
-                placeholder="Firstname *"
-                onBlur={() => setErrors('firstName', formControl.firstName)}
-                onChangeText={(text) => setFormControl({ ...formControl, firstName: text })} />
-            {
-                formControl.formError.firstName != ''
-                    ? <Text style={FormControlStyle.errorMessage}>{formControl.formError.firstName}</Text>
-                    : null
-            }
+            <ImageBackground source={BACKGROUND_IAMGE} style={FormControlStyle.background}>
+                <Card containerStyle={FormControlStyle.cardContainer}>
+                    <Card.Title>Signup</Card.Title>
+                    <Card.Divider />
+                    <TextInput
+                        style={[FormControlStyle.textInput]}
+                        placeholder="Firstname *"
+                        onBlur={() => setErrors('firstName', formControl.firstName)}
+                        onChangeText={(text) => setFormControl({ ...formControl, firstName: text })} />
+                    {
+                        formControl.formError.firstName != ''
+                            ? <Text style={FormControlStyle.errorMessage}>{formControl.formError.firstName}</Text>
+                            : null
+                    }
 
-            <TextInput
-                style={[FormControlStyle.textInput]}
-                placeholder="Lastname"
-                onChangeText={(text) => setFormControl({ ...formControl, lastName: text })} />
+                    <TextInput
+                        style={[FormControlStyle.textInput]}
+                        placeholder="Lastname"
+                        onChangeText={(text) => setFormControl({ ...formControl, lastName: text })} />
 
-            <TextInput
-                style={[FormControlStyle.textInput]}
-                placeholder="Username *"
-                onBlur={() => setErrors('username', formControl.username)}
-                onChangeText={(text) => setFormControl({ ...formControl, username: text })} />
-            {
-                formControl.formError.username != ''
-                    ? <Text style={FormControlStyle.errorMessage}>{formControl.formError.username}</Text>
-                    : null
-            }
+                    <TextInput
+                        style={[FormControlStyle.textInput]}
+                        placeholder="Username *"
+                        onBlur={() => setErrors('username', formControl.username)}
+                        onChangeText={(text) => setFormControl({ ...formControl, username: text })} />
+                    {
+                        formControl.formError.username != ''
+                            ? <Text style={FormControlStyle.errorMessage}>{formControl.formError.username}</Text>
+                            : null
+                    }
 
-            <TextInput
-                style={[FormControlStyle.textInput]}
-                secureTextEntry={true}
-                placeholder="Password *"
-                onBlur={() => setErrors('password', formControl.password)}
-                onChangeText={(text) => setFormControl({ ...formControl, password: text })} />
-            {
-                formControl.formError.password != ''
-                    ? <Text style={FormControlStyle.errorMessage}>{formControl.formError.password}</Text>
-                    : null
-            }
+                    <TextInput
+                        style={[FormControlStyle.textInput]}
+                        secureTextEntry={true}
+                        placeholder="Password *"
+                        onBlur={() => setErrors('password', formControl.password)}
+                        onChangeText={(text) => setFormControl({ ...formControl, password: text })} />
+                    {
+                        formControl.formError.password != ''
+                            ? <Text style={FormControlStyle.errorMessage}>{formControl.formError.password}</Text>
+                            : null
+                    }
 
-            <TextInput
-                style={[FormControlStyle.textInput]}
-                secureTextEntry={true}
-                placeholder="Confirm Password *"
-                onBlur={() => setErrors('confirmPassword', formControl.confirmPassword)}
-                onChangeText={(text) => setFormControl({ ...formControl, confirmPassword: text })} />
-            {
-                formControl.formError.confirmPassword != ''
-                    ? <Text style={FormControlStyle.errorMessage}>{formControl.formError.confirmPassword}</Text>
-                    : null
-            }
+                    <TextInput
+                        style={[FormControlStyle.textInput]}
+                        secureTextEntry={true}
+                        placeholder="Confirm Password *"
+                        onBlur={() => setErrors('confirmPassword', formControl.confirmPassword)}
+                        onChangeText={(text) => setFormControl({ ...formControl, confirmPassword: text })} />
+                    {
+                        formControl.formError.confirmPassword != ''
+                            ? <Text style={FormControlStyle.errorMessage}>{formControl.formError.confirmPassword}</Text>
+                            : null
+                    }
 
-            <View style={FormControlStyle.submitButton}>
-                <Button title="Signup" onPress={() => { submit() }} />
-            </View>
+                    <View style={FormControlStyle.submitButton}>
+                        <Button title="Signup" onPress={() => { submit() }} color="#3f51bf" />
+                    </View>
 
-            <View style={FormControlStyle.navigationLinks}>
-                <TouchableOpacity onPress={() => props.navigation.navigate('Signin')}>
-                    <Text>Already a User, Got to Login.</Text>
-                </TouchableOpacity>
-            </View>
+                    <Card.Divider />
+
+                    <View style={FormControlStyle.navigationLinks}>
+                        <TouchableOpacity onPress={() => props.navigation.navigate('Signin')}>
+                            <Text>Already a User, Got to Login.</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Card>
+            </ImageBackground>
         </View>
     );
 

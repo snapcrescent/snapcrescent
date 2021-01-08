@@ -1,25 +1,27 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import store from '..';
 
 function getClient() {
     const serverUrl = store.getState().serverUrl;
+    const authToken = store.getState().authToken;
+
     return axios.create({
         baseURL: 'http://' + serverUrl,
         headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
+            'Access-Control-Allow-Origin': '*',
+            'Authorization': 'Bearer ' + authToken
         },
     });
 
 }
 
-export const getData = (url) => {
-    return getClient().get(url)
+export const getData = (url, searchParams) => {
+    return getClient().get(url, { params: searchParams })
         .then(res => {
             return res.data;
         }).catch(error => {
-            console.error(error);
+            errorHandler(error);
         });
 }
 
@@ -28,7 +30,7 @@ export const postData = (url, body) => {
         .then(res => {
             return res.data;
         }).catch(error => {
-            console.error(error);
+            errorHandler(error);
         });
 }
 
@@ -37,7 +39,7 @@ export const putData = (url, body) => {
         .then(res => {
             return res.data;
         }).catch(error => {
-            console.error(error);
+            errorHandler(error);
         });
 }
 
@@ -47,7 +49,7 @@ export const testStorageUrl = (serverUrl) => {
         baseURL: 'http://' + serverUrl,
         headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
+            'Access-Control-Allow-Origin': '*',
         },
     });
 
@@ -61,4 +63,13 @@ export const testStorageUrl = (serverUrl) => {
         }).catch(error => {
             return false;
         });
+}
+
+function errorHandler(error) {
+    if (error &&
+        error.response &&
+        error.response.data &&
+        error.response.data.message) {
+        alert(error.response.data.message);
+    }
 }

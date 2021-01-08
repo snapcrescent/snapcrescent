@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { ImageBackground } from 'react-native';
 import {
     TextInput,
     View,
@@ -8,11 +8,13 @@ import {
     Text,
     TouchableOpacity
 } from 'react-native';
+import { Card } from 'react-native-elements';
 import store from '../../core';
-import { updateAuthState } from '../../core/action/authentication';
+import { updateAuthState, updateAuthToken } from '../../core/action/authentication';
 import { signin } from '../../core/service/AuthService';
+import { showToast } from '../../core/service/ToastService';
 import { isNotNull } from '../../utils/CoreUtil';
-import FormControlStyle from './formControlStyles';
+import FormControlStyle, { BACKGROUND_IAMGE } from './formControlStyles';
 import FormError from './FormError';
 
 const initialFormState = {
@@ -33,17 +35,15 @@ function Login(props) {
             const payload = formControl;
             delete payload.formError;
             signin(payload).then(res => {
-
                 if (res && isNotNull(res.token)) {
                     AsyncStorage.setItem('authToken', res.token).then(() => {
+                        store.dispatch(updateAuthToken(res.token));
                         store.dispatch(updateAuthState(true));
                     });
-                } else {
-                    alert('Something went wrong. Please try later.');
                 }
             });
         } else {
-            alert('Please fill all the mandatory fields.');
+            showToast('Please fill all the mandatory fields.');
         }
     }
 
@@ -79,30 +79,38 @@ function Login(props) {
 
     return (
         <View style={FormControlStyle.container}>
-            <TextInput
-                style={[FormControlStyle.textInput]}
-                placeholder="Username *"
-                onBlur={() => setErrors('username', formControl.username)}
-                onChangeText={(text) => setFormControl({ ...formControl, username: text })} />
-            <FormError errorMessage={formControl.formError.username} />
+            <ImageBackground source={BACKGROUND_IAMGE} style={FormControlStyle.background}>
+                <Card containerStyle={FormControlStyle.cardContainer}>
+                    <Card.Title>Signin</Card.Title>
+                    <Card.Divider />
+                    <TextInput
+                        style={[FormControlStyle.textInput]}
+                        placeholder="Username *"
+                        onBlur={() => setErrors('username', formControl.username)}
+                        onChangeText={(text) => setFormControl({ ...formControl, username: text })} />
+                    <FormError errorMessage={formControl.formError.username} />
 
-            <TextInput
-                style={[FormControlStyle.textInput]}
-                secureTextEntry={true}
-                placeholder="Password *"
-                onBlur={() => setErrors('password', formControl.password)}
-                onChangeText={(text) => setFormControl({ ...formControl, password: text })} />
-            <FormError errorMessage={formControl.formError.password} />
+                    <TextInput
+                        style={[FormControlStyle.textInput]}
+                        secureTextEntry={true}
+                        placeholder="Password *"
+                        onBlur={() => setErrors('password', formControl.password)}
+                        onChangeText={(text) => setFormControl({ ...formControl, password: text })} />
+                    <FormError errorMessage={formControl.formError.password} />
 
-            <View style={FormControlStyle.submitButton}>
-                <Button title="Login" onPress={() => { submit() }} />
-            </View>
+                    <View style={FormControlStyle.submitButton}>
+                        <Button title="Login" onPress={() => { submit() }} color="#3f51bf" />
+                    </View>
 
-            <View style={FormControlStyle.navigationLinks}>
-                <TouchableOpacity onPress={() => props.navigation.navigate('Signup')}>
-                    <Text>New User, Got to Signup</Text>
-                </TouchableOpacity>
-            </View>
+                    <Card.Divider />
+
+                    <View style={FormControlStyle.navigationLinks}>
+                        <TouchableOpacity onPress={() => props.navigation.navigate('Signup')}>
+                            <Text>New User, Got to Signup</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Card>
+            </ImageBackground>
         </View>
     );
 
