@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -7,8 +7,18 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
+import InputBase from '@material-ui/core/InputBase';
+import SearchIcon from '@material-ui/icons/Search';
+import IconButton from '@material-ui/core/IconButton';
+import ViewModuleIcon from '@material-ui/icons/ViewModule';
+import ViewComfy from '@material-ui/icons/ViewComfy';
+import ViewList from '@material-ui/icons/ViewList';
+
+
+import './SearchTable.scss';
 
 const useStyles = makeStyles((theme) => ({
     table: {
@@ -32,16 +42,68 @@ const useStyles = makeStyles((theme) => ({
             filter: 'brightness(0.8)',
             border: 'solid 2px #15C57E'
         }
+    },
+    actionBar: {
+        height: theme.spacing(6),
+        marginBottom: theme.spacing(3),
+        background: '#BDBDBD'
+    },
+    actionBarContainer: {
+        color: '#ffffff'
+    },
+    iconGrid: {
+        textAlign: 'right',
+        paddingRight: theme.spacing(3)
     }
 }));
 
 export const SearchTable = (props) => {
     const classes = useStyles();
 
+    const [view, setView] = useState('COMFY');
+
     return (
         <div>
+            <Paper className={classes.actionBar}>
+                <Grid container className={classes.actionBarContainer}>
+                    <Grid item sm={6} className='center-content'>
+                        <div className="search">
+                        <div className="searchIcon">
+                            <SearchIcon />
+                        </div>
+                        <InputBase
+                            placeholder="Search…"
+                            classes={{
+                            root: classes.inputRoot,
+                            input: classes.inputInput,
+                            }}
+                            inputProps={{ 'aria-label': 'search' }} />
+                        </div>
+                    </Grid>
+                    <Grid item sm={6} className={classes.iconGrid}>
+                        {   
+                            view === 'MODULE' &&
+                            <IconButton color="inherit" aria-label="toggle view" onClick={()=> setView('COMFY')}>
+                                <ViewModuleIcon />
+                            </IconButton>
+                        }
+                        {
+                            view === 'COMFY' &&
+                            <IconButton color="inherit" aria-label="toggle view" onClick={()=> setView('LIST')}>
+                                <ViewComfy />
+                            </IconButton>
+                        }
+                        {
+                            view === 'LIST' &&
+                            <IconButton color="inherit" aria-label="toggle view" onClick={()=> setView('COMFY')}>
+                                <ViewList />
+                            </IconButton>
+                        }
+                    </Grid>
+                </Grid>
+            </Paper>
             {(() => {
-                if (props.view === "LIST") {
+                if (view === "LIST") {
                     return (
                         <TableContainer component={Paper}>
                             <Table className={classes.table} aria-label="simple table">
@@ -58,7 +120,7 @@ export const SearchTable = (props) => {
                                 </TableHead>
                                 <TableBody>
                                     {props.rows.map((row) => (
-                                        <TableRow key={row.id}>
+                                        <TableRow key={row.id.value}>
                                             {
                                                 Object.entries(row).map(([key, data]) => {
                                                     if (data.hidden) {
@@ -81,12 +143,12 @@ export const SearchTable = (props) => {
                             </Table>
                         </TableContainer>
                     )
-                } else if (props.view === "GRID") {
+                } else if (view === "COMFY") {
                     return (
-                        <GridList cellHeight={'auto'} className={classes.gridList} cols={0} spacing={10}>
+                        <GridList cellHeight={'auto'} cols={0} spacing={10}>
                             {props.rows.map((row) => (
-                                <GridListTile key={row.thumbnail} cols={1}>
-                                    <img className={classes.gridThumbnail} src={row.thumbnail} alt="thumbnail" />
+                                <GridListTile key={row.id.value} cols={1}>
+                                    <img className={classes.gridThumbnail} src={row.thumbnail.value} alt="thumbnail" />
                                 </GridListTile>
                             ))}
                         </GridList>
