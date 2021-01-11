@@ -16,7 +16,8 @@ import IconButton from '@material-ui/core/IconButton';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import ViewComfy from '@material-ui/icons/ViewComfy';
 import ViewList from '@material-ui/icons/ViewList';
-
+import { PhotoSlide } from '../PhotoSlide/PhotoSlide';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 import './SearchTable.scss';
 
@@ -46,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
     actionBar: {
         height: theme.spacing(6),
         marginBottom: theme.spacing(3),
-        background: '#BDBDBD'
+        background: '#5CA591'
     },
     actionBarContainer: {
         color: '#ffffff'
@@ -54,19 +55,29 @@ const useStyles = makeStyles((theme) => ({
     iconGrid: {
         textAlign: 'right',
         paddingRight: theme.spacing(3)
+    },
+    scrollContainer: {
+        overflow: 'hidden !important'
     }
 }));
 
 export const SearchTable = (props) => {
     const classes = useStyles();
+    const { rows, columns, totalElements, page, setPage } = props;
+    const [view, setView] = useState('LIST');
 
-    const [view, setView] = useState('COMFY');
+    const [openPhotoSlideDialog, setOpenPhotoSlideDialog] = useState(false);
+    const [selectedId, setSelectedId] = useState(null);
 
+    const handleThumbnailClick = (id) => {
+        setOpenPhotoSlideDialog(true);
+        setSelectedId(id);
+    }
     return (
         <div>
             <Paper className={classes.actionBar}>
                 <Grid container className={classes.actionBarContainer}>
-                    <Grid item sm={6} className='center-content'>
+                    <Grid item sm={4} className='center-content'>
                         <div className="search">
                         <div className="searchIcon">
                             <SearchIcon />
@@ -80,7 +91,7 @@ export const SearchTable = (props) => {
                             inputProps={{ 'aria-label': 'search' }} />
                         </div>
                     </Grid>
-                    <Grid item sm={6} className={classes.iconGrid}>
+                    <Grid item sm={8} className={classes.iconGrid}>
                         {   
                             view === 'MODULE' &&
                             <IconButton color="inherit" aria-label="toggle view" onClick={()=> setView('COMFY')}>
@@ -102,6 +113,12 @@ export const SearchTable = (props) => {
                     </Grid>
                 </Grid>
             </Paper>
+            <InfiniteScroll
+                dataLength={rows.length}
+                next={()=>{setPage(page+1)}}
+                hasMore={totalElements > rows.length}
+                className={classes.scrollContainer}
+            >
             {(() => {
                 if (view === "LIST") {
                     return (
@@ -111,7 +128,7 @@ export const SearchTable = (props) => {
                                     <TableRow>
                                         <TableCell>
                                         </TableCell>
-                                        {props.columns.map((column) => (
+                                        {columns.map((column) => (
                                             <TableCell className={classes.head} key={column.field}>
                                                 {column.headerName}
                                             </TableCell>
@@ -119,7 +136,7 @@ export const SearchTable = (props) => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {props.rows.map((row) => (
+                                    {rows.map((row) => (
                                         <TableRow key={row.id.value}>
                                             {
                                                 Object.entries(row).map(([key, data]) => {
@@ -128,7 +145,14 @@ export const SearchTable = (props) => {
                                                     }
                                                     if (data.type === 'IMAGE') {
                                                         return (
-                                                            <TableCell><img className={classes.listThumbnail} src={data.value} alt="thumbnail" /></TableCell>
+                                                            <TableCell>
+                                                                <img
+                                                                    className={classes.listThumbnail}
+                                                                    src={data.value}
+                                                                    alt="thumbnail"
+                                                                    onClick={() => handleThumbnailClick(row.id.value)}
+                                                                />
+                                                            </TableCell>
                                                         )
                                                     } else {
                                                         return (
@@ -146,9 +170,14 @@ export const SearchTable = (props) => {
                 } else if (view === "COMFY") {
                     return (
                         <GridList cellHeight={'auto'} cols={0} spacing={10}>
-                            {props.rows.map((row) => (
+                            {rows.map((row) => (
                                 <GridListTile key={row.id.value} cols={1}>
-                                    <img className={classes.gridThumbnail} src={row.thumbnail.value} alt="thumbnail" />
+                                    <img
+                                        className={classes.gridThumbnail}
+                                        src={row.thumbnail.value}
+                                        alt="thumbnail"
+                                        onClick={() => handleThumbnailClick(row.id.value)}
+                                    />
                                 </GridListTile>
                             ))}
                         </GridList>
@@ -161,7 +190,19 @@ export const SearchTable = (props) => {
                     )
                 }
             })()}
+            </InfiniteScroll>
 
+            <PhotoSlide
+                openDialog={openPhotoSlideDialog}
+                setOpenDialog={setOpenPhotoSlideDialog}
+                fullScreen={true}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+                photos={rows}
+                totalElements={totalElements}
+                page={page}
+                setPage={setPage}
+            ></PhotoSlide>
         </div>
     );
 }
