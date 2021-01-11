@@ -19,6 +19,8 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<node.version>v10.18.1</node.version>
+		<npm.version>6.13.4</npm.version>
 	</properties>
 
 	<dependencies>
@@ -137,8 +139,8 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<nodeVersion>v14.15.3</nodeVersion>
-							<npmVersion>6.13.4</npmVersion>
+							<nodeVersion>${node.version}</nodeVersion>
+							<npmVersion>${npm.version}</npmVersion>
 						</configuration>
 					</execution>
 
@@ -165,9 +167,9 @@
 					</execution>
 				</executions>
 				<configuration>
-					<nodeVersion>v14.15.3</nodeVersion>
+					<nodeVersion>${node.version}</nodeVersion>
 					<workingDirectory>src/main/webapp</workingDirectory>
-					<skip>true</skip>
+					<skip>${skip.prod}</skip>
 				</configuration>
 				
 			</plugin>
@@ -178,7 +180,7 @@
 					<execution>
 						<phase>generate-resources</phase>
 						<configuration>
-							<skip>true</skip>
+							<skip>${skip.prod}</skip>
 							<target>
 								<copy todir="target/classes/public">
 									<fileset dir="src/main/webapp/build" />
