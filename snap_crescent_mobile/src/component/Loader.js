@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
-export default function Lodder() {
+export default function Loader() {
     return (
         <View style={styles.container}>
             <ActivityIndicator size='large' color='#15c57e' />

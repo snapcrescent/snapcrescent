@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator } from 'react-native';
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { Image } from 'react-native-elements';
+import { View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { searchImage } from '../../../core/service/ImageService';
+import coreStyles from '../../../styles/styles';
+import GridView from '../../grid-view/GridView';
+import Loader from '../../Loader';
 
 const initialState = {
-    imageList: []
+    imageList: [],
+    dataFecthed: false
 };
 
 function Home() {
@@ -27,50 +29,28 @@ function Home() {
                     }
                 });
 
-                setState({ imageList: images });
+                setState({ ...state, imageList: images, dataFecthed: true });
             }
         });
     }, []);
 
     const getThumbnailPath = (props) => {
-        return "http://" + serverUrl + "/thumbnail/" + props;
+        return serverUrl + "/thumbnail/" + props;
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <FlatList
-                data={state.imageList}
-                renderItem={({ item }) => (
-                    <View style={styles.imageContainer}>
-                        <Image
-                            source={{ uri: item.thumbnail }}
-                            style={styles.image}
-                            transition={true}
-                            transitionDuration={5000}
-                            PlaceholderContent={<ActivityIndicator />}
-                        />
-                    </View>
-                )}
-                numColumns="2"
-                keyExtractor={item => item.id}
-            />
-        </SafeAreaView>
+        <View style={coreStyles.flex1}>
+            {
+                !state.dataFecthed
+                    ? <Loader />
+                    : <GridView
+                        data={state.imageList}
+                        columnSize="4"
+                        primaryKey="id"
+                        imageKey="thumbnail" />
+            }
+        </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1
-    },
-    imageContainer: {
-        flex: 1,
-        flexDirection: 'column',
-        margin: 1
-    },
-    image: {
-        width: 200,
-        height: 200
-    }
-});
 
 export default Home;

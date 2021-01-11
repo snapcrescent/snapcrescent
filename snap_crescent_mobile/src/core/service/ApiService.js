@@ -1,19 +1,19 @@
 import axios from 'axios';
 import store from '..';
 
-function getClient() {
-    const serverUrl = store.getState().serverUrl;
+export const getHeaders = (includeAuthHeaders = true) => {
     const authToken = store.getState().authToken;
+    const authHeaders = { 'Authorization': 'Bearer ' + authToken };
 
-    return axios.create({
-        baseURL: 'http://' + serverUrl,
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Authorization': 'Bearer ' + authToken
-        },
+    return ({
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        ...(
+            includeAuthHeaders
+                ? authHeaders
+                : {}
+        )
     });
-
 }
 
 export const getData = (url, searchParams) => {
@@ -44,25 +44,28 @@ export const putData = (url, body) => {
 }
 
 
-export const testStorageUrl = (serverUrl) => {
+export const testServerUrl = (serverUrl) => {
     const client = axios.create({
-        baseURL: 'http://' + serverUrl,
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-        },
+        baseURL: serverUrl,
+        headers: { ...getHeaders(false) },
     });
 
     return client.get('user-exists')
         .then(res => {
-            if (res) {
-                return true;
-            }
-
-            return false;
+            return res ? true : false;
         }).catch(error => {
             return false;
         });
+}
+
+function getClient() {
+    const serverUrl = store.getState().serverUrl;
+
+    return axios.create({
+        baseURL: serverUrl,
+        headers: { ...getHeaders() },
+    });
+
 }
 
 function errorHandler(error) {
