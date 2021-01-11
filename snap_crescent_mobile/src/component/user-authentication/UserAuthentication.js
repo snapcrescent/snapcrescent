@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from '@react-navigation/native';
-import Login from './Login';
+import Signin from './Signin';
 import Signup from './Signup';
-import Lodder from '../Lodder';
+import Loader from '../Loader';
 import { doesUserExists } from '../../core/service/AuthService';
 import { View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { isNotNull } from '../../utils/CoreUtil';
 import store from '../../core';
 import { updateAuthState, updateAuthToken } from '../../core/action/authentication';
-import { ImageBackground } from 'react-native';
-import FormControlStyle, { BACKGROUND_IAMGE } from './formControlStyles';
+import ServerUrl from './ServerUrl';
 
 const Stack = createStackNavigator();
 
@@ -56,11 +55,26 @@ function UserAuthentication() {
         <View style={{ flex: 1 }}>
             {
                 !state.dataFecthed
-                    ? <Lodder />
+                    ? <Loader />
                     : <NavigationContainer>
                         <Stack.Navigator initialRouteName={state.userExists ? 'Signin' : 'Signup'}>
-                            <Stack.Screen name='Signin' component={Login} options={{ title: 'Sign-In', ...headerStyleOptions }}></Stack.Screen>
-                            <Stack.Screen name='Signup' component={Signup} options={{ title: 'Sign-Up', ...headerStyleOptions }}></Stack.Screen>
+                            <Stack.Screen
+                                name='Signin'
+                                component={Signin}
+                                options={{ title: 'SignIn', ...headerStyleOptions }}>
+                            </Stack.Screen>
+
+                            <Stack.Screen
+                                name='Signup'
+                                component={Signup}
+                                options={{ title: 'SignUp', ...headerStyleOptions }}>
+                            </Stack.Screen>
+
+                            <Stack.Screen
+                                name='ServerUrl'
+                                component={ServerUrl}
+                                options={{ title: 'Server', ...headerStyleOptions }}>
+                            </Stack.Screen>
                         </Stack.Navigator>
                     </NavigationContainer>
             }

@@ -5,7 +5,7 @@ import { Card } from 'react-native-elements';
 import { signup } from '../../core/service/AuthService';
 import { showToast } from '../../core/service/ToastService';
 import { isNotNull } from '../../utils/CoreUtil';
-import FormControlStyle, { BACKGROUND_IAMGE } from './formControlStyles';
+import FormControlStyle, { BACKGROUND_IMAGE } from './formControlStyles';
 
 const initialFormState = {
     firstName: '',
@@ -77,9 +77,9 @@ function Signup(props) {
 
     return (
         <View style={FormControlStyle.container}>
-            <ImageBackground source={BACKGROUND_IAMGE} style={FormControlStyle.background}>
+            <ImageBackground source={BACKGROUND_IMAGE} style={FormControlStyle.background}>
                 <Card containerStyle={FormControlStyle.cardContainer}>
-                    <Card.Title>Signup</Card.Title>
+                    <Card.Title>SignUp</Card.Title>
                     <Card.Divider />
                     <TextInput
                         style={[FormControlStyle.textInput]}
@@ -138,9 +138,22 @@ function Signup(props) {
 
                     <Card.Divider />
 
-                    <View style={FormControlStyle.navigationLinks}>
+                    <View style={FormControlStyle.navigationLink}>
                         <TouchableOpacity onPress={() => props.navigation.navigate('Signin')}>
-                            <Text>Already a User, Got to Login.</Text>
+                            <Text>Already a User, Go to Login.</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <Card.Divider />
+
+                    <View style={FormControlStyle.navigationLink}>
+                        <TouchableOpacity
+                            onPress={() =>
+                                props.navigation.navigate(
+                                    'ServerUrl',
+                                    { isNavigatedFromAuthScreen: true }
+                                )}>
+                            <Text>Change Server URL</Text>
                         </TouchableOpacity>
                     </View>
                 </Card>

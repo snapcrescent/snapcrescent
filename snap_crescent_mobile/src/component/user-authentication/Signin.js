@@ -2,11 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { ImageBackground } from 'react-native';
 import {
-    TextInput,
-    View,
     Button,
     Text,
-    TouchableOpacity
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { Card } from 'react-native-elements';
 import store from '../../core';
@@ -14,7 +14,7 @@ import { updateAuthState, updateAuthToken } from '../../core/action/authenticati
 import { signin } from '../../core/service/AuthService';
 import { showToast } from '../../core/service/ToastService';
 import { isNotNull } from '../../utils/CoreUtil';
-import FormControlStyle, { BACKGROUND_IAMGE } from './formControlStyles';
+import FormControlStyle, { BACKGROUND_IMAGE } from './formControlStyles';
 import FormError from './FormError';
 
 const initialFormState = {
@@ -26,7 +26,7 @@ const initialFormState = {
     }
 }
 
-function Login(props) {
+function Signin(props) {
 
     const [formControl, setFormControl] = useState(initialFormState);
 
@@ -79,9 +79,9 @@ function Login(props) {
 
     return (
         <View style={FormControlStyle.container}>
-            <ImageBackground source={BACKGROUND_IAMGE} style={FormControlStyle.background}>
+            <ImageBackground source={BACKGROUND_IMAGE} style={FormControlStyle.background}>
                 <Card containerStyle={FormControlStyle.cardContainer}>
-                    <Card.Title>Signin</Card.Title>
+                    <Card.Title>SignIn</Card.Title>
                     <Card.Divider />
                     <TextInput
                         style={[FormControlStyle.textInput]}
@@ -104,9 +104,22 @@ function Login(props) {
 
                     <Card.Divider />
 
-                    <View style={FormControlStyle.navigationLinks}>
+                    <View style={FormControlStyle.navigationLink}>
                         <TouchableOpacity onPress={() => props.navigation.navigate('Signup')}>
-                            <Text>New User, Got to Signup</Text>
+                            <Text>New User, Go to Signup</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <Card.Divider />
+
+                    <View style={FormControlStyle.navigationLink}>
+                        <TouchableOpacity
+                            onPress={() =>
+                                props.navigation.navigate(
+                                    'ServerUrl',
+                                    { isNavigatedFromAuthScreen: true }
+                                )}>
+                            <Text>Change Server URL</Text>
                         </TouchableOpacity>
                     </View>
                 </Card>
@@ -116,4 +129,4 @@ function Login(props) {
 
 }
 
-export default Login;
+export default Signin;

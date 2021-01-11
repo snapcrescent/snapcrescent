@@ -8,7 +8,7 @@ import { updateServerUrl } from './src/core/action/serverUrl';
 import { isNotNull, isNull } from './src/utils/CoreUtil';
 import store from './src/core';
 import { updateAuthState } from './src/core/action/authentication';
-import Lodder from './src/component/Lodder';
+import Loader from './src/component/Loader';
 import Tabs from './src/component/tabs/Tabs';
 
 const initialState = {
@@ -33,13 +33,13 @@ function App() {
 
       setState({ ...state, dataFetched: true });
     });
-  }, []);
+  }, [serverUrl]);
 
   return (
     <View style={{ flex: 1 }}>
       {
         !state.dataFetched
-          ? <Lodder />
+          ? <Loader />
           : isNull(serverUrl)
             ? <ServerUrl />
             : (!isUserAuthenticated)

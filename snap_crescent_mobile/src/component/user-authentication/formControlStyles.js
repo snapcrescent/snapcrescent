@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-export const BACKGROUND_IAMGE = require('../../assets/background.jpg');
+export const BACKGROUND_IMAGE = require('../../assets/background.jpg');
 
 const FormControlStyle = StyleSheet.create({
     container: {
@@ -27,8 +27,9 @@ const FormControlStyle = StyleSheet.create({
     errorMessage: {
         color: 'red'
     },
-    navigationLinks: {
-        marginTop: 10,
+    navigationLink: {
+        marginTop: 5,
+        marginBottom: 5,
         alignItems: 'center',
         justifyContent: 'center'
     },
