@@ -32,6 +32,21 @@ export const getData = (url, params) => {
         });
 }
 
+export const getImage = (url) => {
+    ShowLoader();
+    return client.get(url, {responseType: 'blob'})
+        .then(res => {
+            HideLoader();
+            return res.data;
+        }).catch(error => {
+            HideLoader();
+            if (error && error.response.data.message) {
+                showError(error.response.data.message);
+            }
+        });
+}
+
+
 export const postData = (url, props) => {
     ShowLoader();
     return client.post(url, props)

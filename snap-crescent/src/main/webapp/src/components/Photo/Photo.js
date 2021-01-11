@@ -3,12 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import './Photo.scss';
 import { SearchTable } from '../SearchTable/SearchTable';
 import { search } from '../../services/PhotoService';
-import InfiniteScroll from 'react-infinite-scroll-component';
 
 const useStyles = makeStyles({
-    scrollContainer: {
-        overflow: 'hidden !important'
-    }
 });
 
 export const Photo = () => {
@@ -22,12 +18,12 @@ export const Photo = () => {
       ];
     
     const [rows, setRows] = useState([]);
-    const [pageSize, setPageSize] = useState(50);
+    const [page, setPage] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
 
     const getPhotos = () => {
         const searchRequest = {
-            size: pageSize
+            page: page
         }
         search(searchRequest)
         .then(res => {
@@ -42,13 +38,13 @@ export const Photo = () => {
                       location: {value: item.metadata.location ? parseLocation(item.metadata.location) : 'Unknown'}
                   }
               });
-              setRows(photos);
+              setRows(oldPhotos => [...oldPhotos, ...photos]);
           } 
         });
     }
       useEffect(() => {
         getPhotos();
-      }, [pageSize]);
+      }, [page]);
 
       const getThumbnailPath = (props) => {
         return process.env.REACT_APP_BASE_URL + '/thumbnail/' + props
@@ -68,14 +64,13 @@ export const Photo = () => {
 
     return (
         <div>
-            <InfiniteScroll
-                dataLength={rows.length}
-                next={()=>{setPageSize(pageSize+10)}}
-                hasMore={totalElements > rows.length}
-                className={classes.scrollContainer}
-            >
-                <SearchTable rows={rows} columns={columns} view="LIST"/>
-            </InfiniteScroll>
+                <SearchTable
+                  rows={rows}
+                  columns={columns}
+                  totalElements={totalElements}
+                  page={page}
+                  setPage={setPage}
+                />
         </div>
     )
 }
