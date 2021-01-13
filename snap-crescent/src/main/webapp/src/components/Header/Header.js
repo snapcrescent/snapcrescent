@@ -40,6 +40,9 @@ const useStyles = makeStyles((theme) => ({
   hide: {
     display: 'none',
   },
+  appBarToolMobileView: {
+    marginLeft: theme.spacing(5)
+  }
 }));
 
 export const Header = (props) => {
@@ -95,8 +98,8 @@ export const Header = (props) => {
               </Typography>
             </Grid>
 
-            {!isMobileView
-              ? showAppBarTools(classes, setOpenUploadPhotoDialog, signOutUser)
+            {true
+              ? showAppBarTools(classes, setOpenUploadPhotoDialog, signOutUser, isMobileView)
               : <></>
             }
           </Grid>
@@ -114,12 +117,12 @@ export const Header = (props) => {
   )
 }
 
-function showAppBarTools(classes, setOpenUploadPhotoDialog, signOutUser) {
+function showAppBarTools(classes, setOpenUploadPhotoDialog, signOutUser, isMobileView) {
   return (
     <>
       <Grid item sm></Grid>
 
-      <Grid item>
+      <Grid item className={isMobileView ? classes.appBarToolMobileView : ''}>
         <IconButton color="inherit" aria-label="upload" onClick={() => setOpenUploadPhotoDialog(true)}>
           <CloudUploadIcon />
         </IconButton>

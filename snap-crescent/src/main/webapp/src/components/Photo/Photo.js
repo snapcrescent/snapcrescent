@@ -32,7 +32,7 @@ export const Photo = () => {
           const photos = res.content.map(item => {
                   return {
                       id: {value: item.id, hidden: true},
-                      thumbnail: {value: getThumbnailPath(item.thumbnailId), type: 'IMAGE'},
+                      thumbnail: {value: item.thumbnailId, type: 'IMAGE'},
                       createdDate: {value: new Date(item.metadata.createdDate).toLocaleDateString()},
                       device: {value: item.metadata.model ? item.metadata.model : 'Unknown'},
                       location: {value: item.metadata.location ? parseLocation(item.metadata.location) : 'Unknown'}
@@ -45,10 +45,6 @@ export const Photo = () => {
       useEffect(() => {
         getPhotos();
       }, [page]);
-
-      const getThumbnailPath = (props) => {
-        return process.env.REACT_APP_BASE_URL + '/thumbnail/' + props
-      }
 
       const parseLocation = (location) => {
         const city = location.city || location.town;

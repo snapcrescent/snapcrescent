@@ -97,7 +97,7 @@ export const ResetPassword = () => {
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
                 <div className="signup-signin-card">
-                    <img className="logo" src={'/logo.png'} alt="logo" />
+                    <img className="logo" src={'/logo.png'} alt='' />
                     <Typography component="h1" variant="h5">
                         Reset Password
                         </Typography>
