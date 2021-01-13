@@ -17,11 +17,12 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
         background: '#000000',
         color: '#ffffff',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        padding: 0
     },
     image: {
-        maxWidth: 1200,
-        maxHeight: 800,
+        maxWidth: '100%',
+        maxHeight: '100%',
         width: 'auto',
         height: 'auto'
     },
@@ -36,6 +37,10 @@ const useStyles = makeStyles((theme) => ({
         right: 0,
         top: '50%',
         bottom: '50%'
+    },
+    footer: {
+        background: 'red',
+        height: 50
     }
 }));
 
@@ -56,7 +61,7 @@ const useKey = (key, cb) => {
 
         document.addEventListener("keydown", _handleKeyDown);
         return () => document.removeEventListener("keydown", _handleKeyDown);
-    }, key)
+    }, [key])
 }
 export const PhotoSlide = (props) => {
 
@@ -175,7 +180,7 @@ export const PhotoSlide = (props) => {
                         </Grid>
                     </Toolbar>
                 </AppBar>
-                <DialogContent dividers className={classes.content}>
+                <DialogContent className={classes.content}>
                     <IconButton
                         className={classes.arrorBack}
                         color="inherit"
@@ -185,7 +190,7 @@ export const PhotoSlide = (props) => {
                     >
                         <ArrowBack />
                     </IconButton>
-                    <img src={currentPhoto?.url} alt="Image" className={classes.image} />
+                    <img src={currentPhoto?.url} alt='' className={classes.image} />
                     <IconButton
                         className={classes.arrorForward}
                         color="inherit"
@@ -196,6 +201,12 @@ export const PhotoSlide = (props) => {
                         <ArrowForward />
                     </IconButton>
                 </DialogContent>
+                <AppBar className={classes.appBar}>
+                    <Toolbar>
+                        <Grid item md={12} className="text-right">
+                        </Grid>
+                    </Toolbar>
+                </AppBar>
             </Dialog>
         </div>
     )

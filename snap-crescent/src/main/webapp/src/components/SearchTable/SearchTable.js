@@ -18,6 +18,8 @@ import ViewComfy from '@material-ui/icons/ViewComfy';
 import ViewList from '@material-ui/icons/ViewList';
 import { PhotoSlide } from '../PhotoSlide/PhotoSlide';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { getById } from '../../services/ThumbnailService';
+import { Thumbnail } from './Thumbnail';
 
 import './SearchTable.scss';
 
@@ -37,8 +39,8 @@ const useStyles = makeStyles((theme) => ({
         }
     },
     gridThumbnail: {
-        height: 150,
-        width: 150,
+        height: 142,
+        width: 142,
         '&:hover': {
             filter: 'brightness(0.8)',
             border: 'solid 2px #15C57E'
@@ -46,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
     },
     actionBar: {
         height: theme.spacing(6),
-        marginBottom: theme.spacing(3),
+        marginBottom: theme.spacing(2),
         background: '#5CA591'
     },
     actionBarContainer: {
@@ -58,6 +60,9 @@ const useStyles = makeStyles((theme) => ({
     },
     scrollContainer: {
         overflow: 'hidden !important'
+    },
+    inputRoot: {
+        left: theme.spacing(6)
     }
 }));
 
@@ -73,6 +78,7 @@ export const SearchTable = (props) => {
         setOpenPhotoSlideDialog(true);
         setSelectedId(id);
     }
+
     return (
         <div>
             <Paper className={classes.actionBar}>
@@ -86,7 +92,7 @@ export const SearchTable = (props) => {
                             placeholder="Search…"
                             classes={{
                             root: classes.inputRoot,
-                            input: classes.inputInput,
+                            input: classes.inputInput
                             }}
                             inputProps={{ 'aria-label': 'search' }} />
                         </div>
@@ -146,12 +152,10 @@ export const SearchTable = (props) => {
                                                     if (data.type === 'IMAGE') {
                                                         return (
                                                             <TableCell>
-                                                                <img
+                                                                <Thumbnail
+                                                                    thumbnailId={data.value}
                                                                     className={classes.listThumbnail}
-                                                                    src={data.value}
-                                                                    alt="thumbnail"
-                                                                    onClick={() => handleThumbnailClick(row.id.value)}
-                                                                />
+                                                                    onClick={() => handleThumbnailClick(row.id.value)}/>
                                                             </TableCell>
                                                         )
                                                     } else {
@@ -172,12 +176,10 @@ export const SearchTable = (props) => {
                         <GridList cellHeight={'auto'} cols={0} spacing={10}>
                             {rows.map((row) => (
                                 <GridListTile key={row.id.value} cols={1}>
-                                    <img
+                                    <Thumbnail
+                                        thumbnailId={row.thumbnail.value}
                                         className={classes.gridThumbnail}
-                                        src={row.thumbnail.value}
-                                        alt="thumbnail"
-                                        onClick={() => handleThumbnailClick(row.id.value)}
-                                    />
+                                        onClick={() => handleThumbnailClick(row.thumbnail.value)}/>
                                 </GridListTile>
                             ))}
                         </GridList>

@@ -7,6 +7,7 @@ import Container from '@material-ui/core/Container';
 import { Link, useHistory } from 'react-router-dom';
 import { signin } from '../../services/AuthService';
 import { updateAuthHeader } from '../../utils/ApiUtil';
+import Cookies from 'universal-cookie';
 
 import './Signin.scss';
 
@@ -36,6 +37,8 @@ export const Signin = () => {
             localStorage.setItem('user', JSON.stringify(res.user));
             localStorage.setItem('token', res.token);
             updateAuthHeader(res.token);
+            const cookies = new Cookies();
+            cookies.set('Authorization', res.token);
             history.push({ pathname: '/home' });
           }
         })
@@ -94,7 +97,7 @@ export const Signin = () => {
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className="signup-signin-card">
-          <img className="logo" src={'/logo.png'} alt="logo" />
+          <img className="logo" src={'/logo.png'} alt='' />
           <Typography component="h1" variant="h5">
             Sign In
             </Typography>

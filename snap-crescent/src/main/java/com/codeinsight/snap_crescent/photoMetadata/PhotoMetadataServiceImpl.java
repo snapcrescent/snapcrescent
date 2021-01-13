@@ -64,7 +64,7 @@ public class PhotoMetadataServiceImpl implements PhotoMetadataService {
 
 	    Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 	    int orientation = 1;
-	    if(directory != null) {
+	    if(directory != null && directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
 	    	orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
 	    }
 		photoMetadata.setOrientation(orientation);

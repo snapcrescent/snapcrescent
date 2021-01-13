@@ -108,7 +108,7 @@ export const Signup = () => {
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
                 <div className="signup-signin-card">
-                    <img className="logo" src={'/logo.png'} alt="logo" />
+                    <img className="logo" src={'/logo.png'} alt='' />
                     <Typography component="h1" variant="h5">
                         Sign Up
                         </Typography>
