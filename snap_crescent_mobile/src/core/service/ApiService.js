@@ -58,6 +58,15 @@ export const testServerUrl = (serverUrl) => {
         });
 }
 
+export const getImage = (url) => {
+    return getClient().get(url, { responseType: 'blob' })
+        .then(res => {
+            return res.data;
+        }).catch(error => {
+            errorHandler(error);
+        });
+}
+
 function getClient() {
     const serverUrl = store.getState().serverUrl;
 

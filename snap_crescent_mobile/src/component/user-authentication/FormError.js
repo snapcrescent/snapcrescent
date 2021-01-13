@@ -4,12 +4,14 @@ import { isNotNull } from "../../utils/CoreUtil";
 import FormControlStyle from "./formControlStyles";
 
 function FormError(props) {
+    const { errorMessage } = props;
+
     return (
         <View>
             {
-                isNotNull(props.errorMessage)
+                isNotNull(errorMessage)
                     ? <View>
-                        <Text style={FormControlStyle.errorMessage}>{props.errorMessage}</Text>
+                        <Text style={FormControlStyle.errorMessage}>{errorMessage}</Text>
                     </View >
                     : null
             }

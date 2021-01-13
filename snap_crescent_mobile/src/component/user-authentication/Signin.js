@@ -28,6 +28,7 @@ const initialFormState = {
 
 function Signin(props) {
 
+    const { navigation } = props;
     const [formControl, setFormControl] = useState(initialFormState);
 
     const submit = () => {
@@ -105,7 +106,7 @@ function Signin(props) {
                     <Card.Divider />
 
                     <View style={FormControlStyle.navigationLink}>
-                        <TouchableOpacity onPress={() => props.navigation.navigate('Signup')}>
+                        <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
                             <Text>New User, Go to Signup</Text>
                         </TouchableOpacity>
                     </View>
@@ -115,7 +116,7 @@ function Signin(props) {
                     <View style={FormControlStyle.navigationLink}>
                         <TouchableOpacity
                             onPress={() =>
-                                props.navigation.navigate(
+                                navigation.navigate(
                                     'ServerUrl',
                                     { isNavigatedFromAuthScreen: true }
                                 )}>

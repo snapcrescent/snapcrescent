@@ -1,41 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { useSelector } from 'react-redux';
 import { searchImage } from '../../../core/service/ImageService';
 import coreStyles from '../../../styles/styles';
 import GridView from '../../grid-view/GridView';
 import Loader from '../../Loader';
+import PhotoSlide from '../../photo-slide/PhotoSlide';
 
 const initialState = {
     imageList: [],
     dataFecthed: false
 };
 
+const initialPhotoSlideState = {
+    selectedImage: null,
+    showPhotoSlide: false
+};
+
 function Home() {
 
     const [state, setState] = useState(initialState);
-    const serverUrl = useSelector(state => state.serverUrl);
+    const [photoSlideState, setPhotoSlideState] = useState(initialPhotoSlideState);
 
     useEffect(() => {
         searchImage().then(res => {
             if (res) {
-                const images = res.content.map(item => {
-                    return {
-                        id: item.id,
-                        createdDate: item.metadata.createdDate,
-                        device: item.metadata.model ? item.metadata.model : 'Unknown',
-                        size: item.metadata.size,
-                        thumbnail: getThumbnailPath(item.thumbnailId)
-                    }
-                });
-
-                setState({ ...state, imageList: images, dataFecthed: true });
+                setState({ ...state, imageList: res, dataFecthed: true });
             }
         });
     }, []);
 
-    const getThumbnailPath = (props) => {
-        return serverUrl + "/thumbnail/" + props;
+    const onImageClick = (image) => {
+        setPhotoSlideState({ selectedImage: image, showPhotoSlide: true });
     };
 
     return (
@@ -47,8 +42,16 @@ function Home() {
                         data={state.imageList}
                         columnSize="4"
                         primaryKey="id"
-                        imageKey="thumbnail" />
+                        imageKey="thumbnailSource"
+                        onGridPress={item => onImageClick(item)} />
             }
+
+            <PhotoSlide
+                showPhotoSlide={photoSlideState.showPhotoSlide}
+                images={state.imageList}
+                idFieldKey="id"
+                selectedImage={photoSlideState.selectedImage}
+                onClose={() => { setPhotoSlideState({ ...photoSlideState, showPhotoSlide: false }); }} />
         </View>
     );
 }
