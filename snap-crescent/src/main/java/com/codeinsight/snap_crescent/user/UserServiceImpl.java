@@ -1,4 +1,4 @@
-package com.codeinsight.snap_crescent.userManagement;
+package com.codeinsight.snap_crescent.user;
 
 import java.util.Optional;
 
@@ -7,9 +7,9 @@ import javax.security.auth.login.CredentialNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.codeinsight.snap_crescent.userManagement.bean.ResetPasswordRequest;
-import com.codeinsight.snap_crescent.userManagement.bean.UserLoginBean;
+import com.codeinsight.snap_crescent.beans.ResetPasswordRequest;
 import com.codeinsight.snap_crescent.utils.StringHasher;
 
 @Service
@@ -19,6 +19,7 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Override
+	@Transactional
 	public User saveUser(User user) throws Exception {
 		User savedUser = null;
 		if (!validateUser(user)) {
@@ -32,19 +33,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User login(UserLoginBean userLoginBean) throws Exception {
-
-		Optional<User> user = userRepository.findByUsernameAndPassword(userLoginBean.getUsername(),
-				userLoginBean.getPassword());
-
-		if (!user.isPresent()) {
-			throw new CredentialNotFoundException("Invalid Username or Password.");
-		}
-
-		return user.get();
-	}
-
-	@Override
+	@Transactional
 	public String resetPassword(ResetPasswordRequest resetPasswordRequest) throws Exception {
 
 		Optional<User> userToRetrive = userRepository.findByUsername(resetPasswordRequest.getUsername());
@@ -56,8 +45,8 @@ public class UserServiceImpl implements UserService {
 		User user = userToRetrive.get();
 		user.setPassword(StringHasher.getBCrpytHash(resetPasswordRequest.getPassword()));
 		userRepository.save(user);
-		
-        return "Password successfully updated.";
+
+		return "Password successfully updated.";
 	}
 
 	private boolean validateUser(User user) {
@@ -68,11 +57,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Boolean doesUserExists() throws Exception {
 		boolean exists = false;
-		
-		if(userRepository.count() > 0) {
+
+		if (userRepository.count() > 0) {
 			exists = true;
 		}
-		
+
 		return exists;
 	}
 

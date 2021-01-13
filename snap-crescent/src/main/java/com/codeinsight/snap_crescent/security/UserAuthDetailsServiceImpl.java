@@ -11,8 +11,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.codeinsight.snap_crescent.beans.AppUser;
-import com.codeinsight.snap_crescent.userManagement.User;
-import com.codeinsight.snap_crescent.userManagement.UserRepository;
+import com.codeinsight.snap_crescent.user.User;
+import com.codeinsight.snap_crescent.user.UserRepository;
 
 @Service
 public class UserAuthDetailsServiceImpl implements UserAuthDetailsService{

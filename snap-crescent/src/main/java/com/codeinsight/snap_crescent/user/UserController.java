@@ -1,4 +1,4 @@
-package com.codeinsight.snap_crescent.userManagement;
+package com.codeinsight.snap_crescent.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.codeinsight.snap_crescent.userManagement.bean.ResetPasswordRequest;
+import com.codeinsight.snap_crescent.beans.ResetPasswordRequest;
 
 @RestController
 public class UserController {

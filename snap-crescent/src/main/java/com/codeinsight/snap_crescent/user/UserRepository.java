@@ -1,4 +1,4 @@
-package com.codeinsight.snap_crescent.userManagement;
+package com.codeinsight.snap_crescent.user;
 
 import java.util.Optional;
 
