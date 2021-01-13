@@ -10,6 +10,7 @@ import store from './src/core';
 import { updateAuthState } from './src/core/action/authentication';
 import Loader from './src/component/Loader';
 import Tabs from './src/component/tabs/Tabs';
+import coreStyles from './src/styles/styles';
 
 const initialState = {
   dataFetched: false
@@ -36,7 +37,7 @@ function App() {
   }, [serverUrl]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={coreStyles.flex1}>
       {
         !state.dataFetched
           ? <Loader />

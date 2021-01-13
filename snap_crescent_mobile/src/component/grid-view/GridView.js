@@ -1,40 +1,69 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, View } from 'react-native';
+import {
+    ActivityIndicator,
+    Dimensions,
+    FlatList,
+    SafeAreaView,
+    StyleSheet,
+    View
+} from 'react-native';
 import { Image } from 'react-native-elements';
-import { getHeaders } from '../../core/service/ApiService';
 
 const initialState = {
     dataSource: []
 };
 
+const NUMBER_OF_COLUMNS = 4;
+const WINDOW_WIDTH = Dimensions.get('window').width;
+
 function GridView(props) {
 
+    const { data, imageKey, onGridPress, primaryKey } = props;
     const [state, setState] = useState(initialState);
 
     useEffect(() => {
-        setState({ ...state, dataSource: props.data });
-    }, [props.data, props.columnSize]);
+        const dataList = data;
+        formatData(dataList);
+        setState({ ...state, dataSource: dataList });
+    }, [data]);
+
+    const formatData = (dataToFormat) => {
+        const totalRows = Math.floor(dataToFormat.length / NUMBER_OF_COLUMNS);
+        let elementsInLastRow = data.length - (totalRows * NUMBER_OF_COLUMNS);
+
+        while (elementsInLastRow != 0 && elementsInLastRow != NUMBER_OF_COLUMNS) {
+            dataToFormat.push({ isEmpty: true });
+            elementsInLastRow++;
+        }
+    }
+
+    const renderItem = ({ item }) => {
+        if (item.isEmpty) {
+            return (<View style={{ ...styles.imageContainer, backgroundColor: 'transparent' }} />)
+        } else {
+            return (
+                <View style={styles.imageContainer}>
+                    <Image
+                        source={item[imageKey]}
+                        PlaceholderContent={<ActivityIndicator />}
+                        style={styles.image}
+                        transition={true}
+                        transitionDuration={4000}
+                        onPress={() => { onGridPress(item) }}>
+                    </Image>
+                </View>
+            );
+        }
+
+    }
 
     return (
         <SafeAreaView style={styles.viewContainer}>
             <FlatList
                 data={state.dataSource}
-                numColumns={props.columnSize}
-                keyExtractor={item => item[props.primaryKey]}
-                renderItem={({ item }) => (
-                    <View style={styles.imageContainer}>
-                        <Image
-                            source={{
-                                uri: item[props.imageKey],
-                                headers: getHeaders()
-                            }}
-                            PlaceholderContent={<ActivityIndicator />}
-                            style={styles.image}
-                            transition={true}
-                            transitionDuration={4000}>
-                        </Image>
-                    </View>
-                )}>
+                numColumns={NUMBER_OF_COLUMNS}
+                keyExtractor={item => item[primaryKey]}
+                renderItem={renderItem}>
             </FlatList>
         </SafeAreaView>
     );
@@ -52,9 +81,10 @@ const styles = StyleSheet.create({
         margin: 1
     },
     image: {
-        width: 100,
-        height: 100
+        width: WINDOW_WIDTH / NUMBER_OF_COLUMNS,
+        height: WINDOW_WIDTH / NUMBER_OF_COLUMNS,
+        resizeMode: 'contain'
     }
-})
+});
 
 export default GridView;

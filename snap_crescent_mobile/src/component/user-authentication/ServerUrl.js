@@ -18,16 +18,19 @@ const initialFormState = {
 };
 
 function ServerUrl(props) {
+
+    const { navigation, route } = props;
+
     const [formControl, setFormControl] = useState(initialFormState);
     const [navigatedFromAuthScreen, setNavigatedFromAuthScreen] = useState(false);
 
     useEffect(() => {
-        if (props?.route?.params?.isNavigatedFromAuthScreen) {
+        if (route?.params?.isNavigatedFromAuthScreen) {
             setNavigatedFromAuthScreen(true);
         } else {
             setNavigatedFromAuthScreen(false);
         }
-    }, [props?.route?.params?.isNavigatedFromAuthScreen]);
+    }, [route?.params?.isNavigatedFromAuthScreen]);
 
     const setStorage = (formControl) => {
         if (validate(formControl)) {
@@ -35,9 +38,9 @@ function ServerUrl(props) {
             testServerUrl(serverUrl).then(res => {
                 if (res) {
                     store.dispatch(updateServerUrl(serverUrl));
-                    if (navigatedFromAuthScreen && props.navigation) {
+                    if (navigatedFromAuthScreen && navigation) {
                         showToast('Whoooo you are now connected to the new Server.');
-                        props.navigation.goBack();
+                        navigation.goBack();
                     } else {
                         showToast('Whoooo you are now connected.');
                     }

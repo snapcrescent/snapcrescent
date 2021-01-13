@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './home/Home';
 import Settings from './settings/Settings';
 import { NavigationContainer } from '@react-navigation/native';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 const Tab = createBottomTabNavigator();
 
