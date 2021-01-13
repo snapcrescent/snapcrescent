@@ -15,12 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.codeinsight.snap_crescent.appConfig.AppConfigService;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadata;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadataRepository;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadataService;
 import com.codeinsight.snap_crescent.thumbnail.Thumbnail;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailRepository;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailService;
+import com.codeinsight.snap_crescent.utils.AppConfigKeys;
 
 @Service
 public class PhotoServiceImpl implements PhotoService {
@@ -42,6 +44,9 @@ public class PhotoServiceImpl implements PhotoService {
 
 	@Autowired
 	private ThumbnailRepository thumbnailRepository;
+	
+	@Autowired
+	private AppConfigService appConfigService;
 
 	@Transactional
 	public Page<Photo> search(PhotoSearchCriteria photoSearchCriteria) throws Exception {
@@ -52,6 +57,11 @@ public class PhotoServiceImpl implements PhotoService {
 	@Override
 	@Transactional
 	public void upload(ArrayList<MultipartFile> multipartFiles) throws Exception {
+		
+		String x = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_SKIP_UPLOADING);
+		if(x != null & Boolean.parseBoolean(x) == true) {
+			return;
+		}
 		File directory = new File(PHOTO_PATH);
 		if (!directory.exists()) {
 			directory.mkdir();

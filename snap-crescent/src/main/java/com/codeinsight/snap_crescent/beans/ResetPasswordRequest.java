@@ -1,6 +1,6 @@
-package com.codeinsight.snap_crescent.userManagement.bean;
+package com.codeinsight.snap_crescent.beans;
 
-public class UserLoginBean {
+public class ResetPasswordRequest {
 
 	private String username;
 
@@ -21,5 +21,4 @@ public class UserLoginBean {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
 }
