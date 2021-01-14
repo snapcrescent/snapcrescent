@@ -19,7 +19,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<node.version>v10.18.1</node.version>
+		<node.version>v14.15.4</node.version>
 		<npm.version>6.13.4</npm.version>
 	</properties>
 
@@ -169,7 +169,7 @@
 				<configuration>
 					<nodeVersion>${node.version}</nodeVersion>
 					<workingDirectory>src/main/webapp</workingDirectory>
-					<skip>${skip.prod}</skip>
+					<skip>${skip.build}</skip>
 				</configuration>
 				
 			</plugin>
@@ -180,7 +180,7 @@
 					<execution>
 						<phase>generate-resources</phase>
 						<configuration>
-							<skip>${skip.prod}</skip>
+							<skip>${skip.build.copy}</skip>
 							<target>
 								<copy todir="target/classes/public">
 									<fileset dir="src/main/webapp/build" />

@@ -11,6 +11,7 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,9 +34,6 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 	@Value("${thumbnail.output.nameSuffix}")
 	private String THUMBNAIL_OUTPUT_NAME_SUFFIX;
-
-	@Value("${thumbnail.output.type}")
-	private String THUMBNAIL_OUTPUT_TYPE;
 
 	@Autowired
 	private ThumbnailRepository thumbnailRepository;
@@ -85,7 +83,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 			// Save Image as generated thumbnail
 			File outputFile = new File(THUMBNAIL_OUTPUT_PATH + getThumbnailName(file));
-			ImageIO.write(bufferedImage, THUMBNAIL_OUTPUT_TYPE, outputFile);
+			ImageIO.write(bufferedImage, photoMetadata.getFileExtension(), outputFile);
 
 			isThumbnailCreated = true;
 		} catch (IOException exception) {
@@ -96,8 +94,9 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	}
 
 	private String getThumbnailName(File file) {
-		return file.getName().substring(0, file.getName().lastIndexOf(FILE_TYPE_SEPARATOR))
-				+ THUMBNAIL_OUTPUT_NAME_SUFFIX + FILE_TYPE_SEPARATOR + THUMBNAIL_OUTPUT_TYPE;
+		String extension = FilenameUtils.getExtension(file.getName());
+		String fileName = FilenameUtils.removeExtension(file.getName());
+		return fileName + THUMBNAIL_OUTPUT_NAME_SUFFIX + FILE_TYPE_SEPARATOR + extension;
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import { HashRouter, Route, Redirect } from 'react-router-dom';
 import { ResetPassword } from './components/ResetPassword/ResetPassword';
 import { doesUserExists, authenticate } from './services/AuthService';
 import { CssBaseline } from '@material-ui/core';
+import { updateAuthHeader } from './utils/ApiUtil';
 
 const appModel = {
   dataFetched: false,
@@ -18,6 +19,11 @@ export const App = () => {
   const [formData, setFormData] = useState(appModel);
 
   useEffect(() => {
+    const demoToken = process.env.REACT_APP_AUTH_TOKEN;
+    if(demoToken) {
+      updateAuthHeader(demoToken);
+      setFormData({dataFetched: true, userExists: true, isAuthenticated: true});
+    } else {
     doesUserExists()
       .then(exists => {
         if (localStorage.getItem('token')) {
@@ -34,6 +40,7 @@ export const App = () => {
         }
 
       });
+    }
   }, []);
 
 
