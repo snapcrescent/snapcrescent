@@ -46,7 +46,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const Header = (props) => {
-
   const history = useHistory();
   const classes = useStyles();
   const theme = useTheme();
@@ -97,11 +96,18 @@ export const Header = (props) => {
                 Snap Crescent
               </Typography>
             </Grid>
+            <Grid item sm></Grid>
 
-            {true
-              ? showAppBarTools(classes, setOpenUploadPhotoDialog, signOutUser, isMobileView)
-              : <></>
+            <Grid item className={isMobileView ? classes.appBarToolMobileView : ''}>
+            <IconButton color="inherit" aria-label="upload" onClick={() => setOpenUploadPhotoDialog(true)}>
+              <CloudUploadIcon />
+            </IconButton>
+            { !process.env.REACT_APP_DEMO_SITE &&
+              <IconButton color="inherit" aria-label="logout" onClick={signOutUser}>
+                <ExitToAppIcon />
+              </IconButton>
             }
+            </Grid>
           </Grid>
 
         </Toolbar>
@@ -117,19 +123,3 @@ export const Header = (props) => {
   )
 }
 
-function showAppBarTools(classes, setOpenUploadPhotoDialog, signOutUser, isMobileView) {
-  return (
-    <>
-      <Grid item sm></Grid>
-
-      <Grid item className={isMobileView ? classes.appBarToolMobileView : ''}>
-        <IconButton color="inherit" aria-label="upload" onClick={() => setOpenUploadPhotoDialog(true)}>
-          <CloudUploadIcon />
-        </IconButton>
-        <IconButton color="inherit" aria-label="logout" onClick={signOutUser}>
-          <ExitToAppIcon />
-        </IconButton>
-      </Grid>
-    </>
-  );
-}

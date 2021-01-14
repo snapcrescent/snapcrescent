@@ -54,7 +54,7 @@ public class JwtTokenUtil {
 		final Date createdDate = new Date();
 
 		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(createdDate)
-				.setExpiration(new Date(createdDate.getTime() + JWT_TOKEN_EXPIRATION * 1000))
+				.setExpiration(new Date(createdDate.getTime() + JWT_TOKEN_EXPIRATION * 1000 * 60 * 60 * 24))
 				.signWith(SignatureAlgorithm.HS512, JWT_SECRET).compact();
 	}
 

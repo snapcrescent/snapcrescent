@@ -9,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "THUMBNAIL")
 public class Thumbnail implements Serializable {
@@ -22,6 +24,7 @@ public class Thumbnail implements Serializable {
 	@Column(nullable = false)
 	private String name;
 
+	@JsonIgnore
 	@Column(nullable = false)
 	private String path;
 

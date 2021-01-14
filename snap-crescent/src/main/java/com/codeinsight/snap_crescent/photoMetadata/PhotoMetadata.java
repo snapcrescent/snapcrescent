@@ -14,6 +14,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.codeinsight.snap_crescent.location.Location;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -29,6 +30,7 @@ public class PhotoMetadata implements Serializable {
 	@Column(nullable = false)
 	private String name;
 
+	@JsonIgnore
 	@Column(nullable = false)
 	private String path;
 
