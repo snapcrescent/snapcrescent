@@ -6,6 +6,8 @@ import { showToast } from '../../core/service/ToastService';
 import CoreStyles from '../../styles/styles';
 import Loader from '../Loader';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import CloseIcon from '../shared/close-icon/CloseIcon';
+import Dialog from '../../core/dialog/Dialog';
 
 const initialState = {
     imagesToDisplay: [],
@@ -62,30 +64,31 @@ function PhotoSlide(props) {
 
     return (
         <View style={CoreStyles.flex1}>
-            <Modal transparent={true} visible={state.showPhotoSlide}>
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalInnerContainer}>
-                        <View style={CoreStyles.rightAlignedContainer}>
-                            <TouchableOpacity onPress={() => { closePhotoSlide() }} style={{ padding: 10 }}>
-                                <FontAwesome5 name="times-circle" style={CoreStyles.closeIcon} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.imageContainer}>
-                            {
-                                !state.selectedImage?.source
-                                    ? <Loader />
-                                    : <View style={styles.imageContainer}>
-                                        <Image
-                                            source={state.selectedImage.source}
-                                            PlaceholderContent={<ActivityIndicator />}
-                                            style={styles.image}>
-                                        </Image>
-                                    </View>
-                            }
-                        </View>
+            <Dialog
+                showDialog={state.showPhotoSlide}
+                showCloseButton={true}
+                onClose={() => closePhotoSlide()}
+                dialogStyle={{
+                    outerContainer: {
+                        padding: 5
+                    }
+                }}
+                template={
+                    <View style={styles.imageContainer}>
+                        {
+                            !state.selectedImage?.source
+                                ? <Loader />
+                                : <View style={styles.imageContainer}>
+                                    <Image
+                                        source={state.selectedImage.source}
+                                        PlaceholderContent={<ActivityIndicator />}
+                                        style={styles.image}>
+                                    </Image>
+                                </View>
+                        }
                     </View>
-                </View>
-            </Modal >
+                }
+            />
         </View >
     )
 }

@@ -11,6 +11,7 @@ import FormError from './FormError';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import CoreStyles, { THEME_COLORS } from '../../styles/styles';
 import { signOut } from '../../core/service/AuthService';
+import CloseIcon from '../shared/close-icon/CloseIcon';
 
 const initialFormState = {
     serverUrl: '',
@@ -100,16 +101,12 @@ function ServerUrl(props) {
                 {
                     isModalLayout
                         ? <View style={CoreStyles.flex1}>
-                            <View style={CoreStyles.rightAlignedContainer}>
-                                <TouchableOpacity onPress={() => { onModalClose() }} style={{ padding: 10 }}>
-                                    <FontAwesome5 name="times-circle" style={CoreStyles.closeIcon} />
-                                </TouchableOpacity>
-                            </View>
+                            <CloseIcon onPress={() => { onModalClose() }} />
                         </View>
                         : null
                 }
 
-                <View style={[FormControlStyle.centerAlignContainer, CoreStyles.width100, (isModalLayout ? { flex: 10 } : null)]}>
+                <View style={[FormControlStyle.centerAlignContainer, CoreStyles.width100, (isModalLayout ? CoreStyles.flex10 : null)]}>
                     <Card containerStyle={FormControlStyle.cardContainer}>
                         <Card.Title>Please enter a Server URL</Card.Title>
                         <Card.Divider />
