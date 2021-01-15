@@ -15,13 +15,13 @@ const tabBarOptions = {
 function Tabs() {
     return (
         <NavigationContainer>
-            <Tab.Navigator tabBarOptions={tabBarOptions}>
-                <Tab.Screen name="Home" component={Home} options={{
+            <Tab.Navigator tabBarOptions={tabBarOptions} initialRouteName="home">
+                <Tab.Screen name="home" component={Home} options={{
                     tabBarIcon: ({ focused, color, size }) => {
                         return <FontAwesome5 name="home" style={{ fontSize: 20 }} />
                     }
                 }} />
-                <Tab.Screen name="Settings" component={Settings} options={{
+                <Tab.Screen name="settings" component={Settings} options={{
                     tabBarIcon: ({ focused, color, size }) => {
                         return <FontAwesome5 name="cog" style={{ fontSize: 20 }} />
                     }

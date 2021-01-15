@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ImageBackground } from 'react-native';
-import { Button, TextInput, View } from "react-native";
+import { Button, ImageBackground, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { Card } from 'react-native-elements';
 import store from '../../core';
 import { updateServerUrl } from '../../core/action/serverUrl';
@@ -9,6 +8,9 @@ import { showToast } from '../../core/service/ToastService';
 import { isNotNull } from '../../utils/CoreUtil';
 import FormControlStyle, { BACKGROUND_IMAGE } from './formControlStyles';
 import FormError from './FormError';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import CoreStyles, { THEME_COLORS } from '../../styles/styles';
+import { signOut } from '../../core/service/AuthService';
 
 const initialFormState = {
     serverUrl: '',
@@ -19,7 +21,7 @@ const initialFormState = {
 
 function ServerUrl(props) {
 
-    const { navigation, route } = props;
+    const { navigation, route, isModalLayout, onModalClose } = props;
 
     const [formControl, setFormControl] = useState(initialFormState);
     const [navigatedFromAuthScreen, setNavigatedFromAuthScreen] = useState(false);
@@ -32,24 +34,34 @@ function ServerUrl(props) {
         }
     }, [route?.params?.isNavigatedFromAuthScreen]);
 
-    const setStorage = (formControl) => {
+    const setServer = (formControl) => {
         if (validate(formControl)) {
             const serverUrl = formControl.serverUrl;
             testServerUrl(serverUrl).then(res => {
                 if (res) {
-                    store.dispatch(updateServerUrl(serverUrl));
-                    if (navigatedFromAuthScreen && navigation) {
-                        showToast('Whoooo you are now connected to the new Server.');
-                        navigation.goBack();
-                    } else {
-                        showToast('Whoooo you are now connected.');
-                    }
+                    successHandler(serverUrl);
                 } else {
                     showToast('Invalid URL.');
                 }
             });
         } else {
             showToast('Please fill all the mandatory fields.');
+        }
+    };
+
+    const successHandler = (serverUrl) => {
+        const message = 'Whoooo you are now connected to the new Server.';
+        if (isModalLayout) {
+            signOut().then(() => {
+                store.dispatch(updateServerUrl(serverUrl));
+                showToast(message);
+            });
+        } else {
+            store.dispatch(updateServerUrl(serverUrl));
+            showToast(message);
+            if (navigatedFromAuthScreen) {
+                navigation.goBack();
+            }
         }
     };
 
@@ -84,23 +96,37 @@ function ServerUrl(props) {
 
     return (
         <View style={FormControlStyle.container}>
-            <ImageBackground source={BACKGROUND_IMAGE} style={FormControlStyle.background}>
-                <Card containerStyle={FormControlStyle.cardContainer}>
-                    <Card.Title>Please enter a Server URL</Card.Title>
-                    <Card.Divider />
-                    <TextInput
-                        style={[FormControlStyle.textInput]}
-                        placeholder="Server URL *"
-                        onBlur={() => setErrors(formControl, 'serverUrl', formControl.serverUrl)}
-                        onChangeText={(text) => setFormControl({ ...formControl, serverUrl: text })} />
-                    <FormError errorMessage={formControl.formError.serverUrl} />
+            <ImageBackground source={BACKGROUND_IMAGE} style={[FormControlStyle.background, (!isModalLayout ? FormControlStyle.centerAlignContainer : null)]}>
+                {
+                    isModalLayout
+                        ? <View style={CoreStyles.flex1}>
+                            <View style={CoreStyles.rightAlignedContainer}>
+                                <TouchableOpacity onPress={() => { onModalClose() }} style={{ padding: 10 }}>
+                                    <FontAwesome5 name="times-circle" style={CoreStyles.closeIcon} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        : null
+                }
 
-                    <View style={FormControlStyle.submitButton}>
-                        <Button title="Set Server" onPress={() => { setStorage(formControl) }} color="#3f51bf" />
-                    </View>
-                </Card>
+                <View style={[FormControlStyle.centerAlignContainer, CoreStyles.width100, (isModalLayout ? { flex: 10 } : null)]}>
+                    <Card containerStyle={FormControlStyle.cardContainer}>
+                        <Card.Title>Please enter a Server URL</Card.Title>
+                        <Card.Divider />
+                        <TextInput
+                            style={[FormControlStyle.textInput]}
+                            placeholder="Server URL *"
+                            onBlur={() => setErrors(formControl, 'serverUrl', formControl.serverUrl)}
+                            onChangeText={(text) => setFormControl({ ...formControl, serverUrl: text })} />
+                        <FormError errorMessage={formControl.formError.serverUrl} />
+
+                        <View style={FormControlStyle.submitButton}>
+                            <Button title="Set Server" onPress={() => { setServer(formControl) }} color={THEME_COLORS.primary} />
+                        </View>
+                    </Card>
+                </View>
             </ImageBackground>
-        </View>
+        </View >
     );
 }
 

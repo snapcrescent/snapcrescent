@@ -3,7 +3,7 @@ import { ActivityIndicator, Modal, StyleSheet, Text, TouchableOpacity, View } fr
 import { Image } from 'react-native-elements';
 import { getImageById } from '../../core/service/ImageService';
 import { showToast } from '../../core/service/ToastService';
-import coreStyles from '../../styles/styles';
+import CoreStyles from '../../styles/styles';
 import Loader from '../Loader';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
@@ -61,13 +61,13 @@ function PhotoSlide(props) {
     };
 
     return (
-        <View style={coreStyles.flex1}>
+        <View style={CoreStyles.flex1}>
             <Modal transparent={true} visible={state.showPhotoSlide}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalInnerContainer}>
-                        <View style={{ alignItems: 'flex-end' }}>
-                            <TouchableOpacity onPress={() => { closePhotoSlide() }}>
-                                <FontAwesome5 name="times" style={styles.closeIcon} />
+                        <View style={CoreStyles.rightAlignedContainer}>
+                            <TouchableOpacity onPress={() => { closePhotoSlide() }} style={{ padding: 10 }}>
+                                <FontAwesome5 name="times-circle" style={CoreStyles.closeIcon} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.imageContainer}>
@@ -99,10 +99,6 @@ const styles = StyleSheet.create({
         flex: 1,
         margin: 5,
         borderRadius: 5
-    },
-    closeIcon: {
-        fontSize: 24,
-        color: '#ffffff'
     },
     imageContainer: {
         flex: 1,

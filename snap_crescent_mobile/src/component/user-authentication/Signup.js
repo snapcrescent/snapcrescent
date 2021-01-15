@@ -4,6 +4,7 @@ import { TextInput, View, Button, Text, TouchableOpacity } from 'react-native';
 import { Card } from 'react-native-elements';
 import { signup } from '../../core/service/AuthService';
 import { showToast } from '../../core/service/ToastService';
+import { THEME_COLORS } from '../../styles/styles';
 import { isNotNull } from '../../utils/CoreUtil';
 import FormControlStyle, { BACKGROUND_IMAGE } from './formControlStyles';
 
@@ -78,7 +79,7 @@ function Signup(props) {
 
     return (
         <View style={FormControlStyle.container}>
-            <ImageBackground source={BACKGROUND_IMAGE} style={FormControlStyle.background}>
+            <ImageBackground source={BACKGROUND_IMAGE} style={[FormControlStyle.background, FormControlStyle.centerAlignContainer]}>
                 <Card containerStyle={FormControlStyle.cardContainer}>
                     <Card.Title>SignUp</Card.Title>
                     <Card.Divider />
@@ -134,7 +135,7 @@ function Signup(props) {
                     }
 
                     <View style={FormControlStyle.submitButton}>
-                        <Button title="Signup" onPress={() => { submit() }} color="#3f51bf" />
+                        <Button title="Signup" onPress={() => { submit() }} color={THEME_COLORS.primary} />
                     </View>
 
                     <Card.Divider />
