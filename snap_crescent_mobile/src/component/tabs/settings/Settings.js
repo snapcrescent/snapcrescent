@@ -10,6 +10,7 @@ import {
     View
 } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Dialog from '../../../core/dialog/Dialog';
 import { signOut } from '../../../core/service/AuthService';
 import ServerUrl from '../../user-authentication/ServerUrl';
 
@@ -54,15 +55,20 @@ function Settings() {
                 keyExtractor={({ item, index }) => index}>
             </FlatList>
 
-            <Modal transparent={true} visible={state.showServerModal}>
-                <View style={{ flex: 1, backgroundColor: "#000000aa", padding: 25 }}>
-                    <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
-                        <View style={styles.serverUrlContainer}>
-                            <ServerUrl isModalLayout={true} onModalClose={() => { setState({ ...state, showServerModal: false }) }} />
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+            <Dialog
+                showDialog={state.showServerModal}
+                dialogStyle={{
+                    outerContainer: {
+                        padding: 25
+                    }
+                }}
+                template={
+                    <ServerUrl
+                        isModalLayout={true}
+                        onModalClose={() => { setState({ ...state, showServerModal: false }) }} />
+                }
+            />
+
         </SafeAreaView >
     );
 }
