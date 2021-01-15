@@ -13,6 +13,7 @@ import store from '../../core';
 import { updateAuthState, updateAuthToken } from '../../core/action/authentication';
 import { signin } from '../../core/service/AuthService';
 import { showToast } from '../../core/service/ToastService';
+import { THEME_COLORS } from '../../styles/styles';
 import { isNotNull } from '../../utils/CoreUtil';
 import FormControlStyle, { BACKGROUND_IMAGE } from './formControlStyles';
 import FormError from './FormError';
@@ -80,7 +81,7 @@ function Signin(props) {
 
     return (
         <View style={FormControlStyle.container}>
-            <ImageBackground source={BACKGROUND_IMAGE} style={FormControlStyle.background}>
+            <ImageBackground source={BACKGROUND_IMAGE} style={[FormControlStyle.background, FormControlStyle.centerAlignContainer]}>
                 <Card containerStyle={FormControlStyle.cardContainer}>
                     <Card.Title>SignIn</Card.Title>
                     <Card.Divider />
@@ -100,7 +101,7 @@ function Signin(props) {
                     <FormError errorMessage={formControl.formError.password} />
 
                     <View style={FormControlStyle.submitButton}>
-                        <Button title="Login" onPress={() => { submit() }} color="#3f51bf" />
+                        <Button title="Login" onPress={() => { submit() }} color={THEME_COLORS.primary} />
                     </View>
 
                     <Card.Divider />

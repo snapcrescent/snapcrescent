@@ -9,4 +9,12 @@ const allReducers = combineReducers({
     serverUrl: serverUrlReducer
 });
 
-export default allReducers;
+const rootReducer = (state, action) => {
+    if (action.type === 'SIGN_OUT') {
+        state = undefined;
+    }
+
+    return allReducers(state, action);
+}
+
+export default rootReducer;

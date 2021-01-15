@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { searchImage } from '../../../core/service/ImageService';
-import coreStyles from '../../../styles/styles';
+import CoreStyles from '../../../styles/styles';
 import GridView from '../../grid-view/GridView';
 import Loader from '../../Loader';
 import PhotoSlide from '../../photo-slide/PhotoSlide';
@@ -34,7 +34,7 @@ function Home() {
     };
 
     return (
-        <View style={coreStyles.flex1}>
+        <View style={CoreStyles.flex1}>
             {
                 !state.dataFecthed
                     ? <Loader />

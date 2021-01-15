@@ -10,8 +10,10 @@ const FormControlStyle = StyleSheet.create({
     background: {
         flex: 1,
         resizeMode: "cover",
-        justifyContent: "center",
-        alignItems: "center"
+    },
+    centerAlignContainer: {
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     textInput: {
         height: 40,
