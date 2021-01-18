@@ -8,6 +8,7 @@ import {
     View
 } from 'react-native';
 import { Image } from 'react-native-elements';
+import { isNotNull } from '../../utils/CoreUtil';
 
 const initialState = {
     dataSource: []
@@ -18,8 +19,9 @@ const WINDOW_WIDTH = Dimensions.get('window').width;
 
 function GridView(props) {
 
-    const { data, imageKey, onGridPress, primaryKey } = props;
+    const { data, imageKey, onGridPress, primaryKey, onRefresh } = props;
     const [state, setState] = useState(initialState);
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         const dataList = data;
@@ -34,6 +36,22 @@ function GridView(props) {
         while (elementsInLastRow != 0 && elementsInLastRow != NUMBER_OF_COLUMNS) {
             dataToFormat.push({ isEmpty: true });
             elementsInLastRow++;
+        }
+    }
+
+    const refreshData = () => {
+        if (onRefresh) {
+            setRefreshing(true);
+            onRefresh().then((res) => {
+                setTimeout(() => {
+                    if (isNotNull(res)) {
+                        formatData(res);
+                        setState({ ...state, dataSource: res });
+                    }
+
+                    setRefreshing(false);
+                });
+            });
         }
     }
 
@@ -63,7 +81,9 @@ function GridView(props) {
                 data={state.dataSource}
                 numColumns={NUMBER_OF_COLUMNS}
                 keyExtractor={item => item[primaryKey]}
-                renderItem={renderItem}>
+                renderItem={renderItem}
+                refreshing={refreshing}
+                onRefresh={() => { refreshData() }}>
             </FlatList>
         </SafeAreaView>
     );
