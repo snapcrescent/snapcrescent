@@ -22,12 +22,19 @@ function Home() {
     const [photoSlideState, setPhotoSlideState] = useState(initialPhotoSlideState);
 
     useEffect(() => {
-        searchImage().then(res => {
+        getImages();
+    }, []);
+
+    const getImages = () => {
+        return searchImage().then(res => {
             if (res) {
                 setState({ ...state, imageList: res, dataFecthed: true });
+                return res;
             }
+
+            return [];
         });
-    }, []);
+    }
 
     const onImageClick = (image) => {
         setPhotoSlideState({ selectedImage: image, showPhotoSlide: true });
@@ -43,7 +50,8 @@ function Home() {
                         columnSize="4"
                         primaryKey="id"
                         imageKey="thumbnailSource"
-                        onGridPress={item => onImageClick(item)} />
+                        onGridPress={item => onImageClick(item)}
+                        onRefresh={() => { return getImages() }} />
             }
 
             <PhotoSlide
