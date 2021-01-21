@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
     FlatList,
-    Modal,
     SafeAreaView,
     StatusBar,
     StyleSheet,
@@ -10,8 +9,8 @@ import {
     View
 } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import Dialog from '../../../core/dialog/Dialog';
 import { signOut } from '../../../core/service/AuthService';
+import Dialog from '../../shared/dialog/Dialog'
 import ServerUrl from '../../user-authentication/ServerUrl';
 
 const initialState = {

@@ -58,7 +58,7 @@ export const testServerUrl = (serverUrl) => {
         });
 }
 
-export const getImage = (url) => {
+export const getFile = (url) => {
     return getClient().get(url, { responseType: 'blob' })
         .then(res => {
             return res.data;

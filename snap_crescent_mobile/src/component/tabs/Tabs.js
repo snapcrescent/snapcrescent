@@ -4,11 +4,12 @@ import Home from './home/Home';
 import Settings from './settings/Settings';
 import { NavigationContainer } from '@react-navigation/native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { THEME_COLORS } from '../../styles/styles';
 
 const Tab = createBottomTabNavigator();
 
 const tabBarOptions = {
-    activeBackgroundColor: '#15c57e',
+    activeBackgroundColor: THEME_COLORS.secondary,
     activeTintColor: '#000000'
 };
 

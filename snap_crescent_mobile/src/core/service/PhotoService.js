@@ -1,17 +1,17 @@
 import store from "..";
-import { getData, getHeaders, getImage } from "./ApiService";
+import { getData, getFile, getHeaders } from "./ApiService";
 
-const IMAGE_URL = 'photo';
+const PHOTO_URL = 'photo';
 
-export const searchImage = (searchParams) => {
+export const searchPhoto = (searchParams) => {
     const serverUrl = store.getState().serverUrl;
     searchParams = {
         page: 0,
         size: 50,
         ...searchParams
     };
-    return getData(IMAGE_URL, searchParams).then(res => {
-        const images = res.content.map((item, index) => {
+    return getData(PHOTO_URL, searchParams).then(res => {
+        const photos = res.content.map((item, index) => {
             return {
                 id: item.id,
                 createdDate: item.metadata.createdDate,
@@ -27,10 +27,10 @@ export const searchImage = (searchParams) => {
             }
         });
 
-        return images;
+        return photos;
     });
 }
 
-export const getImageById = (imageId) => {
-    return getImage(IMAGE_URL + '/' + imageId);
+export const getPhotoById = (imageId) => {
+    return getFile(PHOTO_URL + '/' + imageId);
 }
