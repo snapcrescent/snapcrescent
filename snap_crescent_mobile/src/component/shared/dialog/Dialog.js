@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, View } from "react-native";
-import CloseIcon from '../../component/shared/close-icon/CloseIcon';
+import CloseIcon from '../close-icon/CloseIcon';
 import DialogStyle from './DialogStyle';
 
 function Dialog(props) {

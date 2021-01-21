@@ -141,7 +141,7 @@ function Signup(props) {
                     <Card.Divider />
 
                     <View style={FormControlStyle.navigationLink}>
-                        <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
+                        <TouchableOpacity onPress={() => navigation.navigate('signin')}>
                             <Text>Already a User, Go to Login.</Text>
                         </TouchableOpacity>
                     </View>
@@ -152,7 +152,7 @@ function Signup(props) {
                         <TouchableOpacity
                             onPress={() =>
                                 navigation.navigate(
-                                    'ServerUrl',
+                                    'server-url',
                                     { isNavigatedFromAuthScreen: true }
                                 )}>
                             <Text>Change Server URL</Text>

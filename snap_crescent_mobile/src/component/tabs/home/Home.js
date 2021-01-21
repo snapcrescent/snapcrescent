@@ -1,67 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
-import { searchImage } from '../../../core/service/ImageService';
-import CoreStyles from '../../../styles/styles';
-import GridView from '../../grid-view/GridView';
-import Loader from '../../Loader';
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import { THEME_COLORS } from '../../../styles/styles';
+import PhotoGrid from '../../photo-grid/PhotoGrid';
 import PhotoSlide from '../../photo-slide/PhotoSlide';
 
-const initialState = {
-    imageList: [],
-    dataFecthed: false
-};
-
-const initialPhotoSlideState = {
-    selectedImage: null,
-    showPhotoSlide: false
-};
+const HomeStack = createStackNavigator();
 
 function Home() {
 
-    const [state, setState] = useState(initialState);
-    const [photoSlideState, setPhotoSlideState] = useState(initialPhotoSlideState);
-
-    useEffect(() => {
-        getImages();
-    }, []);
-
-    const getImages = () => {
-        return searchImage().then(res => {
-            if (res) {
-                setState({ ...state, imageList: res, dataFecthed: true });
-                return res;
-            }
-
-            return [];
-        });
-    }
-
-    const onImageClick = (image) => {
-        setPhotoSlideState({ selectedImage: image, showPhotoSlide: true });
+    const headerStyleOptions = {
+        headerStyle: {
+            backgroundColor: THEME_COLORS.secondary,
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+            fontWeight: 'bold',
+        }
     };
 
     return (
-        <View style={CoreStyles.flex1}>
-            {
-                !state.dataFecthed
-                    ? <Loader />
-                    : <GridView
-                        data={state.imageList}
-                        columnSize="4"
-                        primaryKey="id"
-                        imageKey="thumbnailSource"
-                        onGridPress={item => onImageClick(item)}
-                        onRefresh={() => { return getImages() }} />
-            }
-
-            <PhotoSlide
-                showPhotoSlide={photoSlideState.showPhotoSlide}
-                images={state.imageList}
-                idFieldKey="id"
-                selectedImage={photoSlideState.selectedImage}
-                onClose={() => { setPhotoSlideState({ ...photoSlideState, showPhotoSlide: false }); }} />
-        </View>
-    );
+        <HomeStack.Navigator initialRouteName='photos'>
+            <HomeStack.Screen name='photos' component={PhotoGrid} options={{ title: 'Snap Crescent', ...headerStyleOptions }} />
+            <HomeStack.Screen name='photo-slide' component={PhotoSlide} options={{ title: 'Photo', ...headerStyleOptions }} />
+        </HomeStack.Navigator>
+    )
 }
 
 export default Home;

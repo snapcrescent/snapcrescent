@@ -1,108 +1,158 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Image } from 'react-native-elements';
-import { getImageById } from '../../core/service/ImageService';
-import { showToast } from '../../core/service/ToastService';
+import { StyleSheet, View } from 'react-native';
 import CoreStyles from '../../styles/styles';
 import Loader from '../Loader';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import CloseIcon from '../shared/close-icon/CloseIcon';
-import Dialog from '../../core/dialog/Dialog';
+import { getPhotoById } from '../../core/service/PhotoService';
+import GestureRecognizer from 'react-native-swipe-gestures';
+import { Image } from 'react-native-elements';
 
-const initialState = {
-    imagesToDisplay: [],
-    selectedImage: null,
-    showPhotoSlide: false
-};
+const initialPhotoState = {
+    id: null,
+    label: null,
+    source: null,
+    index: null,
+}
 
 function PhotoSlide(props) {
 
-    const { images, idFieldKey, selectedImage, showPhotoSlide, onClose } = props;
-    const [state, setState] = useState(initialState);
+    const { navigation, route } = props;
+    const { photos, selectedPhotoId } = route.params;
+
+    const [currentPhoto, setCurrentPhoto] = useState(initialPhotoState);
+    const [previousPhoto, setPreviousPhoto] = useState(initialPhotoState);
+    const [nextPhoto, setNextPhoto] = useState(initialPhotoState);
 
     useEffect(() => {
-        if (showPhotoSlide) {
-            const selectedImg = selectedImage ? selectedImage : images[0];
-            setState({ imagesToDisplay: images, selectedImage: selectedImg, showPhotoSlide: showPhotoSlide });
-        } else {
-            setState(initialState);
-        }
+        if (selectedPhotoId) {
+            getPhotoUriById(selectedPhotoId, setCurrentPhoto);
 
-    }, [images, selectedImage, idFieldKey, showPhotoSlide]);
+            let previousId = null;
+            let nextId = null;
 
-    useEffect(() => {
-        if (state.showPhotoSlide) {
-            getImage(selectedImage[idFieldKey]);
-        }
-    }, [state.showPhotoSlide]);
+            const indexOfSelectedPhoto = photos.findIndex(photo => photo.id == selectedPhotoId);
 
-    const closePhotoSlide = () => {
-        setState({ ...state, showPhotoSlide: false });
-        if (onClose) {
-            onClose();
-        }
-    };
-
-    const getImage = (imageId) => {
-        getImageById(imageId).then(res => {
-            if (res) {
-                const fileReader = new FileReader();
-                fileReader.readAsDataURL(res);
-                fileReader.onload = () => {
-                    const selectedImg = state.selectedImage;
-                    selectedImg.source = {
-                        uri: fileReader.result
-                    };
-                    const images = state.imagesToDisplay;
-                    setState({ selectedImage: selectedImg, imagesToDisplay: images, showPhotoSlide });
-                };
-            } else {
-                showToast('Unable to get Image');
+            if (indexOfSelectedPhoto == 0) { // First Image
+                nextId = photos[indexOfSelectedPhoto + 1].id;
+            } else if (indexOfSelectedPhoto + 1 === photos.length) { // Last Image
+                previousId = photos[index - 1].id;
             }
+            else {
+                previousId = photos[indexOfSelectedPhoto - 1].id;
+                nextId = photos[indexOfSelectedPhoto + 1].id;
+            }
+
+            getPhotoUriById(previousId, setPreviousPhoto);
+            getPhotoUriById(nextId, setNextPhoto);
+        }
+    }, [photos, selectedPhotoId]);
+
+    useEffect(() => {
+        if (currentPhoto?.label) {
+            navigation.setOptions({ title: currentPhoto.label });
+        }
+    }, [currentPhoto])
+
+    const getPhotoUriById = (photoId, setPhotoCallback) => {
+        if (photoId) {
+            const indexOfPhoto = photos.findIndex(photo => photo.id == photoId);
+            const photo = {
+                id: photoId,
+                index: indexOfPhoto,
+                thumbnail: photos[indexOfPhoto].thumbnailSource,
+                label: getPhotoLabel(photos[indexOfPhoto]),
+            };
+
+            getPhotoById(photoId).then((res) => {
+                if (res) {
+                    const fileReader = new FileReader();
+                    fileReader.readAsDataURL(res);
+                    fileReader.onload = () => {
+
+                        photo.source = {
+                            uri: fileReader.result
+                        };
+                        setPhotoCallback({ ...photo });
+                    }
+                }
+            });
+        } else {
+            setPhotoCallback(null);
+        }
+    }
+
+    const getPhotoLabel = (photo) => {
+        if (photo.createdDate) {
+            return new Date(photo.createdDate).toDateString();
+        } else {
+            return 'Photo';
+        }
+    }
+
+    const handleSwipeLeft = () => {
+        if (nextPhoto) {
+            setPreviousPhoto(currentPhoto);
+            setCurrentPhoto(nextPhoto);
+
+            const indexOfNextPhoto = nextPhoto.index + 1;
+
+            if (indexOfNextPhoto < photos.length) {
+                handleSwipeEvent(indexOfNextPhoto, setNextPhoto);
+            } else {
+                setNextPhoto(null);
+            }
+        }
+    }
+
+    const handleSwipeRight = () => {
+        if (previousPhoto) {
+            setNextPhoto(currentPhoto);
+            setCurrentPhoto(previousPhoto);
+
+            const indexOfPreviousPhoto = previousPhoto.index - 1;
+
+            if (indexOfPreviousPhoto >= 0) {
+                handleSwipeEvent(indexOfPreviousPhoto, setPreviousPhoto);
+            } else {
+                setPreviousPhoto(null);
+            }
+        }
+    }
+
+    const handleSwipeEvent = (index, setPhotoCallBack) => {
+        const nextPhotoId = photos[index].id;
+        setPhotoCallBack({
+            id: nextPhotoId,
+            index,
+            thumbnail: photos[index].thumbnailSource,
+            label: getPhotoLabel(photos[index]),
         });
-    };
+        getPhotoUriById(nextPhotoId, setPhotoCallBack);
+    }
 
     return (
         <View style={CoreStyles.flex1}>
-            <Dialog
-                showDialog={state.showPhotoSlide}
-                showCloseButton={true}
-                onClose={() => closePhotoSlide()}
-                dialogStyle={{
-                    outerContainer: {
-                        padding: 5
+            <View style={styles.imageContainer}>
+                <GestureRecognizer
+                    onSwipeLeft={() => { handleSwipeLeft() }}
+                    onSwipeRight={() => { handleSwipeRight() }}>
+                    {
+                        !currentPhoto?.source?.uri
+                            ? <Image
+                                source={currentPhoto.thumbnail}
+                                style={styles.image}
+                                PlaceholderContent={<Loader />} />
+                            : <Image
+                                source={currentPhoto.source}
+                                style={styles.image}
+                                PlaceholderContent={<Loader />} />
                     }
-                }}
-                template={
-                    <View style={styles.imageContainer}>
-                        {
-                            !state.selectedImage?.source
-                                ? <Loader />
-                                : <View style={styles.imageContainer}>
-                                    <Image
-                                        source={state.selectedImage.source}
-                                        PlaceholderContent={<ActivityIndicator />}
-                                        style={styles.image}>
-                                    </Image>
-                                </View>
-                        }
-                    </View>
-                }
-            />
+                </GestureRecognizer>
+            </View>
         </View >
     )
 }
 
 const styles = StyleSheet.create({
-    modalContainer: {
-        flex: 1,
-        backgroundColor: "#000000aa"
-    },
-    modalInnerContainer: {
-        flex: 1,
-        margin: 5,
-        borderRadius: 5
-    },
     imageContainer: {
         flex: 1,
         justifyContent: 'center',

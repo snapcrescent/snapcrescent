@@ -92,7 +92,7 @@ function GridView(props) {
 const styles = StyleSheet.create({
     viewContainer: {
         flex: 1,
-        marginTop: 20,
+        marginTop: 5,
         padding: 5
     },
     imageContainer: {

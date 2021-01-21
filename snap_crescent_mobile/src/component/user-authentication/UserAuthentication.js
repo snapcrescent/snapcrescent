@@ -11,6 +11,7 @@ import { isNotNull } from '../../utils/CoreUtil';
 import store from '../../core';
 import { updateAuthState, updateAuthToken } from '../../core/action/authentication';
 import ServerUrl from './ServerUrl';
+import { THEME_COLORS } from '../../styles/styles';
 
 const Stack = createStackNavigator();
 
@@ -24,7 +25,7 @@ function UserAuthentication() {
 
     const headerStyleOptions = {
         headerStyle: {
-            backgroundColor: '#15c57e',
+            backgroundColor: THEME_COLORS.secondary,
         },
         headerTintColor: '#fff',
         headerTitleStyle: {
@@ -57,21 +58,21 @@ function UserAuthentication() {
                 !state.dataFecthed
                     ? <Loader />
                     : <NavigationContainer>
-                        <Stack.Navigator initialRouteName={state.userExists ? 'Signin' : 'Signup'}>
+                        <Stack.Navigator initialRouteName={state.userExists ? 'signin' : 'signup'}>
                             <Stack.Screen
-                                name='Signin'
+                                name='signin'
                                 component={Signin}
                                 options={{ title: 'SignIn', ...headerStyleOptions }}>
                             </Stack.Screen>
 
                             <Stack.Screen
-                                name='Signup'
+                                name='signup'
                                 component={Signup}
                                 options={{ title: 'SignUp', ...headerStyleOptions }}>
                             </Stack.Screen>
 
                             <Stack.Screen
-                                name='ServerUrl'
+                                name='server-url'
                                 component={ServerUrl}
                                 options={{ title: 'Server', ...headerStyleOptions }}>
                             </Stack.Screen>
