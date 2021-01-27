@@ -6,6 +6,7 @@ import { Home } from './components/Home/Home';
 import { HashRouter, Route, Redirect } from 'react-router-dom';
 import { ResetPassword } from './components/ResetPassword/ResetPassword';
 import { doesUserExists, authenticate } from './services/AuthService';
+import { getConfigJWT } from './services/ConfigService';
 import { CssBaseline } from '@material-ui/core';
 import { updateAuthHeader } from './utils/ApiUtil';
 
@@ -19,28 +20,32 @@ export const App = () => {
   const [formData, setFormData] = useState(appModel);
 
   useEffect(() => {
-    const demoToken = process.env.REACT_APP_AUTH_TOKEN;
-    if(demoToken) {
-      updateAuthHeader(demoToken);
-      setFormData({dataFetched: true, userExists: true, isAuthenticated: true});
-    } else {
-    doesUserExists()
-      .then(exists => {
-        if (localStorage.getItem('token')) {
-          authenticate()
-            .then(res => {
-              if (res) {
-                setFormData({ dataFetched: true, userExists: exists, isAuthenticated: true });
-              } else {
-                setFormData({ dataFetched: true, userExists: exists, isAuthenticated: false });
-              }
-            });
-        } else {
-          setFormData({ dataFetched: true, userExists: exists, isAuthenticated: false });
-        }
+    getConfigJWT().then(res => {
+      const demoToken = res;
+      if (demoToken) {
+        localStorage.setItem('env', 'demo');
+        updateAuthHeader(demoToken);
+        setFormData({ dataFetched: true, userExists: true, isAuthenticated: true });
+      } else {
+        localStorage.removeItem('env');
+        doesUserExists()
+          .then(exists => {
+            if (localStorage.getItem('token')) {
+              authenticate()
+                .then(res => {
+                  if (res) {
+                    setFormData({ dataFetched: true, userExists: exists, isAuthenticated: true });
+                  } else {
+                    setFormData({ dataFetched: true, userExists: exists, isAuthenticated: false });
+                  }
+                });
+            } else {
+              setFormData({ dataFetched: true, userExists: exists, isAuthenticated: false });
+            }
 
-      });
-    }
+          });
+      }
+    });
   }, []);
 
 

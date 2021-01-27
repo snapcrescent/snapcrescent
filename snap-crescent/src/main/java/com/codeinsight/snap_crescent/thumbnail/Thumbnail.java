@@ -12,7 +12,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "THUMBNAIL")
+@Table(name = "thumbnail")
 public class Thumbnail implements Serializable {
 
 	private static final long serialVersionUID = 1567235158787189351L;

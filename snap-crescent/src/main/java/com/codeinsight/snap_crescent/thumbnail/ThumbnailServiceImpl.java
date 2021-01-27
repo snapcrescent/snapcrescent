@@ -43,13 +43,15 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	public Thumbnail generateThumbnail(File file, PhotoMetadata photoMetadata) throws Exception {
 
 		boolean isThumbnailCreated = createThumbnail(file, photoMetadata);
-
 		if (isThumbnailCreated) {
+			File directory = new File(THUMBNAIL_OUTPUT_PATH);
+			if (!directory.exists()) {
+				directory.mkdir();
+			}
 			Thumbnail thumbnail = new Thumbnail();
 			String thumbnailName = getThumbnailName(file);
 			thumbnail.setName(thumbnailName);
 			thumbnail.setPath(THUMBNAIL_OUTPUT_PATH + thumbnailName);
-
 			return thumbnail;
 		}
 
@@ -57,6 +59,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	}
 
 	private boolean createThumbnail(File file, PhotoMetadata photoMetadata) {
+		
 		boolean isThumbnailCreated = false;
 		try {
 
@@ -89,7 +92,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 		} catch (IOException exception) {
 			System.out.println("Unable to read image file: " + file.getName());
 		}
-
+		
 		return isThumbnailCreated;
 	}
 

@@ -22,6 +22,7 @@ public class UserController {
 			User savedUser = userService.saveUser(user);
 			return ResponseEntity.ok(savedUser);
 		} catch (Exception exception) {
+			exception.printStackTrace();
 			return ResponseEntity.badRequest().body(exception.getLocalizedMessage());
 		}
 
@@ -33,6 +34,7 @@ public class UserController {
 			String successMessage = userService.resetPassword(resetRequest);
 			return ResponseEntity.ok(successMessage);
 		} catch (Exception exception) {
+			exception.printStackTrace();
 			return ResponseEntity.badRequest().body(exception.getLocalizedMessage());
 		}
 	}
@@ -43,6 +45,7 @@ public class UserController {
 			Boolean exist = userService.doesUserExists();
 			return ResponseEntity.ok(exist);
 		} catch (Exception exception) {
+			exception.printStackTrace();
 			return ResponseEntity.badRequest().body(exception.getLocalizedMessage());
 		}
 	}

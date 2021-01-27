@@ -18,8 +18,6 @@ import ViewComfy from '@material-ui/icons/ViewComfy';
 import ViewList from '@material-ui/icons/ViewList';
 import { PhotoSlide } from '../PhotoSlide/PhotoSlide';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { getById } from '../../services/ThumbnailService';
-import { Thumbnail } from './Thumbnail';
 
 import './SearchTable.scss';
 
@@ -155,7 +153,8 @@ export const SearchTable = (props) => {
                                                                     <img src={data.value}
                                                                         className={classes.listThumbnail}
                                                                         alt=''
-                                                                        onClick={() => { handleThumbnailClick(row.id.value) }} />
+                                                                        onClick={() => { handleThumbnailClick(row.id.value) }}
+                                                                    />
                                                                 </TableCell>
                                                             )
                                                         } else {
@@ -176,10 +175,11 @@ export const SearchTable = (props) => {
                             <GridList cellHeight={'auto'} cols={0} spacing={10}>
                                 {rows.map((row) => (
                                     <GridListTile key={row.id.value} cols={1}>
-                                        <Thumbnail
-                                            thumbnailId={row.thumbnail.value}
+                                        <img src={row.thumbnail.value}
                                             className={classes.gridThumbnail}
-                                            onClick={() => handleThumbnailClick(row.thumbnail.value)} />
+                                            alt=''
+                                            onClick={() => { handleThumbnailClick(row.id.value) }}
+                                        />
                                     </GridListTile>
                                 ))}
                             </GridList>

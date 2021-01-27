@@ -12,3 +12,4 @@ snap-crescent/src/main/webapp/debug.log
 snap-crescent/src/main/webapp/package-lock.json
 snap-crescent/src/main/webapp/.eslintcache
 
+*.db

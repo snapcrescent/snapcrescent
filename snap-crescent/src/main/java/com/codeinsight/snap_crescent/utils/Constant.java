@@ -1,6 +1,8 @@
 package com.codeinsight.snap_crescent.utils;
 
 public class Constant {
+		
+	public static final String DEMO_ADDRESS = "demo.snapcrescent.com";
 	
 	public static final String METADATA_FILE_NAME = "File Name";
 	public static final String METADATA_FILE_SIZE = "File Size";
