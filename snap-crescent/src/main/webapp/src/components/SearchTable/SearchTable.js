@@ -85,34 +85,34 @@ export const SearchTable = (props) => {
                 <Grid container className={classes.actionBarContainer}>
                     <Grid item sm={4} className='center-content'>
                         <div className="search">
-                        <div className="searchIcon">
-                            <SearchIcon />
-                        </div>
-                        <InputBase
-                            placeholder="Search…"
-                            classes={{
-                            root: classes.inputRoot,
-                            input: classes.inputInput
-                            }}
-                            inputProps={{ 'aria-label': 'search' }} />
+                            <div className="searchIcon">
+                                <SearchIcon />
+                            </div>
+                            <InputBase
+                                placeholder="Search…"
+                                classes={{
+                                    root: classes.inputRoot,
+                                    input: classes.inputInput
+                                }}
+                                inputProps={{ 'aria-label': 'search' }} />
                         </div>
                     </Grid>
                     <Grid item sm={8} className={classes.iconGrid}>
-                        {   
+                        {
                             view === 'MODULE' &&
-                            <IconButton color="inherit" aria-label="toggle view" onClick={()=> setView('COMFY')}>
+                            <IconButton color="inherit" aria-label="toggle view" onClick={() => setView('COMFY')}>
                                 <ViewModuleIcon />
                             </IconButton>
                         }
                         {
                             view === 'COMFY' &&
-                            <IconButton color="inherit" aria-label="toggle view" onClick={()=> setView('LIST')}>
+                            <IconButton color="inherit" aria-label="toggle view" onClick={() => setView('LIST')}>
                                 <ViewComfy />
                             </IconButton>
                         }
                         {
                             view === 'LIST' &&
-                            <IconButton color="inherit" aria-label="toggle view" onClick={()=> setView('COMFY')}>
+                            <IconButton color="inherit" aria-label="toggle view" onClick={() => setView('COMFY')}>
                                 <ViewList />
                             </IconButton>
                         }
@@ -121,77 +121,77 @@ export const SearchTable = (props) => {
             </Paper>
             <InfiniteScroll
                 dataLength={rows.length}
-                next={()=>{setPage(page+1)}}
+                next={() => { setPage(page + 1) }}
                 hasMore={totalElements > rows.length}
                 className={classes.scrollContainer}
             >
-            {(() => {
-                if (view === "LIST") {
-                    return (
-                        <TableContainer component={Paper}>
-                            <Table className={classes.table} aria-label="simple table">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>
-                                        </TableCell>
-                                        {columns.map((column) => (
-                                            <TableCell className={classes.head} key={column.field}>
-                                                {column.headerName}
+                {(() => {
+                    if (view === "LIST") {
+                        return (
+                            <TableContainer component={Paper}>
+                                <Table className={classes.table} aria-label="simple table">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>
                                             </TableCell>
-                                        ))}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {rows.map((row) => (
-                                        <TableRow key={row.id.value}>
-                                            {
-                                                Object.entries(row).map(([key, data]) => {
-                                                    if (data.hidden) {
-                                                        return
-                                                    }
-                                                    if (data.type === 'IMAGE') {
-                                                        return (
-                                                            <TableCell>
-                                                                <Thumbnail
-                                                                    thumbnailId={data.value}
-                                                                    className={classes.listThumbnail}
-                                                                    onClick={() => handleThumbnailClick(row.id.value)}/>
-                                                            </TableCell>
-                                                        )
-                                                    } else {
-                                                        return (
-                                                            <TableCell>{data.value}</TableCell>
-                                                        )
-                                                    }
-                                                })
-                                            }
+                                            {columns.map((column) => (
+                                                <TableCell className={classes.head} key={column.field}>
+                                                    {column.headerName}
+                                                </TableCell>
+                                            ))}
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    )
-                } else if (view === "COMFY") {
-                    return (
-                        <GridList cellHeight={'auto'} cols={0} spacing={10}>
-                            {rows.map((row) => (
-                                <GridListTile key={row.id.value} cols={1}>
-                                    <Thumbnail
-                                        thumbnailId={row.thumbnail.value}
-                                        className={classes.gridThumbnail}
-                                        onClick={() => handleThumbnailClick(row.thumbnail.value)}/>
-                                </GridListTile>
-                            ))}
-                        </GridList>
-                    )
-                } else {
-                    return (
-                        <div>
+                                    </TableHead>
+                                    <TableBody>
+                                        {rows.map((row) => (
+                                            <TableRow key={row.id.value}>
+                                                {
+                                                    Object.entries(row).map(([key, data]) => {
+                                                        if (data.hidden) {
+                                                            return
+                                                        }
+                                                        if (data.type === 'IMAGE') {
+                                                            return (
+                                                                <TableCell>
+                                                                    <img src={data.value}
+                                                                        className={classes.listThumbnail}
+                                                                        alt=''
+                                                                        onClick={() => { handleThumbnailClick(row.id.value) }} />
+                                                                </TableCell>
+                                                            )
+                                                        } else {
+                                                            return (
+                                                                <TableCell>{data.value}</TableCell>
+                                                            )
+                                                        }
+                                                    })
+                                                }
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        )
+                    } else if (view === "COMFY") {
+                        return (
+                            <GridList cellHeight={'auto'} cols={0} spacing={10}>
+                                {rows.map((row) => (
+                                    <GridListTile key={row.id.value} cols={1}>
+                                        <Thumbnail
+                                            thumbnailId={row.thumbnail.value}
+                                            className={classes.gridThumbnail}
+                                            onClick={() => handleThumbnailClick(row.thumbnail.value)} />
+                                    </GridListTile>
+                                ))}
+                            </GridList>
+                        )
+                    } else {
+                        return (
+                            <div>
 
-                        </div>
-                    )
-                }
-            })()}
+                            </div>
+                        )
+                    }
+                })()}
             </InfiniteScroll>
 
             <PhotoSlide

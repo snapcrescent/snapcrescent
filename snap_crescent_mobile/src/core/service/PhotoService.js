@@ -7,7 +7,7 @@ export const searchPhoto = (searchParams) => {
     const serverUrl = store.getState().serverUrl;
     searchParams = {
         page: 0,
-        size: 50,
+        size: 500,
         ...searchParams
     };
     return getData(PHOTO_URL, searchParams).then(res => {
@@ -18,11 +18,7 @@ export const searchPhoto = (searchParams) => {
                 device: item.metadata.model ? item.metadata.model : 'Unknown',
                 size: item.metadata.size,
                 thumbnailSource: {
-                    uri: serverUrl + "/thumbnail/" + item.thumbnailId,
-                    headers: {
-                        ...getHeaders(true),
-                        responseType: 'blob'
-                    }
+                    uri: 'data:image/*;base64,' + item.base64EncodedThumbnail
                 }
             }
         });
