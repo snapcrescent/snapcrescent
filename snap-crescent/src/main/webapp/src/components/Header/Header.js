@@ -102,7 +102,7 @@ export const Header = (props) => {
             <IconButton color="inherit" aria-label="upload" onClick={() => setOpenUploadPhotoDialog(true)}>
               <CloudUploadIcon />
             </IconButton>
-            { !process.env.REACT_APP_DEMO_SITE &&
+            { localStorage.getItem('env') !== "demo" &&
               <IconButton color="inherit" aria-label="logout" onClick={signOutUser}>
                 <ExitToAppIcon />
               </IconButton>

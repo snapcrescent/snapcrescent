@@ -40,7 +40,6 @@ public class PhotoMetadataServiceImpl implements PhotoMetadataService {
 		}
 		PhotoMetadata photoMetadata = new PhotoMetadata();
 
-		System.out.println(metaDataMap.get("Orientation"));
 		photoMetadata.setName(metaDataMap.get(Constant.METADATA_FILE_NAME));
 		photoMetadata.setPath(file.getPath());
 		photoMetadata.setSize(metaDataMap.get(Constant.METADATA_FILE_SIZE));

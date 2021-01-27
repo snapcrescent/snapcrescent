@@ -20,12 +20,21 @@ public class LocationServiceImpl implements LocationService {
 	@Override
 	@Transactional
 	public Long saveLocation(Double longitude, Double latitude) throws Exception {
-
-		Location location = executeReverseGeoCoding(longitude, latitude);
-		location.setLongitude(longitude);
-		location.setLatitude(latitude);
-		locationRepository.save(location);
-		return location.getId();
+		
+		try {
+			System.out.println("Get Location - Start");
+			Location location = executeReverseGeoCoding(longitude, latitude);
+			System.out.println("Get Location - End");
+			location.setLongitude(longitude);
+			location.setLatitude(latitude);
+			System.out.println("Save Location - Start");
+			locationRepository.save(location);
+			System.out.println("Save Location - End");
+			return location.getId();	
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 
 	}
 

@@ -76,25 +76,28 @@ export const PhotoSlide = (props) => {
     useEffect(() => {
         if (selectedId) {
             getPhoto(selectedId, setCurrentPhoto);
-            let previousId = null;
-            let nextId = null;
+            
+            if(photos.length > 1) {
+                let previousId = null;
+                let nextId = null;
 
-            photos.map((photo, index) => {
-                if (photo.id.value === selectedId) {
-                    if (index === 0) { // First Image
-                        nextId = photos[index + 1].id.value;
-                    } else if (index + 1 === photos.length) { // Last Image
-                        previousId = photos[index - 1].id.value;
+                photos.forEach((photo, index) => {
+                    if (photo.id.value === selectedId) {
+                        if (index === 0) { // First Image
+                            nextId = photos[index + 1].id.value;
+                        } else if (index + 1 === photos.length) { // Last Image
+                            previousId = photos[index - 1].id.value;
+                        }
+                        else {
+                            previousId = photos[index - 1].id.value;
+                            nextId = photos[index + 1].id.value;
+                        }
                     }
-                    else {
-                        previousId = photos[index - 1].id.value;
-                        nextId = photos[index + 1].id.value;
-                    }
-                }
-            });
+                });
 
-            getPhoto(previousId, setPreviousPhoto);
-            getPhoto(nextId, setNextPhotos);
+                getPhoto(previousId, setPreviousPhoto);
+                getPhoto(nextId, setNextPhotos);
+            }
         }
     }, [selectedId, photos]);
     const getPhoto = (id, setPhoto) => {
@@ -118,7 +121,7 @@ export const PhotoSlide = (props) => {
         setCurrentPhoto(nextPhoto);
 
         let nextId = null;
-        photos.map((photo, index) => {
+        photos.forEach((photo, index) => {
             if (photo.id.value === nextPhoto.id) {
                 if (index + 1 === photos.length) { // Last Image
                     if (photos.length < totalElements) {
@@ -146,7 +149,7 @@ export const PhotoSlide = (props) => {
         setCurrentPhoto(previousPhoto);
 
         let previousId = null;
-        photos.map((photo, index) => {
+        photos.forEach((photo, index) => {
             if (photo.id.value === previousPhoto.id) {
                 if (index === 0) { // First Image
                     setPreviousPhoto(null);
