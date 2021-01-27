@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,22 +45,27 @@ public class PhotoServiceImpl implements PhotoService {
 
 	@Autowired
 	private ThumbnailRepository thumbnailRepository;
-	
+
 	@Autowired
 	private AppConfigService appConfigService;
 
 	@Transactional
 	public Page<Photo> search(PhotoSearchCriteria photoSearchCriteria) throws Exception {
 		Pageable pageable = PageRequest.of(photoSearchCriteria.getPage(), photoSearchCriteria.getSize());
-		return photoRepository.search(pageable);
+		Page<Photo> photos = photoRepository.search(pageable);
+		for (Photo photo : photos) {
+			photo.setBase64EncodedThumbnail(
+					Base64.getEncoder().encodeToString(thumbnailService.getById(photo.getId())));
+		}
+		return photos;
 	}
 
 	@Override
 	@Transactional
 	public void upload(ArrayList<MultipartFile> multipartFiles) throws Exception {
-		
+
 		String x = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_SKIP_UPLOADING);
-		if(x != null & Boolean.parseBoolean(x) == true) {
+		if (x != null & Boolean.parseBoolean(x) == true) {
 			return;
 		}
 		File directory = new File(PHOTO_PATH);

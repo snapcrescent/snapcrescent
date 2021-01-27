@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadata;
 import com.codeinsight.snap_crescent.thumbnail.Thumbnail;
@@ -41,6 +42,9 @@ public class Photo implements Serializable {
 
 	@Column(name = "METADATA_ID", nullable = false, insertable = true, updatable = true)
 	private Long metaDataId;
+	
+	@Transient
+	private String base64EncodedThumbnail;
 
 	public long getId() {
 		return id;
@@ -81,4 +85,13 @@ public class Photo implements Serializable {
 	public void setMetaDataId(Long metaDataId) {
 		this.metaDataId = metaDataId;
 	}
+
+	public String getBase64EncodedThumbnail() {
+		return base64EncodedThumbnail;
+	}
+
+	public void setBase64EncodedThumbnail(String base64EncodedThumbnail) {
+		this.base64EncodedThumbnail = base64EncodedThumbnail;
+	}
+	
 }

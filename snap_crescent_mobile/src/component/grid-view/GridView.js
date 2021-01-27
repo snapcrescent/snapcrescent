@@ -66,7 +66,7 @@ function GridView(props) {
                         PlaceholderContent={<ActivityIndicator />}
                         style={styles.image}
                         transition={true}
-                        transitionDuration={4000}
+                        transitionDuration={500}
                         onPress={() => { onGridPress(item) }}>
                     </Image>
                 </View>
