@@ -9,6 +9,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
+import com.codeinsight.snap_crescent.utils.Constant;
+
 @Configuration
 public class DBInitializeConfig {
 
@@ -19,7 +21,7 @@ public class DBInitializeConfig {
 	public void initialize() {
 
 		try {
-			if (System.getenv("ENV").equals("sqlite")) {
+			if (System.getenv("ENV").equals(Constant.DB_SQLITE)) {
 				Resource resource = new ClassPathResource("schema-sqlite.sql");
 				ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(resource);
 				databasePopulator.execute(dataSource);

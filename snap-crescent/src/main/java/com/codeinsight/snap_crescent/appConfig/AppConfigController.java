@@ -20,7 +20,8 @@ public class AppConfigController {
 	@GetMapping("/config-jwt")
 	public ResponseEntity<String> getConfig(HttpServletRequest request) {
 		try {
-			if(request.getLocalName().equals(Constant.DEMO_ADDRESS)) {
+			String host = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_HOST_ADDRESS);
+			if(host != null && host.equals(Constant.DEMO_ADDRESS)) {
 				return new ResponseEntity<>(appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_DEMO_JWT), HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(HttpStatus.OK);
