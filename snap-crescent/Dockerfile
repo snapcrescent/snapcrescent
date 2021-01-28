@@ -1,6 +1,6 @@
 FROM maven:3.6.0-jdk-11-slim AS build
-COPY pom.xml /tmp/
-COPY src /tmp/src/
+COPY snap-crescent/pom.xml /tmp/
+COPY snap-crescent/src /tmp/src/
 WORKDIR /tmp/
 RUN mvn package
 
