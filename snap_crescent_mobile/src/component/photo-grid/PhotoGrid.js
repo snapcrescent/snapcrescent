@@ -19,15 +19,12 @@ function PhotoGrid(props) {
         getPhotos();
     }, []);
 
-    const getPhotos = () => {
-        return searchPhoto().then(res => {
+    const getPhotos = (refreshFromServer) => {
+        return searchPhoto({}, (res) => {
             if (res) {
-                setState({ ...state, photoList: res, dataFecthed: true });
-                return res;
+                setState({ ...state, photoList: res.data, dataFecthed: true });
             }
-
-            return null;
-        });
+        }, refreshFromServer);
     }
 
     const onGridItemClick = (item) => {
@@ -50,7 +47,7 @@ function PhotoGrid(props) {
                         primaryKey="id"
                         imageKey="thumbnailSource"
                         onGridPress={item => onGridItemClick(item)}
-                        onRefresh={() => { return getPhotos() }} />
+                        onRefresh={() => { return getPhotos(true) }} />
             }
         </View>
     );
