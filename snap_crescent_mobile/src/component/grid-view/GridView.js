@@ -44,11 +44,6 @@ function GridView(props) {
             setRefreshing(true);
             onRefresh().then((res) => {
                 setTimeout(() => {
-                    if (isNotNull(res)) {
-                        formatData(res);
-                        setState({ ...state, dataSource: res });
-                    }
-
                     setRefreshing(false);
                 });
             });

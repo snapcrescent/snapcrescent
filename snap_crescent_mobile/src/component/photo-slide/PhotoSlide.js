@@ -6,81 +6,72 @@ import { getPhotoById } from '../../core/service/PhotoService';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { Image } from 'react-native-elements';
 
-const initialPhotoState = {
-    id: null,
-    label: null,
-    source: null,
-    index: null,
-}
+class PhotoSlide extends React.Component {
 
-function PhotoSlide(props) {
+    photos = [];
+    selectedPhotoId = null;
+    photoRequestIntervalId = null;
 
-    const { navigation, route } = props;
-    const { photos, selectedPhotoId } = route.params;
+    constructor(props) {
+        super(props);
+        this.photos = props.route?.params?.photos;
+        this.selectedPhotoId = props.route?.params?.selectedPhotoId;
 
-    const [currentPhoto, setCurrentPhoto] = useState(initialPhotoState);
-    const [previousPhoto, setPreviousPhoto] = useState(initialPhotoState);
-    const [nextPhoto, setNextPhoto] = useState(initialPhotoState);
+        this.state = {
+            currentPhoto: {}
+        };
+    }
 
-    useEffect(() => {
-        if (selectedPhotoId) {
-            getPhotoUriById(selectedPhotoId, setCurrentPhoto);
-
-            let previousId = null;
-            let nextId = null;
-
-            const indexOfSelectedPhoto = photos.findIndex(photo => photo.id == selectedPhotoId);
-
-            if (indexOfSelectedPhoto == 0) { // First Image
-                nextId = photos[indexOfSelectedPhoto + 1].id;
-            } else if (indexOfSelectedPhoto + 1 === photos.length) { // Last Image
-                previousId = photos[index - 1].id;
-            }
-            else {
-                previousId = photos[indexOfSelectedPhoto - 1].id;
-                nextId = photos[indexOfSelectedPhoto + 1].id;
-            }
-
-            getPhotoUriById(previousId, setPreviousPhoto);
-            getPhotoUriById(nextId, setNextPhoto);
-        }
-    }, [photos, selectedPhotoId]);
-
-    useEffect(() => {
-        if (currentPhoto?.label) {
-            navigation.setOptions({ title: currentPhoto.label });
-        }
-    }, [currentPhoto])
-
-    const getPhotoUriById = (photoId, setPhotoCallback) => {
-        if (photoId) {
-            const indexOfPhoto = photos.findIndex(photo => photo.id == photoId);
-            const photo = {
-                id: photoId,
-                index: indexOfPhoto,
-                thumbnail: photos[indexOfPhoto].thumbnailSource,
-                label: getPhotoLabel(photos[indexOfPhoto]),
-            };
-
-            getPhotoById(photoId).then((res) => {
-                if (res) {
-                    const fileReader = new FileReader();
-                    fileReader.readAsDataURL(res);
-                    fileReader.onload = () => {
-
-                        photo.source = {
-                            uri: fileReader.result
-                        };
-                        setPhotoCallback({ ...photo });
-                    }
-                }
-            });
-        } else {
-            setPhotoCallback(null);
+    componentDidMount() {
+        if (this.photos && this.selectedPhotoId) {
+            this.getPhotoUriById(this.selectedPhotoId);
         }
     }
 
-    const getPhotoLabel = (photo) => {
+    componentDidUpdate() {
+        if (this.state.currentPhoto?.label) {
+            this.props.navigation.setOptions({ title: this.state.currentPhoto?.label });
+        }
+    }
+
+    getPhotoUriById(photoId) {
+        if (photoId) {
+            const indexOfPhoto = this.photos.findIndex(photo => photo.id == photoId);
+            const photo = {
+                ...this.photos[indexOfPhoto],
+                index: indexOfPhoto,
+                label: this.getPhotoLabel(this.photos[indexOfPhoto])
+            };
+
+            this.setState({ currentPhoto: photo }, () => {
+                if (this.photoRequestIntervalId) {
+                    clearInterval(this.photoRequestIntervalId);
+                }
+
+                this.photoRequestIntervalId = setTimeout(() => {
+                    getPhotoById(photoId).then((res) => {
+                        if (res) {
+                            const fileReader = new FileReader();
+                            fileReader.readAsDataURL(res);
+                            fileReader.onload = () => {
+                                if (photo.id == this.state.currentPhoto.id) {
+                                    photo.source = {
+                                        uri: fileReader.result
+                                    };
+                                    this.setState({ currentPhoto: { ...photo } })
+                                }
+                            }
+                        }
+                    });
+                }, 1000);
+            });
+
+        } else {
+            this.setState({ currentPhoto: null });
+        }
+    }
+
+    getPhotoLabel(photo) {
         if (photo.createdDate) {
             return new Date(photo.createdDate).toDateString();
         } else {
@@ -88,68 +79,43 @@ function PhotoSlide(props) {
         }
     }
 
-    const handleSwipeLeft = () => {
-        if (nextPhoto) {
-            setPreviousPhoto(currentPhoto);
-            setCurrentPhoto(nextPhoto);
-
-            const indexOfNextPhoto = nextPhoto.index + 1;
-
-            if (indexOfNextPhoto < photos.length) {
-                handleSwipeEvent(indexOfNextPhoto, setNextPhoto);
-            } else {
-                setNextPhoto(null);
-            }
+    handleSwipeLeft() {
+        if (this.state.currentPhoto.index != (this.photos.length - 1)) {
+            const nextPhotoId = this.photos[this.state.currentPhoto.index + 1].id;
+            this.getPhotoUriById(nextPhotoId);
         }
     }
 
-    const handleSwipeRight = () => {
-        if (previousPhoto) {
-            setNextPhoto(currentPhoto);
-            setCurrentPhoto(previousPhoto);
-
-            const indexOfPreviousPhoto = previousPhoto.index - 1;
-
-            if (indexOfPreviousPhoto >= 0) {
-                handleSwipeEvent(indexOfPreviousPhoto, setPreviousPhoto);
-            } else {
-                setPreviousPhoto(null);
-            }
+    handleSwipeRight() {
+        if (this.state.currentPhoto.index != 0) {
+            const previousPhotoId = this.photos[this.state.currentPhoto.index - 1].id;
+            this.getPhotoUriById(previousPhotoId);
         }
     }
 
-    const handleSwipeEvent = (index, setPhotoCallBack) => {
-        const nextPhotoId = photos[index].id;
-        setPhotoCallBack({
-            id: nextPhotoId,
-            index,
-            thumbnail: photos[index].thumbnailSource,
-            label: getPhotoLabel(photos[index]),
-        });
-        getPhotoUriById(nextPhotoId, setPhotoCallBack);
+    render() {
+        return (
+            <View style={CoreStyles.flex1} >
+                <View style={styles.imageContainer}>
+                    <GestureRecognizer
+                        onSwipeLeft={() => { this.handleSwipeLeft() }}
+                        onSwipeRight={() => { this.handleSwipeRight() }}>
+                        {
+                            !this.state.currentPhoto?.source?.uri
+                                ? <Image
+                                    source={this.state.currentPhoto?.thumbnailSource}
+                                    style={styles.image}
+                                    PlaceholderContent={<Loader />} />
+                                : <Image
+                                    source={this.state.currentPhoto?.source}
+                                    style={styles.image}
+                                    PlaceholderContent={<Loader />} />
+                        }
+                    </GestureRecognizer>
+                </View>
+            </View >
+        );
     }
-
-    return (
-        <View style={CoreStyles.flex1}>
-            <View style={styles.imageContainer}>
-                <GestureRecognizer
-                    onSwipeLeft={() => { handleSwipeLeft() }}
-                    onSwipeRight={() => { handleSwipeRight() }}>
-                    {
-                        !currentPhoto?.source?.uri
-                            ? <Image
-                                source={currentPhoto.thumbnail}
-                                style={styles.image}
-                                PlaceholderContent={<Loader />} />
-                            : <Image
-                                source={currentPhoto.source}
-                                style={styles.image}
-                                PlaceholderContent={<Loader />} />
-                    }
-                </GestureRecognizer>
-            </View>
-        </View >
-    )
 }
 
 const styles = StyleSheet.create({
