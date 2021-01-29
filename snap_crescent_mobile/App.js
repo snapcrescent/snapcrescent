@@ -1,16 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import ServerUrl from './src/component/user-authentication/ServerUrl';
 import UserAuthentication from './src/component/user-authentication/UserAuthentication';
 import { updateServerUrl } from './src/core/action/serverUrl';
 import { isNotNull, isNull } from './src/utils/CoreUtil';
 import store from './src/core';
-import { updateAuthState } from './src/core/action/authentication';
-import Loader from './src/component/Loader';
+import { updateAuthState, updateAuthToken } from './src/core/action/authentication';
 import Tabs from './src/component/tabs/Tabs';
-import CoreStyles from './src/styles/styles';
+import CoreStyles, { THEME_COLORS } from './src/styles/styles';
+import SplashScreen from './src/component/shared/splash-screen/SplashScreen';
+
+const SPLASH_SCREEN_TIMEOUT = 250;
 
 const initialState = {
   dataFetched: false
@@ -24,23 +26,46 @@ function App() {
   const [state, setState] = useState(initialState);
 
   useEffect(() => {
+    checkServer();
+  }, [serverUrl]);
+
+  const checkServer = () => {
     AsyncStorage.getItem('serverUrl').then(serverUrl => {
       if (isNotNull(serverUrl)) {
         store.dispatch(updateServerUrl(serverUrl));
+        checkAuthentication();
       } else {
         store.dispatch(updateServerUrl(null));
+        store.dispatch(updateAuthToken(null));
+        store.dispatch(updateAuthState(false));
+
+        setTimeout(() => {
+          setState({ dataFetched: true });
+        }, SPLASH_SCREEN_TIMEOUT);
+      }
+    });
+  }
+
+  const checkAuthentication = () => {
+    AsyncStorage.getItem('authToken').then(authToken => {
+      if (isNotNull(authToken)) {
+        store.dispatch(updateAuthToken(authToken));
+        store.dispatch(updateAuthState(true));
+      } else {
+        store.dispatch(updateAuthToken(null));
         store.dispatch(updateAuthState(false));
       }
-
-      setState({ ...state, dataFetched: true });
+      setTimeout(() => {
+        setState({ dataFetched: true });
+      }, SPLASH_SCREEN_TIMEOUT);
     });
-  }, [serverUrl]);
+  }
 
   return (
     <View style={CoreStyles.flex1}>
       {
         !state.dataFetched
-          ? <Loader />
+          ? <SplashScreen />
           : isNull(serverUrl)
             ? <ServerUrl />
             : (!isUserAuthenticated)

@@ -7,11 +7,12 @@ import Loader from '../Loader';
 import { doesUserExists } from '../../core/service/AuthService';
 import { View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isNotNull } from '../../utils/CoreUtil';
+import { isNotNull, isNull } from '../../utils/CoreUtil';
 import store from '../../core';
 import { updateAuthState, updateAuthToken } from '../../core/action/authentication';
 import ServerUrl from './ServerUrl';
 import { THEME_COLORS } from '../../styles/styles';
+import { useSelector } from 'react-redux';
 
 const Stack = createStackNavigator();
 
@@ -21,6 +22,7 @@ const initialState = {
 };
 
 function UserAuthentication() {
+    const authToken = useSelector(state => state.authToken);
     const [state, setState] = useState(initialState);
 
     const headerStyleOptions = {
@@ -34,22 +36,9 @@ function UserAuthentication() {
     };
 
     useEffect(() => {
-        try {
-            AsyncStorage.getItem('authToken').then(authToken => {
-                if (isNotNull(authToken)) {
-                    store.dispatch(updateAuthToken(authToken));
-                    store.dispatch(updateAuthState(true));
-                } else {
-                    doesUserExists().then(response => {
-                        setState({ userExists: response, dataFecthed: true });
-                    });
-                }
-            });
-        } catch (error) {
-            doesUserExists().then(response => {
-                setState({ userExists: response, dataFecthed: true });
-            });
-        }
+        doesUserExists().then(response => {
+            setState({ userExists: response, dataFecthed: true });
+        });
     }, []);
 
     return (
