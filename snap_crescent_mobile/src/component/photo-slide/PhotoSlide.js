@@ -1,16 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import CoreStyles from '../../styles/styles';
 import Loader from '../Loader';
-import { getPhotoById } from '../../core/service/PhotoService';
+import { downloadPhotoById, getPhotoById } from '../../core/service/PhotoService';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { Image } from 'react-native-elements';
+import { showToast } from '../../core/service/ToastService';
+import DropMenu from '../shared/drop-menu/DropMenu';
 
+const IMAGE_URL_PREFIX = 'data:image/*;base64,';
 class PhotoSlide extends React.Component {
 
     photos = [];
     selectedPhotoId = null;
     photoRequestIntervalId = null;
+    menu = null;
+    menuItems = [
+        { label: 'Share', hasDivider: true, onPress: () => { } },
+        { label: 'Download', onPress: () => { this.downloadPhoto(this.state.currentPhoto) } }
+    ];
 
     constructor(props) {
         super(props);
@@ -30,7 +38,12 @@ class PhotoSlide extends React.Component {
 
     componentDidUpdate() {
         if (this.state.currentPhoto?.label) {
-            this.props.navigation.setOptions({ title: this.state.currentPhoto?.label });
+            this.props.navigation.setOptions({
+                title: this.state.currentPhoto?.label,
+                headerRight: () => (
+                    <DropMenu items={this.menuItems} />
+                ),
+            });
         }
     }
 
@@ -51,15 +64,11 @@ class PhotoSlide extends React.Component {
                 this.photoRequestIntervalId = setTimeout(() => {
                     getPhotoById(photoId).then((res) => {
                         if (res) {
-                            const fileReader = new FileReader();
-                            fileReader.readAsDataURL(res);
-                            fileReader.onload = () => {
-                                if (photo.id == this.state.currentPhoto.id) {
-                                    photo.source = {
-                                        uri: fileReader.result
-                                    };
-                                    this.setState({ currentPhoto: { ...photo } })
-                                }
+                            if (photo.id == this.state.currentPhoto.id) {
+                                photo.source = {
+                                    uri: IMAGE_URL_PREFIX + res
+                                };
+                                this.setState({ currentPhoto: { ...photo } })
                             }
                         }
                     });
@@ -71,11 +80,17 @@ class PhotoSlide extends React.Component {
         }
     }
 
+    downloadPhoto(photo) {
+        downloadPhotoById(photo.id, photo.name).then(res => {
+            showToast(photo.name + ' has been downloded');
+        });
+    }
+
     getPhotoLabel(photo) {
         if (photo.createdDate) {
             return new Date(photo.createdDate).toDateString();
         } else {
-            return 'Photo';
+            return photo.name;
         }
     }
 

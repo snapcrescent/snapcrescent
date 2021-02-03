@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { Image, Text, View } from 'react-native';
+import { View } from 'react-native';
 import { useSelector } from 'react-redux';
 import ServerUrl from './src/component/user-authentication/ServerUrl';
 import UserAuthentication from './src/component/user-authentication/UserAuthentication';
@@ -9,7 +9,7 @@ import { isNotNull, isNull } from './src/utils/CoreUtil';
 import store from './src/core';
 import { updateAuthState, updateAuthToken } from './src/core/action/authentication';
 import Tabs from './src/component/tabs/Tabs';
-import CoreStyles, { THEME_COLORS } from './src/styles/styles';
+import CoreStyles from './src/styles/styles';
 import SplashScreen from './src/component/shared/splash-screen/SplashScreen';
 
 const SPLASH_SCREEN_TIMEOUT = 250;
