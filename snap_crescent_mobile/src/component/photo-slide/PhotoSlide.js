@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Share, StyleSheet, View } from 'react-native';
 import CoreStyles from '../../styles/styles';
 import Loader from '../Loader';
 import { downloadPhotoById, getPhotoById } from '../../core/service/PhotoService';
@@ -16,7 +16,7 @@ class PhotoSlide extends React.Component {
     photoRequestIntervalId = null;
     menu = null;
     menuItems = [
-        { label: 'Share', hasDivider: true, onPress: () => { } },
+        { label: 'Share', hasDivider: true, onPress: () => { this.onSharePress(this.state.currentPhoto) } },
         { label: 'Download', onPress: () => { this.downloadPhoto(this.state.currentPhoto) } }
     ];
 
@@ -83,6 +83,26 @@ class PhotoSlide extends React.Component {
     downloadPhoto(photo) {
         downloadPhotoById(photo.id, photo.name).then(res => {
             showToast(photo.name + ' has been downloded');
+        });
+    }
+
+    onSharePress(photo) {
+        if (photo.source?.uri) {
+            this.sharePhoto(photo.name, photo.source?.uri, photo.name);
+        } else {
+            downloadPhotoById(photo.id, photo.name).then(res => {
+                this.sharePhoto(photo.name, IMAGE_URL_PREFIX + res, photo.name);
+            });
+        }
+    }
+
+    sharePhoto(title, url, message) {
+        Share.share({
+            title,
+            url,
+            message
+        }).then(res => {
+            showToast(photo.name + ' has been shared');
         });
     }
 
