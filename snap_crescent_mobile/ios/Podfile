@@ -12,6 +12,8 @@ target 'snap_crescent_mobile' do
 
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-async-storage/async-storage'
 
+  pod 'react-native-fetch-blob', :path => '../node_modules/react-native-fetch-blob'
+
   target 'snap_crescent_mobileTests' do
     inherit! :complete
     # Pods for testing
