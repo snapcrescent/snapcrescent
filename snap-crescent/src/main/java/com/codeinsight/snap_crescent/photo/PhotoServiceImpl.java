@@ -52,7 +52,7 @@ public class PhotoServiceImpl implements PhotoService {
 	@Transactional
 	public Page<Photo> search(PhotoSearchCriteria photoSearchCriteria) throws Exception {
 		Pageable pageable = PageRequest.of(photoSearchCriteria.getPage(), photoSearchCriteria.getSize());
-		Page<Photo> photos = photoRepository.search(pageable);
+		Page<Photo> photos = photoRepository.search(photoSearchCriteria.getFavorite(), photoSearchCriteria.getSearchInput(), photoSearchCriteria.getMonth(), photoSearchCriteria.getYear() ,pageable);
 		for (Photo photo : photos) {
 			photo.setBase64EncodedThumbnail(
 					Base64.getEncoder().encodeToString(thumbnailService.getById(photo.getId())));
@@ -118,5 +118,13 @@ public class PhotoServiceImpl implements PhotoService {
 			e.printStackTrace();
 		}
 		return image;
+	}
+
+	@Override
+	@Transactional
+	public void like(Long id) throws Exception {
+		Photo photo = photoRepository.findById(id).get();
+		Boolean like = photo.getFavorite();
+		photo.setFavorite(!like);
 	}
 }

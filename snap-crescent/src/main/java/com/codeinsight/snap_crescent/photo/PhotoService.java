@@ -12,4 +12,6 @@ public interface PhotoService {
 	public void upload(ArrayList<MultipartFile> multipartFiles) throws Exception;
 	
 	public byte[] getById(Long id) throws Exception;
+	
+	public void like(Long id) throws Exception;
 }

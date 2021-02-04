@@ -18,6 +18,16 @@ import ViewComfy from '@material-ui/icons/ViewComfy';
 import ViewList from '@material-ui/icons/ViewList';
 import { PhotoSlide } from '../PhotoSlide/PhotoSlide';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import { like } from '../../services/PhotoService';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 
 import './SearchTable.scss';
 
@@ -44,13 +54,24 @@ const useStyles = makeStyles((theme) => ({
             border: 'solid 2px #15C57E'
         }
     },
-    actionBar: {
-        height: theme.spacing(6),
+    accordion: {
         marginBottom: theme.spacing(2),
-        background: '#5CA591'
     },
-    actionBarContainer: {
+    accordionSummary: {
+        height: theme.spacing(6),
+        background: '#5E5E5E',
         color: '#ffffff'
+    },
+    accordionDetails: {
+        background: '#767676'
+    },
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 120,
+    },
+    inputSelect: {
+        width: theme.spacing(25),
+        background: '#ffffff'
     },
     iconGrid: {
         textAlign: 'right',
@@ -60,14 +81,39 @@ const useStyles = makeStyles((theme) => ({
         overflow: 'hidden !important'
     },
     inputRoot: {
-        left: theme.spacing(6)
-    }
+        width: '80%'
+    },
+    gridFavoriteButton: {
+        position: 'absolute',
+        top: theme.spacing(13),
+        left: theme.spacing(-1),
+        zIndex: 1,
+        color: '#ffffff'
+    },
 }));
 
+const Favorite = (props) => {
+    const { row, className, toggleFavorite } = props;
+    const [favorite, setFavorite] = useState(row.favorite.value);
+    return (
+        <>
+            {
+                <IconButton color="inherit" className={className} onClick={() => {toggleFavorite(); setFavorite(!favorite)}}>
+                    { favorite === true &&
+                        <FavoriteIcon />
+                    }
+                    { favorite === false &&
+                        <FavoriteBorderIcon />
+                    }
+                </IconButton>
+            }
+        </>
+    )
+}
 export const SearchTable = (props) => {
     const classes = useStyles();
-    const { rows, columns, totalElements, page, setPage } = props;
-    const [view, setView] = useState('LIST');
+    const { rows, columns, totalElements, page, setPage, setRows, setSearchInput, searchFormFields, setSearchFormFields, search } = props;
+    const [view, setView] = useState('COMFY');
 
     const [openPhotoSlideDialog, setOpenPhotoSlideDialog] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
@@ -77,10 +123,41 @@ export const SearchTable = (props) => {
         setSelectedId(id);
     }
 
+    const toggleFavorite = (row) => {
+        like(row.id.value).then(res => {
+            rows.forEach(item => {
+                if(item.id.value === row.id.value) {
+                    item.favorite.value = !item.favorite.value;
+                }
+            })
+            setRows(rows);
+        });
+    }
+
+    const handleSearchInput = (event) => {
+        if(event.key === 'Enter') {
+            setRows([]);
+            setSearchInput(event.target.value);
+        }
+    }
+
+    const handleSearchFormChange = (event) => {
+        const { name, value } = event.target;
+        searchFormFields.forEach(searchFormField => {
+            if(searchFormField.key === name) {
+                searchFormField.value = value;
+            }
+        });
+        setSearchFormFields(searchFormFields);
+        setRows([]);
+        search();
+    }
+
     return (
         <div>
-            <Paper className={classes.actionBar}>
-                <Grid container className={classes.actionBarContainer}>
+            <Accordion className={classes.accordion}>
+            <AccordionSummary className={classes.accordionSummary} expandIcon={<ExpandMoreIcon />}>
+                <Grid container>
                     <Grid item sm={4} className='center-content'>
                         <div className="search">
                             <div className="searchIcon">
@@ -92,7 +169,10 @@ export const SearchTable = (props) => {
                                     root: classes.inputRoot,
                                     input: classes.inputInput
                                 }}
-                                inputProps={{ 'aria-label': 'search' }} />
+                                inputProps={{ 'aria-label': 'search' }}
+                                onClick={(event) => event.stopPropagation()}
+                                onFocus={(event) => event.stopPropagation()}
+                                onKeyUp={handleSearchInput} />
                         </div>
                     </Grid>
                     <Grid item sm={8} className={classes.iconGrid}>
@@ -116,7 +196,30 @@ export const SearchTable = (props) => {
                         }
                     </Grid>
                 </Grid>
-            </Paper>
+            </AccordionSummary>
+            <AccordionDetails className={classes.accordionDetails}>
+
+                {
+                    searchFormFields.map(searchFormField => (
+                        <FormControl variant="outlined" className={classes.formControl}>
+                            <Select
+                            className={classes.inputSelect}
+                            value={searchFormField.value}
+                            name={searchFormField.key}
+                            id={searchFormField.key}
+                            onChange={handleSearchFormChange}
+                            >
+                            {
+                                searchFormField.options.map(option => (
+                                    <MenuItem value={option.id}>{option.value}</MenuItem>        
+                                ))
+                            }
+                            </Select>
+                        </FormControl>
+                    ))
+                }
+            </AccordionDetails>
+            </Accordion>
             <InfiniteScroll
                 dataLength={rows.length}
                 next={() => { setPage(page + 1) }}
@@ -130,20 +233,20 @@ export const SearchTable = (props) => {
                                 <Table className={classes.table} aria-label="simple table">
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>
-                                            </TableCell>
+                                            <TableCell />
                                             {columns.map((column) => (
                                                 <TableCell className={classes.head} key={column.field}>
                                                     {column.headerName}
                                                 </TableCell>
                                             ))}
+                                            <TableCell />
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {rows.map((row) => (
                                             <TableRow key={row.id.value}>
                                                 {
-                                                    Object.entries(row).map(([key, data]) => {
+                                                    Object.values(row).map((data) => {
                                                         if (data.hidden) {
                                                             return
                                                         }
@@ -157,7 +260,14 @@ export const SearchTable = (props) => {
                                                                     />
                                                                 </TableCell>
                                                             )
-                                                        } else {
+                                                        } if (data.type === 'ICON') {
+                                                            return (
+                                                                <TableCell>
+                                                                    <Favorite row={row} toggleFavorite={() => toggleFavorite(row)} />
+                                                                </TableCell>
+                                                            )
+                                                        } 
+                                                        else {
                                                             return (
                                                                 <TableCell>{data.value}</TableCell>
                                                             )
@@ -175,10 +285,11 @@ export const SearchTable = (props) => {
                             <GridList cellHeight={'auto'} cols={0} spacing={10}>
                                 {rows.map((row) => (
                                     <GridListTile key={row.id.value} cols={1}>
+                                        <Favorite row={row} className={classes.gridFavoriteButton} toggleFavorite={() => toggleFavorite(row)} />
                                         <img src={row.thumbnail.value}
                                             className={classes.gridThumbnail}
                                             alt=''
-                                            onClick={() => { handleThumbnailClick(row.id.value) }}
+                                            onClick={() => handleThumbnailClick(row.id.value)}
                                         />
                                     </GridListTile>
                                 ))}
