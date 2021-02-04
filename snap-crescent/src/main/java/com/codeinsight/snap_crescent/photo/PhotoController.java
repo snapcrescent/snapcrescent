@@ -49,12 +49,39 @@ public class PhotoController {
 		if (searchParams.get("size") != null) {
 			searchCriteria.setSize(Integer.parseInt(searchParams.get("size")));
 		}
+		
+		if (searchParams.get("favorite") != null) {
+			searchCriteria.setFavorite(Boolean.parseBoolean(searchParams.get("favorite")));
+		}
+		
+		if (searchParams.get("searchInput") != null) {
+			searchCriteria.setSearchInput(searchParams.get("searchInput"));
+		}
+		
+		if (searchParams.get("month") != null) {
+			searchCriteria.setMonth(searchParams.get("month"));
+		}
+		
+		if (searchParams.get("year") != null) {
+			searchCriteria.setYear(searchParams.get("year"));
+		}
 	}
 	
 	@GetMapping(value="/photo/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
 	public ResponseEntity<byte[]> get(@PathVariable Long id) {
 		try {
 			return new ResponseEntity<>(photoService.getById(id), HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@PostMapping(value="/photo/{id}/like")
+	public ResponseEntity<?> like(@PathVariable Long id) {
+		try {
+			photoService.like(id);
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

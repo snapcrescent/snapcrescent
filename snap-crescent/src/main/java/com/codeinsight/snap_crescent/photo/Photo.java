@@ -43,6 +43,8 @@ public class Photo implements Serializable {
 	@Column(name = "METADATA_ID", nullable = false, insertable = true, updatable = true)
 	private Long metaDataId;
 	
+	private Boolean favorite = false;
+	
 	@Transient
 	private String base64EncodedThumbnail;
 
@@ -86,6 +88,14 @@ public class Photo implements Serializable {
 		this.metaDataId = metaDataId;
 	}
 
+	public Boolean getFavorite() {
+		return favorite;
+	}
+
+	public void setFavorite(Boolean favorite) {
+		this.favorite = favorite;
+	}
+	
 	public String getBase64EncodedThumbnail() {
 		return base64EncodedThumbnail;
 	}

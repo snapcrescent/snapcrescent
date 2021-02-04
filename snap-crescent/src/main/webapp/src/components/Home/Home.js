@@ -5,14 +5,12 @@ import { HashRouter, Route, Redirect } from 'react-router-dom';
 import { Sidebar } from '../Sidebar/Sidebar';
 import { Photo } from '../Photo/Photo';
 import { Video } from '../Video/Video';
-import { Favorite } from '../Favorite/Favorite';
 import { Loader } from '../Loader/Loader';
 
 export const Home = () => {
 
     return (
         <HashRouter>
-            {/* <Header /> */}
             <div className="root">
                 <Loader />
                 <Sidebar />
@@ -28,7 +26,7 @@ export const Home = () => {
                     />
                     <div className="container">
                         <Route path='/home/photos' component={Photo} />
-                        <Route path='/home/favorites' component={Favorite} />
+                        <Route path='/home/favorites' render={(props) => <Photo {...props} favorite={true}/>}  />
                         <Route path='/home/videos' component={Video} />
                     </div>
                 </div>

@@ -51,3 +51,7 @@ a{
     align-items: center;
     justify-content: center;
   }
+
+button:focus { 
+    outline: none !important;
+}
