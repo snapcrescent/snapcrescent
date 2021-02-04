@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import RNFetchBlob from "rn-fetch-blob";
 import { isNotNull } from "../../utils/CoreUtil";
 import { getData, getFile } from "./ApiService";
 import { downloadFile, fetchFile } from "./FileService";
@@ -32,8 +33,15 @@ export const getPhotoById = (photoId) => {
     return fetchFile(PHOTO_URL + '/' + photoId);
 }
 
-export const downloadPhotoById = (photoId, name) => {
-    return downloadFile(PHOTO_URL + '/' + photoId, { name });
+export const downloadPhotoById = (photoId, params) => {
+    params = {
+        ...params,
+        fileName: params.name,
+        mimeType: 'image/*',
+        fileStoragePath: RNFetchBlob.fs.dirs.PictureDir + '/' + params.name
+    };
+
+    return downloadFile(PHOTO_URL + '/' + photoId, params);
 }
 
 const searchPhotosFromServer = (searchParams, callback) => {
