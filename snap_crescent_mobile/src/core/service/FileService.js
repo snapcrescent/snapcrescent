@@ -1,44 +1,46 @@
-import RNFetchBlob from "react-native-fetch-blob";
-import store from "..";
-import { getHeaders } from "./ApiService";
+import RNFetchBlob from 'rn-fetch-blob';
+import store from '..';
+import { getHeaders } from './ApiService';
 
-export function downloadFile(url, params) {
-    const { config, fs } = RNFetchBlob;
-    const filePath = fs.dirs.PictureDir + '/' + params.name;
-
-    const DOWNLOAD_FILE_OPTIONS = {
-        fileCache: true,
-        addAndroidDownloads: {
-            useDownloadManager: true, // setting it to true will use the device's native download manager and will be shown in the notification bar.
-            notification: true,
-            title: 'Snap Crescent',
-            description: `Downloading ${params.name}`,
-            path: filePath
-        }
-    };
-
-    return config(DOWNLOAD_FILE_OPTIONS)
-        .fetch('GET',
-            getUrl(url),
-            getHeaders())
-        .then(res => {
-            return res;
-        }).catch(errorMessage => {
-            alert(errorMessage);
-        });
-}
-
-export const fetchFile = (url, params) => {
-    return RNFetchBlob
-        .fetch('GET', getUrl(url), getHeaders())
-        .then(res => {
-            return res.base64();
-        }).catch(errorMessage => {
-            alert(errorMessage);
-        });
-}
-
-const getUrl = (url) => {
+function getUrl(url) {
     const serverUrl = store.getState().serverUrl;
     return serverUrl + '/' + url;
+}
+
+export function fetchFile(url, params) {
+    return RNFetchBlob
+        .config({
+            fileCache: true
+        })
+        .fetch('GET', getUrl(url), getHeaders())
+        .then((res) => {
+            // When using a file path as Image source on Android,
+            // you must prepend "file://"" before the file path
+            return Platform.OS === 'android' ? 'file://' + res.path() : '' + res.path()
+        });
+}
+
+export function downloadFile(url, params) {
+    return RNFetchBlob
+        .config({
+            fileCache: true,
+            // android only options, these options be a no-op on IOS
+            addAndroidDownloads: {
+                useDownloadManager: true,
+                // Show notification when response data transmitted
+                notification: true,
+                // Title of download notification
+                title: params.fileName,
+                // File description (not notification description)
+                description: 'Downloading file from Snap Crescent.',
+                mime: params.mimeType,
+                // Make the file scannable  by media scanner
+                mediaScannable: true,
+                path: params.fileStoragePath
+            }
+        })
+        .fetch('GET', getUrl(url), getHeaders())
+        .then((res) => {
+            return res;
+        });
 }

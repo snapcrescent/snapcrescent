@@ -1,31 +1,31 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
-import Menu, { MenuDivider, MenuItem } from 'react-native-material-menu';
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Menu, { MenuDivider, MenuItem } from "react-native-material-menu";
+import { isNotNull } from "../../../utils/CoreUtil";
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
-import { isNotNull } from '../../../utils/CoreUtil';
 
 function DropMenu(props) {
+    const { items, dropIcon, dropIconStyle, dropLabel, dropLabelStyle } = props;
+    let menuRef = null;
 
-    const { items, icon, iconStyle, label, labelStyle } = props;
-    let menu = null;
+    const menuTriggerButton = (
+        <TouchableOpacity
+            onPress={() => { menuRef?.show() }}
+            style={{ paddingHorizontal: 5, marginHorizontal: 5 }}>
+            {
+                isNotNull(dropLabel)
+                    ? <Text style={[styles.dropTrigger, dropLabelStyle]}>{dropLabel}</Text>
+                    : <FontAwesome5Icon
+                        name={dropIcon ? dropIcon : 'ellipsis-v'}
+                        style={[styles.dropTrigger, dropIconStyle]} />
+            }
+        </TouchableOpacity>
+    );
 
     return (
         <Menu
-            ref={(ref) => { menu = ref; }}
-            button={
-                <TouchableOpacity
-                    onPress={() => { menu?.show() }}
-                    style={{ paddingHorizontal: 5, marginHorizontal: 5 }}>
-                    {
-                        isNotNull(label)
-                            ? <Text style={{ fontSize: 20, color: '#fff', ...labelStyle }}>{label}</Text>
-                            : <FontAwesome5Icon
-                                name={icon ? icon : 'ellipsis-v'}
-                                style={{ fontSize: 20, color: '#fff', ...iconStyle }} />
-                    }
-                </TouchableOpacity>
-            }>
-
+            ref={(ref) => { menuRef = ref }}
+            button={menuTriggerButton}>
             {
                 items.map(item => {
                     return (
@@ -41,7 +41,14 @@ function DropMenu(props) {
                 })
             }
         </Menu>
-    );
+    )
 }
+
+const styles = StyleSheet.create({
+    dropTrigger: {
+        fontSize: 20,
+        color: '#fff'
+    }
+});
 
 export default DropMenu;

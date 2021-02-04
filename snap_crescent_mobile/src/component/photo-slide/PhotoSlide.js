@@ -1,22 +1,20 @@
 import React from 'react';
-import { Share, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import CoreStyles from '../../styles/styles';
 import Loader from '../Loader';
 import { downloadPhotoById, getPhotoById } from '../../core/service/PhotoService';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { Image } from 'react-native-elements';
-import { showToast } from '../../core/service/ToastService';
 import DropMenu from '../shared/drop-menu/DropMenu';
+import { showToast } from '../../core/service/ToastService';
 
-const IMAGE_URL_PREFIX = 'data:image/*;base64,';
 class PhotoSlide extends React.Component {
 
     photos = [];
     selectedPhotoId = null;
     photoRequestIntervalId = null;
-    menu = null;
     menuItems = [
-        { label: 'Share', hasDivider: true, onPress: () => { this.onSharePress(this.state.currentPhoto) } },
+        { label: 'Share', hasDivider: true, onPress: () => { } },
         { label: 'Download', onPress: () => { this.downloadPhoto(this.state.currentPhoto) } }
     ];
 
@@ -50,6 +48,7 @@ class PhotoSlide extends React.Component {
     getPhotoUriById(photoId) {
         if (photoId) {
             const indexOfPhoto = this.photos.findIndex(photo => photo.id == photoId);
+            this.selectedPhotoId = photoId;
             const photo = {
                 ...this.photos[indexOfPhoto],
                 index: indexOfPhoto,
@@ -57,6 +56,10 @@ class PhotoSlide extends React.Component {
             };
 
             this.setState({ currentPhoto: photo }, () => {
+                if (this.state.currentPhoto.source?.uri) {
+                    return;
+                }
+
                 if (this.photoRequestIntervalId) {
                     clearInterval(this.photoRequestIntervalId);
                 }
@@ -66,9 +69,13 @@ class PhotoSlide extends React.Component {
                         if (res) {
                             if (photo.id == this.state.currentPhoto.id) {
                                 photo.source = {
-                                    uri: IMAGE_URL_PREFIX + res
+                                    uri: res
                                 };
-                                this.setState({ currentPhoto: { ...photo } })
+                                const selectedPhoto = this.photos.find(item => item.id == photo.id);
+                                selectedPhoto.source = {
+                                    uri: res
+                                };
+                                this.setState({ currentPhoto: { ...photo } });
                             }
                         }
                     });
@@ -80,37 +87,11 @@ class PhotoSlide extends React.Component {
         }
     }
 
-    downloadPhoto(photo) {
-        downloadPhotoById(photo.id, photo.name).then(res => {
-            showToast(photo.name + ' has been downloded');
-        });
-    }
-
-    onSharePress(photo) {
-        if (photo.source?.uri) {
-            this.sharePhoto(photo.name, photo.source?.uri, photo.name);
-        } else {
-            downloadPhotoById(photo.id, photo.name).then(res => {
-                this.sharePhoto(photo.name, IMAGE_URL_PREFIX + res, photo.name);
-            });
-        }
-    }
-
-    sharePhoto(title, url, message) {
-        Share.share({
-            title,
-            url,
-            message
-        }).then(res => {
-            showToast(photo.name + ' has been shared');
-        });
-    }
-
     getPhotoLabel(photo) {
         if (photo.createdDate) {
             return new Date(photo.createdDate).toDateString();
         } else {
-            return photo.name;
+            return 'Photo';
         }
     }
 
@@ -128,6 +109,12 @@ class PhotoSlide extends React.Component {
         }
     }
 
+    downloadPhoto(photo) {
+        downloadPhotoById(photo.id, { name: photo.name }).then(res => {
+            showToast(`${photo.name} has been downloaded.`);
+        });
+    }
+
     render() {
         return (
             <View style={CoreStyles.flex1} >
@@ -137,10 +124,13 @@ class PhotoSlide extends React.Component {
                         onSwipeRight={() => { this.handleSwipeRight() }}>
                         {
                             !this.state.currentPhoto?.source?.uri
-                                ? <Image
-                                    source={this.state.currentPhoto?.thumbnailSource}
-                                    style={styles.image}
-                                    PlaceholderContent={<Loader />} />
+                                ? <View>
+                                    <View style={styles.thumbnailLoader}><Loader /></View>
+                                    <Image
+                                        source={this.state.currentPhoto?.thumbnailSource}
+                                        style={styles.image}
+                                        PlaceholderContent={<Loader />} />
+                                </View>
                                 : <Image
                                     source={this.state.currentPhoto?.source}
                                     style={styles.image}
@@ -154,6 +144,14 @@ class PhotoSlide extends React.Component {
 }
 
 const styles = StyleSheet.create({
+    thumbnailLoader: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        zIndex: 5
+    },
     imageContainer: {
         flex: 1,
         justifyContent: 'center',

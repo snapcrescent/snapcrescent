@@ -28,7 +28,8 @@
     "react-native-swipe-gestures": "^1.0.5",
     "react-native-vector-icons": "^7.1.0",
     "react-redux": "^7.2.2",
-    "redux": "^4.0.5"
+    "redux": "^4.0.5",
+    "rn-fetch-blob": "^0.12.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
