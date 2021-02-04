@@ -23,13 +23,12 @@ function GridView(props) {
     const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
-        const dataList = data;
+        const dataList = data.filter(item => !item.isEmpty);
         formatData(dataList);
         setState({ ...state, dataSource: dataList });
     }, [data]);
 
     const formatData = (dataToFormat) => {
-        dataToFormat = dataToFormat.filter(data => !data.isEmpty);
         const totalRows = Math.floor(dataToFormat.length / NUMBER_OF_COLUMNS);
         let elementsInLastRow = data.length - (totalRows * NUMBER_OF_COLUMNS);
 
