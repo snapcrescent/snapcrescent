@@ -18,7 +18,7 @@ const WINDOW_WIDTH = Dimensions.get('window').width;
 
 function GridView(props) {
 
-    const { data, imageKey, onGridPress, primaryKey, onRefresh } = props;
+    const { data, imageKey, onGridPress, primaryKey, onRefresh, onEndReached } = props;
     const [state, setState] = useState(initialState);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -29,6 +29,7 @@ function GridView(props) {
     }, [data]);
 
     const formatData = (dataToFormat) => {
+        dataToFormat = dataToFormat.filter(data => !data.isEmpty);
         const totalRows = Math.floor(dataToFormat.length / NUMBER_OF_COLUMNS);
         let elementsInLastRow = data.length - (totalRows * NUMBER_OF_COLUMNS);
 
@@ -77,7 +78,9 @@ function GridView(props) {
                 keyExtractor={item => item[primaryKey]}
                 renderItem={renderItem}
                 refreshing={refreshing}
-                onRefresh={() => { refreshData() }}>
+                onRefresh={() => { refreshData() }}
+                onEndReached={() => { onEndReached() }}
+                onEndReachedThreshold={0.3}>
             </FlatList>
         </SafeAreaView>
     );
