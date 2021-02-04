@@ -3,33 +3,45 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './home/Home';
 import Settings from './settings/Settings';
 import { NavigationContainer } from '@react-navigation/native';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import { THEME_COLORS } from '../../styles/styles';
+import { StyleSheet } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
-const tabBarOptions = {
-    activeBackgroundColor: THEME_COLORS.secondary,
-    activeTintColor: '#000000'
-};
-
 function Tabs() {
+
+    const tabs = [
+        { key: 'home', routeName: 'home', component: Home, tabIcon: 'home' },
+        { key: 'settings', routeName: 'settings', component: Settings, tabIcon: 'cog' }
+    ];
+
+    const tabBarOptions = {
+        activeBackgroundColor: THEME_COLORS.secondary,
+        activeTintColor: '#000000'
+    };
+
     return (
         <NavigationContainer>
             <Tab.Navigator tabBarOptions={tabBarOptions} initialRouteName="home">
-                <Tab.Screen name="home" component={Home} options={{
-                    tabBarIcon: ({ focused, color, size }) => {
-                        return <FontAwesome5 name="home" style={{ fontSize: 20 }} />
-                    }
-                }} />
-                <Tab.Screen name="settings" component={Settings} options={{
-                    tabBarIcon: ({ focused, color, size }) => {
-                        return <FontAwesome5 name="cog" style={{ fontSize: 20 }} />
-                    }
-                }} />
+                {
+                    tabs.map(tab => (
+                        <Tab.Screen key={tab.key} name={tab.routeName} component={tab.component} options={{
+                            tabBarIcon: ({ focused, color, size }) => {
+                                return <FontAwesome5Icon name={tab.tabIcon} style={styles.tabIcon} />
+                            }
+                        }} />
+                    ))
+                }
             </Tab.Navigator>
         </NavigationContainer >
     );
 }
+
+const styles = StyleSheet.create({
+    tabIcon: {
+        fontSize: 20
+    }
+});
 
 export default Tabs;

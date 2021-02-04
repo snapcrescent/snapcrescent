@@ -6,13 +6,8 @@ import Signup from './Signup';
 import Loader from '../Loader';
 import { doesUserExists } from '../../core/service/AuthService';
 import { View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isNotNull, isNull } from '../../utils/CoreUtil';
-import store from '../../core';
-import { updateAuthState, updateAuthToken } from '../../core/action/authentication';
 import ServerUrl from './ServerUrl';
 import { THEME_COLORS } from '../../styles/styles';
-import { useSelector } from 'react-redux';
 
 const Stack = createStackNavigator();
 
@@ -22,8 +17,13 @@ const initialState = {
 };
 
 function UserAuthentication() {
-    const authToken = useSelector(state => state.authToken);
     const [state, setState] = useState(initialState);
+
+    const authenticationScreens = [
+        { key: 'signin', routeName: 'signin', title: 'SignIn', component: Signin },
+        { key: 'signup', routeName: 'signup', title: 'SignUp', component: Signup },
+        { key: 'server-url', routeName: 'server-url', title: 'Server', component: ServerUrl }
+    ];
 
     const headerStyleOptions = {
         headerStyle: {
@@ -48,23 +48,16 @@ function UserAuthentication() {
                     ? <Loader />
                     : <NavigationContainer>
                         <Stack.Navigator initialRouteName={state.userExists ? 'signin' : 'signup'}>
-                            <Stack.Screen
-                                name='signin'
-                                component={Signin}
-                                options={{ title: 'SignIn', ...headerStyleOptions }}>
-                            </Stack.Screen>
-
-                            <Stack.Screen
-                                name='signup'
-                                component={Signup}
-                                options={{ title: 'SignUp', ...headerStyleOptions }}>
-                            </Stack.Screen>
-
-                            <Stack.Screen
-                                name='server-url'
-                                component={ServerUrl}
-                                options={{ title: 'Server', ...headerStyleOptions }}>
-                            </Stack.Screen>
+                            {
+                                authenticationScreens.map(screen => (
+                                    <Stack.Screen
+                                        key={screen.key}
+                                        name={screen.routeName}
+                                        component={screen.component}
+                                        options={{ title: screen.title, ...headerStyleOptions }}>
+                                    </Stack.Screen>
+                                ))
+                            }
                         </Stack.Navigator>
                     </NavigationContainer>
             }

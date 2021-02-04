@@ -8,6 +8,11 @@ const HomeStack = createStackNavigator();
 
 function Home() {
 
+    const homeStackScreens = [
+        { key: 'photos', title: 'Snap Crescent', routeName: 'photos', component: PhotoGrid },
+        { key: 'photo-slide', title: 'Photo', routeName: 'photo-slide', component: PhotoSlide }
+    ];
+
     const headerStyleOptions = {
         headerStyle: {
             backgroundColor: THEME_COLORS.secondary,
@@ -20,8 +25,20 @@ function Home() {
 
     return (
         <HomeStack.Navigator initialRouteName='photos'>
-            <HomeStack.Screen name='photos' component={PhotoGrid} options={{ title: 'Snap Crescent', ...headerStyleOptions }} />
-            <HomeStack.Screen name='photo-slide' component={PhotoSlide} options={{ title: 'Photo', ...headerStyleOptions }} />
+            {
+                homeStackScreens.map(screen => (
+                    <HomeStack.Screen
+                        key={screen.key}
+                        name={screen.routeName}
+                        component={screen.component}
+                        options={{
+                            title: screen.title,
+                            ...headerStyleOptions
+                        }} />
+                ))
+            }
+            {/* <HomeStack.Screen name='photos' component={PhotoGrid} options={{ title: 'Snap Crescent', ...headerStyleOptions }} />
+            <HomeStack.Screen name='photo-slide' component={PhotoSlide} options={{ title: 'Photo', ...headerStyleOptions }} /> */}
         </HomeStack.Navigator>
     )
 }

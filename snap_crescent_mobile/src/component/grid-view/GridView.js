@@ -8,7 +8,6 @@ import {
     View
 } from 'react-native';
 import { Image } from 'react-native-elements';
-import { isNotNull } from '../../utils/CoreUtil';
 
 const initialState = {
     dataSource: []

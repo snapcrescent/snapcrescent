@@ -2,43 +2,53 @@ import RNFetchBlob from 'rn-fetch-blob';
 import store from '..';
 import { getHeaders } from './ApiService';
 
-function getUrl(url) {
+export const FILE_RESPONSE_TYPE = {
+    BASE64: 'base64',
+    PATH: 'path'
+}
+
+const getUrl = (url) => {
     const serverUrl = store.getState().serverUrl;
     return serverUrl + '/' + url;
 }
 
-export function fetchFile(url, params) {
+export const fetchFile = (url, config) => {
+
+    const configOption =
+        config?.responseType == FILE_RESPONSE_TYPE.BASE64
+            ? {}
+            : { fileCache: true };
+
     return RNFetchBlob
-        .config({
-            fileCache: true
-        })
+        .config(configOption)
         .fetch('GET', getUrl(url), getHeaders())
         .then((res) => {
-            // When using a file path as Image source on Android,
-            // you must prepend "file://"" before the file path
-            return Platform.OS === 'android' ? 'file://' + res.path() : '' + res.path()
+            if (config?.responseType == FILE_RESPONSE_TYPE.BASE64) {
+                const base64Resp = res.base64();
+                return `data:${config.mimeType};base64,${base64Resp}`;
+            } else {
+                return Platform.OS === 'android' ? 'file://' + res.path() : '' + res.path();
+            }
         });
 }
 
-export function downloadFile(url, params) {
+export const downloadFile = (url, config) => {
+
+    const configOption = {
+        fileCache: true,
+        addAndroidDownloads: {
+            useDownloadManager: true,
+            notification: true,
+            title: config.fileName,
+            description: 'Downloading file from Snap Crescent.',
+            mime: config.mimeType,
+            mediaScannable: true,
+            path: config.fileStoragePath
+        }
+    };
+
     return RNFetchBlob
-        .config({
-            fileCache: true,
-            // android only options, these options be a no-op on IOS
-            addAndroidDownloads: {
-                useDownloadManager: true,
-                // Show notification when response data transmitted
-                notification: true,
-                // Title of download notification
-                title: params.fileName,
-                // File description (not notification description)
-                description: 'Downloading file from Snap Crescent.',
-                mime: params.mimeType,
-                // Make the file scannable  by media scanner
-                mediaScannable: true,
-                path: params.fileStoragePath
-            }
-        })
+        .config(configOption)
         .fetch('GET', getUrl(url), getHeaders())
         .then((res) => {
             return res;
