@@ -1,5 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 export default function serverUrlReducer(state = null, action) {
     switch (action.type) {
         case 'SERVER_URL_EXISTS': {

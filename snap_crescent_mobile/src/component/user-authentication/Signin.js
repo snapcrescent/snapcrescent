@@ -81,7 +81,9 @@ function Signin(props) {
 
     return (
         <View style={FormControlStyle.container}>
-            <ImageBackground source={BACKGROUND_IMAGE} style={[FormControlStyle.background, FormControlStyle.centerAlignContainer]}>
+            <ImageBackground
+                source={BACKGROUND_IMAGE}
+                style={[FormControlStyle.background, FormControlStyle.centerAlignContainer]}>
                 <Card containerStyle={FormControlStyle.cardContainer}>
                     <Card.Title>SignIn</Card.Title>
                     <Card.Divider />

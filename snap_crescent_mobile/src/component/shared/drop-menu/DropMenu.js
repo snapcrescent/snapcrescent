@@ -30,7 +30,12 @@ function DropMenu(props) {
                 items.map(item => {
                     return (
                         <View>
-                            <MenuItem onPress={() => { item.onPress() }}>{item.label}</MenuItem>
+                            <MenuItem onPress={
+                                () => {
+                                    menuRef?.hide();
+                                    item.onPress();
+                                }
+                            }>{item.label}</MenuItem>
                             {
                                 item.hasDivider
                                     ? <MenuDivider />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, ImageBackground, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Button, ImageBackground, TextInput, View } from 'react-native';
 import { Card } from 'react-native-elements';
 import store from '../../core';
 import { updateServerUrl } from '../../core/action/serverUrl';
@@ -8,7 +8,6 @@ import { showToast } from '../../core/service/ToastService';
 import { isNotNull } from '../../utils/CoreUtil';
 import FormControlStyle, { BACKGROUND_IMAGE } from './formControlStyles';
 import FormError from './FormError';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import CoreStyles, { THEME_COLORS } from '../../styles/styles';
 import { signOut } from '../../core/service/AuthService';
 import CloseIcon from '../shared/close-icon/CloseIcon';
@@ -97,7 +96,9 @@ function ServerUrl(props) {
 
     return (
         <View style={FormControlStyle.container}>
-            <ImageBackground source={BACKGROUND_IMAGE} style={[FormControlStyle.background, (!isModalLayout ? FormControlStyle.centerAlignContainer : null)]}>
+            <ImageBackground
+                source={BACKGROUND_IMAGE}
+                style={[FormControlStyle.background, (!isModalLayout ? FormControlStyle.centerAlignContainer : null)]}>
                 {
                     isModalLayout
                         ? <View style={CoreStyles.flex1}>
@@ -118,7 +119,10 @@ function ServerUrl(props) {
                         <FormError errorMessage={formControl.formError.serverUrl} />
 
                         <View style={FormControlStyle.submitButton}>
-                            <Button title="Set Server" onPress={() => { setServer(formControl) }} color={THEME_COLORS.primary} />
+                            <Button
+                                title="Set Server"
+                                onPress={() => { setServer(formControl) }}
+                                color={THEME_COLORS.primary} />
                         </View>
                     </Card>
                 </View>

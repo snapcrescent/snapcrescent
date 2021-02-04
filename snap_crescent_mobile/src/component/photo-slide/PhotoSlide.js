@@ -6,7 +6,10 @@ import { downloadPhotoById, getPhotoById } from '../../core/service/PhotoService
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { Image } from 'react-native-elements';
 import DropMenu from '../shared/drop-menu/DropMenu';
-import { showToast } from '../../core/service/ToastService';
+import { showErrorToast, showToast } from '../../core/service/ToastService';
+import Share from 'react-native-share';
+import { FILE_RESPONSE_TYPE } from '../../core/service/FileService';
+import { StatusBar } from 'react-native';
 
 class PhotoSlide extends React.Component {
 
@@ -14,7 +17,7 @@ class PhotoSlide extends React.Component {
     selectedPhotoId = null;
     photoRequestIntervalId = null;
     menuItems = [
-        { label: 'Share', hasDivider: true, onPress: () => { } },
+        { label: 'Share', hasDivider: true, onPress: () => { this.sharePhoto(this.state.currentPhoto) } },
         { label: 'Download', onPress: () => { this.downloadPhoto(this.state.currentPhoto) } }
     ];
 
@@ -24,7 +27,8 @@ class PhotoSlide extends React.Component {
         this.selectedPhotoId = props.route?.params?.selectedPhotoId;
 
         this.state = {
-            currentPhoto: {}
+            currentPhoto: {},
+            showLoader: false
         };
     }
 
@@ -55,30 +59,37 @@ class PhotoSlide extends React.Component {
                 label: this.getPhotoLabel(this.photos[indexOfPhoto])
             };
 
-            this.setState({ currentPhoto: photo }, () => {
+            if (this.photoRequestIntervalId) {
+                clearInterval(this.photoRequestIntervalId);
+            }
+
+            this.setState({ currentPhoto: photo, showLoader: true }, () => {
                 if (this.state.currentPhoto.source?.uri) {
+                    this.setState({ ...this.state, showLoader: false });
                     return;
                 }
 
-                if (this.photoRequestIntervalId) {
-                    clearInterval(this.photoRequestIntervalId);
-                }
-
                 this.photoRequestIntervalId = setTimeout(() => {
-                    getPhotoById(photoId).then((res) => {
-                        if (res) {
-                            if (photo.id == this.state.currentPhoto.id) {
-                                photo.source = {
-                                    uri: res
-                                };
-                                const selectedPhoto = this.photos.find(item => item.id == photo.id);
-                                selectedPhoto.source = {
-                                    uri: res
-                                };
-                                this.setState({ currentPhoto: { ...photo } });
+                    getPhotoById(photoId)
+                        .then((res) => {
+                            if (res) {
+                                if (photo.id == this.state.currentPhoto.id) {
+                                    photo.source = {
+                                        uri: res
+                                    };
+                                    const selectedPhoto = this.photos.find(item => item.id == photo.id);
+                                    selectedPhoto.source = {
+                                        uri: res
+                                    };
+                                    this.setState({ currentPhoto: { ...photo }, showLoader: false });
+                                } else {
+                                    this.setState({ ...this.state, showLoader: false });
+                                }
                             }
-                        }
-                    });
+                        })
+                        .catch(error => {
+                            showErrorToast();
+                        });
                 }, 1000);
             });
 
@@ -109,7 +120,38 @@ class PhotoSlide extends React.Component {
         }
     }
 
+    sharePhoto(photo) {
+        showToast(`Preparing ${photo.name} for sharing.`);
+        this.setState({ ...this.state, showLoader: true });
+
+        const params = {
+            responseType: FILE_RESPONSE_TYPE.BASE64,
+            mimeType: photo.mimeType
+        };
+
+        getPhotoById(photo.id, params)
+            .then((res) => {
+                this.setState({ ...this.state, showLoader: false });
+                try {
+                    Share.open({
+                        filename: photo.name,
+                        message: 'Shared by Snap Crescent.',
+                        url: res,
+                        title: photo.name,
+                        type: photo.mimeType
+                    }).then(() => {
+                        showToast(`${photo.name} has been shared.`);
+                    });
+                } catch (error) {
+                    showErrorToast();
+                }
+            }).catch(error => {
+                showErrorToast();
+            });
+    }
+
     downloadPhoto(photo) {
+        showToast(`Downloading ${photo.name}`);
         downloadPhotoById(photo.id, { name: photo.name }).then(res => {
             showToast(`${photo.name} has been downloaded.`);
         });
@@ -122,20 +164,25 @@ class PhotoSlide extends React.Component {
                     <GestureRecognizer
                         onSwipeLeft={() => { this.handleSwipeLeft() }}
                         onSwipeRight={() => { this.handleSwipeRight() }}>
-                        {
-                            !this.state.currentPhoto?.source?.uri
-                                ? <View>
-                                    <View style={styles.thumbnailLoader}><Loader /></View>
-                                    <Image
+                        <View>
+                            {
+                                this.state.showLoader
+                                    ? <View style={styles.loader}><Loader /></View>
+                                    : null
+                            }
+                            {
+                                !this.state.currentPhoto?.source?.uri
+                                    ? <Image
                                         source={this.state.currentPhoto?.thumbnailSource}
                                         style={styles.image}
                                         PlaceholderContent={<Loader />} />
-                                </View>
-                                : <Image
-                                    source={this.state.currentPhoto?.source}
-                                    style={styles.image}
-                                    PlaceholderContent={<Loader />} />
-                        }
+                                    :
+                                    <Image
+                                        source={this.state.currentPhoto?.source}
+                                        style={styles.image}
+                                        PlaceholderContent={<Loader />} />
+                            }
+                        </View>
                     </GestureRecognizer>
                 </View>
             </View >
@@ -144,7 +191,7 @@ class PhotoSlide extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    thumbnailLoader: {
+    loader: {
         position: 'absolute',
         left: 0,
         right: 0,
@@ -155,7 +202,8 @@ const styles = StyleSheet.create({
     imageContainer: {
         flex: 1,
         justifyContent: 'center',
-        alignContent: 'center'
+        alignContent: 'center',
+        backgroundColor: '#000000aa'
     },
     image: {
         width: '100%',

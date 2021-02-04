@@ -78,10 +78,7 @@ function getClient() {
 }
 
 function errorHandler(error) {
-    if (error &&
-        error.response &&
-        error.response.data &&
-        error.response.data.message) {
+    if (error?.response?.data?.message) {
         alert(error.response.data.message);
     }
 }
