@@ -17,8 +17,8 @@ class PhotoSlide extends React.Component {
     selectedPhotoId = null;
     photoRequestIntervalId = null;
     menuItems = [
-        { label: 'Share', hasDivider: true, onPress: () => { this.sharePhoto(this.state.currentPhoto) } },
-        { label: 'Download', onPress: () => { this.downloadPhoto(this.state.currentPhoto) } }
+        { label: 'Share', icon: 'share-alt', hasDivider: true, onPress: () => { this.sharePhoto(this.state.currentPhoto) } },
+        { label: 'Download', icon: 'save', onPress: () => { this.downloadPhoto(this.state.currentPhoto) } }
     ];
 
     constructor(props) {

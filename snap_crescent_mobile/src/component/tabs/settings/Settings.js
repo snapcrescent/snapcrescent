@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { signOut } from '../../../core/service/AuthService';
+import { showToast } from '../../../core/service/ToastService';
 import Dialog from '../../shared/dialog/Dialog'
 import ServerUrl from '../../user-authentication/ServerUrl';
 
@@ -31,9 +32,14 @@ function Settings() {
         {
             label: 'Sign-Out',
             icon: 'sign-out-alt',
-            onClick: () => { signOut(); }
+            onClick: () => { onSignOut() }
         }
     ];
+
+    const onSignOut = () => {
+        showToast('Signing Out. Bye Bye');
+        signOut();
+    }
 
     const renderActions = ({ item }) => {
         return (
