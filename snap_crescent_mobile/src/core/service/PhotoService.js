@@ -5,13 +5,13 @@ import { getData } from "./ApiService";
 import { downloadFile, fetchFile } from "./FileService";
 
 const PHOTO_URL = 'photo';
+const PHOTO_STORAGE_KEY = 'photos';
 
-export const searchPhoto = (searchParams, callback, fetchFromServer = false) => {
-    searchParams = { page: 0, size: 500, ...searchParams };
+export const searchPhoto = (searchParams, fetchFromServer = false, overrideStoredPhotos = false, callback) => {
+    searchParams = { page: 0, size: 15, ...searchParams };
 
     if (!fetchFromServer) {
-        const searchKey = JSON.stringify(searchParams);
-        return AsyncStorage.getItem(searchKey).then(storedObject => {
+        return AsyncStorage.getItem(PHOTO_STORAGE_KEY).then(storedObject => {
             if (isNotNull(storedObject)) {
                 storedObject = JSON.parse(storedObject);
                 if (callback) {
@@ -20,11 +20,11 @@ export const searchPhoto = (searchParams, callback, fetchFromServer = false) => 
                     return storedObject;
                 }
             } else {
-                searchPhotosFromServer(searchParams, callback);
+                searchPhotosFromServer(searchParams, true, callback);
             }
         });
     } else {
-        return searchPhotosFromServer(searchParams, callback);
+        return searchPhotosFromServer(searchParams, overrideStoredPhotos, callback);
     }
 
 }
@@ -44,7 +44,7 @@ export const downloadPhotoById = (photoId, params) => {
     return downloadFile(PHOTO_URL + '/' + photoId, params);
 }
 
-const searchPhotosFromServer = (searchParams, callback) => {
+const searchPhotosFromServer = (searchParams, overrideStoredPhotos, callback) => {
     return getData(PHOTO_URL, searchParams).then(res => {
         const photos = res.content.map((item) => {
             return {
@@ -66,12 +66,33 @@ const searchPhotosFromServer = (searchParams, callback) => {
             data: photos
         };
 
-        AsyncStorage.removeItem(JSON.stringify(searchParams), () => {
-            AsyncStorage.setItem(JSON.stringify(searchParams), JSON.stringify(responseObject));
-        });
+        if (overrideStoredPhotos) {
+            AsyncStorage.removeItem(PHOTO_STORAGE_KEY, () => {
+                AsyncStorage.setItem(PHOTO_STORAGE_KEY, JSON.stringify(responseObject));
+            });
 
-        if (callback) {
-            callback(responseObject);
+            if (callback) {
+                callback(responseObject);
+            }
+        } else {
+            AsyncStorage.getItem(PHOTO_STORAGE_KEY).then(item => {
+                let existingItem = {
+                    data: []
+                };
+                if (isNotNull(item)) {
+                    existingItem = JSON.parse(item);
+                }
+
+                existingItem.totalElements = responseObject.totalElements;
+                existingItem.totalPages = responseObject.totalPages;
+                existingItem.data = [...existingItem.data, ...responseObject.data];
+                responseObject.data = [...existingItem.data];
+
+                AsyncStorage.setItem(PHOTO_STORAGE_KEY, JSON.stringify(existingItem));
+                if (callback) {
+                    callback(responseObject);
+                }
+            });
         }
     });
 }
