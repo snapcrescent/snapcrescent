@@ -6,7 +6,7 @@ export default function Loader(props) {
 
     return (
         <View style={styles.container}>
-            <ActivityIndicator size='large' color={THEME_COLORS.secondary} />
+            <ActivityIndicator size='large' color={THEME_COLORS.primary} />
         </View>
     )
 }

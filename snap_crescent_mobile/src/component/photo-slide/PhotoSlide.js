@@ -9,7 +9,6 @@ import DropMenu from '../shared/drop-menu/DropMenu';
 import { showErrorToast, showToast } from '../../core/service/ToastService';
 import Share from 'react-native-share';
 import { FILE_RESPONSE_TYPE } from '../../core/service/FileService';
-import { StatusBar } from 'react-native';
 
 class PhotoSlide extends React.Component {
 
@@ -165,11 +164,7 @@ class PhotoSlide extends React.Component {
                         onSwipeLeft={() => { this.handleSwipeLeft() }}
                         onSwipeRight={() => { this.handleSwipeRight() }}>
                         <View>
-                            {
-                                this.state.showLoader
-                                    ? <View style={styles.loader}><Loader /></View>
-                                    : null
-                            }
+                            {this.state.showLoader ? <View style={CoreStyles.loader}><Loader /></View> : null}
                             {
                                 !this.state.currentPhoto?.source?.uri
                                     ? <Image
@@ -191,14 +186,6 @@ class PhotoSlide extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    loader: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-        zIndex: 5
-    },
     imageContainer: {
         flex: 1,
         justifyContent: 'center',

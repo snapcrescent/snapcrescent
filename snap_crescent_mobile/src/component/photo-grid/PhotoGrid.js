@@ -4,7 +4,6 @@ import CoreStyles from '../../styles/styles';
 import { searchPhoto } from '../../core/service/PhotoService';
 import GridView from '../shared/grid-view/GridView';
 import Loader from '../Loader';
-import { showToast } from './../../core/service/ToastService';
 
 const initialState = {
     photoList: [],
@@ -12,6 +11,8 @@ const initialState = {
     totalElements: 0,
     dataFecthed: false
 };
+
+const PAGE_SIZE = 500;
 
 function PhotoGrid(props) {
 
@@ -53,7 +54,7 @@ function PhotoGrid(props) {
 
     const handleOnEndReached = () => {
         if (state.photoList.length < state.totalElements) {
-            page = page + 1;
+            page = state.photoList.length / PAGE_SIZE;
             getPhotos(true, false);
         }
     }

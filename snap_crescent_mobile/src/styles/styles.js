@@ -1,8 +1,8 @@
 import { StyleSheet } from "react-native";
 
 export const THEME_COLORS = {
-    primary: '#3f51bf',
-    secondary: '#15c57e'
+    primary: '#15c57e',
+    secondary: '#3f51bf',
 };
 
 const CoreStyles = StyleSheet.create({

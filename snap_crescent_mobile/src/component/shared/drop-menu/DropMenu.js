@@ -3,11 +3,15 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Menu, { MenuDivider, MenuItem } from "react-native-material-menu";
 import { isNotNull } from "../../../utils/CoreUtil";
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
-import CoreStyles from '../../../styles/styles';
 
 function DropMenu(props) {
     const { items, dropIcon, dropIconStyle, dropLabel, dropLabelStyle } = props;
     let menuRef = null;
+
+    const onMenuItemPress = (item) => {
+        menuRef?.hide();
+        item.onPress();
+    }
 
     const menuTriggerButton = (
         <TouchableOpacity
@@ -32,26 +36,13 @@ function DropMenu(props) {
                     return (
                         <View>
                             <MenuItem
-                                onPress={
-                                    () => {
-                                        menuRef?.hide();
-                                        item.onPress();
-                                    }
-                                }>
+                                onPress={() => { onMenuItemPress(item) }}>
                                 <View style={styles.menuItem}>
-                                    {
-                                        item.icon
-                                            ? <FontAwesome5Icon name={item.icon} style={styles.itemIcon} />
-                                            : null
-                                    }
+                                    {item.icon ? <FontAwesome5Icon name={item.icon} style={styles.itemIcon} /> : null}
                                     <Text style={styles.label}>{item.label}</Text>
                                 </View>
                             </MenuItem>
-                            {
-                                item.hasDivider
-                                    ? <MenuDivider />
-                                    : null
-                            }
+                            { item.hasDivider ? <MenuDivider /> : null}
                         </View>
                     )
                 })

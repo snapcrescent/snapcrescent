@@ -11,6 +11,7 @@ import { updateAuthState, updateAuthToken } from './src/core/action/authenticati
 import Tabs from './src/component/tabs/Tabs';
 import CoreStyles from './src/styles/styles';
 import SplashScreen from './src/component/shared/splash-screen/SplashScreen';
+import { clearTemporaryStorage } from './src/core/service/FileService';
 
 const SPLASH_SCREEN_TIMEOUT = 250;
 
@@ -26,6 +27,7 @@ function App() {
   const [state, setState] = useState(initialState);
 
   useEffect(() => {
+    clearTemporaryStorage();
     checkServer();
   }, [serverUrl]);
 

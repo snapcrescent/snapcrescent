@@ -11,9 +11,10 @@ import FormError from './FormError';
 import CoreStyles, { THEME_COLORS } from '../../styles/styles';
 import { signOut } from '../../core/service/AuthService';
 import CloseIcon from '../shared/close-icon/CloseIcon';
+import { State } from 'react-native-gesture-handler';
 
 const initialFormState = {
-    serverUrl: '',
+    serverUrl: 'https://demo.snapcrescent.com',
     formError: {
         serverUrl: ''
     }
@@ -114,6 +115,7 @@ function ServerUrl(props) {
                         <TextInput
                             style={[FormControlStyle.textInput]}
                             placeholder="Server URL *"
+                            value={formControl.serverUrl}
                             onBlur={() => setErrors(formControl, 'serverUrl', formControl.serverUrl)}
                             onChangeText={(text) => setFormControl({ ...formControl, serverUrl: text })} />
                         <FormError errorMessage={formControl.formError.serverUrl} />
