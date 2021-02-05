@@ -11,11 +11,7 @@ function Dialog(props) {
         <Modal transparent={true} visible={showDialog}>
             <View style={[DialogStyle.outerContainer, dialogStyle?.outerContainer]}>
                 <View style={[DialogStyle.innerConatiner, dialogStyle?.innerConatiner]}>
-                    {
-                        showCloseButton
-                            ? <CloseIcon onPress={() => { onClose() }} />
-                            : null
-                    }
+                    {showCloseButton ? <CloseIcon onPress={() => { onClose() }} /> : null}
                     {template}
                 </View>
             </View>

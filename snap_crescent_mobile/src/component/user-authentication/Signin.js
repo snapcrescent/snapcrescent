@@ -19,8 +19,8 @@ import FormControlStyle, { BACKGROUND_IMAGE } from './formControlStyles';
 import FormError from './FormError';
 
 const initialFormState = {
-    username: '',
-    password: '',
+    username: 'demo',
+    password: 'demo',
     formError: {
         username: '',
         password: ''
@@ -90,6 +90,7 @@ function Signin(props) {
                     <TextInput
                         style={[FormControlStyle.textInput]}
                         placeholder="Username *"
+                        value={formControl.username}
                         onBlur={() => setErrors('username', formControl.username)}
                         onChangeText={(text) => setFormControl({ ...formControl, username: text })} />
                     <FormError errorMessage={formControl.formError.username} />
@@ -98,6 +99,7 @@ function Signin(props) {
                         style={[FormControlStyle.textInput]}
                         secureTextEntry={true}
                         placeholder="Password *"
+                        value={formControl.password}
                         onBlur={() => setErrors('password', formControl.password)}
                         onChangeText={(text) => setFormControl({ ...formControl, password: text })} />
                     <FormError errorMessage={formControl.formError.password} />

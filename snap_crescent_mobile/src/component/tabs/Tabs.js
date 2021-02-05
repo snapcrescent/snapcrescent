@@ -17,7 +17,7 @@ function Tabs() {
     ];
 
     const tabBarOptions = {
-        activeBackgroundColor: THEME_COLORS.secondary,
+        activeBackgroundColor: THEME_COLORS.primary,
         activeTintColor: '#000000'
     };
 
@@ -26,11 +26,15 @@ function Tabs() {
             <Tab.Navigator tabBarOptions={tabBarOptions} initialRouteName="home">
                 {
                     tabs.map(tab => (
-                        <Tab.Screen key={tab.key} name={tab.routeName} component={tab.component} options={{
-                            tabBarIcon: ({ focused, color, size }) => {
-                                return <FontAwesome5Icon name={tab.tabIcon} style={styles.tabIcon} />
-                            }
-                        }} />
+                        <Tab.Screen
+                            key={tab.key}
+                            name={tab.routeName}
+                            component={tab.component}
+                            options={{
+                                tabBarIcon: ({ focused, color, size }) => {
+                                    return <FontAwesome5Icon name={tab.tabIcon} style={styles.tabIcon} />
+                                }
+                            }} />
                     ))
                 }
             </Tab.Navigator>

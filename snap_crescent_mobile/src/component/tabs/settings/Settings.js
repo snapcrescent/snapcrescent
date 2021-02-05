@@ -73,7 +73,6 @@ function Settings() {
                         onModalClose={() => { setState({ ...state, showServerModal: false }) }} />
                 }
             />
-
         </SafeAreaView >
     );
 }

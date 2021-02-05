@@ -27,7 +27,7 @@ function UserAuthentication() {
 
     const headerStyleOptions = {
         headerStyle: {
-            backgroundColor: THEME_COLORS.secondary,
+            backgroundColor: THEME_COLORS.primary,
         },
         headerTintColor: '#fff',
         headerTitleStyle: {

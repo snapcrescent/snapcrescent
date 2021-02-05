@@ -66,7 +66,6 @@ function GridView(props) {
                 </View>
             );
         }
-
     }
 
     return (

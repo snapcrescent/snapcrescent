@@ -15,7 +15,7 @@ function Home() {
 
     const headerStyleOptions = {
         headerStyle: {
-            backgroundColor: THEME_COLORS.secondary,
+            backgroundColor: THEME_COLORS.primary,
         },
         headerTintColor: '#fff',
         headerTitleStyle: {
@@ -37,8 +37,6 @@ function Home() {
                         }} />
                 ))
             }
-            {/* <HomeStack.Screen name='photos' component={PhotoGrid} options={{ title: 'Snap Crescent', ...headerStyleOptions }} />
-            <HomeStack.Screen name='photo-slide' component={PhotoSlide} options={{ title: 'Photo', ...headerStyleOptions }} /> */}
         </HomeStack.Navigator>
     )
 }

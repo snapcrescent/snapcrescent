@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     container: {
         ...CoreStyles.flex1,
         ...CoreStyles.centerAlignedContainer,
-        backgroundColor: THEME_COLORS.secondary
+        backgroundColor: THEME_COLORS.primary
     },
     image: {
         resizeMode: 'center'
