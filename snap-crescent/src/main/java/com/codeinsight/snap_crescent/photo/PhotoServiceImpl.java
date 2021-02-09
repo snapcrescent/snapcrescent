@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,7 +53,8 @@ public class PhotoServiceImpl implements PhotoService {
 
 	@Transactional
 	public Page<Photo> search(PhotoSearchCriteria photoSearchCriteria) throws Exception {
-		Pageable pageable = PageRequest.of(photoSearchCriteria.getPage(), photoSearchCriteria.getSize());
+		Sort sort = Sort.by(photoSearchCriteria.getSortDirection().equals("desc") ? Direction.DESC : Direction.ASC, photoSearchCriteria.getSort());
+		Pageable pageable = PageRequest.of(photoSearchCriteria.getPage(), photoSearchCriteria.getSize(), sort);
 		Page<Photo> photos = photoRepository.search(photoSearchCriteria.getFavorite(), photoSearchCriteria.getSearchInput(), photoSearchCriteria.getMonth(), photoSearchCriteria.getYear() ,pageable);
 		for (Photo photo : photos) {
 			photo.setBase64EncodedThumbnail(
