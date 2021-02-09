@@ -65,6 +65,14 @@ public class PhotoController {
 		if (searchParams.get("year") != null) {
 			searchCriteria.setYear(searchParams.get("year"));
 		}
+
+		if (searchParams.get("sort") != null) {
+			searchCriteria.setSort(searchParams.get("sort"));
+		}
+		
+		if (searchParams.get("sortDirection") != null) {
+			searchCriteria.setSortDirection(searchParams.get("sortDirection"));
+		}
 	}
 	
 	@GetMapping(value="/photo/{id}", produces = MediaType.IMAGE_JPEG_VALUE)

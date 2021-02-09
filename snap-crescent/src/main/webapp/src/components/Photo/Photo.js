@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import './Photo.scss';
 import { SearchTable } from '../SearchTable/SearchTable';
 import { search } from '../../services/PhotoService';
@@ -22,17 +22,17 @@ const months = [
     {id: '12', value: 'December'},
 ];
 
-const searchFields = [
-  {key: 'year', options: years, value: '0'},
-  {key: 'month', options: months, value: '0'}
-  ]
-
 export const Photo = (props) => {
 
+  const searchFields = [
+    {key: 'year', options: years, value: '0'},
+    {key: 'month', options: months, value: '0'}
+  ]
+  
   const columns = [
-    { field: 'createdDate', headerName: 'Created Date', width: 400 },
-    { field: 'device', headerName: 'Device', width: 400 },
-    { field: 'location', headerName: 'Location', width: 400 },
+    { field: 'createdDate', headerName: 'Created Date', sortable: true, width: 400 },
+    { field: 'device', headerName: 'Device', sortable: true, width: 400 },
+    { field: 'location', headerName: 'Location', sortable: false, width: 400 },
   ];
 
   const [rows, setRows] = useState([]);
@@ -40,10 +40,14 @@ export const Photo = (props) => {
   const [totalElements, setTotalElements] = useState(0);
   const [searchInput, setSearchInput] = useState(null);
   const [searchFormFields, setSearchFormFields] = useState(searchFields);
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('createdDate');
 
   const getPhotos = () => {
     const searchRequest = {
-      page: page
+      page: page,
+      sort: orderBy,
+      sortDirection: order
     }
     if(props.favorite) {
       searchRequest.favorite = props.favorite; 
@@ -75,9 +79,6 @@ export const Photo = (props) => {
         }
       });
   }
-  useEffect(() => {
-    getPhotos();
-  }, [page, searchInput]);
 
   const parseLocation = (location) => {
     const city = location.city || location.town;
@@ -104,6 +105,10 @@ export const Photo = (props) => {
         searchFormFields={searchFormFields}
         setSearchFormFields={setSearchFormFields}
         search={getPhotos}
+        order={order}
+        setOrder={setOrder}
+        orderBy={orderBy}
+        setOrderBy={setOrderBy}
       />
     </div>
   )

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -28,6 +28,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
 
 import './SearchTable.scss';
 
@@ -90,6 +91,17 @@ const useStyles = makeStyles((theme) => ({
         zIndex: 1,
         color: '#ffffff'
     },
+    hidden: {
+        border: 0,
+        clip: 'rect(0 0 0 0)',
+        height: 1,
+        margin: -1,
+        overflow: 'hidden',
+        padding: 0,
+        position: 'absolute',
+        top: 20,
+        width: 1,
+    }
 }));
 
 const Favorite = (props) => {
@@ -99,10 +111,10 @@ const Favorite = (props) => {
         <>
             {
                 <IconButton color="inherit" className={className} onClick={() => {toggleFavorite(); setFavorite(!favorite)}}>
-                    { favorite === true &&
+                    { favorite &&
                         <FavoriteIcon />
                     }
-                    { favorite === false &&
+                    { !favorite &&
                         <FavoriteBorderIcon />
                     }
                 </IconButton>
@@ -112,8 +124,8 @@ const Favorite = (props) => {
 }
 export const SearchTable = (props) => {
     const classes = useStyles();
-    const { rows, columns, totalElements, page, setPage, setRows, setSearchInput, searchFormFields, setSearchFormFields, search } = props;
-    const [view, setView] = useState('COMFY');
+    const { rows, columns, totalElements, page, setPage, setRows, searchInput, setSearchInput, searchFormFields, setSearchFormFields, search, order, setOrder, orderBy, setOrderBy } = props;
+    const [view, setView] = useState('LIST');
 
     const [openPhotoSlideDialog, setOpenPhotoSlideDialog] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
@@ -153,6 +165,21 @@ export const SearchTable = (props) => {
         search();
     }
 
+    const createSortHandler = (property) => (event) => {
+        onRequestSort(event, property);
+    };
+    
+    const onRequestSort = (event, property) => {
+        setRows([]);
+        const isAsc = orderBy === property && order === 'asc';
+        setOrder(isAsc ? 'desc' : 'asc');
+        setOrderBy(property);
+    };
+
+    useEffect(() => {
+        search();
+    }, [page, searchInput, order, orderBy]);
+
     return (
         <div>
             <Accordion className={classes.accordion}>
@@ -178,19 +205,19 @@ export const SearchTable = (props) => {
                     <Grid item sm={8} className={classes.iconGrid}>
                         {
                             view === 'MODULE' &&
-                            <IconButton color="inherit" aria-label="toggle view" onClick={() => setView('COMFY')}>
+                            <IconButton color="inherit" aria-label="toggle view" onClick={(event) => {event.stopPropagation(); setView('COMFY')}}>
                                 <ViewModuleIcon />
                             </IconButton>
                         }
                         {
                             view === 'COMFY' &&
-                            <IconButton color="inherit" aria-label="toggle view" onClick={() => setView('LIST')}>
+                            <IconButton color="inherit" aria-label="toggle view" onClick={(event) => {event.stopPropagation(); setView('LIST')}}>
                                 <ViewComfy />
                             </IconButton>
                         }
                         {
                             view === 'LIST' &&
-                            <IconButton color="inherit" aria-label="toggle view" onClick={() => setView('COMFY')}>
+                            <IconButton color="inherit" aria-label="toggle view" onClick={(event) => {event.stopPropagation(); setView('COMFY')}}>
                                 <ViewList />
                             </IconButton>
                         }
@@ -227,6 +254,13 @@ export const SearchTable = (props) => {
                 className={classes.scrollContainer}
             >
                 {(() => {
+                    if(rows.length === 0) {
+                        return (
+                            <strong>
+                                No Result Found
+                            </strong>
+                        )
+                    }
                     if (view === "LIST") {
                         return (
                             <TableContainer component={Paper}>
@@ -235,8 +269,27 @@ export const SearchTable = (props) => {
                                         <TableRow>
                                             <TableCell />
                                             {columns.map((column) => (
-                                                <TableCell className={classes.head} key={column.field}>
-                                                    {column.headerName}
+                                                <TableCell className={classes.head} key={column.field} sortDirection={orderBy === column.field ? order : false}>
+                                                    { column.sortable &&
+                                                    <TableSortLabel
+                                                        active={orderBy === column.field}
+                                                        direction={orderBy === column.field ? order : 'asc'}
+                                                        onClick={createSortHandler(column.field)}
+                                                        >
+                                                        {column.headerName}
+                                                        {orderBy === column.field ? (
+                                                            <span className={classes.hidden}>
+                                                            {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                                            </span>
+                                                        ) : null}
+                                                    </TableSortLabel>
+                                                    }
+                                                    {
+                                                        !column.sortable &&
+                                                        <span>
+                                                            {column.headerName}
+                                                        </span>
+                                                    }
                                                 </TableCell>
                                             ))}
                                             <TableCell />

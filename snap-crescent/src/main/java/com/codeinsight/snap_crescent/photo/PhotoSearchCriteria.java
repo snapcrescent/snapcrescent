@@ -6,6 +6,8 @@ public class PhotoSearchCriteria {
 	private String searchInput;
 	private String month;
 	private String year;
+	private String sort;
+	private String sortDirection;
 	
 	private Integer page = 0;
 	private Integer size = 100;
@@ -40,6 +42,22 @@ public class PhotoSearchCriteria {
 
 	public void setYear(String year) {
 		this.year = year;
+	}
+
+	public String getSort() {
+		return sort;
+	}
+
+	public void setSort(String sort) {
+		this.sort = sort;
+	}
+
+	public String getSortDirection() {
+		return sortDirection;
+	}
+
+	public void setSortDirection(String sortDirection) {
+		this.sortDirection = sortDirection;
 	}
 
 	public Integer getPage() {
