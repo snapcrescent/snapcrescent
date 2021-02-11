@@ -10,6 +10,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
+import GridListTileBar from '@material-ui/core/GridListTileBar';
 import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
 import IconButton from '@material-ui/core/IconButton';
@@ -29,6 +30,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
+import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
+import DateRangeIcon from '@material-ui/icons/DateRange';
 
 import './SearchTable.scss';
 
@@ -50,6 +53,14 @@ const useStyles = makeStyles((theme) => ({
     gridThumbnail: {
         height: 142,
         width: 142,
+        '&:hover': {
+            filter: 'brightness(0.8)',
+            border: 'solid 2px #15C57E'
+        }
+    },
+    moduleThumbnail: {
+        height: 270,
+        width: 270,
         '&:hover': {
             filter: 'brightness(0.8)',
             border: 'solid 2px #15C57E'
@@ -91,6 +102,9 @@ const useStyles = makeStyles((theme) => ({
         zIndex: 1,
         color: '#ffffff'
     },
+    moduleFavoriteButton: {
+        color: '#ffffff'
+    },
     hidden: {
         border: 0,
         clip: 'rect(0 0 0 0)',
@@ -125,7 +139,7 @@ const Favorite = (props) => {
 export const SearchTable = (props) => {
     const classes = useStyles();
     const { rows, columns, totalElements, page, setPage, setRows, searchInput, setSearchInput, searchFormFields, setSearchFormFields, search, order, setOrder, orderBy, setOrderBy } = props;
-    const [view, setView] = useState('LIST');
+    const [view, setView] = useState('COMFY');
 
     const [openPhotoSlideDialog, setOpenPhotoSlideDialog] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
@@ -153,33 +167,52 @@ export const SearchTable = (props) => {
         }
     }
 
-    const handleSearchFormChange = (event) => {
-        const { name, value } = event.target;
-        searchFormFields.forEach(searchFormField => {
-            if(searchFormField.key === name) {
-                searchFormField.value = value;
-            }
-        });
-        setSearchFormFields(searchFormFields);
-        setRows([]);
-        search();
+    const handleSearchFormChange = (key, value) => {
+
+        if(key === 'sort') {    
+            handleSort(value);
+        } else {
+            searchFormFields.forEach(searchFormField => {
+                if(searchFormField.key === key) {
+                    searchFormField.value = value;
+                }
+            });
+            setSearchFormFields(searchFormFields);
+            setRows([]);
+            search();
+        }
     }
 
     const createSortHandler = (property) => (event) => {
-        onRequestSort(event, property);
+        handleSort(property);
     };
-    
-    const onRequestSort = (event, property) => {
+
+    const handleSort = (property) => {
+
+        searchFormFields.filter(item => item.key === 'sort').forEach(searchFormField => {
+            searchFormField.value = property;
+        });
+        setSearchFormFields(searchFormFields);
         setRows([]);
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
-    };
+    }
 
     useEffect(() => {
+        if(localStorage.getItem('view')) {
+            setView(localStorage.getItem('view'));
+        } else {
+            localStorage.setItem('view', view);
+        }
         search();
     }, [page, searchInput, order, orderBy]);
 
+    const switchView = (event, props) => {
+        event.stopPropagation();
+        setView(props);
+        localStorage.setItem('view', props);
+    }
     return (
         <div>
             <Accordion className={classes.accordion}>
@@ -205,19 +238,19 @@ export const SearchTable = (props) => {
                     <Grid item sm={8} className={classes.iconGrid}>
                         {
                             view === 'MODULE' &&
-                            <IconButton color="inherit" aria-label="toggle view" onClick={(event) => {event.stopPropagation(); setView('COMFY')}}>
+                            <IconButton color="inherit" aria-label="toggle view" onClick={(event) => {switchView(event, 'COMFY')}}>
                                 <ViewModuleIcon />
                             </IconButton>
                         }
                         {
                             view === 'COMFY' &&
-                            <IconButton color="inherit" aria-label="toggle view" onClick={(event) => {event.stopPropagation(); setView('LIST')}}>
+                            <IconButton color="inherit" aria-label="toggle view" onClick={(event) => {switchView(event, 'LIST')}}>
                                 <ViewComfy />
                             </IconButton>
                         }
                         {
                             view === 'LIST' &&
-                            <IconButton color="inherit" aria-label="toggle view" onClick={(event) => {event.stopPropagation(); setView('COMFY')}}>
+                            <IconButton color="inherit" aria-label="toggle view" onClick={(event) => {switchView(event, 'MODULE')}}>
                                 <ViewList />
                             </IconButton>
                         }
@@ -230,15 +263,14 @@ export const SearchTable = (props) => {
                     searchFormFields.map(searchFormField => (
                         <FormControl variant="outlined" className={classes.formControl}>
                             <Select
-                            className={classes.inputSelect}
-                            value={searchFormField.value}
-                            name={searchFormField.key}
-                            id={searchFormField.key}
-                            onChange={handleSearchFormChange}
+                                className={classes.inputSelect}
+                                value={searchFormField.value}
+                                name={searchFormField.key}
+                                id={searchFormField.key}
                             >
                             {
                                 searchFormField.options.map(option => (
-                                    <MenuItem value={option.id}>{option.value}</MenuItem>        
+                                    <MenuItem value={option.id} onClick={() => handleSearchFormChange(searchFormField.key,option.id)} >{option.value}</MenuItem>        
                                 ))
                             }
                             </Select>
@@ -350,9 +382,28 @@ export const SearchTable = (props) => {
                         )
                     } else {
                         return (
-                            <div>
-
-                            </div>
+                            <GridList cellHeight={'auto'} cols={0} spacing={10}>
+                                {rows.map((row) => (
+                                    <GridListTile key={row.id.value} cols={1}>
+                                        <img src={row.thumbnail.value}
+                                            className={classes.moduleThumbnail}
+                                            alt=''
+                                            onClick={() => handleThumbnailClick(row.id.value)}
+                                        />
+                                        <GridListTileBar
+                                            subtitle={
+                                                <span className="text-left">
+                                                    <div><PhotoCameraIcon className="icon-16 mr-1" />{row.device.value}</div>
+                                                    <div><DateRangeIcon className="icon-16 mr-1" />{row.createdDate.value}</div>
+                                                </span>
+                                            }
+                                            actionIcon={
+                                                <Favorite row={row} className={classes.moduleFavoriteButton} toggleFavorite={() => toggleFavorite(row)} />
+                                            }
+                                        />
+                                    </GridListTile>
+                                ))}
+                            </GridList>
                         )
                     }
                 })()}
