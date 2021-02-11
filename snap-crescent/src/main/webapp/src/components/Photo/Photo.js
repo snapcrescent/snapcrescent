@@ -24,9 +24,14 @@ const months = [
 
 export const Photo = (props) => {
 
+  const sortOptions = [
+    {id: 'createdDate', value: 'Created Date'},
+    {id: 'device', value: 'Device'}
+  ];
   const searchFields = [
     {key: 'year', options: years, value: '0'},
-    {key: 'month', options: months, value: '0'}
+    {key: 'month', options: months, value: '0'},
+    {key: 'sort', options: sortOptions, value: 'createdDate'},
   ]
   
   const columns = [
