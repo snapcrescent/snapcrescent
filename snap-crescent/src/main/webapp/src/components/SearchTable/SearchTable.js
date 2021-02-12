@@ -32,6 +32,7 @@ import Select from '@material-ui/core/Select';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import DateRangeIcon from '@material-ui/icons/DateRange';
+import FolderIcon from '@material-ui/icons/Folder';
 
 import './SearchTable.scss';
 
@@ -115,6 +116,10 @@ const useStyles = makeStyles((theme) => ({
         position: 'absolute',
         top: 20,
         width: 1,
+    },
+    albumIcon:{
+        height: 220,
+        width: 220
     }
 }));
 
@@ -200,7 +205,9 @@ export const SearchTable = (props) => {
     }
 
     useEffect(() => {
-        if(localStorage.getItem('view')) {
+        if(props.view){
+            setView(props.view);
+        } else if(localStorage.getItem('view')) {
             setView(localStorage.getItem('view'));
         } else {
             localStorage.setItem('view', view);
@@ -259,7 +266,7 @@ export const SearchTable = (props) => {
             </AccordionSummary>
             <AccordionDetails className={classes.accordionDetails}>
 
-                {
+                {   searchFormFields && searchFormFields.length &&
                     searchFormFields.map(searchFormField => (
                         <FormControl variant="outlined" className={classes.formControl}>
                             <Select
@@ -293,7 +300,68 @@ export const SearchTable = (props) => {
                             </strong>
                         )
                     }
-                    if (view === "LIST") {
+                    if (view === "ALBUM") {
+                        return (
+                            <GridList cellHeight={'auto'} cols={0} spacing={10}>
+                                {rows.map((row) => (
+                                    <GridListTile key={row.id.value} cols={1} className="albumTile">
+                                        <FolderIcon className={classes.albumIcon} />
+                                        <GridListTileBar
+                                            title={
+                                                <span className="text-left">
+                                                    <div>{row.name.value}</div>
+                                                </span>}
+                                            subtitle={
+                                                <span className="text-left">
+                                                    <div><DateRangeIcon className="icon-16 mr-1" />{row.createdDate.value}</div>
+                                                </span>
+                                            }
+                                        />
+                                    </GridListTile>
+                                ))}
+                            </GridList>
+                        )
+                    } else if (view === "COMFY") {
+                        return (
+                            <GridList cellHeight={'auto'} cols={0} spacing={10}>
+                                {rows.map((row) => (
+                                    <GridListTile key={row.id.value} cols={1}>
+                                        <Favorite row={row} className={classes.gridFavoriteButton} toggleFavorite={() => toggleFavorite(row)} />
+                                        <img src={row.thumbnail.value}
+                                            className={classes.gridThumbnail}
+                                            alt=''
+                                            onClick={() => handleThumbnailClick(row.id.value)}
+                                        />
+                                    </GridListTile>
+                                ))}
+                            </GridList>
+                        )
+                    } else if (view === "MODULE"){
+                        return (
+                            <GridList cellHeight={'auto'} cols={0} spacing={10}>
+                                {rows.map((row) => (
+                                    <GridListTile key={row.id.value} cols={1}>
+                                        <img src={row.thumbnail.value}
+                                            className={classes.moduleThumbnail}
+                                            alt=''
+                                            onClick={() => handleThumbnailClick(row.id.value)}
+                                        />
+                                        <GridListTileBar
+                                            subtitle={
+                                                <span className="text-left">
+                                                    <div><PhotoCameraIcon className="icon-16 mr-1" />{row.device.value}</div>
+                                                    <div><DateRangeIcon className="icon-16 mr-1" />{row.createdDate.value}</div>
+                                                </span>
+                                            }
+                                            actionIcon={
+                                                <Favorite row={row} className={classes.moduleFavoriteButton} toggleFavorite={() => toggleFavorite(row)} />
+                                            }
+                                        />
+                                    </GridListTile>
+                                ))}
+                            </GridList>
+                        )
+                    } else {
                         return (
                             <TableContainer component={Paper}>
                                 <Table className={classes.table} aria-label="simple table">
@@ -364,46 +432,6 @@ export const SearchTable = (props) => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                        )
-                    } else if (view === "COMFY") {
-                        return (
-                            <GridList cellHeight={'auto'} cols={0} spacing={10}>
-                                {rows.map((row) => (
-                                    <GridListTile key={row.id.value} cols={1}>
-                                        <Favorite row={row} className={classes.gridFavoriteButton} toggleFavorite={() => toggleFavorite(row)} />
-                                        <img src={row.thumbnail.value}
-                                            className={classes.gridThumbnail}
-                                            alt=''
-                                            onClick={() => handleThumbnailClick(row.id.value)}
-                                        />
-                                    </GridListTile>
-                                ))}
-                            </GridList>
-                        )
-                    } else {
-                        return (
-                            <GridList cellHeight={'auto'} cols={0} spacing={10}>
-                                {rows.map((row) => (
-                                    <GridListTile key={row.id.value} cols={1}>
-                                        <img src={row.thumbnail.value}
-                                            className={classes.moduleThumbnail}
-                                            alt=''
-                                            onClick={() => handleThumbnailClick(row.id.value)}
-                                        />
-                                        <GridListTileBar
-                                            subtitle={
-                                                <span className="text-left">
-                                                    <div><PhotoCameraIcon className="icon-16 mr-1" />{row.device.value}</div>
-                                                    <div><DateRangeIcon className="icon-16 mr-1" />{row.createdDate.value}</div>
-                                                </span>
-                                            }
-                                            actionIcon={
-                                                <Favorite row={row} className={classes.moduleFavoriteButton} toggleFavorite={() => toggleFavorite(row)} />
-                                            }
-                                        />
-                                    </GridListTile>
-                                ))}
-                            </GridList>
                         )
                     }
                 })()}
