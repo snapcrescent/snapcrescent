@@ -17,9 +17,9 @@ import MovieIcon from '@material-ui/icons/Movie';
 import { Header } from '../Header/Header';
 import { Link } from 'react-router-dom';
 import { useMediaQuery } from '@material-ui/core';
+import FolderIcon from '@material-ui/icons/Folder';
 
 const drawerWidth = 240;
-const bgImgUrl = `https://images.unsplash.com/photo-1564352969906-8b7f46ba4b8b?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1534&q=80`;
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    backgroundImage: `url(${bgImgUrl})`,
+    backgroundImage: `url(${process.env.PUBLIC_URL + '/sidebar.jpg'})`,
     backgroundSize: 'cover'
   },
   drawerClose: {
@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('sm')]: {
       width: theme.spacing(9) + 1,
     },
-    backgroundImage: `url(${bgImgUrl})`,
+    backgroundImage: `url(${process.env.PUBLIC_URL + '/sidebar.jpg'})`,
     backgroundSize: 'cover'
   },
   toolbar: {
@@ -91,11 +91,11 @@ export const Sidebar = () => {
       icon: <FavoriteIcon />,
       url: '/home/favorites'
     },
-    // {
-    //   title: 'Private',
-    //   icon: <LockIcon />,
-    //   url: '/home/private'
-    // },
+    {
+      title: 'Album',
+      icon: <FolderIcon />,
+      url: '/home/albums'
+    },
     {
       title: 'Videos',
       icon: <MovieIcon />,

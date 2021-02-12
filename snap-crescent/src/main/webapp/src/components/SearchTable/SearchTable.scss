@@ -16,3 +16,11 @@
     pointer-events: none;
     justify-content: center;
   }
+
+  .albumTile {
+    .MuiGridListTile-tile {
+      width: 270px;
+      height: 270px;
+      background: #616161;
+    }
+  }
