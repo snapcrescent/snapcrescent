@@ -8,7 +8,13 @@ const PHOTO_URL = 'photo';
 const PHOTO_STORAGE_KEY = 'photos';
 
 export const searchPhoto = (searchParams, fetchFromServer = false, overrideStoredPhotos = false, callback) => {
-    searchParams = { page: 0, size: 500, ...searchParams };
+    searchParams = {
+        page: 0,
+        size: 500,
+        sort: 'metadata.createdDate',
+        sortDirection: 'asc',
+        ...searchParams
+    };
 
     if (!fetchFromServer) {
         return AsyncStorage.getItem(PHOTO_STORAGE_KEY).then(storedObject => {
