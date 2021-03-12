@@ -1,3 +1,8 @@
+<!-- For Development -->
+npm install
+npx react-native run-android
+
+<!-- For production APK -->
 Please gradle.properties at C:\Users\<USER>\.gradle\
 
 cd <project root>
