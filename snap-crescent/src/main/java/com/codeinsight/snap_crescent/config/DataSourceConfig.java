@@ -20,7 +20,7 @@ public class DataSourceConfig {
 	public DataSource getDataSource() {
 		DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
 
-		if (System.getenv("ENV").equals(Constant.DB_MYSQL)) {
+		if (System.getenv("ENV").equalsIgnoreCase(Constant.DB_MYSQL)) {
 			dataSourceBuilder.driverClassName(environment.getProperty("SQL_DRIVER"));
 			dataSourceBuilder.url(System.getenv("SQL_URL"));
 			dataSourceBuilder.username(System.getenv("SQL_USER"));
