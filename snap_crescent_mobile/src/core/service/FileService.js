@@ -4,7 +4,7 @@ import store from '..';
 import { isNotNull } from '../../utils/CoreUtil';
 import { getHeaders } from './ApiService';
 
-const FILE_TEMP_STORAGE_KEY = 'SNAP_CRESCENT_TEMPORARY_FILES';
+const TEMP_FILE_STORAGE_KEY = 'SNAP_CRESCENT_TEMPORARY_FILES';
 const FILE_SESSION_KEY = 'SNAP_CRESCENT_FILES_SESSION';
 
 export const FILE_RESPONSE_TYPE = {
@@ -31,7 +31,7 @@ export const fetchFile = (url, config) => {
                 return `data:${config.mimeType};base64,${base64Resp}`;
             } else {
                 const filePath = res.path();
-                addTempPathInStorage(filePath);
+                addPathInTempStorage(filePath);
                 return Platform.OS === 'android' ? 'file://' + filePath : '' + filePath;
             }
         });
@@ -61,23 +61,23 @@ export const downloadFile = (url, config) => {
 }
 
 export const clearTemporaryStorage = () => {
-    AsyncStorage.getItem(FILE_TEMP_STORAGE_KEY).then(item => {
+    AsyncStorage.getItem(TEMP_FILE_STORAGE_KEY).then(item => {
         if (isNotNull(item)) {
             const filePaths = JSON.parse(item);
             filePaths.forEach(path => {
                 RNFetchBlob.fs.unlink(path);
             });
 
-            AsyncStorage.removeItem(FILE_TEMP_STORAGE_KEY);
+            AsyncStorage.removeItem(TEMP_FILE_STORAGE_KEY);
         }
     });
 }
 
-const addTempPathInStorage = (filePath) => {
-    AsyncStorage.getItem(FILE_TEMP_STORAGE_KEY).then(item => {
-        const existsingItems = isNotNull(item) ? JSON.parse(item) : [];
-        existsingItems.push(filePath);
-        AsyncStorage.setItem(FILE_TEMP_STORAGE_KEY, JSON.stringify(filePath));
+const addPathInTempStorage = (filePath) => {
+    AsyncStorage.getItem(TEMP_FILE_STORAGE_KEY).then(item => {
+        const existingItems = isNotNull(item) ? JSON.parse(item) : [];
+        existingItems.push(filePath);
+        AsyncStorage.setItem(TEMP_FILE_STORAGE_KEY, JSON.stringify(existingItems));
     });
 }
 
