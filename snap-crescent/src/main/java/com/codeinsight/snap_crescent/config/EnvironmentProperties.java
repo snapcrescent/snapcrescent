@@ -8,7 +8,7 @@ public class EnvironmentProperties {
 	public static String SQL_PASSWORD = System.getenv("SQL_PASSWORD");
 	
 	
-	public static String STORAGE_PATH = System.getenv("STORAGE_PATH");
-	public static String DATA_PATH = System.getenv("DATA_PATH");
+	public static String STORAGE_PATH = "/media/";
+	public static String DATA_PATH = "/data/";
 
 }
