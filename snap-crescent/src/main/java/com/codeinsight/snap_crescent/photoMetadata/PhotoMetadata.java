@@ -22,6 +22,7 @@ public class PhotoMetadata extends BaseEntity {
 	private static final long serialVersionUID = 1567235158787189351L;
 
 	private String name;
+	private String internalName;
 	private String path;
 	private String size;
 	private String fileTypeName;

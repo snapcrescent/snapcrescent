@@ -4,5 +4,5 @@ import java.io.File;
 
 public interface PhotoMetadataService {
 
-	public PhotoMetadata extractMetaData(File file) throws Exception;
+	public PhotoMetadata extractMetaData(String originalFilename, File file) throws Exception;
 }

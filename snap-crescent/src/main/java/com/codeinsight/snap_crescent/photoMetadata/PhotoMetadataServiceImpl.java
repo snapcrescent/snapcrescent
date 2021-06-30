@@ -28,7 +28,7 @@ public class PhotoMetadataServiceImpl implements PhotoMetadataService {
 	@Autowired
 	private LocationService locationService;
 
-	public PhotoMetadata extractMetaData(File file) throws Exception {
+	public PhotoMetadata extractMetaData(String originalFilename, File file) throws Exception {
 
 		Metadata metadata = getMetadata(file);
 		Map<String, String> metaDataMap = new HashMap<>();
@@ -41,7 +41,8 @@ public class PhotoMetadataServiceImpl implements PhotoMetadataService {
 		PhotoMetadata photoMetadata = new PhotoMetadata();
 
 		photoMetadata.setName(metaDataMap.get(Constant.METADATA_FILE_NAME));
-		photoMetadata.setPath(file.getPath());
+		photoMetadata.setInternalName(file.getName());
+		photoMetadata.setPath(file.getName());
 		photoMetadata.setSize(metaDataMap.get(Constant.METADATA_FILE_SIZE));
 		String modifiedDateString = new SimpleDateFormat(Constant.SIMPLE_DATE_FORMAT).format(file.lastModified());
 		Date modifiedDate = new SimpleDateFormat(Constant.SIMPLE_DATE_FORMAT).parse(modifiedDateString);

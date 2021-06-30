@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.codeinsight.snap_crescent.common.utils.Constant;
 import com.codeinsight.snap_crescent.common.utils.FileService;
+import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadata;
 
@@ -27,9 +29,6 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 	@Value("${thumbnail.size.height}")
 	private int THUMBNAIL_HEIGHT;
-
-	@Value("${thumbnail.output.path}")
-	private String THUMBNAIL_OUTPUT_PATH;
 
 	@Value("${thumbnail.output.nameSuffix}")
 	private String THUMBNAIL_OUTPUT_NAME_SUFFIX;
@@ -43,17 +42,18 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	private final String FILE_TYPE_SEPARATOR = ".";
 
 	public Thumbnail generateThumbnail(File file, PhotoMetadata photoMetadata) throws Exception {
+		
+		File directory = new File(EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER);
+		if (!directory.exists()) {
+			directory.mkdir();
+		}
 
 		boolean isThumbnailCreated = createThumbnail(file, photoMetadata);
 		if (isThumbnailCreated) {
-			File directory = new File(THUMBNAIL_OUTPUT_PATH);
-			if (!directory.exists()) {
-				directory.mkdir();
-			}
 			Thumbnail thumbnail = new Thumbnail();
 			String thumbnailName = getThumbnailName(file);
 			thumbnail.setName(thumbnailName);
-			thumbnail.setPath(THUMBNAIL_OUTPUT_PATH + thumbnailName);
+			thumbnail.setPath(thumbnailName);
 			return thumbnail;
 		}
 
@@ -87,7 +87,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 			bufferedImage.createGraphics().drawImage(scaledImage, 0, 0, null);
 
 			// Save Image as generated thumbnail
-			File outputFile = new File(THUMBNAIL_OUTPUT_PATH + getThumbnailName(file));
+			File outputFile = new File(EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER + getThumbnailName(file));
 			ImageIO.write(bufferedImage, photoMetadata.getFileExtension(), outputFile);
 
 			isThumbnailCreated = true;
