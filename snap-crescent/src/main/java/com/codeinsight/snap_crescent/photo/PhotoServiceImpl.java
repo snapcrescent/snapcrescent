@@ -3,9 +3,9 @@ package com.codeinsight.snap_crescent.photo;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,9 +14,11 @@ import com.codeinsight.snap_crescent.appConfig.AppConfigService;
 import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
 import com.codeinsight.snap_crescent.common.services.BaseService;
 import com.codeinsight.snap_crescent.common.utils.AppConfigKeys;
+import com.codeinsight.snap_crescent.common.utils.Constant;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
 import com.codeinsight.snap_crescent.common.utils.FileService;
+import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadata;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadataRepository;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadataService;
@@ -26,9 +28,6 @@ import com.codeinsight.snap_crescent.thumbnail.ThumbnailService;
 
 @Service
 public class PhotoServiceImpl extends BaseService implements PhotoService {
-
-	@Value("${photo.path}")
-	private String PHOTO_PATH;
 
 	@Autowired
 	private PhotoMetadataService photoMetadataService;
@@ -86,12 +85,19 @@ public class PhotoServiceImpl extends BaseService implements PhotoService {
 		if (x != null & Boolean.parseBoolean(x) == true) {
 			return;
 		}
-		File directory = new File(PHOTO_PATH);
+		
+		
+		File directory = new File(EnvironmentProperties.STORAGE_PATH + Constant.PHOTO_FOLDER);
 		if (!directory.exists()) {
 			directory.mkdir();
 		}
 		for (MultipartFile multipartFile : multipartFiles) {
-			String path = PHOTO_PATH + multipartFile.getOriginalFilename();
+			
+			String originalFilename = multipartFile.getOriginalFilename();
+			String extension =  originalFilename.substring(originalFilename.lastIndexOf("."));
+			
+			String path = EnvironmentProperties.STORAGE_PATH + Constant.PHOTO_FOLDER + UUID.randomUUID().toString() + extension;
+			
 			multipartFile.transferTo(new File(path));
 
 			File file = new File(path);
@@ -100,7 +106,7 @@ public class PhotoServiceImpl extends BaseService implements PhotoService {
 			}
 			Photo image = new Photo();
 
-			PhotoMetadata photoMetadata = photoMetadataService.extractMetaData(file);
+			PhotoMetadata photoMetadata = photoMetadataService.extractMetaData(originalFilename, file);
 			Thumbnail thumbnail = thumbnailService.generateThumbnail(file, photoMetadata);
 
 			photoMetadataRepository.save(photoMetadata);

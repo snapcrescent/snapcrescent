@@ -18,6 +18,9 @@ public class Constant {
 	public static final String METADATA_CREATED_DATE = "Date/Time";
 	public static final String METADATA_MODEL = "Model";
 	public static final String METADATA_FSTOP = "F-Number";
+	
+	public static final String PHOTO_FOLDER = "/photos/";
+	public static final String THUMBNAIL_FOLDER = "/thumbnails/";
 
 	public static final String SIMPLE_DATE_FORMAT = "yyyy:mm:dd hh:mm:ss";
 
