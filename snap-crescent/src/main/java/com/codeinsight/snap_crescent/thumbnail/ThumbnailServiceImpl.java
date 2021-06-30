@@ -5,19 +5,18 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.codeinsight.snap_crescent.common.utils.FileService;
+import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadata;
 
 @Service
@@ -34,6 +33,9 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 	@Value("${thumbnail.output.nameSuffix}")
 	private String THUMBNAIL_OUTPUT_NAME_SUFFIX;
+	
+	@Autowired
+	private FileService fileService;
 
 	@Autowired
 	private ThumbnailRepository thumbnailRepository;
@@ -105,17 +107,9 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	@Override
 	@Transactional
 	public byte[] getById(Long id) {
-		Thumbnail thumbnail = thumbnailRepository.findById(id).get();
-		String path = thumbnail.getPath();
-		File file = new File(path);
-		byte[] image = null;
-		try {
-			InputStream in = new FileInputStream(file);
-			image = IOUtils.toByteArray(in);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return image;
+		Thumbnail thumbnail = thumbnailRepository.findById(id);
+		String fileUniqueName = thumbnail.getPath();
+		return fileService.readFileBytes(FILE_TYPE.THUMBNAIL,fileUniqueName);
 	}
 
 	public static AffineTransform getExifTransformation(int orientation, int width, int height) {

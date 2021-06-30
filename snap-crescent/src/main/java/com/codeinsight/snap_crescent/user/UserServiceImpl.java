@@ -1,7 +1,5 @@
 package com.codeinsight.snap_crescent.user;
 
-import java.util.Optional;
-
 import javax.security.auth.login.CredentialNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +7,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.codeinsight.snap_crescent.beans.ResetPasswordRequest;
-import com.codeinsight.snap_crescent.utils.StringHasher;
+import com.codeinsight.snap_crescent.common.beans.ResetPasswordRequest;
+import com.codeinsight.snap_crescent.common.utils.StringHasher;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -21,28 +19,26 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public User saveUser(User user) throws Exception {
-		User savedUser = null;
 		if (!validateUser(user)) {
 			throw new DuplicateKeyException("Username already exists.");
 		} else {
 			user.setPassword(StringHasher.getBCrpytHash(user.getPassword()));
-			savedUser = userRepository.save(user);
+			userRepository.save(user);
 		}
 
-		return savedUser;
+		return user;
 	}
 
 	@Override
 	@Transactional
 	public String resetPassword(ResetPasswordRequest resetPasswordRequest) throws Exception {
 
-		Optional<User> userToRetrive = userRepository.findByUsername(resetPasswordRequest.getUsername());
+		User user = userRepository.findByUsername(resetPasswordRequest.getUsername());
 
-		if (!userToRetrive.isPresent()) {
+		if (user == null) {
 			throw new CredentialNotFoundException("User not exist.");
 		}
 
-		User user = userToRetrive.get();
 		user.setPassword(StringHasher.getBCrpytHash(resetPasswordRequest.getPassword()));
 		userRepository.save(user);
 

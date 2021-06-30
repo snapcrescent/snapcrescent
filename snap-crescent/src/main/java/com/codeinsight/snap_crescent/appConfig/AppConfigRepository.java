@@ -1,16 +1,26 @@
 package com.codeinsight.snap_crescent.appConfig;
 
-import java.util.Optional;
+import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.data.rest.core.annotation.RestResource;
+import javax.persistence.TypedQuery;
 
-@RepositoryRestResource(exported = false)
-public interface AppConfigRepository extends JpaRepository<AppConfig, Long>, QuerydslPredicateExecutor<AppConfig> {
+import org.springframework.stereotype.Repository;
 
-	@RestResource(exported = false)
-	public Optional<AppConfig> findByConfigKey(@Param("configKey") String configKey);
+import com.codeinsight.snap_crescent.common.BaseRepository;
+
+@Repository
+public class AppConfigRepository extends BaseRepository<AppConfig> {
+
+	public AppConfigRepository() {
+		super(AppConfig.class);
+	}
+
+	public AppConfig findByConfigKey(String configKey) {
+		String query = "SELECT appConfig FROM AppConfig appConfig WHERE appConfig.configKey = :configKey";
+		
+		TypedQuery<AppConfig> typedQuery = getCurrentSession().createQuery(query,AppConfig.class);
+		typedQuery.setParameter("configKey", configKey);
+		List<AppConfig> results = typedQuery.getResultList();
+		return results.isEmpty() ? null : results.get(0);
+	}
 }

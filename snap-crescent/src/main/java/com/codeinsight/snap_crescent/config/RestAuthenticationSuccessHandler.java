@@ -11,10 +11,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.codeinsight.snap_crescent.beans.UserLoginResponse;
-import com.codeinsight.snap_crescent.security.CoreService;
-import com.codeinsight.snap_crescent.utils.JsonUtils;
-import com.codeinsight.snap_crescent.utils.JwtTokenUtil;
+import com.codeinsight.snap_crescent.common.security.CoreService;
+import com.codeinsight.snap_crescent.common.security.UserLoginResponse;
+import com.codeinsight.snap_crescent.common.utils.JsonUtils;
+import com.codeinsight.snap_crescent.common.utils.JwtTokenUtil;
 
 @Component
 public class RestAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {

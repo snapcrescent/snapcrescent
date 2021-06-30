@@ -2,16 +2,19 @@ package com.codeinsight.snap_crescent.photo;
 
 import java.util.ArrayList;
 
-import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
 
 public interface PhotoService {
 	
-	public Page<Photo> search(PhotoSearchCriteria photoSearchCriteria) throws Exception;
+	public BaseResponseBean<Long, UiPhoto> search(PhotoSearchCriteria photoSearchCriteria);
 	
 	public void upload(ArrayList<MultipartFile> multipartFiles) throws Exception;
 	
-	public byte[] getById(Long id) throws Exception;
+	public UiPhoto getById(Long id);
+
+	public byte[] getImageById(Long id) throws Exception;
 	
 	public void like(Long id) throws Exception;
 }

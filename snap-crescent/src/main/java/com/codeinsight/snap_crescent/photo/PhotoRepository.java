@@ -1,33 +1,98 @@
 package com.codeinsight.snap_crescent.photo;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-@RepositoryRestResource(exported = false)
-public interface PhotoRepository extends JpaRepository<Photo, Long>, QuerydslPredicateExecutor<Photo>{
+import javax.persistence.TypedQuery;
 
-	@Query("SELECT photo from Photo photo"
-			+ " LEFT JOIN photo.metadata metadata"
-			+ " LEFT JOIN metadata.location location"
-			+ " WHERE"
-			+ " (:favorite is null OR photo.favorite = :favorite)"
-			+ " AND"
-			+ " (:month is null OR metadata.createdDate like concat('%','-',:month,'-','%'))"
-			+ " AND"
-			+ " (:year is null OR metadata.createdDate like concat('%',:year,'-','%'))"
-			+ " AND"
-			+ " (:searchInput is null OR lower(metadata.model) like concat('%',lower(trim(:searchInput)),'%')"
-			+ " OR"
-			+ " lower(location.city) like concat('%',lower(trim(:searchInput)),'%')"
-			+ " OR"
-			+ " lower(location.state) like concat('%',lower(trim(:searchInput)),'%')"
-			+ " OR"
-			+ " lower(location.country) like concat('%',lower(trim(:searchInput)),'%')"
-			+ " OR"
-			+ " lower(location.town) like concat('%',lower(trim(:searchInput)),'%'))")
-	Page<Photo> search(Boolean favorite, String searchInput, String month, String year, Pageable pageable);
+import org.springframework.stereotype.Repository;
+
+import com.codeinsight.snap_crescent.common.BaseRepository;
+import com.codeinsight.snap_crescent.common.utils.SearchDAOHelper;
+import com.codeinsight.snap_crescent.common.utils.StringUtils;
+
+@Repository
+public class PhotoRepository extends BaseRepository<Photo>{
+	
+	public PhotoRepository() {
+		super(Photo.class);
+	}
+	
+	public int count(PhotoSearchCriteria searchCriteria) {
+		int totalRows = 0;
+		TypedQuery<Long> query = getSearchQuery(searchCriteria, true,  Long.class);
+		totalRows = query.getResultList().get(0).intValue();
+
+		return totalRows;
+	}
+
+	public List<Photo> search(PhotoSearchCriteria searchCriteria, boolean isExportRequest) {
+		TypedQuery<Photo> query = getSearchQuery(searchCriteria, false, Photo.class);
+		if (!isExportRequest) {
+			addPagingParameters(query, searchCriteria);
+		}
+		return query.getResultList();
+	}
+	
+	public <T> TypedQuery<T> getSearchQuery(PhotoSearchCriteria searchCriteria, boolean isCountQuery,  Class<T> type) {
+		// standard fields
+		Boolean isSearchKeyword = Boolean.FALSE;
+		Map<String, Object> paramsMap = new HashMap<>();
+
+		SearchDAOHelper<T> daoHelper = new SearchDAOHelper<T>();
+
+		StringBuffer hql = null;
+		if (isCountQuery) {
+			hql = new StringBuffer("SELECT count(distinct photo.id)");
+		}
+		else {
+			hql = new StringBuffer("SELECT distinct photo");
+		}
+
+		hql.append(" FROM Photo photo");
+		
+		hql.append(" LEFT JOIN photo.photoMetadata photoMetadata");
+		hql.append(" LEFT JOIN photoMetadata.location location");
+		
+		hql.append(" where 1=1 ");
+
+		if (searchCriteria != null && StringUtils.isNotBlank(searchCriteria.getSearchKeyword())) {
+			isSearchKeyword = Boolean.TRUE;
+			String[] stringFields = {"metadata.model","location.city","location.state","location.country","location.town"};
+			String[] numberFields = {};
+			hql.append(daoHelper.getSearchWhereStatement(stringFields, numberFields, searchCriteria.getSearchKeyword(),
+					true));
+		}
+		
+		if(searchCriteria.getActive() != null)
+		{
+			hql.append(" AND photo.active = :active ");
+			paramsMap.put("active", searchCriteria.getActive());
+		}
+		
+		if(searchCriteria.getFavorite() != null)
+		{
+			hql.append(" AND photo.favorite = :favorite ");
+			paramsMap.put("favorite", searchCriteria.getFavorite());
+		}
+		
+		if(isCountQuery == false && searchCriteria.getSortBy() != null){
+			hql.append(" ORDER BY " + searchCriteria.getSortBy() + " " + searchCriteria.getSortOrder());
+		}
+
+		TypedQuery<T> q = this.getCurrentSession().createQuery(hql.toString(), type);
+
+		if (isSearchKeyword) {
+			daoHelper.setSearchStringValue(q);
+		}
+
+		for (Entry<String, Object> parameterEntry : paramsMap.entrySet()) {
+			q.setParameter(parameterEntry.getKey(), parameterEntry.getValue());
+		}
+
+		return q;
+	}
+	
 }

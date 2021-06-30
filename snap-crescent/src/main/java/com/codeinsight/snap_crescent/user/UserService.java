@@ -1,6 +1,6 @@
 package com.codeinsight.snap_crescent.user;
 
-import com.codeinsight.snap_crescent.beans.ResetPasswordRequest;
+import com.codeinsight.snap_crescent.common.beans.ResetPasswordRequest;
 
 public interface UserService {
 

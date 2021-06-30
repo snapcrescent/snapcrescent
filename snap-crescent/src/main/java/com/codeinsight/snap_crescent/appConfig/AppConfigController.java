@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.codeinsight.snap_crescent.utils.AppConfigKeys;
-import com.codeinsight.snap_crescent.utils.Constant;
+import com.codeinsight.snap_crescent.common.utils.AppConfigKeys;
+import com.codeinsight.snap_crescent.common.utils.Constant;
 
 @RestController
 public class AppConfigController {

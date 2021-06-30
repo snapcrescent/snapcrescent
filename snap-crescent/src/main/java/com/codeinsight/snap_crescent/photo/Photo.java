@@ -1,33 +1,27 @@
 package com.codeinsight.snap_crescent.photo;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
+import com.codeinsight.snap_crescent.common.BaseEntity;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadata;
 import com.codeinsight.snap_crescent.thumbnail.Thumbnail;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "photo")
-public class Photo implements Serializable {
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class Photo extends BaseEntity {
 
 	private static final long serialVersionUID = -4250460739319965956L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
-
-	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "THUMBNAIL_ID", nullable = false, insertable = false, updatable = false)
 	private Thumbnail thumbnail;
@@ -35,73 +29,12 @@ public class Photo implements Serializable {
 	@Column(name = "THUMBNAIL_ID", nullable = false, insertable = true, updatable = true)
 	private Long thumbnailId;
 
-	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "METADATA_ID", nullable = false, insertable = false, updatable = false)
-	private PhotoMetadata metadata;
+	@JoinColumn(name = "PHOTO_METADATA_ID", nullable = false, insertable = false, updatable = false)
+	private PhotoMetadata photoMetadata;
 
-	@Column(name = "METADATA_ID", nullable = false, insertable = true, updatable = true)
-	private Long metaDataId;
+	@Column(name = "PHOTO_METADATA_ID", nullable = false, insertable = true, updatable = true)
+	private Long photoMetadataId;
 	
-	private Boolean favorite = false;
-	
-	@Transient
-	private String base64EncodedThumbnail;
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
-
-	public Thumbnail getThumbnail() {
-		return thumbnail;
-	}
-
-	public void setThumbnail(Thumbnail thumbnail) {
-		this.thumbnail = thumbnail;
-	}
-
-	public Long getThumbnailId() {
-		return thumbnailId;
-	}
-
-	public void setThumbnailId(Long thumbnailId) {
-		this.thumbnailId = thumbnailId;
-	}
-
-	public PhotoMetadata getMetadata() {
-		return metadata;
-	}
-
-	public void setMetadata(PhotoMetadata metadata) {
-		this.metadata = metadata;
-	}
-
-	public Long getMetaDataId() {
-		return metaDataId;
-	}
-
-	public void setMetaDataId(Long metaDataId) {
-		this.metaDataId = metaDataId;
-	}
-
-	public Boolean getFavorite() {
-		return favorite;
-	}
-
-	public void setFavorite(Boolean favorite) {
-		this.favorite = favorite;
-	}
-	
-	public String getBase64EncodedThumbnail() {
-		return base64EncodedThumbnail;
-	}
-
-	public void setBase64EncodedThumbnail(String base64EncodedThumbnail) {
-		this.base64EncodedThumbnail = base64EncodedThumbnail;
-	}
-	
+	private Boolean favorite;
 }

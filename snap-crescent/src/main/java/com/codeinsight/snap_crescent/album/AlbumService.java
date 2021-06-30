@@ -1,13 +1,11 @@
 package com.codeinsight.snap_crescent.album;
 
-import org.springframework.data.domain.Page;
+import java.util.List;
 
 public interface AlbumService {
 
-	public Page<Album> search(AlbumSearchCriteria albumSearchCriteria) throws Exception;
-
+	public List<Album> search(AlbumSearchCriteria albumSearchCriteria) throws Exception;
 	public void create(Album album) throws Exception;
-
 	public void update(Album album) throws Exception;
 
 }

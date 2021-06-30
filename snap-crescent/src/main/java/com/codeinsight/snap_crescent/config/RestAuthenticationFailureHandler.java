@@ -11,8 +11,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
-import com.codeinsight.snap_crescent.beans.BaseResponse;
-import com.codeinsight.snap_crescent.utils.JsonUtils;
+import com.codeinsight.snap_crescent.common.beans.BaseResponse;
+import com.codeinsight.snap_crescent.common.utils.JsonUtils;
 
 @Component
 public class RestAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
