@@ -8,4 +8,4 @@ FROM openjdk:11.0.7-jre-slim
 COPY --from=build /tmp/target/snap-crescent-*.jar /snap-crescent.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=${ENV}", "snap-crescent.jar"]
+ENTRYPOINT ["java", "-jar", "snap-crescent.jar"]
