@@ -1,10 +1,14 @@
 package com.codeinsight.snap_crescent.location;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.stereotype.Repository;
 
-@RepositoryRestResource(exported = false)
-public interface LocationRepository extends JpaRepository<Location, Long>, QuerydslPredicateExecutor<Location>{
+import com.codeinsight.snap_crescent.common.BaseRepository;
+
+@Repository
+public class LocationRepository extends BaseRepository<Location> {
+
+	public LocationRepository() {
+		super(Location.class);
+	}
 
 }

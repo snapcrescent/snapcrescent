@@ -1,34 +1,31 @@
 package com.codeinsight.snap_crescent.photo;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Base64;
+import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.codeinsight.snap_crescent.appConfig.AppConfigService;
+import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
+import com.codeinsight.snap_crescent.common.services.BaseService;
+import com.codeinsight.snap_crescent.common.utils.AppConfigKeys;
+import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
+import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
+import com.codeinsight.snap_crescent.common.utils.FileService;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadata;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadataRepository;
 import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadataService;
 import com.codeinsight.snap_crescent.thumbnail.Thumbnail;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailRepository;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailService;
-import com.codeinsight.snap_crescent.utils.AppConfigKeys;
 
 @Service
-public class PhotoServiceImpl implements PhotoService {
+public class PhotoServiceImpl extends BaseService implements PhotoService {
 
 	@Value("${photo.path}")
 	private String PHOTO_PATH;
@@ -51,16 +48,34 @@ public class PhotoServiceImpl implements PhotoService {
 	@Autowired
 	private AppConfigService appConfigService;
 
+	@Autowired
+	private FileService fileService;
+
+	@Autowired
+	private PhotoConverter photoConverter;
+
 	@Transactional
-	public Page<Photo> search(PhotoSearchCriteria photoSearchCriteria) throws Exception {
-		Sort sort = Sort.by(photoSearchCriteria.getSortDirection().equals("desc") ? Direction.DESC : Direction.ASC, photoSearchCriteria.getSort());
-		Pageable pageable = PageRequest.of(photoSearchCriteria.getPage(), photoSearchCriteria.getSize(), sort);
-		Page<Photo> photos = photoRepository.search(photoSearchCriteria.getFavorite(), photoSearchCriteria.getSearchInput(), photoSearchCriteria.getMonth(), photoSearchCriteria.getYear() ,pageable);
-		for (Photo photo : photos) {
-			photo.setBase64EncodedThumbnail(
-					Base64.getEncoder().encodeToString(thumbnailService.getById(photo.getId())));
+	public BaseResponseBean<Long, UiPhoto> search(PhotoSearchCriteria searchCriteria) {
+
+		BaseResponseBean<Long, UiPhoto> response = new BaseResponseBean<>();
+
+		int count = photoRepository.count(searchCriteria);
+
+		if (count > 0) {
+
+			List<UiPhoto> searchResult = photoConverter.getBeansFromEntities(
+					photoRepository.search(searchCriteria, searchCriteria.getResultType() == ResultType.OPTION),
+					searchCriteria.getResultType());
+
+			response.setTotalResultsCount(count);
+			response.setResultCountPerPage(searchResult.size());
+			response.setCurrentPageIndex(searchCriteria.getPageNumber());
+
+			response.setObjects(searchResult);
+
 		}
-		return photos;
+
+		return response;
 	}
 
 	@Override
@@ -91,7 +106,7 @@ public class PhotoServiceImpl implements PhotoService {
 			photoMetadataRepository.save(photoMetadata);
 			thumbnailRepository.save(thumbnail);
 
-			image.setMetaDataId(photoMetadata.getId());
+			image.setPhotoMetadataId(photoMetadata.getId());
 			image.setThumbnailId(thumbnail.getId());
 
 			photoRepository.save(image);
@@ -106,28 +121,28 @@ public class PhotoServiceImpl implements PhotoService {
 		exist = photoMetadataRepository.existsByName(fileName);
 		return exist;
 	}
+	
+	@Override
+	public UiPhoto getById(Long id) {
+		return photoConverter.getBeanFromEntity(photoRepository.findById(id), ResultType.FULL) ;
+	}
+
 
 	@Override
 	@Transactional
-	public byte[] getById(Long id) throws Exception {
-		Photo photo = photoRepository.findById(id).get();
-		String path = photo.getMetadata().getPath();
-		File file = new File(path);
-		byte[] image = null;
-		try {
-			InputStream in = new FileInputStream(file);
-			image = IOUtils.toByteArray(in);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return image;
+	public byte[] getImageById(Long id) throws Exception {
+		Photo photo = photoRepository.findById(id);
+		String fileUniqueName = photo.getPhotoMetadata().getPath();
+		return fileService.readFileBytes(FILE_TYPE.PHOTO, fileUniqueName);
 	}
 
 	@Override
 	@Transactional
 	public void like(Long id) throws Exception {
-		Photo photo = photoRepository.findById(id).get();
+		Photo photo = photoRepository.findById(id);
 		Boolean like = photo.getFavorite();
 		photo.setFavorite(!like);
 	}
+
+	
 }

@@ -1,14 +1,17 @@
 package com.codeinsight.snap_crescent.photoMetadata;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.stereotype.Repository;
 
-@RepositoryRestResource(exported = false)
-public interface PhotoMetadataRepository extends JpaRepository<PhotoMetadata, Long>, QuerydslPredicateExecutor<PhotoMetadata>{
+import com.codeinsight.snap_crescent.common.BaseRepository;
 
-	@RestResource(exported = false)
-	boolean existsByName(@Param("name") String name);
+@Repository
+public class PhotoMetadataRepository extends BaseRepository<PhotoMetadata>{
+	
+	public PhotoMetadataRepository() {
+		super(PhotoMetadata.class);
+	}
+
+	public boolean existsByName(String name) {
+		return true;
+	}
 }

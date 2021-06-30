@@ -4,12 +4,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
-import com.codeinsight.snap_crescent.beans.UserLoginRequest;
+import com.codeinsight.snap_crescent.common.security.UserLoginRequest;
 
 public class CustomWebAuthenticationDetails extends WebAuthenticationDetails {
 
 	private static final long serialVersionUID = 4707572641863916710L;
-	UserLoginRequest loginRequest = null;
+	private UserLoginRequest loginRequest = null;
 
 	public CustomWebAuthenticationDetails(HttpServletRequest request) {
 		super(request);

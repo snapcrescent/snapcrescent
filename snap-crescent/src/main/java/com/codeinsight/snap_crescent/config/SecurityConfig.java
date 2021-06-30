@@ -17,7 +17,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.codeinsight.snap_crescent.security.UserAuthDetailsService;
+import com.codeinsight.snap_crescent.common.security.UserAuthDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -79,14 +79,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.antMatchers("/user-exists").permitAll()
 		.antMatchers("/sign-up").permitAll()
 		.antMatchers("/logout").permitAll();
-		http.formLogin().authenticationDetailsSource(authenticationDetailsSource).loginPage("/login").permitAll();
+		//http.formLogin().authenticationDetailsSource(authenticationDetailsSource).loginPage("/login").permitAll();
 
-		http.logout().logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler);
+		//http.logout().logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler);
 
-		http.authorizeRequests().anyRequest().authenticated();
+		//http.authorizeRequests().anyRequest().authenticated();
 
-		http.addFilter(jwtAuthorizationFilter());
-		http.addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+		//http.addFilter(jwtAuthorizationFilter());
+		//http.addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
 	
 	@Bean

@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.codeinsight.snap_crescent.beans.GeolocationApiResponse;
-import com.codeinsight.snap_crescent.utils.RestApiUtil;
+import com.codeinsight.snap_crescent.common.beans.GeolocationApiResponse;
+import com.codeinsight.snap_crescent.common.utils.RestApiUtil;
 
 @Service
 public class LocationServiceImpl implements LocationService {
@@ -22,14 +22,10 @@ public class LocationServiceImpl implements LocationService {
 	public Long saveLocation(Double longitude, Double latitude) throws Exception {
 		
 		try {
-			System.out.println("Get Location - Start");
 			Location location = executeReverseGeoCoding(longitude, latitude);
-			System.out.println("Get Location - End");
 			location.setLongitude(longitude);
 			location.setLatitude(latitude);
-			System.out.println("Save Location - Start");
 			locationRepository.save(location);
-			System.out.println("Save Location - End");
 			return location.getId();	
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -9,7 +9,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
-import com.codeinsight.snap_crescent.utils.Constant;
+import com.codeinsight.snap_crescent.common.utils.Constant;
 
 @Configuration
 public class DBInitializeConfig {

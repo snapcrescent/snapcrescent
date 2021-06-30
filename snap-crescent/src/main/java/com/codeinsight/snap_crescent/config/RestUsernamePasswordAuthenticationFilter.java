@@ -11,8 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.codeinsight.snap_crescent.beans.UserLoginRequest;
-import com.codeinsight.snap_crescent.utils.JsonUtils;
+import com.codeinsight.snap_crescent.common.security.UserLoginRequest;
+import com.codeinsight.snap_crescent.common.utils.JsonUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 public class RestUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {

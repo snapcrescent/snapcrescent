@@ -10,8 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.codeinsight.snap_crescent.beans.BaseResponse;
-import com.codeinsight.snap_crescent.utils.JsonUtils;
+import com.codeinsight.snap_crescent.common.beans.BaseResponse;
+import com.codeinsight.snap_crescent.common.utils.JsonUtils;
 
 @Component
 public class RestLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {

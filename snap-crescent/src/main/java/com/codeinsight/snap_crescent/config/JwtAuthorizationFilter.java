@@ -15,8 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-import com.codeinsight.snap_crescent.security.UserAuthDetailsService;
-import com.codeinsight.snap_crescent.utils.JwtTokenUtil;
+import com.codeinsight.snap_crescent.common.security.UserAuthDetailsService;
+import com.codeinsight.snap_crescent.common.utils.JwtTokenUtil;
 
 import io.jsonwebtoken.ExpiredJwtException;
 
@@ -60,7 +60,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 	}
 
 	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-		try {
+		
 			String token = request.getHeader(JWT_HEADER);
 			token = token.replaceAll("Bearer", "").trim();
 			
@@ -78,9 +78,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
 				return auth;
 			}
-
-		} catch (Exception e) {
-		}
 
 		return null;
 	}

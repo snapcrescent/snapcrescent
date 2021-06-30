@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.codeinsight.snap_crescent.beans.ResetPasswordRequest;
+import com.codeinsight.snap_crescent.common.beans.ResetPasswordRequest;
 
 @RestController
 public class UserController {

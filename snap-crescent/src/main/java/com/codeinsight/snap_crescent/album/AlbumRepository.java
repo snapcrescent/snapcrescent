@@ -1,15 +1,19 @@
 package com.codeinsight.snap_crescent.album;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import java.util.List;
 
-@RepositoryRestResource(exported = false)
-public interface AlbumRepository extends JpaRepository<Album, Long>, QuerydslPredicateExecutor<Album> {
+import org.springframework.stereotype.Repository;
 
-	@Query("SELECT album from Album album")
-	Page<Album> search(Pageable pageable);
+import com.codeinsight.snap_crescent.common.BaseRepository;
+
+@Repository
+public class AlbumRepository extends BaseRepository<Album> {
+
+	public AlbumRepository() {
+		super(Album.class);
+	}
+
+	public List<Album> search(AlbumSearchCriteria albumSearchCriteria) {
+		return null;
+	}
 }
