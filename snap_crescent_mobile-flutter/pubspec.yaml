@@ -24,14 +24,13 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_mobx: ^2.0.0
+  fluttertoast: ^8.0.7
   http: ^0.13.3
   mobx: ^2.0.1
   path_provider: ^2.0.2
   path : ^1.8.0
   provider: ^5.0.0
   sqflite: ^2.0.0+3
-  sqfentity: ^2.0.0
-  sqfentity_gen : ^2.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

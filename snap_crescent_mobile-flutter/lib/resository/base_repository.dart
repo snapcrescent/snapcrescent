@@ -36,6 +36,10 @@ class BaseResository {
       return await DatabaseHelper.instance.update(tableName,entity.toMap());
   }
 
+  Future<int> deleteAll() async {
+      return await DatabaseHelper.instance.deleteAll(tableName);
+  }
+
   Future<int> delete(int id) async {
       return await DatabaseHelper.instance.delete(tableName,id);
   }

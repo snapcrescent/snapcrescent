@@ -5,11 +5,13 @@ import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/photo.dart';
 import 'package:snap_crescent/resository/photo_resository.dart';
 import 'package:snap_crescent/resository/thumbnail_resository.dart';
+import 'package:snap_crescent/services/base_service.dart';
 
-class PhotoService {
+class PhotoService extends BaseService {
   
   Future<BaseResponseBean<int, Photo>> search() async {
-    Response response = await get(Uri.parse("http://192.168.0.61:8080/photo?resultType=SEARCH&page=0&size=1000&sort=photo.id&sortDirection=desc"));
+    final baseUrl = await getServerUrl();
+    Response response = await get(Uri.parse('''$baseUrl/photo?resultType=SEARCH&page=0&size=1000&sort=photo.id&sortDirection=desc'''));
 
     if (response.statusCode == 200) {
       return BaseResponseBean.fromJson(jsonDecode(response.body), Photo.fromJsonModel);
@@ -19,12 +21,13 @@ class PhotoService {
   }
 
   Future<BaseResponseBean<int, Photo>> getById(int photoId) async {
-    Response res = await get(Uri.parse("http://192.168.0.61:8080/photo/" + photoId.toString()));
+    final baseUrl = await getServerUrl();
+    Response res = await get(Uri.parse('''$baseUrl/photo/$photoId'''));
 
     if (res.statusCode == 200) {
       return BaseResponseBean.fromJson(jsonDecode(res.body), Photo.fromJsonModel);
     } else {
-      throw "Unable to retrieve photos.";
+      throw "Unable to retrieve photo.";
     }
   }
 
@@ -63,7 +66,7 @@ class PhotoService {
   }
 
   Future<int> findPreviousById(int photoId) async {
-    return PhotoResository.instance.findNextById(photoId);
+    return PhotoResository.instance.findPreviousById(photoId);
   }
   
 }

@@ -1,8 +1,8 @@
 class BaseUiBean {
   int? id;
 	int? version;
-  int? creationDatetime;
-	int? lastModifiedDatetime;
+  DateTime? creationDatetime;
+	DateTime? lastModifiedDatetime;
   bool? active;
 
   
@@ -29,9 +29,9 @@ class BaseUiBean {
     return {
       'ID':id,
       'VERSION':version,
-      'CREATION_DATETIME':creationDatetime,
-      'LAST_MODIFIED_DATETIME':lastModifiedDatetime,
-      'ACTIVE':active
+      'CREATION_DATETIME':creationDatetime!.millisecondsSinceEpoch,
+      'LAST_MODIFIED_DATETIME':lastModifiedDatetime!.millisecondsSinceEpoch,
+      'ACTIVE':active == true ? 1 : 0
     };
   }
             
