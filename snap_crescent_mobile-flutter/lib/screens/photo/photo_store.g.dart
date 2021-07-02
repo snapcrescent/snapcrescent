@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'photos_store.dart';
+part of 'photo_store.dart';
 
 // **************************************************************************
 // StoreGenerator
@@ -8,8 +8,8 @@ part of 'photos_store.dart';
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
-mixin _$PhotosStore on _PhotosStore, Store {
-  final _$allPhotosAtom = Atom(name: '_PhotosStore.allPhotos');
+mixin _$PhotoStore on _PhotoStore, Store {
+  final _$allPhotosAtom = Atom(name: '_PhotoStore.allPhotos');
 
   @override
   List<Photo> get allPhotos {
@@ -24,7 +24,7 @@ mixin _$PhotosStore on _PhotosStore, Store {
     });
   }
 
-  final _$getPhotosAsyncAction = AsyncAction('_PhotosStore.getPhotos');
+  final _$getPhotosAsyncAction = AsyncAction('_PhotoStore.getPhotos');
 
   @override
   Future<void> getPhotos(bool forceReloadFromApi) {

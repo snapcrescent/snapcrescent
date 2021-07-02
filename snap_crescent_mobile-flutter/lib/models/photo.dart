@@ -35,8 +35,14 @@ class Photo extends BaseUiBean {
     return Photo(
       id: json['id'],
       version: json['version'],
-      creationDatetime: json['creationDatetime'],
-      lastModifiedDatetime: json['lastModifiedDatetime'],
+      creationDatetime: json['creationDatetime'] == null
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(
+              json['creationDatetime'] * 1000),
+      lastModifiedDatetime: json['lastModifiedDatetime'] == null
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(
+              json['lastModifiedDatetime'] * 1000),
       active: json['active'],
       thumbnail: json['thumbnail'] == null
           ? null
@@ -51,26 +57,27 @@ class Photo extends BaseUiBean {
   }
 
   factory Photo.fromMap(Map<String, dynamic> map) {
-      return Photo(
-        id : map['ID'],
-        version : map['VERSION'],
-        creationDatetime : map['CREATION_DATETIME'],
-        lastModifiedDatetime : map['LAST_MODIFIED_DATETIME'],
-        active : map['ACTIVE'] == 1 ? true : false,
-        thumbnailId : map['THUMBNAIL_ID'],
-        photoMetadataId : map['PHOTO_METADATA_ID'],
-        favorite : map['FAVORITE'] == 1 ? true : false,
-      );
-
-   }
+    return Photo(
+      id: map['ID'],
+      version: map['VERSION'],
+      creationDatetime:
+          DateTime.fromMillisecondsSinceEpoch(map['CREATION_DATETIME'] * 1000),
+      lastModifiedDatetime: DateTime.fromMillisecondsSinceEpoch(
+          map['LAST_MODIFIED_DATETIME'] * 1000),
+      active: map['ACTIVE'] == 1 ? true : false,
+      thumbnailId: map['THUMBNAIL_ID'],
+      photoMetadataId: map['PHOTO_METADATA_ID'],
+      favorite: map['FAVORITE'] == 1 ? true : false,
+    );
+  }
 
   @override
-  Map<String,dynamic> toMap() {
-    Map<String,dynamic> map =  super.toMap();
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> map = super.toMap();
 
     map['THUMBNAIL_ID'] = thumbnailId;
     map['PHOTO_METADATA_ID'] = thumbnailId;
-    map['FAVORITE'] = thumbnailId;
+    map['FAVORITE'] = favorite == true ? 1 : 0;
 
     return map;
   }

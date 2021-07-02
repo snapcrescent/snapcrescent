@@ -11,14 +11,16 @@ class PhotoResository extends BaseResository{
 
   Future<int> findNextById(int id) async {
       Database database = await DatabaseHelper.instance.database;
-      final result = await database.rawQuery('''SELECT ID from $tableName where ID > $id LIMIT 1''').then((value) => value);
-      return Future.value(Sqflite.firstIntValue(result));
+      final result = await database.rawQuery('''SELECT ID from $tableName where ID > $id LIMIT 1''');
+      final int? nextId = result.isEmpty ? 0 : Sqflite.firstIntValue(result);
+      return Future.value(nextId);
   }
 
   Future<int> findPreviousById(int id) async {
       Database database = await DatabaseHelper.instance.database;
-      final result = await database.rawQuery('''SELECT ID from $tableName where ID < $id ORDER BY ID DESC LIMIT 1''').then((value) => value);
-       return Future.value(Sqflite.firstIntValue(result));
+      final result = await database.rawQuery('''SELECT ID from $tableName where ID < $id ORDER BY ID DESC LIMIT 1''');
+      final int? previousId = result.isEmpty ? 0 : Sqflite.firstIntValue(result);
+      return Future.value(previousId);
   }
   
 }

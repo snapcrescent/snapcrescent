@@ -4,18 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/photo.dart';
+import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
+import 'package:snap_crescent/screens/photo/photo_store.dart';
 import 'package:snap_crescent/screens/photo_detail/photo_detail.dart';
-import 'package:snap_crescent/screens/photos/photos_store.dart';
 
-class Photos extends StatelessWidget {
-  static const routeName = '/photos';
+class PhotoScreen extends StatelessWidget {
+  static const routeName = '/photo';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: Text('Photos'),
+          backgroundColor: Colors.black,
         ),
+        drawer: AppDrawer(),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[Expanded(child: PhotoGridView())],
@@ -36,7 +39,7 @@ class _PhotoGridViewState extends State<PhotoGridView> {
 
   @override
   Widget build(BuildContext context) {
-    final PhotosStore photosStore = Provider.of<PhotosStore>(context);
+    final PhotoStore photosStore = Provider.of<PhotoStore>(context);
 
     
     
@@ -44,9 +47,7 @@ class _PhotoGridViewState extends State<PhotoGridView> {
       Navigator.pushNamed(
         context,
         PhotoDetail.routeName,
-        arguments: {
-          "id": photoId
-        },
+        arguments: photoId,
       );
     }
 
@@ -64,11 +65,11 @@ class _PhotoGridViewState extends State<PhotoGridView> {
                 );
     }
 
-    _gridView(PhotosStore photosStore) {
+    _gridView(Orientation orientation, PhotoStore photosStore) {
       return GridView.count(
                     mainAxisSpacing: 1,
                     crossAxisSpacing: 1,
-                    crossAxisCount: 4,
+                    crossAxisCount: orientation == Orientation.portrait ? 4 : 8,
                     children: photosStore.allPhotos
                         .map((photo) => GestureDetector(
                             child: new Image.memory(base64Decode(
@@ -85,10 +86,14 @@ class _PhotoGridViewState extends State<PhotoGridView> {
     }
 
     return Observer(
-        builder: (_) => photosStore.allPhotos.isNotEmpty
-            ? RefreshIndicator(
+        builder: (context) => photosStore.allPhotos.isNotEmpty
+            ? OrientationBuilder(
+              builder: (context, orientation) {
+                return RefreshIndicator(
                 onRefresh: _pullRefresh,
-                child: _scrollBar(_gridView(photosStore)))
+                child: _scrollBar(_gridView(orientation, photosStore)));
+              }
+            )
             : Center(
                 child: Container(
                   width: 60,

@@ -7,7 +7,7 @@ import 'package:path/path.dart';
 class DatabaseHelper {
 
   static final _dbName = 'snap-crescent.db'; 
-  static final _dbVersion = 2; 
+  static final _dbVersion = 1; 
   
   // making it singleton class
   DatabaseHelper._privateConstructor();
@@ -31,13 +31,22 @@ class DatabaseHelper {
   }
 
   Future _onCreate(Database database,int version) {
+
+    database.execute(
+      '''
+      CREATE TABLE APP_CONFIG ( 
+        CONFIG_KEY TEXT PRIMARY KEY,
+        CONFIG_VALUE TEXT NOT NULL
+        );
+      ''');
+
     database.execute(
       '''
       CREATE TABLE PHOTO ( 
         ID INTEGER PRIMARY KEY,
         VERSION INTEGER NOT NULL,
-        CREATION_DATETIME TEXT,
-        LAST_MODIFIED_DATETIME TEXT,
+        CREATION_DATETIME INTEGER,
+        LAST_MODIFIED_DATETIME INTEGER,
         ACTIVE INTEGER,
         THUMBNAIL_ID INTEGER,
         PHOTO_METADATA_ID INTEGER,
@@ -50,13 +59,15 @@ class DatabaseHelper {
       CREATE TABLE THUMBNAIL (
         ID INTEGER PRIMARY KEY,
         VERSION INTEGER NOT NULL,
-        CREATION_DATETIME TEXT,
-        LAST_MODIFIED_DATETIME TEXT,
+        CREATION_DATETIME INTEGER,
+        LAST_MODIFIED_DATETIME INTEGER,
         ACTIVE INTEGER,
         NAME TEXT,
         BASE_64_ENCODED_THUMBNAIL TEXT
         );
       ''');
+
+      
   }
 
   Future<int> save(String tableName, Map<String,dynamic> row) async {
@@ -83,6 +94,11 @@ class DatabaseHelper {
   Future<int> delete(String tableName,int id) async {
       Database database = await instance.database;
       return await database.delete(tableName,where: 'ID = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteAll(String tableName) async {
+      Database database = await instance.database;
+      return await database.delete(tableName);
   }
 
 }

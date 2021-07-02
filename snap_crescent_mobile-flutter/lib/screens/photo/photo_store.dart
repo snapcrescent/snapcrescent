@@ -3,13 +3,13 @@ import 'package:snap_crescent/models/photo.dart';
 import 'package:snap_crescent/services/photo_service.dart';
 import 'package:snap_crescent/services/thumbnail_service.dart';
 
-part 'photos_store.g.dart';
+part 'photo_store.g.dart';
 
-class PhotosStore = _PhotosStore with _$PhotosStore;
+class PhotoStore = _PhotoStore with _$PhotoStore;
 
-abstract class _PhotosStore with Store {
+abstract class _PhotoStore with Store {
   
-  _PhotosStore() {
+  _PhotoStore() {
     getPhotos(false);
   }
 
@@ -50,6 +50,8 @@ abstract class _PhotosStore with Store {
     await PhotoService().saveOnLocal(allPhotos[0]);
     await PhotoService().saveOnLocal(allPhotos[1]);
     await PhotoService().saveOnLocal(allPhotos[2]);
+    await PhotoService().saveOnLocal(allPhotos[3]);
+    await PhotoService().saveOnLocal(allPhotos[4]);
   }
 
 }
