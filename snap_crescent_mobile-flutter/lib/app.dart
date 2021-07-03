@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snap_crescent/screens/home/home_screen.dart';
 import 'package:snap_crescent/screens/login/login.dart';
 import 'package:snap_crescent/screens/photo_detail/photo_detail.dart';
 import 'package:snap_crescent/screens/photo/photo.dart';
 import 'package:snap_crescent/screens/photo/photo_store.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
+import 'package:snap_crescent/screens/sync_process/sync_process.dart';
 import 'package:snap_crescent/screens/video/video.dart';
 import 'package:snap_crescent/style.dart';
 
@@ -21,7 +21,6 @@ class App extends StatelessWidget {
       child: MaterialApp(
         title: 'Snap Crescent',
         initialRoute: SplashScreen.routeName,
-        // routes: _routes(),
         theme: _theme(),
         onGenerateRoute: _generateRoute,
       ),
@@ -34,12 +33,13 @@ class App extends StatelessWidget {
         return MaterialPageRoute(builder: (_) => SplashScreen());
       case LoginScreen.routeName:
         return MaterialPageRoute(builder: (_) => LoginScreen());
-      case HomeScreen.routeName:
-        return MaterialPageRoute(builder: (_) => HomeScreen());
+      case SyncProcessScreen.routeName:
+        return MaterialPageRoute(builder: (_) => SyncProcessScreen());
       case PhotoScreen.routeName:
         return MaterialPageRoute(builder: (_) => PhotoScreen());
       case PhotoDetail.routeName:
-        return MaterialPageRoute(builder: (_) => PhotoDetail(settings.arguments.toString()));
+        return MaterialPageRoute(
+            builder: (_) => PhotoDetail(settings.arguments.toString()));
       case SettingsScreen.routeName:
         return MaterialPageRoute(builder: (_) => SettingsScreen());
       case VideoScreen.routeName:
@@ -53,21 +53,6 @@ class App extends StatelessWidget {
                 ));
     }
   }
-
-  /*
-  _routes() {
-    return {
-      SplashScreen.routeName: (context) => SplashScreen(),
-      LoginScreen.routeName: (context) => LoginScreen(),
-      HomeScreen.routeName: (context) => HomeScreen(),
-      PhotoScreen.routeName: (context) => PhotoScreen(),
-      PhotoDetail.routeName: (context) => PhotoDetail(),
-      SettingsScreen.routeName: (context) => SettingsScreen(),
-      VideoScreen.routeName: (context) => VideoScreen(),
-    };
-    
-  }
-  */
 
   ThemeData _theme() {
     return ThemeData(

@@ -26,7 +26,7 @@ public class BaseController {
 			searchCriteria.setSortBy(searchParams.get("sort"));
 		}
 
-		if (searchParams.get("sortDirection") != null && searchParams.get("sortDirection").equals("desc")) {
+		if (searchParams.get("sortDirection") != null && searchParams.get("sortDirection").equalsIgnoreCase("desc")) {
 			searchCriteria.setSortOrder(Direction.DESC);
 		} else {
 			searchCriteria.setSortOrder(Direction.ASC);

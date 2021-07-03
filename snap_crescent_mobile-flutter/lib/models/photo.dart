@@ -3,7 +3,6 @@ import 'package:snap_crescent/models/photo_metadata.dart';
 import 'package:snap_crescent/models/thumbnail.dart';
 
 class Photo extends BaseUiBean {
-  static Photo fromJsonModel(Map<String, dynamic> json) => Photo.fromJson(json);
 
   Thumbnail? thumbnail;
   int? thumbnailId;
@@ -30,6 +29,8 @@ class Photo extends BaseUiBean {
             creationDatetime: creationDatetime,
             lastModifiedDatetime: lastModifiedDatetime,
             active: active);
+
+  static Photo fromJsonModel(Map<String, dynamic> json) => Photo.fromJson(json);
 
   factory Photo.fromJson(Map<String, dynamic> json) {
     return Photo(
@@ -76,7 +77,7 @@ class Photo extends BaseUiBean {
     Map<String, dynamic> map = super.toMap();
 
     map['THUMBNAIL_ID'] = thumbnailId;
-    map['PHOTO_METADATA_ID'] = thumbnailId;
+    map['PHOTO_METADATA_ID'] = photoMetadataId;
     map['FAVORITE'] = favorite == true ? 1 : 0;
 
     return map;

@@ -144,10 +144,9 @@ public class PhotoServiceImpl extends BaseService implements PhotoService {
 
 	@Override
 	@Transactional
-	public void like(Long id) throws Exception {
-		Photo photo = photoRepository.findById(id);
-		Boolean like = photo.getFavorite();
-		photo.setFavorite(!like);
+	public void update(UiPhoto enity) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

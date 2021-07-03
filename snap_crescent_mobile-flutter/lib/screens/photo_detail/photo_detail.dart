@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
-import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/photo.dart';
 import 'package:snap_crescent/resository/photo_resository.dart';
 import 'package:snap_crescent/services/photo_service.dart';
@@ -120,7 +119,7 @@ class _PhotoDetailViewState extends State<PhotoDetailView> {
     return Observer(
         builder: (context) => photo!.id == _photoId
             ? OrientationBuilder(builder: (context, orientation) {
-                return _imageContainer(photo);
+                return _imageContainer(photo!);
               })
             : Center(
                 child: Container(
