@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:snap_crescent/resository/photo_resository.dart';
-import 'package:snap_crescent/resository/thumbnail_resository.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
 import 'package:snap_crescent/screens/login/login.dart';
+import 'package:snap_crescent/services/sync_info_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   static const routeName = '/settings';
 
   _clearCache() async {
-    await PhotoResository.instance.deleteAll();
-    await ThumbnailResository.instance.deleteAll();
+   await SyncInfoService().deleteAllData();
   }
 
   _setttingsList(BuildContext context) {

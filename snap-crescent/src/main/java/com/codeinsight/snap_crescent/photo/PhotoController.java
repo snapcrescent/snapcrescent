@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +31,12 @@ public class PhotoController extends BaseController{
 
 	@GetMapping("/photo")
 	public @ResponseBody BaseResponseBean<Long, UiPhoto> search(@RequestParam Map<String, String> searchParams) {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		PhotoSearchCriteria searchCriteria = new PhotoSearchCriteria();
 		parseSearchParams(searchParams, searchCriteria);
 		return photoService.search(searchCriteria);
@@ -70,10 +78,10 @@ public class PhotoController extends BaseController{
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
-	@PostMapping(value="/photo/{id}/like")
-	public ResponseEntity<?> like(@PathVariable Long id) {
+	@PutMapping(value="/photo/{id}")
+	public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UiPhoto photo) {
 		try {
-			photoService.like(id);
+			// photoService.like(id);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

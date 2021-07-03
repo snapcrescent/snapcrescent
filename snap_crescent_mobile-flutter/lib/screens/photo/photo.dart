@@ -32,6 +32,42 @@ class PhotoGridView extends StatefulWidget {
 }
 
 class _PhotoGridViewState extends State<PhotoGridView> {
+  _onPhotoTap(BuildContext context, int photoId, List<Photo> photos) {
+    Navigator.pushNamed(
+      context,
+      PhotoDetail.routeName,
+      arguments: photoId,
+    );
+  }
+
+  _scrollableView(Widget? child) {
+    return Scrollbar(
+      thickness: 10,
+      isAlwaysShown: true,
+      radius: Radius.circular(10),
+      showTrackOnHover: true,
+      notificationPredicate: (ScrollNotification notification) {
+        return notification.depth == 0;
+      },
+      child: GestureDetector(child: child),
+    );
+  }
+
+  _gridView(Orientation orientation, PhotoStore photosStore) {
+    return GridView.count(
+      mainAxisSpacing: 1,
+      crossAxisSpacing: 1,
+      crossAxisCount: orientation == Orientation.portrait ? 4 : 8,
+      children: photosStore.allPhotos
+          .map((photo) => GestureDetector(
+              child: new Image.memory(
+                  base64Decode(photo.thumbnail!.base64EncodedThumbnail!)),
+              onTap: () =>
+                  _onPhotoTap(context, photo.id!, photosStore.allPhotos)))
+          .toList(),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -41,45 +77,6 @@ class _PhotoGridViewState extends State<PhotoGridView> {
   Widget build(BuildContext context) {
     final PhotoStore photosStore = Provider.of<PhotoStore>(context);
 
-    
-    
-    _onPhotoTap(BuildContext context, int photoId, List<Photo> photos) {
-      Navigator.pushNamed(
-        context,
-        PhotoDetail.routeName,
-        arguments: photoId,
-      );
-    }
-
-    _scrollBar(Widget? child) {
-      return Scrollbar(
-                  thickness: 10,
-                  isAlwaysShown: true,
-                  radius: Radius.circular(10),
-                  showTrackOnHover: true,
-                  notificationPredicate: (ScrollNotification notification) {
-                    return notification.depth == 0;
-                  },
-                  child: GestureDetector(
-                      child: child),
-                );
-    }
-
-    _gridView(Orientation orientation, PhotoStore photosStore) {
-      return GridView.count(
-                    mainAxisSpacing: 1,
-                    crossAxisSpacing: 1,
-                    crossAxisCount: orientation == Orientation.portrait ? 4 : 8,
-                    children: photosStore.allPhotos
-                        .map((photo) => GestureDetector(
-                            child: new Image.memory(base64Decode(
-                                photo.thumbnail!.base64EncodedThumbnail!)),
-                            onTap: () => _onPhotoTap(
-                                context, photo.id!, photosStore.allPhotos)))
-                        .toList(),
-                  );
-    }
-
     Future<void> _pullRefresh() async {
       photosStore.getPhotos(true);
       setState(() {});
@@ -87,13 +84,11 @@ class _PhotoGridViewState extends State<PhotoGridView> {
 
     return Observer(
         builder: (context) => photosStore.allPhotos.isNotEmpty
-            ? OrientationBuilder(
-              builder: (context, orientation) {
+            ? OrientationBuilder(builder: (context, orientation) {
                 return RefreshIndicator(
-                onRefresh: _pullRefresh,
-                child: _scrollBar(_gridView(orientation, photosStore)));
-              }
-            )
+                    onRefresh: _pullRefresh,
+                    child: _scrollableView(_gridView(orientation, photosStore)));
+              })
             : Center(
                 child: Container(
                   width: 60,
@@ -102,6 +97,4 @@ class _PhotoGridViewState extends State<PhotoGridView> {
                 ),
               ));
   }
-
-  
 }

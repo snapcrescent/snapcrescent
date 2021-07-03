@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:snap_crescent/resository/app_config_resository.dart';
 import 'package:snap_crescent/screens/login/login.dart';
 import 'package:snap_crescent/screens/photo/photo.dart';
+import 'package:snap_crescent/screens/sync_process/sync_process.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -44,7 +45,7 @@ class _SplashScreenViewState extends State<SplashScreenView> {
                   Timer(
                       Duration(seconds: 2),
                       () => Navigator.pushReplacementNamed(
-                          context, PhotoScreen.routeName))
+                          context, SyncProcessScreen.routeName))
                 }
             });
   }
