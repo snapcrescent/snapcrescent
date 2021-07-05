@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/photo.dart';
 import 'package:snap_crescent/models/photo_search_criteria.dart';
@@ -15,8 +18,7 @@ class PhotoService extends BaseService {
     final String queryString = getQueryString(searchCriteria.toMap());
 
     Response response = await get(Uri.parse('''$baseUrl/photo?$queryString'''));
-    //Response response = await get(Uri.parse('''$baseUrl/photo?resultType=SEARCH&page=0&size=1000&sort=photo.id&sortDirection=desc'''));
-
+    
     if (response.statusCode == 200) {
       return BaseResponseBean.fromJson(jsonDecode(response.body), Photo.fromJsonModel);
     } else {
@@ -25,20 +27,28 @@ class PhotoService extends BaseService {
   }
 
   Future<List<Photo>> searchAndSync(PhotoSearchCriteria searchCriteria) async{
-      final data = await PhotoService().search(PhotoSearchCriteria.defaultCriteria());
+      final data = await PhotoService().search(searchCriteria);
       await saveAllOnLocal(data.objects!);
       return new List<Photo>.from(data.objects!);
   }
 
-  Future<BaseResponseBean<int, Photo>> getById(int photoId) async {
+  Future<String> getGenericPhotoByIdUrl() async {
     final baseUrl = await getServerUrl();
-    Response res = await get(Uri.parse('''$baseUrl/photo/$photoId'''));
+    return '''$baseUrl/photo/PHOTO_ID/image''';
+  }
 
-    if (res.statusCode == 200) {
-      return BaseResponseBean.fromJson(jsonDecode(res.body), Photo.fromJsonModel);
-    } else {
-      throw "Unable to retrieve photo.";
-    }
+  String getPhotoByIdUrl(String genericURL, int photoId)  {
+    return genericURL.replaceAll("PHOTO_ID", photoId.toString());
+  }
+
+  Future<File> downloadPhotoById(int photoId,String photoName) async{
+    final _genericPhotoByIdUrl =  await getGenericPhotoByIdUrl();
+    final url = getPhotoByIdUrl(_genericPhotoByIdUrl, photoId);
+    final response = await get(Uri.parse(url));
+    Directory documentDirectory = await getApplicationDocumentsDirectory();
+    File file = new File(join(documentDirectory.path, photoName));
+    file.writeAsBytesSync(response.bodyBytes);
+    return file;
   }
 
   Future<int> saveAllOnLocal(List<Photo> entities) async {

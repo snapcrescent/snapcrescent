@@ -1,4 +1,4 @@
-package com.example.snap_crescent
+package com.codeinsight.snap_crescent
 
 import io.flutter.embedding.android.FlutterActivity
 

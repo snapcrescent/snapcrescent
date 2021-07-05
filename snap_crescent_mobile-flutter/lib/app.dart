@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:snap_crescent/screens/login/login.dart';
 import 'package:snap_crescent/screens/photo_detail/photo_detail.dart';
 import 'package:snap_crescent/screens/photo/photo.dart';
-import 'package:snap_crescent/screens/photo/photo_store.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
 import 'package:snap_crescent/screens/sync_process/sync_process.dart';
 import 'package:snap_crescent/screens/video/video.dart';
+import 'package:snap_crescent/stores/photo_store.dart';
 import 'package:snap_crescent/style.dart';
 
 class App extends StatelessWidget {

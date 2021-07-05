@@ -35,11 +35,11 @@ class Location extends BaseUiBean {
         creationDatetime: json['creationDatetime'] == null
             ? null
             : DateTime.fromMillisecondsSinceEpoch(
-                json['creationDatetime'] * 1000),
+                json['creationDatetime']),
         lastModifiedDatetime: json['lastModifiedDatetime'] == null
             ? null
             : DateTime.fromMillisecondsSinceEpoch(
-                json['lastModifiedDatetime'] * 1000),
+                json['lastModifiedDatetime']),
         active: json['active'],
         longitude: json['longitude'],
         latitude: json['latitude'],

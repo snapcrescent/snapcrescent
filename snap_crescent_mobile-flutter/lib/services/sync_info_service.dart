@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/sync_info.dart';
+import 'package:snap_crescent/models/sync_info_search_criteria.dart';
 import 'package:snap_crescent/resository/photo_metadata_resository.dart';
 import 'package:snap_crescent/resository/photo_resository.dart';
 import 'package:snap_crescent/resository/sync_info_resository.dart';
@@ -13,14 +14,15 @@ import 'package:snap_crescent/services/base_service.dart';
 
 class SyncInfoService extends BaseService {
   
-  Future<BaseResponseBean<int, SyncInfo>> search() async {
+  Future<BaseResponseBean<int, SyncInfo>> search(SyncInfoSearchCriteria searchCriteria) async {
     final baseUrl = await getServerUrl();
-    Response response = await get(Uri.parse('''$baseUrl/sync-info?resultType=SEARCH&page=0&size=1000&sort=syncInfo.id&sortDirection=asc'''));
-
+    final String queryString = getQueryString(searchCriteria.toMap());
+    Response response = await get(Uri.parse('''$baseUrl/sync-info?$queryString'''));
+    
     if (response.statusCode == 200) {
       return BaseResponseBean.fromJson(jsonDecode(response.body), SyncInfo.fromJsonModel);
     } else {
-      throw "Unable to retrieve SyncInfos.";
+      throw "Unable to retrieve SyncInfo.";
     }
   }
 
