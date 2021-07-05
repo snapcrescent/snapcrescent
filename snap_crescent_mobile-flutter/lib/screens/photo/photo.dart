@@ -3,10 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:snap_crescent/models/photo.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
-import 'package:snap_crescent/screens/photo/photo_store.dart';
 import 'package:snap_crescent/screens/photo_detail/photo_detail.dart';
+import 'package:snap_crescent/stores/photo_store.dart';
 
 class PhotoScreen extends StatelessWidget {
   static const routeName = '/photo';
@@ -32,7 +31,7 @@ class PhotoGridView extends StatefulWidget {
 }
 
 class _PhotoGridViewState extends State<PhotoGridView> {
-  _onPhotoTap(BuildContext context, int photoId, List<Photo> photos) {
+  _onPhotoTap(BuildContext context, int photoId) {
     Navigator.pushNamed(
       context,
       PhotoDetail.routeName,
@@ -58,12 +57,15 @@ class _PhotoGridViewState extends State<PhotoGridView> {
       mainAxisSpacing: 1,
       crossAxisSpacing: 1,
       crossAxisCount: orientation == Orientation.portrait ? 4 : 8,
-      children: photosStore.allPhotos
-          .map((photo) => GestureDetector(
+      children: photosStore.photoList
+          .map((photo) => 
+           
+          GestureDetector(
               child: new Image.memory(
                   base64Decode(photo.thumbnail!.base64EncodedThumbnail!)),
               onTap: () =>
-                  _onPhotoTap(context, photo.id!, photosStore.allPhotos)))
+                  _onPhotoTap(context, photosStore.photoList.indexOf(photo)))
+          )
           .toList(),
     );
   }
@@ -83,7 +85,7 @@ class _PhotoGridViewState extends State<PhotoGridView> {
     }
 
     return Observer(
-        builder: (context) => photosStore.allPhotos.isNotEmpty
+        builder: (context) => photosStore.photoList.isNotEmpty
             ? OrientationBuilder(builder: (context, orientation) {
                 return RefreshIndicator(
                     onRefresh: _pullRefresh,

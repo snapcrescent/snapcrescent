@@ -15,11 +15,11 @@ abstract class _PhotoStore with Store {
   }
 
   @observable
-  List<Photo> allPhotos = new List.empty();
+  List<Photo> photoList = new List.empty();
 
   @action
   Future<void> getPhotos(bool forceReloadFromApi) async {
-    allPhotos = new List.empty();
+    photoList = new List.empty();
 
     if(forceReloadFromApi) {
         await getPhotosFromApi();
@@ -33,20 +33,24 @@ abstract class _PhotoStore with Store {
           photo.thumbnail = thumbnail;
         }
 
-        allPhotos = newPhotos;
+        photoList = newPhotos;
          
     } else {
       await getPhotosFromApi();
     }
-    }
-
-    
+    }    
   }
 
   Future<void> getPhotosFromApi() async {
     final data = await PhotoService().search(PhotoSearchCriteria.defaultCriteria());
     //final data = await PhotoService().searchAndSync(PhotoSearchCriteria.defaultCriteria());
-    allPhotos = new List<Photo>.from(data.objects!);
+    photoList = new List<Photo>.from(data.objects!);
   }
+
+  Photo getPhotosAtIndex(int photoIndex) {
+    return photoList[photoIndex];
+  }
+
+
 
 }

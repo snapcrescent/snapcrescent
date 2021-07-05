@@ -18,11 +18,11 @@ class SyncInfo extends BaseUiBean {
         creationDatetime: json['creationDatetime'] == null
             ? null
             : DateTime.fromMillisecondsSinceEpoch(
-                json['creationDatetime'] * 1000),
+                json['creationDatetime']),
         lastModifiedDatetime: json['lastModifiedDatetime'] == null
             ? null
             : DateTime.fromMillisecondsSinceEpoch(
-                json['lastModifiedDatetime'] * 1000),
+                json['lastModifiedDatetime']),
         active: json['active']);
   }
 
@@ -31,9 +31,9 @@ class SyncInfo extends BaseUiBean {
       id: map['ID'],
       version: map['VERSION'],
       creationDatetime:
-          DateTime.fromMillisecondsSinceEpoch(map['CREATION_DATETIME'] * 1000),
+          DateTime.fromMillisecondsSinceEpoch(map['CREATION_DATETIME']),
       lastModifiedDatetime: DateTime.fromMillisecondsSinceEpoch(
-          map['LAST_MODIFIED_DATETIME'] * 1000),
+          map['LAST_MODIFIED_DATETIME']),
       active: map['ACTIVE'] == 1 ? true : false
     );
   }

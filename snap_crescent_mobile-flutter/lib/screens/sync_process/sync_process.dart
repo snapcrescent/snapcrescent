@@ -5,12 +5,8 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:snap_crescent/models/photo_search_criteria.dart';
 import 'package:snap_crescent/models/sync_info.dart';
-import 'package:snap_crescent/resository/photo_metadata_resository.dart';
-import 'package:snap_crescent/resository/photo_resository.dart';
+import 'package:snap_crescent/models/sync_info_search_criteria.dart';
 import 'package:snap_crescent/resository/sync_info_resository.dart';
-import 'package:snap_crescent/resository/thumbnail_resository.dart';
-import 'package:snap_crescent/resository/video_metadata_resository.dart';
-import 'package:snap_crescent/resository/video_resository.dart';
 import 'package:snap_crescent/screens/photo/photo.dart';
 import 'package:snap_crescent/services/photo_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
@@ -43,7 +39,6 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
 
   _navigateToPhotoGrid() {
     Timer(Duration(seconds: 2), () => Navigator.pushReplacementNamed(context, PhotoScreen.routeName));
-    ;
   }
 
   _syncLocalSyncInfoFromServer(SyncInfo serverSyncInfo) async {
@@ -95,7 +90,7 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
   }
 
   _compareLocalSyncInfoWithServer(SyncInfo? localSyncInfo) async {
-    final serverResponse = await SyncInfoService().search();
+    final serverResponse = await SyncInfoService().search(SyncInfoSearchCriteria.defaultCriteria());
 
     if (serverResponse.objects!.length > 0) {
       SyncInfo serverSyncInfo = serverResponse.objects!.last;

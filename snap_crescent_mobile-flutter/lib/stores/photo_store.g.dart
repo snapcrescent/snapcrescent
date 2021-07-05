@@ -9,18 +9,18 @@ part of 'photo_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$PhotoStore on _PhotoStore, Store {
-  final _$allPhotosAtom = Atom(name: '_PhotoStore.allPhotos');
+  final _$photoListAtom = Atom(name: '_PhotoStore.photoList');
 
   @override
-  List<Photo> get allPhotos {
-    _$allPhotosAtom.reportRead();
-    return super.allPhotos;
+  List<Photo> get photoList {
+    _$photoListAtom.reportRead();
+    return super.photoList;
   }
 
   @override
-  set allPhotos(List<Photo> value) {
-    _$allPhotosAtom.reportWrite(value, super.allPhotos, () {
-      super.allPhotos = value;
+  set photoList(List<Photo> value) {
+    _$photoListAtom.reportWrite(value, super.photoList, () {
+      super.photoList = value;
     });
   }
 
@@ -35,7 +35,7 @@ mixin _$PhotoStore on _PhotoStore, Store {
   @override
   String toString() {
     return '''
-allPhotos: ${allPhotos}
+photoList: ${photoList}
     ''';
   }
 }
