@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "sync_info")
+@Table(name = "SYNC_INFO")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class SyncInfo extends BaseEntity {

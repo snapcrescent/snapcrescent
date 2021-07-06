@@ -1,4 +1,4 @@
-package com.codeinsight.snap_crescent.photoMetadata;
+package com.codeinsight.snap_crescent.videoMetadata;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,10 +14,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "PHOTO_METADATA")
+@Table(name = "VIDEO_METADATA")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class PhotoMetadata extends BaseEntity {
+public class VideoMetadata extends BaseEntity {
 
 	private static final long serialVersionUID = 1567235158787189351L;
 

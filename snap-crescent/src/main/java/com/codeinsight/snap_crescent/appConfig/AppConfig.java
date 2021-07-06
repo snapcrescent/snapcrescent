@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "config")
+@Table(name = "APP_CONFIG")
 public class AppConfig implements Serializable {
 
 	private static final long serialVersionUID = -6497139748806438592L;

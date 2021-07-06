@@ -4,38 +4,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
-import 'package:snap_crescent/screens/photo_detail/photo_detail.dart';
-import 'package:snap_crescent/stores/photo_store.dart';
+import 'package:snap_crescent/screens/video_detail/video_detail.dart';
+import 'package:snap_crescent/stores/video_store.dart';
 
-class PhotoScreen extends StatelessWidget {
-  static const routeName = '/photo';
+class VideoGridScreen extends StatelessWidget {
+  static const routeName = '/video';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Photos'),
+          title: Text('Videos'),
           backgroundColor: Colors.black,
         ),
         drawer: AppDrawer(),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[Expanded(child: PhotoGridView())],
+          children: <Widget>[Expanded(child: VideoGridView())],
         ));
   }
 }
 
-class PhotoGridView extends StatefulWidget {
+class VideoGridView extends StatefulWidget {
   @override
-  _PhotoGridViewState createState() => _PhotoGridViewState();
+  _VideoGridViewState createState() => _VideoGridViewState();
 }
 
-class _PhotoGridViewState extends State<PhotoGridView> {
-  _onPhotoTap(BuildContext context, int photoId) {
+class _VideoGridViewState extends State<VideoGridView> {
+  _onVideoTap(BuildContext context, int videoId) {
     Navigator.pushNamed(
       context,
-      PhotoDetail.routeName,
-      arguments: photoId,
+      VideoDetailScreen.routeName,
+      arguments: videoId,
     );
   }
 
@@ -52,19 +52,19 @@ class _PhotoGridViewState extends State<PhotoGridView> {
     );
   }
 
-  _gridView(Orientation orientation, PhotoStore photosStore) {
+  _gridView(Orientation orientation, VideoStore videosStore) {
     return GridView.count(
       mainAxisSpacing: 1,
       crossAxisSpacing: 1,
       crossAxisCount: orientation == Orientation.portrait ? 4 : 8,
-      children: photosStore.photoList
-          .map((photo) => 
+      children: videosStore.videoList
+          .map((video) => 
            
           GestureDetector(
               child: new Image.memory(
-                  base64Decode(photo.thumbnail!.base64EncodedThumbnail!)),
+                  base64Decode(video.thumbnail!.base64EncodedThumbnail!)),
               onTap: () =>
-                  _onPhotoTap(context, photosStore.photoList.indexOf(photo)))
+                  _onVideoTap(context, videosStore.videoList.indexOf(video)))
           )
           .toList(),
     );
@@ -77,19 +77,19 @@ class _PhotoGridViewState extends State<PhotoGridView> {
 
   @override
   Widget build(BuildContext context) {
-    final PhotoStore photosStore = Provider.of<PhotoStore>(context);
+    final VideoStore videosStore = Provider.of<VideoStore>(context);
 
     Future<void> _pullRefresh() async {
-      photosStore.getPhotos(true);
+      videosStore.getVideos(true);
       setState(() {});
     }
 
     return Observer(
-        builder: (context) => photosStore.photoList.isNotEmpty
+        builder: (context) => videosStore.videoList.isNotEmpty
             ? OrientationBuilder(builder: (context, orientation) {
                 return RefreshIndicator(
                     onRefresh: _pullRefresh,
-                    child: _scrollableView(_gridView(orientation, photosStore)));
+                    child: _scrollableView(_gridView(orientation, videosStore)));
               })
             : Center(
                 child: Container(

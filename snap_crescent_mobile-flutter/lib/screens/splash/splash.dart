@@ -14,17 +14,17 @@ class SplashScreen extends StatelessWidget {
     return Scaffold(
         body: Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[Expanded(child: SplashScreenView())],
+      children: <Widget>[Expanded(child: _SplashScreenView())],
     ));
   }
 }
 
-class SplashScreenView extends StatefulWidget {
+class _SplashScreenView extends StatefulWidget {
   @override
   _SplashScreenViewState createState() => _SplashScreenViewState();
 }
 
-class _SplashScreenViewState extends State<SplashScreenView> {
+class _SplashScreenViewState extends State<_SplashScreenView> {
   @override
   void initState() {
     super.initState();
