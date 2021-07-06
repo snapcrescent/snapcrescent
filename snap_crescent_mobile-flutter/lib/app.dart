@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/screens/login/login.dart';
 import 'package:snap_crescent/screens/photo_detail/photo_detail.dart';
-import 'package:snap_crescent/screens/photo/photo.dart';
+import 'package:snap_crescent/screens/photo_grid/photo_grid.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
 import 'package:snap_crescent/screens/sync_process/sync_process.dart';
-import 'package:snap_crescent/screens/video/video.dart';
+import 'package:snap_crescent/screens/video_detail/video_detail.dart';
+import 'package:snap_crescent/screens/video_grid/video_grid.dart';
 import 'package:snap_crescent/stores/photo_store.dart';
+import 'package:snap_crescent/stores/video_store.dart';
 import 'package:snap_crescent/style.dart';
 
 class App extends StatelessWidget {
@@ -17,6 +19,7 @@ class App extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<PhotoStore>(create: (_) => PhotoStore()),
+        Provider<VideoStore>(create: (_) => VideoStore()),
       ],
       child: MaterialApp(
         title: 'Snap Crescent',
@@ -35,15 +38,18 @@ class App extends StatelessWidget {
         return MaterialPageRoute(builder: (_) => LoginScreen());
       case SyncProcessScreen.routeName:
         return MaterialPageRoute(builder: (_) => SyncProcessScreen());
-      case PhotoScreen.routeName:
-        return MaterialPageRoute(builder: (_) => PhotoScreen());
-      case PhotoDetail.routeName:
+      case PhotoGridScreen.routeName:
+        return MaterialPageRoute(builder: (_) => PhotoGridScreen());
+      case PhotoDetailScreen.routeName:
         return MaterialPageRoute(
-            builder: (_) => PhotoDetail(settings.arguments.toString()));
+            builder: (_) => PhotoDetailScreen(settings.arguments.toString()));
       case SettingsScreen.routeName:
         return MaterialPageRoute(builder: (_) => SettingsScreen());
-      case VideoScreen.routeName:
-        return MaterialPageRoute(builder: (_) => VideoScreen());
+      case VideoGridScreen.routeName:
+        return MaterialPageRoute(builder: (_) => VideoGridScreen());
+      case VideoDetailScreen.routeName:
+        return MaterialPageRoute(
+            builder: (_) => VideoDetailScreen(settings.arguments.toString()));
 
       default:
         return MaterialPageRoute(

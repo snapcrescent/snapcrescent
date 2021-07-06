@@ -68,7 +68,7 @@ public class PhotoController extends BaseController{
 			return response;
 	}
 	
-	@GetMapping(value="/photo/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
+	@GetMapping(value="/photo/{id}/raw", produces = MediaType.IMAGE_JPEG_VALUE)
 	public ResponseEntity<byte[]> getImageById(@PathVariable Long id) {
 		try {
 			return new ResponseEntity<>(photoService.getImageById(id), HttpStatus.OK);

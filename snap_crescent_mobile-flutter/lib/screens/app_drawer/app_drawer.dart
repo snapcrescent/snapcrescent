@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:snap_crescent/screens/photo/photo.dart';
+import 'package:snap_crescent/screens/photo_grid/photo_grid.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
-import 'package:snap_crescent/screens/video/video.dart';
+import 'package:snap_crescent/screens/video_grid/video_grid.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -33,7 +33,7 @@ class AppDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => PhotoScreen()));
+                      MaterialPageRoute(builder: (context) => PhotoGridScreen()));
                 },
               ),
               ListTile(
@@ -42,7 +42,7 @@ class AppDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => VideoScreen()));
+                      MaterialPageRoute(builder: (context) => VideoGridScreen()));
                 },
               ),
               ListTile(

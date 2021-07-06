@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "thumbnail")
+@Table(name = "THUMBNAIL")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class Thumbnail extends BaseEntity {

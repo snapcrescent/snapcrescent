@@ -15,16 +15,16 @@ class LoginScreen extends StatelessWidget {
           title: Text('Welcome to Snap Crescent'),
           centerTitle: true,
         ),
-        body: LoginScreenView());
+        body: _LoginScreenView());
   }
 }
 
-class LoginScreenView extends StatefulWidget {
+class _LoginScreenView extends StatefulWidget {
   @override
   _LoginScreenViewState createState() => _LoginScreenViewState();
 }
 
-class _LoginScreenViewState extends State<LoginScreenView> {
+class _LoginScreenViewState extends State<_LoginScreenView> {
   final _formKey = GlobalKey<FormState>();
   AutovalidateMode _autovalidateMode = AutovalidateMode.onUserInteraction;
 

@@ -34,7 +34,7 @@ class PhotoService extends BaseService {
 
   Future<String> getGenericPhotoByIdUrl() async {
     final baseUrl = await getServerUrl();
-    return '''$baseUrl/photo/PHOTO_ID/image''';
+    return '''$baseUrl/photo/PHOTO_ID/raw''';
   }
 
   String getPhotoByIdUrl(String genericURL, int photoId)  {
@@ -79,14 +79,6 @@ class PhotoService extends BaseService {
   Future<List<Photo>> searchOnLocal() async {
     final localPhotosMap =  await PhotoResository.instance.findAll();
     return new List<Photo>.from(localPhotosMap.map((photoMap) => Photo.fromMap(photoMap)).toList());
-  }
-
-  Future<int> findNextById(int photoId) async {
-    return PhotoResository.instance.findNextById(photoId);
-  }
-
-  Future<int> findPreviousById(int photoId) async {
-    return PhotoResository.instance.findPreviousById(photoId);
   }
   
 }

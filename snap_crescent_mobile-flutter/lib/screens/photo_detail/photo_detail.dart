@@ -14,28 +14,28 @@ import 'package:snap_crescent/models/photo.dart';
 import 'package:snap_crescent/services/photo_service.dart';
 import 'package:snap_crescent/stores/photo_store.dart';
 
-class PhotoDetail extends StatelessWidget {
+class PhotoDetailScreen extends StatelessWidget {
   static const routeName = '/photo_detail';
 
   final String _photoIndex;
-  PhotoDetail(this._photoIndex);
+  PhotoDetailScreen(this._photoIndex);
 
   @override
   Widget build(BuildContext context) {
-    return PhotoDetailView(int.parse(_photoIndex));
+    return _PhotoDetailView(int.parse(_photoIndex));
   }
 }
 
-class PhotoDetailView extends StatefulWidget {
+class _PhotoDetailView extends StatefulWidget {
   final int photoIndex;
 
-  PhotoDetailView(this.photoIndex);
+  _PhotoDetailView(this.photoIndex);
 
   @override
   _PhotoDetailViewState createState() => _PhotoDetailViewState();
 }
 
-class _PhotoDetailViewState extends State<PhotoDetailView> {
+class _PhotoDetailViewState extends State<_PhotoDetailView> {
   PageController? pageController;
   String? _genericPhotoByIdUrl;
 
@@ -165,5 +165,11 @@ class _PhotoDetailViewState extends State<PhotoDetailView> {
     }
 
     return _body();
+  }
+
+  @override
+  void dispose() {
+    pageController!.dispose();
+    super.dispose();
   }
 }

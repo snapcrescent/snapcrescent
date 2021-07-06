@@ -15,15 +15,8 @@ public class FileService {
 
 	public byte[] readFileBytes(FILE_TYPE fileType, String fileUniqueName) {
 		
-		String basepath = null;
+		File file = getFile(fileType, fileUniqueName);
 		
-		if(fileType == FILE_TYPE.THUMBNAIL) {
-			basepath =  EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER;
-		} if(fileType == FILE_TYPE.PHOTO) {
-			basepath = EnvironmentProperties.STORAGE_PATH + Constant.PHOTO_FOLDER;
-		}
-		
-		File file = new File(basepath + fileUniqueName);
 		byte[] image = null;
 		try {
 			InputStream in = new FileInputStream(file);
@@ -33,6 +26,22 @@ public class FileService {
 			e.printStackTrace();
 		}
 		return image;
+	}
+	
+	public File getFile(FILE_TYPE fileType, String fileUniqueName) {
+		
+		String basepath = null;
+		
+		if(fileType == FILE_TYPE.THUMBNAIL) {
+			basepath =  EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER;
+		} else  if(fileType == FILE_TYPE.PHOTO) {
+			basepath = EnvironmentProperties.STORAGE_PATH + Constant.PHOTO_FOLDER;
+		} else if(fileType == FILE_TYPE.VIDEO) {
+			basepath = EnvironmentProperties.STORAGE_PATH + Constant.VIDEO_FOLDER;
+		}
+		
+		return new File(basepath + fileUniqueName);
+		
 	}
 
 }

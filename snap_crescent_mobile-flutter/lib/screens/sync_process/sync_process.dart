@@ -6,10 +6,12 @@ import 'package:mobx/mobx.dart';
 import 'package:snap_crescent/models/photo_search_criteria.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/sync_info_search_criteria.dart';
+import 'package:snap_crescent/models/video_search_criteria.dart';
 import 'package:snap_crescent/resository/sync_info_resository.dart';
-import 'package:snap_crescent/screens/photo/photo.dart';
+import 'package:snap_crescent/screens/photo_grid/photo_grid.dart';
 import 'package:snap_crescent/services/photo_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
+import 'package:snap_crescent/services/video_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class SyncProcessScreen extends StatelessWidget {
@@ -37,11 +39,17 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
   int? _syncedPhotoCount = 0;
   int? _totalPhotoCount;
 
+  int? _syncedVideoCount = 0;
+  int? _totalVideoCount;
+
   _navigateToPhotoGrid() {
-    Timer(Duration(seconds: 2), () => Navigator.pushReplacementNamed(context, PhotoScreen.routeName));
+    Timer(
+        Duration(seconds: 2),
+        () =>
+            Navigator.pushReplacementNamed(context, PhotoGridScreen.routeName));
   }
 
-  _syncLocalSyncInfoFromServer(SyncInfo serverSyncInfo) async {
+  _syncPhotosFromServer(SyncInfo serverSyncInfo) async {
     _syncProgressState = 1;
 
     setState(() {});
@@ -79,10 +87,55 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
 
       setState(() {});
     }
+  }
+
+  _syncVideosFromServer(SyncInfo serverSyncInfo) async {
+    _syncProgressState = 2;
+
+    setState(() {});
+
+    VideoSearchCriteria searchCriteria = VideoSearchCriteria.defaultCriteria();
+
+    searchCriteria.resultPerPage = 1;
+    searchCriteria.resultType = ResultType.OPTION;
+
+    final videoCountResponse = await VideoService().search(searchCriteria);
+    _totalVideoCount = videoCountResponse.totalResultsCount;
+
+    setState(() {});
+
+    final itemsPerBatch = 1;
+    final numberOfPages = _totalVideoCount! / itemsPerBatch;
+    final itemsInLastBatch = _totalVideoCount! % itemsPerBatch;
+
+    searchCriteria.resultPerPage = itemsPerBatch;
+    searchCriteria.resultType = ResultType.SEARCH;
+
+    for (int pageNumber = 0; pageNumber < numberOfPages; pageNumber++) {
+      searchCriteria.pageNumber = pageNumber;
+      await VideoService().searchAndSync(searchCriteria);
+      _syncedVideoCount = pageNumber * itemsPerBatch;
+
+      setState(() {});
+    }
+
+    if (itemsInLastBatch > 0) {
+      searchCriteria.pageNumber = searchCriteria.pageNumber! + 1;
+      searchCriteria.resultPerPage = itemsInLastBatch;
+      await VideoService().searchAndSync(searchCriteria);
+      _syncedVideoCount = _syncedPhotoCount! + itemsInLastBatch;
+
+      setState(() {});
+    }
+  }
+
+  _syncLocalSyncInfoFromServer(SyncInfo serverSyncInfo) async {
+    await _syncPhotosFromServer(serverSyncInfo);
+    await _syncVideosFromServer(serverSyncInfo);
 
     await SyncInfoResository.instance.save(serverSyncInfo);
 
-    _syncProgressState = 2;
+    _syncProgressState = 3;
 
     setState(() {});
 
@@ -90,7 +143,8 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
   }
 
   _compareLocalSyncInfoWithServer(SyncInfo? localSyncInfo) async {
-    final serverResponse = await SyncInfoService().search(SyncInfoSearchCriteria.defaultCriteria());
+    final serverResponse = await SyncInfoService()
+        .search(SyncInfoSearchCriteria.defaultCriteria());
 
     if (serverResponse.objects!.length > 0) {
       SyncInfo serverSyncInfo = serverResponse.objects!.last;
@@ -103,8 +157,8 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
       } else {
         if (localSyncInfo.lastModifiedDatetime !=
             serverSyncInfo.lastModifiedDatetime) {
-            await SyncInfoService().deleteAllData();
-            _syncLocalSyncInfoFromServer(serverSyncInfo);
+          await SyncInfoService().deleteAllData();
+          _syncLocalSyncInfoFromServer(serverSyncInfo);
 
           //Local sync info date is not matching with server
 
@@ -127,11 +181,13 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
   _syncProcess() {
     String progressLabel = "Checking server for out of sync data";
 
-    if (_syncProgressState == 1
-        && _totalPhotoCount != null) {
+    if (_syncProgressState == 1 && _totalPhotoCount != null) {
       progressLabel =
           '''Synced $_syncedPhotoCount of $_totalPhotoCount photos from server''';
-    } else if (_syncProgressState == 2) {
+    } else if (_syncProgressState == 2 && _totalVideoCount != null) {
+      progressLabel =
+          '''Synced $_syncedVideoCount of $_totalVideoCount videos from server''';
+    } else if (_syncProgressState == 3) {
       progressLabel = "Sync completed";
     }
 
@@ -160,13 +216,9 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
 
     SyncInfoService().searchOnLocal().then((localSyncInfoList) => {
           if (localSyncInfoList.isEmpty)
-            {
-              _compareLocalSyncInfoWithServer(null)
-            }
+            {_compareLocalSyncInfoWithServer(null)}
           else
-            {
-              _compareLocalSyncInfoWithServer(localSyncInfoList.last)
-            }
+            {_compareLocalSyncInfoWithServer(localSyncInfoList.last)}
         });
   }
 

@@ -1,4 +1,4 @@
-package com.codeinsight.snap_crescent.photo;
+package com.codeinsight.snap_crescent.video;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,17 +8,17 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.codeinsight.snap_crescent.common.BaseEntity;
-import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadata;
+import com.codeinsight.snap_crescent.videoMetadata.VideoMetadata;
 import com.codeinsight.snap_crescent.thumbnail.Thumbnail;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "PHOTO")
+@Table(name = "VIDEO")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Photo extends BaseEntity {
+public class Video extends BaseEntity {
 
 	private static final long serialVersionUID = -4250460739319965956L;
 
@@ -30,11 +30,11 @@ public class Photo extends BaseEntity {
 	private Long thumbnailId;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "PHOTO_METADATA_ID", nullable = false, insertable = false, updatable = false)
-	private PhotoMetadata photoMetadata;
+	@JoinColumn(name = "VIDEO_METADATA_ID", nullable = false, insertable = false, updatable = false)
+	private VideoMetadata videoMetadata;
 
-	@Column(name = "PHOTO_METADATA_ID", nullable = false, insertable = true, updatable = true)
-	private Long photoMetadataId;
+	@Column(name = "VIDEO_METADATA_ID", nullable = false, insertable = true, updatable = true)
+	private Long videoMetadataId;
 	
 	private Boolean favorite;
 }
