@@ -18,11 +18,8 @@ class PhotoMetadata extends BaseUiBean {
   String? base64EncodedPhoto;
 
   PhotoMetadata(
-      {id,
-      version,
-      creationDatetime,
-      lastModifiedDatetime,
-      active,
+      {
+      bean,
       this.name,
       this.size,
       this.fileTypeName,
@@ -38,25 +35,15 @@ class PhotoMetadata extends BaseUiBean {
       this.locationId,
       this.base64EncodedPhoto})
       : super(
-            id: id,
-            version: version,
-            creationDatetime: creationDatetime,
-            lastModifiedDatetime: lastModifiedDatetime,
-            active: active);
+            id: bean.id,
+            version: bean.version,
+            creationDatetime: bean.creationDatetime,
+            lastModifiedDatetime: bean.lastModifiedDatetime,
+            active: bean.active);
 
   factory PhotoMetadata.fromJson(Map<String, dynamic> json) {
     return PhotoMetadata(
-        id: json['id'],
-        version: json['version'],
-        creationDatetime: json['creationDatetime'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch(
-                json['creationDatetime']),
-        lastModifiedDatetime: json['lastModifiedDatetime'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch(
-                json['lastModifiedDatetime']),
-        active: json['active'],
+        bean: BaseUiBean.fromJson(json),
         name: json['name'],
         size: json['size'],
         fileTypeName: json['fileTypeName'],
@@ -77,13 +64,7 @@ class PhotoMetadata extends BaseUiBean {
 
   factory PhotoMetadata.fromMap(Map<String, dynamic> map) {
     return PhotoMetadata(
-        id: map['ID'],
-        version: map['VERSION'],
-        creationDatetime: DateTime.fromMillisecondsSinceEpoch(
-            map['CREATION_DATETIME']),
-        lastModifiedDatetime: DateTime.fromMillisecondsSinceEpoch(
-            map['LAST_MODIFIED_DATETIME']),
-        active: map['ACTIVE'],
+        bean: BaseUiBean.fromMap(map),
         name: map['NAME']);
   }
 

@@ -10,11 +10,8 @@ class Location extends BaseUiBean {
   String? postcode;
 
   Location(
-      {id,
-      version,
-      creationDatetime,
-      lastModifiedDatetime,
-      active,
+      {
+      bean,
       this.longitude,
       this.latitude,
       this.country,
@@ -22,25 +19,15 @@ class Location extends BaseUiBean {
       this.city,
       this.town})
       : super(
-            id: id,
-            version: version,
-            creationDatetime: creationDatetime,
-            lastModifiedDatetime: lastModifiedDatetime,
-            active: active);
+            id: bean.id,
+            version: bean.version,
+            creationDatetime: bean.creationDatetime,
+            lastModifiedDatetime: bean.lastModifiedDatetime,
+            active: bean.active);
 
   factory Location.fromJson(Map<String, dynamic> json) {
     return Location(
-        id: json['id'],
-        version: json['version'],
-        creationDatetime: json['creationDatetime'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch(
-                json['creationDatetime']),
-        lastModifiedDatetime: json['lastModifiedDatetime'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch(
-                json['lastModifiedDatetime']),
-        active: json['active'],
+        bean: BaseUiBean.fromJson(json),
         longitude: json['longitude'],
         latitude: json['latitude'],
         country: json['country'],

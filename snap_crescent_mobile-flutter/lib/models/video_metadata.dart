@@ -18,11 +18,7 @@ class VideoMetadata extends BaseUiBean {
   String? base64EncodedPhoto;
 
   VideoMetadata(
-      {id,
-      version,
-      creationDatetime,
-      lastModifiedDatetime,
-      active,
+      {bean,
       this.name,
       this.size,
       this.fileTypeName,
@@ -38,25 +34,15 @@ class VideoMetadata extends BaseUiBean {
       this.locationId,
       this.base64EncodedPhoto})
       : super(
-            id: id,
-            version: version,
-            creationDatetime: creationDatetime,
-            lastModifiedDatetime: lastModifiedDatetime,
-            active: active);
+            id: bean.id,
+            version: bean.version,
+            creationDatetime: bean.creationDatetime,
+            lastModifiedDatetime: bean.lastModifiedDatetime,
+            active: bean.active);
 
   factory VideoMetadata.fromJson(Map<String, dynamic> json) {
     return VideoMetadata(
-        id: json['id'],
-        version: json['version'],
-        creationDatetime: json['creationDatetime'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch(
-                json['creationDatetime']),
-        lastModifiedDatetime: json['lastModifiedDatetime'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch(
-                json['lastModifiedDatetime']),
-        active: json['active'],
+        bean: BaseUiBean.fromJson(json),
         name: json['name'],
         size: json['size'],
         fileTypeName: json['fileTypeName'],
@@ -76,15 +62,7 @@ class VideoMetadata extends BaseUiBean {
   }
 
   factory VideoMetadata.fromMap(Map<String, dynamic> map) {
-    return VideoMetadata(
-        id: map['ID'],
-        version: map['VERSION'],
-        creationDatetime: DateTime.fromMillisecondsSinceEpoch(
-            map['CREATION_DATETIME']),
-        lastModifiedDatetime: DateTime.fromMillisecondsSinceEpoch(
-            map['LAST_MODIFIED_DATETIME']),
-        active: map['ACTIVE'],
-        name: map['NAME']);
+    return VideoMetadata(bean: BaseUiBean.fromMap(map), name: map['NAME']);
   }
 
   Map<String, dynamic> toMap() {

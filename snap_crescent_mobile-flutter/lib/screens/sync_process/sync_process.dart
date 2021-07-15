@@ -57,7 +57,6 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
     PhotoSearchCriteria searchCriteria = PhotoSearchCriteria.defaultCriteria();
 
     searchCriteria.resultPerPage = 1;
-    searchCriteria.resultType = ResultType.OPTION;
 
     final photoCountResponse = await PhotoService().search(searchCriteria);
     _totalPhotoCount = photoCountResponse.totalResultsCount;

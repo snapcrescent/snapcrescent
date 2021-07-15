@@ -13,38 +13,25 @@ class Photo extends BaseUiBean {
   bool? favorite;
 
   Photo(
-      {id,
-      version,
-      creationDatetime,
-      lastModifiedDatetime,
-      active,
+      {
+      bean,
       this.thumbnail,
       this.thumbnailId,
       this.photoMetadata,
       this.photoMetadataId,
       this.favorite})
       : super(
-            id: id,
-            version: version,
-            creationDatetime: creationDatetime,
-            lastModifiedDatetime: lastModifiedDatetime,
-            active: active);
+            id: bean.id,
+            version: bean.version,
+            creationDatetime: bean.creationDatetime,
+            lastModifiedDatetime: bean.lastModifiedDatetime,
+            active: bean.active);
 
   static Photo fromJsonModel(Map<String, dynamic> json) => Photo.fromJson(json);
 
   factory Photo.fromJson(Map<String, dynamic> json) {
     return Photo(
-      id: json['id'],
-      version: json['version'],
-      creationDatetime: json['creationDatetime'] == null
-          ? null
-          : DateTime.fromMillisecondsSinceEpoch(
-              json['creationDatetime']),
-      lastModifiedDatetime: json['lastModifiedDatetime'] == null
-          ? null
-          : DateTime.fromMillisecondsSinceEpoch(
-              json['lastModifiedDatetime']),
-      active: json['active'],
+      bean: BaseUiBean.fromJson(json),
       thumbnail: json['thumbnail'] == null
           ? null
           : Thumbnail.fromJson(json['thumbnail']),
@@ -58,14 +45,9 @@ class Photo extends BaseUiBean {
   }
 
   factory Photo.fromMap(Map<String, dynamic> map) {
+
     return Photo(
-      id: map['ID'],
-      version: map['VERSION'],
-      creationDatetime:
-          DateTime.fromMillisecondsSinceEpoch(map['CREATION_DATETIME']),
-      lastModifiedDatetime: DateTime.fromMillisecondsSinceEpoch(
-          map['LAST_MODIFIED_DATETIME']),
-      active: map['ACTIVE'] == 1 ? true : false,
+      bean: BaseUiBean.fromMap(map),
       thumbnailId: map['THUMBNAIL_ID'],
       photoMetadataId: map['PHOTO_METADATA_ID'],
       favorite: map['FAVORITE'] == 1 ? true : false,
