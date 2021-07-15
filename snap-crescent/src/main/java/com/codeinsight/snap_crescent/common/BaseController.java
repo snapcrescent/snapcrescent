@@ -10,23 +10,23 @@ import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
 public class BaseController {
 
 	protected void parseCommonSearchParams(Map<String, String> searchParams, BaseSearchCriteria searchCriteria) {
-		if (searchParams.get("searchInput") != null) {
-			searchCriteria.setSearchKeyword(searchParams.get("searchInput"));
+		if (searchParams.get("searchKeyword") != null) {
+			searchCriteria.setSearchKeyword(searchParams.get("searchKeyword"));
 		}
 
-		if (searchParams.get("page") != null) {
-			searchCriteria.setPageNumber(Integer.parseInt(searchParams.get("page")));
+		if (searchParams.get("pageNumber") != null) {
+			searchCriteria.setPageNumber(Integer.parseInt(searchParams.get("pageNumber")));
 		}
 
-		if (searchParams.get("size") != null) {
-			searchCriteria.setResultPerPage(Integer.parseInt(searchParams.get("size")));
+		if (searchParams.get("resultPerPage") != null) {
+			searchCriteria.setResultPerPage(Integer.parseInt(searchParams.get("resultPerPage")));
 		}
 
-		if (searchParams.get("sort") != null) {
-			searchCriteria.setSortBy(searchParams.get("sort"));
+		if (searchParams.get("sortBy") != null) {
+			searchCriteria.setSortBy(searchParams.get("sortBy"));
 		}
 
-		if (searchParams.get("sortDirection") != null && searchParams.get("sortDirection").equalsIgnoreCase("desc")) {
+		if (searchParams.get("sortOrder") != null && searchParams.get("sortOrder").equalsIgnoreCase("desc")) {
 			searchCriteria.setSortOrder(Direction.DESC);
 		} else {
 			searchCriteria.setSortOrder(Direction.ASC);

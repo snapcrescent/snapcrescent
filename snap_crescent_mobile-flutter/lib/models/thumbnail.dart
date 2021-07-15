@@ -5,46 +5,29 @@ class Thumbnail extends BaseUiBean {
   String? base64EncodedThumbnail;
 
   Thumbnail(
-      {id,
-      version,
-      creationDatetime,
-      lastModifiedDatetime,
-      active,
+      {
+      bean,
       this.name,
       this.base64EncodedThumbnail})
       : super(
-            id: id,
-            version: version,
-            creationDatetime: creationDatetime,
-            lastModifiedDatetime: lastModifiedDatetime,
-            active: active);
+            id: bean.id,
+            version: bean.version,
+            creationDatetime: bean.creationDatetime,
+            lastModifiedDatetime: bean.lastModifiedDatetime,
+            active: bean.active);
 
   factory Thumbnail.fromJson(Map<String, dynamic> json) {
+
     return Thumbnail(
-        id: json['id'],
-        version: json['version'],
-        creationDatetime: json['creationDatetime'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch(
-                json['creationDatetime']),
-        lastModifiedDatetime: json['lastModifiedDatetime'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch(
-                json['lastModifiedDatetime']),
-        active: json['active'],
+        bean: BaseUiBean.fromJson(json),
         name: json['name'],
         base64EncodedThumbnail: json['base64EncodedThumbnail']);
   }
 
   factory Thumbnail.fromMap(Map<String, dynamic> map) {
+
     return Thumbnail(
-        id: map['ID'],
-        version: map['VERSION'],
-        creationDatetime: DateTime.fromMillisecondsSinceEpoch(
-            map['CREATION_DATETIME']),
-        lastModifiedDatetime: DateTime.fromMillisecondsSinceEpoch(
-            map['LAST_MODIFIED_DATETIME']),
-        active: map['ACTIVE'] == 1 ? true : false,
+        bean:  BaseUiBean.fromMap(map),
         name: map['NAME'],
         base64EncodedThumbnail: map['BASE_64_ENCODED_THUMBNAIL']);
   }

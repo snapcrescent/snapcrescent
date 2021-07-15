@@ -1,6 +1,8 @@
 class Constants {
 
   static final String appConfigServerURL = 'SERVER_URL';
+  static final String appConfigServerUserName = 'SERVER_USERNAME';
+  static final String appConfigServerPassword = 'SERVER_PASSWORD';
 
   
 }

@@ -36,13 +36,24 @@ class _LoginScreenViewState extends State<_LoginScreenView> {
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  _onLoginPressed() {
+  _onLoginPressed() async {
     AppConfig serverUrlConfig = new AppConfig(
         configkey: Constants.appConfigServerURL,
         configValue: serverURLController.text);
+    
+    AppConfig serverUserNameConfig = new AppConfig(
+        configkey: Constants.appConfigServerUserName,
+        configValue: nameController.text);
 
-    AppConfigResository.instance.saveOrUpdateConfig(serverUrlConfig).then((value) =>
-        {Navigator.pushReplacementNamed(context, SyncProcessScreen.routeName)});
+    AppConfig serverPasswordConfig = new AppConfig(
+        configkey: Constants.appConfigServerPassword,
+        configValue: passwordController.text);
+
+    await AppConfigResository.instance.saveOrUpdateConfig(serverUrlConfig);
+    await AppConfigResository.instance.saveOrUpdateConfig(serverUserNameConfig);
+    await AppConfigResository.instance.saveOrUpdateConfig(serverPasswordConfig);
+    Navigator.pushReplacementNamed(context, SyncProcessScreen.routeName);
+            
   }
 
   _showValidationErrors() {
@@ -59,6 +70,33 @@ class _LoginScreenViewState extends State<_LoginScreenView> {
   @override
   void initState() {
     super.initState();
+
+    AppConfigResository.instance
+        .findByKey(Constants.appConfigServerURL)
+        .then((value) => {
+              if (value.configValue != null)
+                {this.serverURLController.text = value.configValue!}
+              else
+                {this.serverURLController.text = "http://192.168.0.61:8080"}
+            });
+
+    AppConfigResository.instance
+        .findByKey(Constants.appConfigServerUserName)
+        .then((value) => {
+              if (value.configValue != null)
+                {this.nameController.text = value.configValue!}
+              else
+                {this.nameController.text = "Username"}
+            });
+
+    AppConfigResository.instance
+        .findByKey(Constants.appConfigServerPassword)
+        .then((value) => {
+              if (value.configValue != null)
+                {this.passwordController.text = value.configValue!}
+              else
+                {this.passwordController.text = "Password"}
+            });
   }
 
   @override

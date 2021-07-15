@@ -53,7 +53,7 @@ class _VideoDetailViewState extends State<_VideoDetailView> {
           setState(() {
             videoPlayerController!.play();
           });
-        });
+        }); 
     }
 
     return videoPlayerController != null &&
@@ -137,6 +137,7 @@ class _VideoDetailViewState extends State<_VideoDetailView> {
         child: PageView.builder(
           controller: pageController,
           itemCount: videosStore.videoList.length,
+          physics: NeverScrollableScrollPhysics(),
           itemBuilder: (BuildContext context, int index) {
             if (videosStore.videoList.isEmpty) {
               return Container();
