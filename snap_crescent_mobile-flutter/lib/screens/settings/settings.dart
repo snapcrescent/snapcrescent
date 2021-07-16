@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/resository/app_config_resository.dart';
@@ -33,7 +36,12 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   String _lastSyncDate = "Never";
   String _autoBackupFolders = "None";
 
-  Future<bool> _init() async{
+  FutureOr onBackFromChild(dynamic value) {
+    _getSettingsData();
+    setState(() {});
+  }
+
+  Future<bool> _getSettingsData() async{
     await _getAutoBackupInfo();
     await _getAutoBackupFolderInfo();
     await _getLastSyncInfo();
@@ -58,7 +66,18 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         .findByKey(Constants.appConfigAutoBackupFolders);
 
     if (value.configValue != null) {
-      _autoBackupFolders = value.configValue!;
+      List<String> autoBackupFolderIdList = value.configValue!.split(",");
+      
+      final List<AssetPathEntity> assets = await PhotoManager.getAssetPathList();
+      List<String> autoBackupFolderNameList = assets.where((asset) => autoBackupFolderIdList.indexOf(asset.id) > -1).map((asset) => asset.name).toList();
+
+      if(autoBackupFolderNameList.isEmpty) {
+        _autoBackupFolders = "None";
+      } else if (autoBackupFolderNameList.length == assets.length) {
+        _autoBackupFolders = "All";
+      } else {
+        _autoBackupFolders = autoBackupFolderNameList.join(", ");
+      }
     }
   }
 
@@ -85,18 +104,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   _settingsList(BuildContext context) {
     return ListView(padding: EdgeInsets.zero, children: <Widget>[
-      ListTile(
-        title: Text("Delete Synced Photos and Videos", style: TitleTextStyle),
-        subtitle: Text("Last Synced : " + _lastSyncDate),
-        leading: Container(
-          width: 10,
-          alignment: Alignment.center,
-          child: const Icon(Icons.delete),
-        ),
-        onTap: () {
-          _clearCache();
-        },
-      ),
       SwitchListTile(
         title: Text("Auto Backup", style: TitleTextStyle),
         secondary: const Icon(Icons.cloud_upload),
@@ -110,17 +117,29 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
       ),
       if (_autoBackup)
         ListTile(
-          title: Text("Device Folders", style: TitleTextStyle),
+          title: Text("Backup Folders", style: TitleTextStyle),
           subtitle: Text(_autoBackupFolders),
           leading: Container(
             width: 10,
             alignment: Alignment.center,
-            child: const Icon(Icons.delete),
+            child: const Icon(Icons.folder),
           ),
           onTap: () {
-            Navigator.push(context,MaterialPageRoute(builder: (context) => AutoBackupFoldersScreen()));
+            Navigator.push(context,MaterialPageRoute(builder: (context) => AutoBackupFoldersScreen())).then(onBackFromChild);
           },
         ),
+      ListTile(
+        title: Text("Clear Synced Photos and Videos", style: TitleTextStyle),
+        subtitle: Text("Last Synced : " + _lastSyncDate),
+        leading: Container(
+          width: 10,
+          alignment: Alignment.center,
+          child: const Icon(Icons.delete),
+        ),
+        onTap: () {
+          _clearCache();
+        },
+      ),  
       ListTile(
         title: Text("Logout", style: TitleTextStyle),
         leading: Container(
@@ -146,7 +165,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   Widget build(BuildContext context) {
 
     return FutureBuilder<bool>(
-          future: _init(),
+          future: _getSettingsData(),
           builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
             if (snapshot.data == null) {
               return Container();

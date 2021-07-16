@@ -42,12 +42,15 @@ class _AutoBackupFoldersScreenViewState
     }
 
     final List<AssetPathEntity> assets = await PhotoManager.getAssetPathList();
-    assets.sort((AssetPathEntity a, AssetPathEntity b) =>
-        a.name.compareTo(b.name));
+    assets.sort(
+        (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
     List<String> autoBackupFolderNameList = _autoBackupFolders.split(",");
 
-    _autoBackupFolderStatusList = assets.map((asset) => autoBackupFolderNameList.indexOf(asset.id) > 0 ? true : false).toList();
+    _autoBackupFolderStatusList = assets
+        .map((asset) =>
+            autoBackupFolderNameList.indexOf(asset.id) > -1 ? true : false)
+        .toList();
     _autoBackupFolderList = assets.map((asset) => asset.id).toList();
 
     return Future.value(assets);
@@ -75,15 +78,17 @@ class _AutoBackupFoldersScreenViewState
     _autoBackupFolderStatusList[index] = value;
 
     List<String> newAutoBackupFolderList = [];
-    for(int i = 0 ; i < _autoBackupFolderStatusList.length ; i++) {
-      if(_autoBackupFolderStatusList[i] == true) {
+    for (int i = 0; i < _autoBackupFolderStatusList.length; i++) {
+      if (_autoBackupFolderStatusList[i] == true) {
         newAutoBackupFolderList.add(_autoBackupFolderList[i]);
       }
     }
 
+    _autoBackupFolders = newAutoBackupFolderList.join(",");
+
     AppConfig appConfigAutoBackupFoldersConfig = new AppConfig(
         configkey: Constants.appConfigAutoBackupFolders,
-        configValue: newAutoBackupFolderList.join(","));
+        configValue: _autoBackupFolders);
 
     await AppConfigResository.instance
         .saveOrUpdateConfig(appConfigAutoBackupFoldersConfig);
@@ -92,18 +97,29 @@ class _AutoBackupFoldersScreenViewState
   }
 
   _deviceFolderList(BuildContext context, List<AssetPathEntity> assets) {
-    return new ListView.builder(
-        itemCount: assets.length,
-        itemBuilder: (BuildContext ctxt, int index) {
-          return new SwitchListTile(
-            title: Text(assets[index].name, style: TitleTextStyle),
-            secondary: const Icon(Icons.folder),
-            value: _autoBackupFolderStatusList[index],
-            onChanged: (bool value) {
-              _updateAppConfigAutoBackupFolders(index,value);
-            },
-          );
-        });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+                    padding: EdgeInsets.all(15),
+                    child:Text("Selected folder from the list below will be backed up to your server")
+        ),
+        
+        Expanded(
+            child: new ListView.builder(
+                itemCount: assets.length,
+                itemBuilder: (BuildContext ctxt, int index) {
+                  return new SwitchListTile(
+                    title: Text(assets[index].name, style: TitleTextStyle),
+                    secondary: const Icon(Icons.folder),
+                    value: _autoBackupFolderStatusList[index],
+                    onChanged: (bool value) {
+                      _updateAppConfigAutoBackupFolders(index, value);
+                    },
+                  );
+                }))
+      ],
+    );
   }
 
   @override

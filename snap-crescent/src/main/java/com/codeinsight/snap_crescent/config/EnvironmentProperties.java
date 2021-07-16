@@ -8,7 +8,7 @@ public class EnvironmentProperties {
 	public static String SQL_PASSWORD = System.getenv("SQL_PASSWORD");
 	
 	
-	public static String STORAGE_PATH = "D:/PROJECTS/CODE-INSIGHT/Snap-Crescent/data/image-gallery/";
+    public static String STORAGE_PATH = System.getenv("STORAGE_PATH") == null? "/media/" : System.getenv("STORAGE_PATH");
 	public static String DATA_PATH = "/data/";
 
 }
