@@ -31,12 +31,6 @@ public class PhotoController extends BaseController{
 
 	@GetMapping("/photo")
 	public @ResponseBody BaseResponseBean<Long, UiPhoto> search(@RequestParam Map<String, String> searchParams) {
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		PhotoSearchCriteria searchCriteria = new PhotoSearchCriteria();
 		parseSearchParams(searchParams, searchCriteria);
 		return photoService.search(searchCriteria);

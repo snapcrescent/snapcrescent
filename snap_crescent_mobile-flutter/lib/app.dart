@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_crescent/screens/auto_backup_folders/auto_backup_folders.dart';
 import 'package:snap_crescent/screens/login/login.dart';
 import 'package:snap_crescent/screens/photo_detail/photo_detail.dart';
 import 'package:snap_crescent/screens/photo_grid/photo_grid.dart';
@@ -45,6 +46,8 @@ class App extends StatelessWidget {
             builder: (_) => PhotoDetailScreen(settings.arguments.toString()));
       case SettingsScreen.routeName:
         return MaterialPageRoute(builder: (_) => SettingsScreen());
+      case AutoBackupFoldersScreen.routeName:
+        return MaterialPageRoute(builder: (_) => AutoBackupFoldersScreen());
       case VideoGridScreen.routeName:
         return MaterialPageRoute(builder: (_) => VideoGridScreen());
       case VideoDetailScreen.routeName:

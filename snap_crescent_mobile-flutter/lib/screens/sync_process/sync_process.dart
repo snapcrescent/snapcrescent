@@ -142,37 +142,35 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
   }
 
   _compareLocalSyncInfoWithServer(SyncInfo? localSyncInfo) async {
-    final serverResponse = await SyncInfoService()
-        .search(SyncInfoSearchCriteria.defaultCriteria());
+    try {
+      final serverResponse = await SyncInfoService()
+          .search(SyncInfoSearchCriteria.defaultCriteria());
 
-    if (serverResponse.objects!.length > 0) {
-      SyncInfo serverSyncInfo = serverResponse.objects!.last;
+      if (serverResponse.objects!.length > 0) {
+        SyncInfo serverSyncInfo = serverResponse.objects!.last;
 
-      if (localSyncInfo == null) {
-        // No local sync info is present
-        // It is a first boot or app is reset
-        // Need to sync everything
-        _syncLocalSyncInfoFromServer(serverSyncInfo);
-      } else {
-        if (localSyncInfo.lastModifiedDatetime !=
-            serverSyncInfo.lastModifiedDatetime) {
-          await SyncInfoService().deleteAllData();
-          _syncLocalSyncInfoFromServer(serverSyncInfo);
-
-          //Local sync info date is not matching with server
-
+        if (localSyncInfo == null) {
+          // No local sync info is present
+          // It is a first boot or app is reset
+          // Need to sync everything
+          await _syncLocalSyncInfoFromServer(serverSyncInfo);
         } else {
-          // Local sync info date is matching with server
-          // Everything is in sync
-          _navigateToPhotoGrid();
+          if (localSyncInfo.lastModifiedDatetime !=
+              serverSyncInfo.lastModifiedDatetime) {
+            //Local sync info date is not matching with server
+            await SyncInfoService().deleteAllData();
+            await _syncLocalSyncInfoFromServer(serverSyncInfo);
+          } 
         }
+      } else {
+        // No server sync info is present
+        // It is first boot of server or server is reset and it has no data
+        // Empty the local sync info and Send user directly to photo grid
+        await SyncInfoService().deleteAllData();
       }
-    } else {
-      // No server sync info is present
-      // It is first boot of server or server is reset and it has no data
-      // Empty the local sync info and Send user directly to photo grid
-      await SyncInfoService().deleteAllData();
-
+    } catch (e) {
+      print("Network error");
+    } finally {
       _navigateToPhotoGrid();
     }
   }
