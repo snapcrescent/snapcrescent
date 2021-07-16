@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/resository/app_config_resository.dart';
 import 'package:snap_crescent/screens/sync_process/sync_process.dart';
+import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -57,14 +57,7 @@ class _LoginScreenViewState extends State<_LoginScreenView> {
   }
 
   _showValidationErrors() {
-    Fluttertoast.showToast(
-        msg: "Please fix the errors",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
+    ToastService.showError("Please fix the errors");
   }
 
   @override

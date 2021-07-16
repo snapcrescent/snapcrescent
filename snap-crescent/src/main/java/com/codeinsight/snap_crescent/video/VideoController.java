@@ -39,12 +39,6 @@ public class VideoController extends BaseController {
 
 	@GetMapping("/video")
 	public @ResponseBody BaseResponseBean<Long, UiVideo> search(@RequestParam Map<String, String> searchParams) {
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		VideoSearchCriteria searchCriteria = new VideoSearchCriteria();
 		parseSearchParams(searchParams, searchCriteria);
 		return videoService.search(searchCriteria);
