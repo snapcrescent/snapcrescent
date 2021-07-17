@@ -84,7 +84,7 @@ public class PhotoController extends BaseController{
 	}
 
 	@PostMapping("/photo/upload")
-	public ResponseEntity<?> uplaodImage(@RequestParam("files") MultipartFile[] files) throws IOException {
+	public ResponseEntity<?> uploadImage(@RequestParam("files") MultipartFile[] files) throws IOException {
 
 		BaseResponse response = new BaseResponse();
 		try {
