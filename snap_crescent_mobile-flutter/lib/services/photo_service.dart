@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/photo.dart';
 import 'package:snap_crescent/models/photo_search_criteria.dart';
+import 'package:snap_crescent/resository/photo_metadata_resository.dart';
 import 'package:snap_crescent/resository/photo_resository.dart';
 import 'package:snap_crescent/resository/thumbnail_resository.dart';
 import 'package:snap_crescent/services/base_service.dart';
@@ -72,6 +73,13 @@ class PhotoService extends BaseService {
         ThumbnailResository.instance.save(entity.thumbnail!);
       }
 
+      final photoMetadataExistsById =
+          await PhotoMetadataResository.instance.existsById(entity.photoMetadataId!);
+
+      if (photoMetadataExistsById == false) {
+        PhotoMetadataResository.instance.save(entity.photoMetadata!);
+      }
+
       return PhotoResository.instance.save(entity);
     } else {
       return Future.value(0);
@@ -79,8 +87,6 @@ class PhotoService extends BaseService {
   }
 
   Future<List<Photo>> searchOnLocal() async {
-    final localPhotosMap = await PhotoResository.instance.findAll();
-    return new List<Photo>.from(
-        localPhotosMap.map((photoMap) => Photo.fromMap(photoMap)).toList());
+    return PhotoResository.instance.searchOnLocal(); 
   }
 }

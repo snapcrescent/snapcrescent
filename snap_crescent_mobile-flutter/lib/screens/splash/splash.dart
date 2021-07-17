@@ -35,14 +35,14 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
               if (value.configValue == null)
                 {
                   Timer(
-                      Duration(seconds: 2),
+                      Duration(seconds: 1),
                       () => Navigator.pushReplacementNamed(
                           context, LoginScreen.routeName))
                 }
               else
                 {
                   Timer(
-                      Duration(seconds: 2),
+                      Duration(seconds: 1),
                       () => Navigator.pushReplacementNamed(
                           context, SyncProcessScreen.routeName))
                 }
