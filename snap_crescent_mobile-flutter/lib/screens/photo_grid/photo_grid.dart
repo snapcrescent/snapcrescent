@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
 import 'package:snap_crescent/screens/photo_detail/photo_detail.dart';
+import 'package:snap_crescent/services/photo_service.dart';
+import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/stores/photo_store.dart';
 
 class PhotoGridScreen extends StatelessWidget {
@@ -94,7 +97,21 @@ class _PhotoGridViewState extends State<_PhotoGridView> {
   }
 
   _sharePhoto(BuildContext context) async {
-    await _sharePhotoFile();
+    final List<AssetPathEntity> assets = await PhotoManager.getAssetPathList();
+
+    for(int index= 1; index < assets.length;index++) {
+      if(assets[index].assetCount > 0) {
+        final list =  await assets[index].assetList;
+        final file =  await list[0].file;
+        ToastService.showSuccess(list[0].createDateTime.toString());
+        await PhotoService().save(file!);
+        
+      break;
+      }
+    } 
+    
+
+    //await _sharePhotoFile();
   }
 
   @override

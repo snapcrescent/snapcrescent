@@ -12,6 +12,6 @@ public class PhotoMetadataRepository extends BaseRepository<PhotoMetadata>{
 	}
 
 	public boolean existsByName(String name) {
-		return true;
+		return false;
 	}
 }

@@ -146,7 +146,7 @@ public class VideoController extends BaseController {
 	}
 
 	@PostMapping("/video/upload")
-	public ResponseEntity<?> uplaodVideo(@RequestParam("files") MultipartFile[] files) throws IOException {
+	public ResponseEntity<?> uploadVideo(@RequestParam("files") MultipartFile[] files) throws IOException {
 
 		BaseResponse response = new BaseResponse();
 		try {

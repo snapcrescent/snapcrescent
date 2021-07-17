@@ -30,6 +30,6 @@ public abstract class BaseEntity implements Serializable{
 	
 	private Date lastModifiedDatetime;
 	
-	private Boolean active;
+	private Boolean active = true;
 
 }
