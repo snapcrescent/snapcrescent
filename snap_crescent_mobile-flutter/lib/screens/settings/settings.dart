@@ -9,6 +9,7 @@ import 'package:snap_crescent/resository/app_config_resository.dart';
 import 'package:snap_crescent/screens/auto_backup_folders/auto_backup_folders.dart';
 import 'package:snap_crescent/screens/login/login.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
+import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -50,6 +51,11 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   _clearCache() async {
     await SyncInfoService().deleteAllData();
+    await _getLastSyncInfo();
+    ToastService.showSuccess("Successfully deleted locally cached data.");
+    setState(() {
+      
+    });
   }
 
   Future<void> _getAutoBackupInfo() async {
@@ -87,6 +93,8 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     if (localSyncInfoList.isEmpty == false) {
         final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss ');
       _lastSyncDate = formatter.format(localSyncInfoList.last.lastModifiedDatetime!);
+    } else {
+      _lastSyncDate = "Never";
     }
   }
 
@@ -129,7 +137,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           },
         ),
       ListTile(
-        title: Text("Clear Synced Photos and Videos", style: TitleTextStyle),
+        title: Text("Clear Locally Cached Photos and Videos", style: TitleTextStyle),
         subtitle: Text("Last Synced : " + _lastSyncDate),
         leading: Container(
           width: 10,
