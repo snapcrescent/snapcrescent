@@ -2,9 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/video.dart';
@@ -98,27 +95,6 @@ class _VideoDetailViewState extends State<_VideoDetailView> {
       await _shareVideoFile(index);
     }
 
-    _downloadVideo(int index, BuildContext context) async {
-      final status = await Permission.storage.request();
-
-      if (status.isGranted) {
-        final externalDirectory = await getExternalStorageDirectory();
-
-        final Video video = videosStore.videoList[index];
-        await FlutterDownloader.enqueue(
-          url: VideoService().getVideoByIdUrl(_genericVideoByIdUrl!, video.id!),
-          savedDir: externalDirectory!.path,
-          fileName: video.thumbnail!.name,
-          showNotification:
-              true, // show download progress in status bar (for Android)
-          openFileFromNotification:
-              true, // click on notification to open downloaded file (for Android)
-        );
-      } else {
-        print("Permissions Denied");
-      }
-    }
-
     _videoView(index) {
       return FutureBuilder<Video>(
           future: Future.value(videosStore.videoList[index]),
@@ -154,13 +130,6 @@ class _VideoDetailViewState extends State<_VideoDetailView> {
         appBar: AppBar(
           backgroundColor: Colors.black,
           actions: [
-            /*
-            IconButton(
-                onPressed: () {
-                  _downloadVideo(widget.videoIndex, context);
-                },
-                icon: Icon(Icons.download, color: Colors.white)),
-            */
             IconButton(
                 onPressed: () {
                   _shareVideo(widget.videoIndex, context);

@@ -20,3 +20,8 @@ enum Direction {
    ASC,
    DESC
 }
+
+enum ViewType {  
+   PHOTO,
+   VIDEO
+}

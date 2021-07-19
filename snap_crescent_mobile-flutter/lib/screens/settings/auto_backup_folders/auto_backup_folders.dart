@@ -41,19 +41,19 @@ class _AutoBackupFoldersScreenViewState
       return Future.value([]);
     }
 
-    final List<AssetPathEntity> assets = await PhotoManager.getAssetPathList();
-    assets.sort(
+    final List<AssetPathEntity> folders = await PhotoManager.getAssetPathList();
+    folders.sort(
         (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
     List<String> autoBackupFolderNameList = _autoBackupFolders.split(",");
 
-    _autoBackupFolderStatusList = assets
+    _autoBackupFolderStatusList = folders
         .map((asset) =>
             autoBackupFolderNameList.indexOf(asset.id) > -1 ? true : false)
         .toList();
-    _autoBackupFolderList = assets.map((asset) => asset.id).toList();
+    _autoBackupFolderList = folders.map((asset) => asset.id).toList();
 
-    return Future.value(assets);
+    return Future.value(folders);
   }
 
   Future<void> _getAutoBackupInfo() async {
