@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
-import 'package:snap_crescent/screens/video_detail/video_detail.dart';
+import 'package:snap_crescent/screens/cloud/videos/video_detail/video_detail.dart';
 import 'package:snap_crescent/stores/video_store.dart';
 
 class VideoGridScreen extends StatelessWidget {

@@ -3,15 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
+import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/photo_search_criteria.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/sync_info_search_criteria.dart';
 import 'package:snap_crescent/models/video_search_criteria.dart';
 import 'package:snap_crescent/resository/sync_info_resository.dart';
-import 'package:snap_crescent/screens/photo_grid/photo_grid.dart';
+import 'package:snap_crescent/screens/cloud/photos/photo_grid/photo_grid.dart';
 import 'package:snap_crescent/services/photo_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/services/video_service.dart';
+import 'package:snap_crescent/stores/local_photo_store.dart';
+import 'package:snap_crescent/stores/local_video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class SyncProcessScreen extends StatelessWidget {
@@ -33,8 +36,9 @@ class _SyncProcessView extends StatefulWidget {
 }
 
 class _SyncProcessViewState extends State<_SyncProcessView> {
+
   @observable
-  int? _syncProgressState = 1;
+  int _syncProgressState = 1;
 
   int? _syncedPhotoCount = 0;
   int? _totalPhotoCount;
@@ -221,6 +225,10 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
 
   @override
   Widget build(BuildContext context) {
+    
+    final LocalPhotoStore photosStore = Provider.of<LocalPhotoStore>(context);
+    final LocalVideoStore videosStore = Provider.of<LocalVideoStore>(context);
+
     return Observer(
         builder: (context) => _syncProgressState != 0
             ? OrientationBuilder(builder: (context, orientation) {

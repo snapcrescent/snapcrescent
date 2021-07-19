@@ -4,9 +4,6 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -88,28 +85,6 @@ class _PhotoDetailViewState extends State<_PhotoDetailView> {
       await _sharePhotoFile(index);
     }
 
-    _downloadPhoto(int index, BuildContext context) async {
-      final status = await Permission.storage.request();
-
-      if (status.isGranted) {
-
-        final externalDirectory = await getExternalStorageDirectory();
-
-        final Photo photo = photosStore.photoList[index];
-        await FlutterDownloader.enqueue(
-          url: PhotoService().getPhotoByIdUrl(_genericPhotoByIdUrl!, photo.id!),
-          savedDir:externalDirectory!.path,
-          fileName: photo.thumbnail!.name,
-          showNotification:
-              true, // show download progress in status bar (for Android)
-          openFileFromNotification:
-              true, // click on notification to open downloaded file (for Android)
-        );
-      } else {
-        print("Permissions Denied");
-      }
-    }
-
     _photoView(index) {
       return FutureBuilder<Photo>(
           future: Future.value(photosStore.photoList[index]),
@@ -144,13 +119,6 @@ class _PhotoDetailViewState extends State<_PhotoDetailView> {
         appBar: AppBar(
           backgroundColor: Colors.black,
           actions: [
-            /*
-            IconButton(
-                onPressed: () {
-                  _downloadPhoto(widget.photoIndex, context);
-                },
-                icon: Icon(Icons.download, color: Colors.white)),
-            */
             IconButton(
                 onPressed: () {
                   _sharePhoto(widget.photoIndex, context);

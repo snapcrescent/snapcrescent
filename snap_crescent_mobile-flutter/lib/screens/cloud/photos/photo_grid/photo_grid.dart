@@ -5,7 +5,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
-import 'package:snap_crescent/screens/photo_detail/photo_detail.dart';
+import 'package:snap_crescent/screens/cloud/photos/photo_detail/photo_detail.dart';
 import 'package:snap_crescent/services/photo_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/stores/photo_store.dart';
@@ -88,13 +88,6 @@ class _PhotoGridViewState extends State<_PhotoGridView> {
         });
   }
 
-  Future<void> _sharePhotoFile() async {
-    //final Photo photo = photosStore.photoList[index];
-    //final File photoFile = await PhotoService()
-    //  .downloadPhotoById(photo.id!, photo.thumbnail!.name!);
-    //await Share.shareFiles(<String>[photoFile.path],
-    //  mimeTypes: <String>['image/jpg']);
-  }
 
   _sharePhoto(BuildContext context) async {
     final List<AssetPathEntity> assets = await PhotoManager.getAssetPathList();
@@ -134,13 +127,6 @@ class _PhotoGridViewState extends State<_PhotoGridView> {
           title: Text('Photos'),
           backgroundColor: Colors.black,
           actions: [
-            /*
-            IconButton(
-                onPressed: () {
-                  _downloadPhoto(widget.photoIndex, context);
-                },
-                icon: Icon(Icons.download, color: Colors.white)),
-            */
             if (isSelectMode)
               IconButton(
                   onPressed: () {
