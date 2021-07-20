@@ -63,12 +63,9 @@ class AssetService extends BaseService {
     try {
       Dio dio = await getDio();
       final url = getAssetByIdUrl(getGenericRelativeAssetByIdUrl(), assetId);
-      final response = await dio.get(url);
       Directory documentDirectory = await getApplicationDocumentsDirectory();
+      await dio.download(url, join(documentDirectory.path, assetName));
       File file = new File(join(documentDirectory.path, assetName));
-      var raf = file.openSync(mode: FileMode.write);
-      raf.writeFromSync(response.data);
-      await raf.close();
       return file;
     } on DioError catch (ex) {
       if (ex.type == DioErrorType.connectTimeout) {
