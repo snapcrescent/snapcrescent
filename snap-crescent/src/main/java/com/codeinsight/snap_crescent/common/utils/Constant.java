@@ -24,6 +24,17 @@ public class Constant {
 	public static final String THUMBNAIL_FOLDER = "/thumbnails/";
 
 	public static final String SIMPLE_DATE_FORMAT = "yyyy:mm:dd hh:mm:ss";
+	
+	public static final String METADATA_CREATED_DATE_FORMAT = "yyyy:MM:dd hh:mm:ss";
+	
+	
+	public static enum ASSET_TYPE {
+		PHOTO, VIDEO;
+		
+		public static ASSET_TYPE findByValue(int value) {
+			return ASSET_TYPE.values()[value];
+		}
+	}
 
 	public static enum FILE_TYPE {
 		PHOTO, VIDEO, THUMBNAIL

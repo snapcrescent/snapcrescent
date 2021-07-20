@@ -47,20 +47,21 @@ class DatabaseHelper {
       ''');  
 
     database.execute('''
-      CREATE TABLE PHOTO ( 
+      CREATE TABLE ASSET ( 
         ID INTEGER PRIMARY KEY,
         VERSION INTEGER NOT NULL,
         CREATION_DATETIME INTEGER,
         LAST_MODIFIED_DATETIME INTEGER,
         ACTIVE INTEGER,
         THUMBNAIL_ID INTEGER,
-        PHOTO_METADATA_ID INTEGER,
-        FAVORITE INTEGER
+        METADATA_ID INTEGER,
+        FAVORITE INTEGER,
+        ASSET_TYPE INTEGER
         );
       ''');
 
     database.execute('''
-      CREATE TABLE PHOTO_METADATA ( 
+      CREATE TABLE METADATA ( 
         ID INTEGER PRIMARY KEY,
         NAME TEXT,
         SIZE TEXT,
@@ -80,41 +81,6 @@ class DatabaseHelper {
         ACTIVE INTEGER
         );
       ''');
-
-    database.execute('''
-      CREATE TABLE VIDEO ( 
-        ID INTEGER PRIMARY KEY,
-        VERSION INTEGER NOT NULL,
-        CREATION_DATETIME INTEGER,
-        LAST_MODIFIED_DATETIME INTEGER,
-        ACTIVE INTEGER,
-        THUMBNAIL_ID INTEGER,
-        VIDEO_METADATA_ID INTEGER,
-        FAVORITE INTEGER
-        );
-      ''');  
-
-    database.execute('''
-      CREATE TABLE VIDEO_METADATA ( 
-        ID INTEGER PRIMARY KEY,
-        NAME TEXT,
-        SIZE TEXT,
-        FILE_TYPE_NAME TEXT,
-        FILE_TYPE_LONG_NAME TEXT,
-        MIME_TYPE TEXT,
-        FILE_EXTENSION TEXT,
-        MODEL TEXT,
-        HEIGHT TEXT,
-        WIDTH TEXT,
-        ORIENTATION TEXT,
-        FSTOP TEXT,
-        LOCATION_ID INTEGER,
-        VERSION INTEGER NOT NULL,
-        CREATION_DATETIME INTEGER,
-        LAST_MODIFIED_DATETIME INTEGER,
-        ACTIVE INTEGER
-        );
-      ''');  
 
     return database.execute('''
       CREATE TABLE THUMBNAIL (

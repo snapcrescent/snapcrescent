@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snap_crescent/models/local_assets_detail_arguments.dart';
-import 'package:snap_crescent/models/local_assets_grid_arguments.dart';
-import 'package:snap_crescent/screens/cloud/photos/photo_detail/photo_detail.dart';
-import 'package:snap_crescent/screens/cloud/photos/photo_grid/photo_grid.dart';
-import 'package:snap_crescent/screens/cloud/videos/video_detail/video_detail.dart';
-import 'package:snap_crescent/screens/cloud/videos/video_grid/video_grid.dart';
+import 'package:snap_crescent/models/asset_detail_arguments.dart';
+import 'package:snap_crescent/models/assets_grid_arguments.dart';
+import 'package:snap_crescent/screens/cloud/grid/asset_detail.dart';
+import 'package:snap_crescent/screens/cloud/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/local/grid/local_asset_detail.dart';
 import 'package:snap_crescent/screens/local/grid/local_assets_grid.dart';
 import 'package:snap_crescent/screens/local/library/local_library.dart';
-import 'package:snap_crescent/screens/local/photo_detail/local_photo_detail.dart';
-import 'package:snap_crescent/screens/local/video_detail/local_video_detail.dart';
 import 'package:snap_crescent/screens/login/login.dart';
 import 'package:snap_crescent/screens/settings/auto_backup_folders/auto_backup_folders.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
@@ -51,26 +47,22 @@ class App extends StatelessWidget {
         return MaterialPageRoute(builder: (_) => LoginScreen());
       case SyncProcessScreen.routeName:
         return MaterialPageRoute(builder: (_) => SyncProcessScreen());
-      case PhotoGridScreen.routeName:
-        return MaterialPageRoute(builder: (_) => PhotoGridScreen());
-      case PhotoDetailScreen.routeName:
-        return MaterialPageRoute(
-            builder: (_) => PhotoDetailScreen(settings.arguments.toString()));
       case SettingsScreen.routeName:
         return MaterialPageRoute(builder: (_) => SettingsScreen());
       case AutoBackupFoldersScreen.routeName:
         return MaterialPageRoute(builder: (_) => AutoBackupFoldersScreen());
-      case VideoGridScreen.routeName:
-        return MaterialPageRoute(builder: (_) => VideoGridScreen());
-      case VideoDetailScreen.routeName:
-        return MaterialPageRoute(
-            builder: (_) => VideoDetailScreen(settings.arguments.toString()));
+      
+      case AssetsGridScreen.routeName:
+        return MaterialPageRoute(builder: (_) => AssetsGridScreen(settings.arguments as ASSET_TYPE));
+      case AssetDetailScreen.routeName:
+        return MaterialPageRoute(builder: (_) => AssetDetailScreen(settings.arguments as AssetDetailArguments));
+
       case LocalLibraryScreen.routeName:
-        return MaterialPageRoute(builder: (_) => LocalLibraryScreen(settings.arguments.toString() as ViewType));
+        return MaterialPageRoute(builder: (_) => LocalLibraryScreen(settings.arguments.toString() as ASSET_TYPE));
       case LocalAssetsGridScreen.routeName:
-        return MaterialPageRoute(builder: (_) => LocalAssetsGridScreen(settings.arguments as LocalAssetsGridArguments));
+        return MaterialPageRoute(builder: (_) => LocalAssetsGridScreen(settings.arguments as AssetGridArguments));
       case LocalAssetDetailScreen.routeName:
-        return MaterialPageRoute(builder: (_) => LocalAssetDetailScreen(settings.arguments as LocalAssetsDetailArguments));
+        return MaterialPageRoute(builder: (_) => LocalAssetDetailScreen(settings.arguments as AssetDetailArguments));
      
       
 

@@ -1,58 +1,16 @@
-import 'package:mobx/mobx.dart';
-import 'package:snap_crescent/models/video.dart';
-import 'package:snap_crescent/models/video_search_criteria.dart';
-import 'package:snap_crescent/services/toast_service.dart';
-import 'package:snap_crescent/services/video_service.dart';
-import 'package:snap_crescent/services/thumbnail_service.dart';
 
-part 'video_store.g.dart';
+import 'package:snap_crescent/models/asset_search_criteria.dart';
+import 'package:snap_crescent/stores/asset_store.dart';
+import 'package:snap_crescent/utils/constants.dart';
 
-class VideoStore = _VideoStore with _$VideoStore;
+class VideoStore extends AssetStore {
+  
+  @override
+  getAssetSearchCriteria() {
+    AssetSearchCriteria assetSearchCriteria = AssetSearchCriteria.defaultCriteria();
+    assetSearchCriteria.assetType = ASSET_TYPE.VIDEO.index;
+    return assetSearchCriteria;
 
-abstract class _VideoStore with Store {
-  _VideoStore() {
-    getVideos(false);
   }
-
-  @observable
-  List<Video> videoList = new List.empty();
-
-  @action
-  Future<void> getVideos(bool forceReloadFromApi) async {
-    videoList = new List.empty();
-
-    if (forceReloadFromApi) {
-      await getVideosFromApi();
-    } else {
-      final newVideos = await VideoService().searchOnLocal();
-
-      if (newVideos.isNotEmpty) {
-        for (Video video in newVideos) {
-          final thumbnail =
-              await ThumbnailService().findByIdOnLocal(video.thumbnailId!);
-          video.thumbnail = thumbnail;
-        }
-
-        videoList = newVideos;
-      } else {
-        await getVideosFromApi();
-      }
-    }
-  }
-
-  Future<void> getVideosFromApi() async {
-    try {
-      final data = await VideoService()
-          .searchAndSync(VideoSearchCriteria.defaultCriteria());
-      videoList = new List<Video>.from(data);
-    } catch (e) {
-      ToastService.showError("Unable to reach server");
-      print("Network error");
-      return getVideos(false);
-    }
-  }
-
-  Video getVideosAtIndex(int videoIndex) {
-    return videoList[videoIndex];
-  }
+  
 }

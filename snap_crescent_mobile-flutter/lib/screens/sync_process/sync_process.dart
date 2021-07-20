@@ -4,15 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:snap_crescent/models/photo_search_criteria.dart';
+import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/sync_info_search_criteria.dart';
-import 'package:snap_crescent/models/video_search_criteria.dart';
 import 'package:snap_crescent/resository/sync_info_resository.dart';
-import 'package:snap_crescent/screens/cloud/photos/photo_grid/photo_grid.dart';
-import 'package:snap_crescent/services/photo_service.dart';
+import 'package:snap_crescent/screens/cloud/grid/assets_grid.dart';
+import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
-import 'package:snap_crescent/services/video_service.dart';
 import 'package:snap_crescent/stores/local_photo_store.dart';
 import 'package:snap_crescent/stores/local_video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
@@ -50,7 +48,7 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
     Timer(
         Duration(seconds: 2),
         () =>
-            Navigator.pushReplacementNamed(context, PhotoGridScreen.routeName));
+            Navigator.pushReplacementNamed(context, AssetsGridScreen.routeName, arguments: ASSET_TYPE.PHOTO));
   }
 
   _syncPhotosFromServer(SyncInfo serverSyncInfo) async {
@@ -58,11 +56,11 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
 
     setState(() {});
 
-    PhotoSearchCriteria searchCriteria = PhotoSearchCriteria.defaultCriteria();
-
+    AssetSearchCriteria searchCriteria = AssetSearchCriteria.defaultCriteria();
+    searchCriteria.assetType = ASSET_TYPE.PHOTO.index;
     searchCriteria.resultPerPage = 1;
 
-    final photoCountResponse = await PhotoService().search(searchCriteria);
+    final photoCountResponse = await AssetService().search(searchCriteria);
     _totalPhotoCount = photoCountResponse.totalResultsCount;
 
     setState(() {});
@@ -76,7 +74,7 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
 
     for (int pageNumber = 0; pageNumber < numberOfPages; pageNumber++) {
       searchCriteria.pageNumber = pageNumber;
-      await PhotoService().searchAndSync(searchCriteria);
+      await AssetService().searchAndSync(searchCriteria);
       _syncedPhotoCount = pageNumber * itemsPerBatch;
 
       setState(() {});
@@ -85,7 +83,7 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
     if (itemsInLastBatch > 0) {
       searchCriteria.pageNumber = searchCriteria.pageNumber! + 1;
       searchCriteria.resultPerPage = itemsInLastBatch;
-      await PhotoService().searchAndSync(searchCriteria);
+      await AssetService().searchAndSync(searchCriteria);
       _syncedPhotoCount = _syncedPhotoCount! + itemsInLastBatch;
 
       setState(() {});
@@ -97,12 +95,13 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
 
     setState(() {});
 
-    VideoSearchCriteria searchCriteria = VideoSearchCriteria.defaultCriteria();
+    AssetSearchCriteria searchCriteria = AssetSearchCriteria.defaultCriteria();
 
+     searchCriteria.assetType = ASSET_TYPE.VIDEO.index;
     searchCriteria.resultPerPage = 1;
     searchCriteria.resultType = ResultType.OPTION;
 
-    final videoCountResponse = await VideoService().search(searchCriteria);
+    final videoCountResponse = await AssetService().search(searchCriteria);
     _totalVideoCount = videoCountResponse.totalResultsCount;
 
     setState(() {});
@@ -116,7 +115,7 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
 
     for (int pageNumber = 0; pageNumber < numberOfPages; pageNumber++) {
       searchCriteria.pageNumber = pageNumber;
-      await VideoService().searchAndSync(searchCriteria);
+      await AssetService().searchAndSync(searchCriteria);
       _syncedVideoCount = pageNumber * itemsPerBatch;
 
       setState(() {});
@@ -125,7 +124,7 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
     if (itemsInLastBatch > 0) {
       searchCriteria.pageNumber = searchCriteria.pageNumber! + 1;
       searchCriteria.resultPerPage = itemsInLastBatch;
-      await VideoService().searchAndSync(searchCriteria);
+      await AssetService().searchAndSync(searchCriteria);
       _syncedVideoCount = _syncedPhotoCount! + itemsInLastBatch;
 
       setState(() {});

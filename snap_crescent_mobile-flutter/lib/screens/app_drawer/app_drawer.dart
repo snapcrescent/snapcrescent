@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:snap_crescent/screens/cloud/photos/photo_grid/photo_grid.dart';
-import 'package:snap_crescent/screens/cloud/videos/video_grid/video_grid.dart';
+import 'package:snap_crescent/screens/cloud/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/local/library/local_library.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/utils/constants.dart';
@@ -64,7 +63,7 @@ class _AppDrawerViewState extends State<_AppDrawerView> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => PhotoGridScreen()));
+                          builder: (context) => AssetsGridScreen(ASSET_TYPE.PHOTO)));
                 },
               )),
           Padding(
@@ -77,7 +76,7 @@ class _AppDrawerViewState extends State<_AppDrawerView> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => VideoGridScreen()));
+                          builder: (context) => AssetsGridScreen(ASSET_TYPE.VIDEO)));
                 },
               )),
           ListTile(
@@ -95,7 +94,7 @@ class _AppDrawerViewState extends State<_AppDrawerView> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => LocalLibraryScreen(ViewType.PHOTO)));
+                          builder: (context) => LocalLibraryScreen(ASSET_TYPE.PHOTO)));
                 },
               )),
           Padding(
@@ -108,7 +107,7 @@ class _AppDrawerViewState extends State<_AppDrawerView> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => LocalLibraryScreen(ViewType.VIDEO)));
+                          builder: (context) => LocalLibraryScreen(ASSET_TYPE.VIDEO)));
                 },
               )),
           ListTile(

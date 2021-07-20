@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:snap_crescent/models/local_assets_grid_arguments.dart';
+import 'package:snap_crescent/models/assets_grid_arguments.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
 import 'package:snap_crescent/screens/local/grid/local_assets_grid.dart';
 import 'package:snap_crescent/screens/local/library/library_tile.dart';
@@ -13,7 +13,7 @@ import 'package:snap_crescent/utils/constants.dart';
 class LocalLibraryScreen extends StatelessWidget {
   static const routeName = '/local_library';
 
-  final ViewType type;
+  final ASSET_TYPE type;
 
   LocalLibraryScreen(this.type);
 
@@ -25,7 +25,7 @@ class LocalLibraryScreen extends StatelessWidget {
 
 class _LocalLibraryView extends StatefulWidget {
 
-   final ViewType type;
+   final ASSET_TYPE type;
 
    _LocalLibraryView(this.type);
 
@@ -37,7 +37,7 @@ class _LocalLibraryViewState extends State<_LocalLibraryView> {
   
   _onFolderTap(BuildContext context, String folderName) {
     
-    LocalAssetsGridArguments arguments = new LocalAssetsGridArguments(type: widget.type, folderName: folderName);
+    AssetGridArguments arguments = new AssetGridArguments(type: widget.type, folderName: folderName);
 
     Navigator.pushNamed(
       context,
@@ -69,12 +69,12 @@ class _LocalLibraryViewState extends State<_LocalLibraryView> {
 
   @override
   Widget build(BuildContext context) {
-    final LocalAssetStore localAssetStore = widget.type == ViewType.PHOTO ? Provider.of<LocalPhotoStore>(context) : Provider.of<LocalVideoStore>(context);
+    final LocalAssetStore localAssetStore = widget.type == ASSET_TYPE.PHOTO ? Provider.of<LocalPhotoStore>(context) : Provider.of<LocalVideoStore>(context);
    
     _body() {
       return Scaffold(
         appBar: AppBar(
-          title: Text(widget.type == ViewType.PHOTO ? "Photo" : "Video" + ' Library'),
+          title: Text(widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video" + ' Library'),
           backgroundColor: Colors.black,
         ),
         drawer: AppDrawer(),
