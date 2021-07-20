@@ -2,12 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/sync_info_search_criteria.dart';
-import 'package:snap_crescent/resository/photo_metadata_resository.dart';
-import 'package:snap_crescent/resository/photo_resository.dart';
+import 'package:snap_crescent/resository/metadata_resository.dart';
+import 'package:snap_crescent/resository/asset_resository.dart';
 import 'package:snap_crescent/resository/sync_info_resository.dart';
 import 'package:snap_crescent/resository/thumbnail_resository.dart';
-import 'package:snap_crescent/resository/video_metadata_resository.dart';
-import 'package:snap_crescent/resository/video_resository.dart';
 import 'package:snap_crescent/services/base_service.dart';
 
 class SyncInfoService extends BaseService {
@@ -48,11 +46,8 @@ class SyncInfoService extends BaseService {
     await SyncInfoResository.instance.deleteAll();
     
     await ThumbnailResository.instance.deleteAll();
-    await PhotoMetadataResository.instance.deleteAll();
-    await PhotoResository.instance.deleteAll();
-
-    await VideoMetadataResository.instance.deleteAll();
-    await VideoResository.instance.deleteAll();
-    
+    await MetadataResository.instance.deleteAll();
+    await AssetResository.instance.deleteAll();
+ 
   }
 }

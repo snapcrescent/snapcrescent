@@ -1,23 +1,25 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:photo_view/photo_view.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/services/asset_service.dart';
-import 'package:snap_crescent/services/toast_service.dart';
-import 'package:snap_crescent/stores/local_asset_store.dart';
-import 'package:snap_crescent/stores/local_photo_store.dart';
-import 'package:snap_crescent/stores/local_video_store.dart';
+import 'package:snap_crescent/stores/asset_store.dart';
+import 'package:snap_crescent/stores/photo_store.dart';
+import 'package:snap_crescent/stores/video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:video_player/video_player.dart';
 
-class LocalAssetDetailScreen extends StatelessWidget {
-  static const routeName = '/local_asset_detail';
+class AssetDetailScreen extends StatelessWidget {
+  static const routeName = '/asset_detail';
 
   final AssetDetailArguments _arguments;
-  LocalAssetDetailScreen(this._arguments);
+  AssetDetailScreen(this._arguments);
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +42,18 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
   
   VideoPlayerController? _videoPlayerController;
   PageController? pageController;
+  String? _genericAssetByIdUrl;
   
-  _videoPlayer(File? videoFile) {
+  _videoPlayer(Asset? asset) {
+
+     String assetURL = AssetService().getAssetByIdUrl(_genericAssetByIdUrl!, asset!.id!);
+
     if (_videoPlayerController == null) {
       if (_videoPlayerController != null) {
         _videoPlayerController!.dispose();
       }
 
-      _videoPlayerController = VideoPlayerController.file(videoFile!)
+      _videoPlayerController = VideoPlayerController.network(assetURL)
         ..setLooping(true)
         ..initialize().then((_) {
           setState(() {
@@ -70,12 +76,25 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
           );
   }
   
-  _imageBanner(File? asset) {
-    if (asset != null) {
-      return Image.file(asset);  
+  _imageBanner(Asset? asset) {
+    String base64EncodedPhoto;
+    if (asset != null &&
+        asset.metadata != null &&
+        asset.metadata!.base64EncodedPhoto != null) {
+      base64EncodedPhoto = asset.metadata!.base64EncodedPhoto!;
     } else {
-      return Container();
+      base64EncodedPhoto = asset!.thumbnail!.base64EncodedThumbnail!;
     }
+
+    return PhotoView(
+        loadingBuilder: (context, progress) => Center(
+              child: Container(
+                child: Image.memory(base64Decode(base64EncodedPhoto),
+                    fit: BoxFit.scaleDown),
+              ),
+            ),
+        imageProvider: CachedNetworkImageProvider(
+            AssetService().getAssetByIdUrl(_genericAssetByIdUrl!, asset.id!)));
 
     
   }
@@ -83,6 +102,10 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
   @override
   void initState() {
     super.initState();
+
+    AssetService()
+        .getGenericAssetByIdUrl()
+        .then((value) => _genericAssetByIdUrl = value);
     
     pageController = PageController(
       initialPage: widget.assetIndex,
@@ -92,37 +115,23 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    final LocalAssetStore localAssetStore = widget.type == ASSET_TYPE.PHOTO ? Provider.of<LocalPhotoStore>(context) : Provider.of<LocalVideoStore>(context);
+    final AssetStore assetStore = widget.type == ASSET_TYPE.PHOTO ? Provider.of<PhotoStore>(context) : Provider.of<VideoStore>(context);
 
     _getAssetFile(int assetIndex) async{
-       final AssetEntity asset = localAssetStore.assetList[assetIndex];
-      final File? assetFile = await asset.file;
+      final Asset asset = assetStore.assetList[assetIndex];
+      final File assetFile = await AssetService().downloadAssetById(asset.id!, asset.thumbnail!.name!);
       return assetFile;
-    }
-
-    _uploadAsset(int assetIndex, BuildContext context) async {
-      ToastService.showSuccess((widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") + " upload in Progress");
-      final File? assetFile = await _getAssetFile(assetIndex);
-
-      if(widget.type == ASSET_TYPE.PHOTO) {
-        await AssetService().save(ASSET_TYPE.PHOTO, assetFile!);
-      } else{
-        await AssetService().save(ASSET_TYPE.VIDEO, assetFile!);
-      }
-      
-      ToastService.showSuccess((widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") + " uploaded successfully");
     }
 
     Future<void> _shareAssetFile(int assetIndex) async {
       final File? assetFile = await _getAssetFile(assetIndex);
-      await Share.shareFiles(<String>[assetFile!.path],
-        mimeTypes: <String>['image/jpg']);
+      await Share.shareFiles(<String>[assetFile!.path],mimeTypes: <String>['image/jpg']);
     }
 
     _assetView(index) {
-      return FutureBuilder<File?>(
-          future: Future.value(localAssetStore.assetList[index].file),
-          builder: (BuildContext context, AsyncSnapshot<File?> snapshot) {
+      return FutureBuilder<Asset?>(
+          future: Future.value(assetStore.assetList[index]),
+          builder: (BuildContext context, AsyncSnapshot<Asset?> snapshot) {
             if (snapshot.data == null) {
               return Container();
             } else {
@@ -137,9 +146,9 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
         child: PageView.builder(
           controller: pageController,
           physics: widget.type == ASSET_TYPE.PHOTO ?  PageScrollPhysics() : NeverScrollableScrollPhysics(),
-          itemCount: localAssetStore.assetList.length,
+          itemCount: assetStore.assetList.length,
           itemBuilder: (BuildContext context, int index) {
-            if (localAssetStore.assetList.isEmpty) {
+            if (assetStore.assetList.isEmpty) {
               return Container();
             } else {
               return _assetView(index);
@@ -175,12 +184,6 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
         appBar: AppBar(
           backgroundColor: Colors.black,
           actions: [
-            IconButton(
-                onPressed: () {
-                  _uploadAsset(widget.assetIndex, context);
-                },
-                icon: Icon(Icons.upload, color: Colors.white)),
-            
             IconButton(
                 onPressed: () {
                   _shareAssetFile(widget.assetIndex);

@@ -10,6 +10,17 @@ class Constants {
   
 }
 
+enum AssetSearchProgress {  
+   SEARCHING,
+   ASSETS_FOUND,
+   ASSETS_NOT_FOUND
+}
+
+enum ASSET_TYPE {  
+   PHOTO,
+   VIDEO
+}
+
 enum ResultType {  
    OPTION,
    SEARCH,
@@ -19,9 +30,4 @@ enum ResultType {
 enum Direction {  
    ASC,
    DESC
-}
-
-enum ViewType {  
-   PHOTO,
-   VIDEO
 }

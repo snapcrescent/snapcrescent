@@ -9,14 +9,14 @@ import 'package:snap_crescent/utils/constants.dart';
 
 class LibraryTile extends StatelessWidget {
   
-  final ViewType type;
+  final ASSET_TYPE type;
   final String folderName;
   
   LibraryTile(this.type, this.folderName);
 
   @override
   Widget build(BuildContext context) {
-    final LocalAssetStore localAssetStore = this.type == ViewType.PHOTO ? Provider.of<LocalPhotoStore>(context) : Provider.of<LocalVideoStore>(context);
+    final LocalAssetStore localAssetStore = this.type == ASSET_TYPE.PHOTO ? Provider.of<LocalPhotoStore>(context) : Provider.of<LocalVideoStore>(context);
 
     return FutureBuilder<Uint8List?>(
       future: localAssetStore.groupedAssets[folderName]!.first.thumbData,

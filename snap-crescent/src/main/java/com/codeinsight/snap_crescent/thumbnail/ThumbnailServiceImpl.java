@@ -10,16 +10,18 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.codeinsight.snap_crescent.common.utils.Constant;
+import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
+import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.FileService;
 import com.codeinsight.snap_crescent.config.EnvironmentProperties;
-import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
-import com.codeinsight.snap_crescent.photoMetadata.PhotoMetadata;
+import com.codeinsight.snap_crescent.metadata.Metadata;
 
 @Service
 public class ThumbnailServiceImpl implements ThumbnailService {
@@ -32,7 +34,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 	@Value("${thumbnail.output.nameSuffix}")
 	private String THUMBNAIL_OUTPUT_NAME_SUFFIX;
-	
+
 	@Autowired
 	private FileService fileService;
 
@@ -41,14 +43,14 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 	private final String FILE_TYPE_SEPARATOR = ".";
 
-	public Thumbnail generateThumbnail(File file, PhotoMetadata photoMetadata) throws Exception {
-		
+	public Thumbnail generateThumbnail(File file, Metadata metadata, ASSET_TYPE assetType) throws Exception {
+
 		File directory = new File(EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER);
 		if (!directory.exists()) {
 			directory.mkdir();
 		}
 
-		boolean isThumbnailCreated = createThumbnail(file, photoMetadata);
+		boolean isThumbnailCreated =  assetType == ASSET_TYPE.PHOTO ?  createThumbnailFromImage(file, metadata) : getThumbnailFromVideo(file, metadata);
 		if (isThumbnailCreated) {
 			Thumbnail thumbnail = new Thumbnail();
 			String thumbnailName = getThumbnailName(file);
@@ -60,15 +62,15 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 		return null;
 	}
 
-	private boolean createThumbnail(File file, PhotoMetadata photoMetadata) {
-		
+	private boolean createThumbnailFromImage(File file, Metadata metadata) {
+
 		boolean isThumbnailCreated = false;
 		try {
 
 			BufferedImage original = ImageIO.read(file);
 
 			// Rotate Image based on EXIF orientation
-			AffineTransform transform = getExifTransformation(photoMetadata.getOrientation(), original.getWidth(),
+			AffineTransform transform = getExifTransformation(metadata.getOrientation(), original.getWidth(),
 					original.getHeight());
 			AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
 			original = op.filter(original, null);
@@ -87,19 +89,42 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 			bufferedImage.createGraphics().drawImage(scaledImage, 0, 0, null);
 
 			// Save Image as generated thumbnail
-			File outputFile = new File(EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER + getThumbnailName(file));
-			ImageIO.write(bufferedImage, photoMetadata.getFileExtension(), outputFile);
+			File outputFile = new File(
+					EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER + getThumbnailName(file));
+			ImageIO.write(bufferedImage, metadata.getFileExtension(), outputFile);
 
 			isThumbnailCreated = true;
 		} catch (IOException exception) {
 			System.out.println("Unable to read image file: " + file.getName());
 		}
-		
+
+		return isThumbnailCreated;
+	}
+
+	public boolean getThumbnailFromVideo(File file, Metadata metadata) throws Exception, IOException {
+		boolean isThumbnailCreated = false;
+		try {
+			FFmpegFrameGrabber g = new FFmpegFrameGrabber(file);
+			g.start();
+
+			File outputFile = new File(
+					EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER + getThumbnailName(file));
+
+			
+			ImageIO.write(g.grab().getBufferedImage(), "png", outputFile);
+			
+
+			g.stop();
+			isThumbnailCreated = true;
+		} catch (IOException exception) {
+			System.out.println("Unable to read video file: " + file.getName());
+		}
+
 		return isThumbnailCreated;
 	}
 
 	private String getThumbnailName(File file) {
-		String extension = FilenameUtils.getExtension(file.getName());
+		String extension = "jpg";
 		String fileName = FilenameUtils.removeExtension(file.getName());
 		return fileName + THUMBNAIL_OUTPUT_NAME_SUFFIX + FILE_TYPE_SEPARATOR + extension;
 	}
@@ -109,7 +134,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	public byte[] getById(Long id) {
 		Thumbnail thumbnail = thumbnailRepository.findById(id);
 		String fileUniqueName = thumbnail.getPath();
-		return fileService.readFileBytes(FILE_TYPE.THUMBNAIL,fileUniqueName);
+		return fileService.readFileBytes(FILE_TYPE.THUMBNAIL, fileUniqueName);
 	}
 
 	public static AffineTransform getExifTransformation(int orientation, int width, int height) {
