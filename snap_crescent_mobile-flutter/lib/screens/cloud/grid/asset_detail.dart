@@ -119,13 +119,14 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
 
     _getAssetFile(int assetIndex) async{
       final Asset asset = assetStore.assetList[assetIndex];
-      final File assetFile = await AssetService().downloadAssetById(asset.id!, asset.thumbnail!.name!);
+      final File assetFile = await AssetService().downloadAssetById(asset.id!, asset.metadata!.name!);
       return assetFile;
     }
 
     Future<void> _shareAssetFile(int assetIndex) async {
       final File? assetFile = await _getAssetFile(assetIndex);
-      await Share.shareFiles(<String>[assetFile!.path],mimeTypes: <String>['image/jpg']);
+      String mimeType = widget.type == ASSET_TYPE.PHOTO ? "image/jpg" : "video/mp4";
+      await Share.shareFiles(<String>[assetFile!.path],mimeTypes: <String>[mimeType]);
     }
 
     _assetView(index) {
