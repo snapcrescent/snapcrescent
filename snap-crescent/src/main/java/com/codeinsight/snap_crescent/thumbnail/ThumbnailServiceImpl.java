@@ -5,7 +5,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -55,97 +54,92 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 			directory.mkdir();
 		}
 
-		boolean isThumbnailCreated =  assetType == ASSET_TYPE.PHOTO ?  createThumbnailFromImage(file, metadata) : getThumbnailFromVideo(file, metadata);
-		if (isThumbnailCreated) {
-			Thumbnail thumbnail = new Thumbnail();
-			String thumbnailName = getThumbnailName(file);
-			thumbnail.setName(thumbnailName);
-			thumbnail.setPath(thumbnailName);
-			return thumbnail;
-		}
-
-		return null;
+		File thumbnailFile = createThumbnail(assetType, file, metadata);
+		
+		Thumbnail thumbnail = new Thumbnail();
+		String thumbnailName = thumbnailFile.getName();
+		thumbnail.setName(thumbnailName);
+		thumbnail.setPath("");
+		return thumbnail;
+		
 	}
 
-	private boolean createThumbnailFromImage(File file, Metadata metadata) {
+	private File createThumbnail(ASSET_TYPE assetType , File file, Metadata metadata) throws Exception {
 
-		boolean isThumbnailCreated = false;
-		try {
 			
-			BufferedImage original = null;
-
-			if(metadata.getFileExtension().equals("webp")) {
-				ImageReader reader = ImageIO.getImageReadersByMIMEType("image/webp").next();
-
-		        // Configure decoding parameters
-		        WebPReadParam readParam = new WebPReadParam();
-		        readParam.setBypassFiltering(true);
-
-		        // Configure the input on the ImageReader
-		        reader.setInput(new FileImageInputStream(file));
-
-		        // Decode the image
-		        original = reader.read(0, readParam);
-			} else {
-				original = ImageIO.read(file);	
-			}
-			
-			// Rotate Image based on EXIF orientation
-			AffineTransform transform = getExifTransformation(metadata.getOrientation(), original.getWidth(),
-					original.getHeight());
-			AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
-			original = op.filter(original, null);
-
-			// Crop Image for a square thumbnail
-			int side = Math.min(original.getWidth(), original.getHeight());
-			int x = (original.getWidth() - side) / 2;
-			int y = (original.getHeight() - side) / 2;
-			BufferedImage cropped = original.getSubimage(x, y, side, side);
-
-			// Resize Image
-			Image scaledImage = cropped.getScaledInstance(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
-					BufferedImage.SCALE_SMOOTH);
-			BufferedImage bufferedImage = new BufferedImage(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
-					BufferedImage.TYPE_INT_RGB);
-			bufferedImage.createGraphics().drawImage(scaledImage, 0, 0, null);
+			BufferedImage extractedImage = extractImage(assetType, file, metadata);
+			BufferedImage resizedImage = rotateCropAndResizeThumnail(extractedImage, metadata);
 
 			// Save Image as generated thumbnail
-			File outputFile = new File(
-					EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER + getThumbnailName(file));
-			ImageIO.write(bufferedImage, metadata.getFileExtension(), outputFile);
+			File outputFile = new File(EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER + getThumbnailName(file));
+			ImageIO.write(resizedImage,"jpg", outputFile);
+	
+			return outputFile;
+	}
+	
+	private BufferedImage extractImage(ASSET_TYPE assetType , File file, Metadata metadata) throws Exception {
 
-			isThumbnailCreated = true;
-		} catch (IOException exception) {
-			System.out.println("Unable to read image file: " + file.getName());
-		}
+			BufferedImage original = null;
 
-		return isThumbnailCreated;
+			if(assetType == ASSET_TYPE.PHOTO) {
+				if(metadata.getFileExtension().equals("webp")) {
+					ImageReader reader = ImageIO.getImageReadersByMIMEType("image/webp").next();
+
+			        // Configure decoding parameters
+			        WebPReadParam readParam = new WebPReadParam();
+			        readParam.setBypassFiltering(true);
+
+			        // Configure the input on the ImageReader
+			        reader.setInput(new FileImageInputStream(file));
+
+			        // Decode the image
+			        original = reader.read(0, readParam);
+				} else {
+					original = ImageIO.read(file);	
+				}
+			}
+			
+			if(assetType == ASSET_TYPE.VIDEO) {
+				FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(file);
+				frameGrabber.start();
+
+				
+				Frame frame = frameGrabber.grabImage();
+				Java2DFrameConverter java2DFrameConverter = new Java2DFrameConverter();
+				original = java2DFrameConverter.convert(frame);
+			
+				java2DFrameConverter.close();
+				frameGrabber.stop();
+				frameGrabber.close();
+			}
+			
+		
+
+		return original;
 	}
 
-	public boolean getThumbnailFromVideo(File file, Metadata metadata) throws Exception, IOException {
-		boolean isThumbnailCreated = false;
-		try {
-			FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(file);
-			frameGrabber.start();
+	
+	private BufferedImage rotateCropAndResizeThumnail(BufferedImage original, Metadata metadata) {
+		// Rotate Image based on EXIF orientation
+		AffineTransform transform = getExifTransformation(metadata.getOrientation(), original.getWidth(),
+				original.getHeight());
+		AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
+		original = op.filter(original, null);
 
-			File outputFile = new File(
-					EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER + getThumbnailName(file));
+		// Crop Image for a square thumbnail
+		int side = Math.min(original.getWidth(), original.getHeight());
+		int x = (original.getWidth() - side) / 2;
+		int y = (original.getHeight() - side) / 2;
+		BufferedImage cropped = original.getSubimage(x, y, side, side);
 
-			Frame frame = frameGrabber.grabImage();
-			Java2DFrameConverter java2DFrameConverter = new Java2DFrameConverter();
-			BufferedImage bufferedImage = java2DFrameConverter.convert(frame);
-			ImageIO.write(bufferedImage, "png", outputFile);
-			
-
-			java2DFrameConverter.close();
-			frameGrabber.stop();
-			frameGrabber.close();
-			isThumbnailCreated = true;
-		} catch (IOException exception) {
-			System.out.println("Unable to read video file: " + file.getName());
-		}
-
-		return isThumbnailCreated;
+		// Resize Image
+		Image scaledImage = cropped.getScaledInstance(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
+				BufferedImage.SCALE_SMOOTH);
+		BufferedImage bufferedImage = new BufferedImage(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
+				BufferedImage.TYPE_INT_RGB);
+		bufferedImage.createGraphics().drawImage(scaledImage, 0, 0, null);
+		
+		return bufferedImage;
 	}
 
 	private String getThumbnailName(File file) {
@@ -158,8 +152,8 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	@Transactional
 	public byte[] getById(Long id) {
 		Thumbnail thumbnail = thumbnailRepository.findById(id);
-		String fileUniqueName = thumbnail.getPath();
-		return fileService.readFileBytes(FILE_TYPE.THUMBNAIL, fileUniqueName);
+		String fileUniquePathAndName = thumbnail.getPath() + thumbnail.getName();
+		return fileService.readFileBytes(FILE_TYPE.THUMBNAIL, fileUniquePathAndName);
 	}
 
 	public static AffineTransform getExifTransformation(int orientation, int width, int height) {

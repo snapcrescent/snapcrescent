@@ -155,7 +155,6 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
       return Container(
           color: Colors.black,
           child: DraggableScrollbar.semicircle(
-              alwaysVisibleScrollThumb: true,
               labelTextBuilder: (offset) => getScrollLabel(),
               labelConstraints:
                   BoxConstraints.tightFor(width: 150.0, height: 30.0),
