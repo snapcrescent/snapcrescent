@@ -38,11 +38,15 @@ class _LocalPhotoDetailView extends StatefulWidget {
 
 class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
   
+  
   VideoPlayerController? _videoPlayerController;
   PageController? pageController;
+  bool _updateVideoPlayerControllerSource = false;
+  int _currentAssetIndex = 0;
   
   _videoPlayer(File? videoFile) {
-    if (_videoPlayerController == null) {
+    if (_videoPlayerController == null || _updateVideoPlayerControllerSource == true) {
+      _updateVideoPlayerControllerSource = false;
       if (_videoPlayerController != null) {
         _videoPlayerController!.dispose();
       }
@@ -51,7 +55,7 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
         ..setLooping(true)
         ..initialize().then((_) {
           setState(() {
-
+            
           });
         });
     }
@@ -83,7 +87,7 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
   @override
   void initState() {
     super.initState();
-    
+    _currentAssetIndex = widget.assetIndex;
     pageController = PageController(
       initialPage: widget.assetIndex,
       viewportFraction: 1.06,
@@ -105,9 +109,9 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
       final File? assetFile = await _getAssetFile(assetIndex);
 
       if(widget.type == ASSET_TYPE.PHOTO) {
-        await AssetService().save(ASSET_TYPE.PHOTO, assetFile!);
+        await AssetService().save(ASSET_TYPE.PHOTO, [assetFile!]);
       } else{
-        await AssetService().save(ASSET_TYPE.VIDEO, assetFile!);
+        await AssetService().save(ASSET_TYPE.VIDEO, [assetFile!]);
       }
       
       ToastService.showSuccess((widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") + " uploaded successfully");
@@ -136,8 +140,16 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
         color: Colors.black,
         child: PageView.builder(
           controller: pageController,
-          physics: widget.type == ASSET_TYPE.PHOTO ?  PageScrollPhysics() : NeverScrollableScrollPhysics(),
+          // physics: widget.type == ASSET_TYPE.PHOTO ?  PageScrollPhysics() : NeverScrollableScrollPhysics(),
           itemCount: localAssetStore.assetList.length,
+          onPageChanged: (index) {
+            _videoPlayerController!.pause();
+            _updateVideoPlayerControllerSource = true;
+            _currentAssetIndex = index;
+            setState(() {
+              
+            });
+          },
           itemBuilder: (BuildContext context, int index) {
             if (localAssetStore.assetList.isEmpty) {
               return Container();
@@ -177,13 +189,13 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
           actions: [
             IconButton(
                 onPressed: () {
-                  _uploadAsset(widget.assetIndex, context);
+                  _uploadAsset(_currentAssetIndex, context);
                 },
                 icon: Icon(Icons.upload, color: Colors.white)),
             
             IconButton(
                 onPressed: () {
-                  _shareAssetFile(widget.assetIndex);
+                  _shareAssetFile(_currentAssetIndex);
                 },
                 icon: Icon(Icons.share, color: Colors.white))
           ],

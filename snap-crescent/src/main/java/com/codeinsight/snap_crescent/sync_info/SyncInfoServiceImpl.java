@@ -42,6 +42,12 @@ public class SyncInfoServiceImpl implements SyncInfoService{
 		return response;
 	}
 	
+	@Override
+	@Transactional
+	public void createNewSyncInfo() throws Exception {
+		SyncInfo syncInfo = new SyncInfo();
+		create(syncInfo);
+	}
 	
 	@Override
 	@Transactional

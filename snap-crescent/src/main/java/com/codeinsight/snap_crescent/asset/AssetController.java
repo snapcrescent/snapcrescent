@@ -1,8 +1,6 @@
 package com.codeinsight.snap_crescent.asset;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +21,16 @@ import com.codeinsight.snap_crescent.common.BaseController;
 import com.codeinsight.snap_crescent.common.beans.BaseResponse;
 import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
 import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
+import com.codeinsight.snap_crescent.sync_info.SyncInfoService;
 
 @RestController
 public class AssetController extends BaseController{
 
 	@Autowired
 	private AssetService assetService;
+	
+	@Autowired
+	private SyncInfoService syncInfoService;
 
 	@GetMapping("/asset")
 	public @ResponseBody BaseResponseBean<Long, UiAsset> search(@RequestParam Map<String, String> searchParams) {
@@ -93,7 +95,11 @@ public class AssetController extends BaseController{
 
 		BaseResponse response = new BaseResponse();
 		try {
-			assetService.upload(ASSET_TYPE.findByValue(assetType), new ArrayList<MultipartFile>(Arrays.asList(files)));
+			for (MultipartFile multipartFile : files) {
+				assetService.upload(ASSET_TYPE.findByValue(assetType), multipartFile);	
+			}
+			
+			syncInfoService.createNewSyncInfo();
 			response.setMessage("Asset uploaded successfully.");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {

@@ -11,6 +11,8 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.Java2DFrameConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -104,17 +106,21 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	public boolean getThumbnailFromVideo(File file, Metadata metadata) throws Exception, IOException {
 		boolean isThumbnailCreated = false;
 		try {
-			FFmpegFrameGrabber g = new FFmpegFrameGrabber(file);
-			g.start();
+			FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(file);
+			frameGrabber.start();
 
 			File outputFile = new File(
 					EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER + getThumbnailName(file));
 
-			
-			ImageIO.write(g.grab().getBufferedImage(), "png", outputFile);
+			Frame frame = frameGrabber.grabImage();
+			Java2DFrameConverter java2DFrameConverter = new Java2DFrameConverter();
+			BufferedImage bufferedImage = java2DFrameConverter.convert(frame);
+			ImageIO.write(bufferedImage, "png", outputFile);
 			
 
-			g.stop();
+			java2DFrameConverter.close();
+			frameGrabber.stop();
+			frameGrabber.close();
 			isThumbnailCreated = true;
 		} catch (IOException exception) {
 			System.out.println("Unable to read video file: " + file.getName());

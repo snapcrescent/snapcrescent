@@ -29,12 +29,17 @@ class AssetService extends BaseService {
     }
   }
 
-  save(ASSET_TYPE assetType,File file) async {
+  save(ASSET_TYPE assetType,List<File> files) async {
     Dio dio = await getDio();
-    String fileName = file.path.split('/').last;
+
+    List<MultipartFile> multipartFiles = [];
+    for(final File file in files) {
+          multipartFiles.add(await MultipartFile.fromFile(file.path, filename: file.path.split('/').last));
+    }
+
     FormData formData = FormData.fromMap({
       "assetType": assetType.index,
-      "files": await MultipartFile.fromFile(file.path, filename: fileName),
+      "files": multipartFiles,
     });
     await dio.post("/asset/upload", data: formData);
     return Future.value(true);
