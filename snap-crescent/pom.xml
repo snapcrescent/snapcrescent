@@ -17,17 +17,6 @@
 	<packaging>jar</packaging>
 	<description>SNAP-CRESCENT</description>
 
-	<repositories>
-		<!-- In Project repository -->
-		<repository>
-			<id>in-project</id>
-			<name>In Project Repo</name>
-			<url>file://${basedir}/libs</url>
-		</repository>
-
-	</repositories>
-
-
 	<properties>
 		<java.version>11</java.version>
 		<node.version>v14.15.4</node.version>
@@ -166,12 +155,6 @@
 			<groupId>org.bytedeco</groupId>
 			<artifactId>javacv-platform</artifactId>
 			<version>1.5.5</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.github.nintha</groupId>
-			<artifactId>webp-imageio-core</artifactId>
-			<version>0.1.3</version>
 		</dependency>
 
 	</dependencies>
