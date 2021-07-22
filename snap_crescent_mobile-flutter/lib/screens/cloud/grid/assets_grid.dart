@@ -116,7 +116,7 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
         : Provider.of<VideoStore>(context);
 
     Future<void> _pullRefresh() async {
-      assetStore.getAssets(true);
+      await assetStore.getAssets(true);
       setState(() {});
     }
 
@@ -139,13 +139,12 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
             Expanded(
                 child: Observer(
                     builder: (context) => assetStore.assetsSearchProgress !=
-                            AssetSearchProgress.SEARCHING
+                            AssetSearchProgress.IDLE
                         ? OrientationBuilder(builder: (context, orientation) {
                             return RefreshIndicator(
                                 onRefresh: _pullRefresh,
                                 child: _scrollableView(
                                     _gridView(orientation, assetStore)));
-                            ;
                           })
                         : Center(
                             child: Container(

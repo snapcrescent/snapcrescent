@@ -74,7 +74,7 @@ class _LocalLibraryViewState extends State<_LocalLibraryView> {
     _body() {
       return Scaffold(
         appBar: AppBar(
-          title: Text(widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video" + ' Library'),
+          title: Text((widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") + ' Library'),
           backgroundColor: Colors.black,
         ),
         drawer: AppDrawer(),
@@ -82,7 +82,7 @@ class _LocalLibraryViewState extends State<_LocalLibraryView> {
           children: <Widget>[
             Expanded(
                 child: Observer(
-                    builder: (context) => localAssetStore.groupedAssets.isNotEmpty
+                    builder: (context) => localAssetStore.assetsSearchProgress != AssetSearchProgress.IDLE
                         ? OrientationBuilder(builder: (context, orientation) {
                             return _gridView(orientation, localAssetStore);
                           })

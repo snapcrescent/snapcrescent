@@ -22,14 +22,15 @@ abstract class _AssetStore with Store {
   Map<String, List<Asset>> groupedAssets = new Map();
 
   @observable
-  AssetSearchProgress assetsSearchProgress = AssetSearchProgress.SEARCHING;
+  AssetSearchProgress assetsSearchProgress = AssetSearchProgress.IDLE;
 
   AssetSearchCriteria getAssetSearchCriteria();
 
   @action
   Future<void> getAssets(bool forceReloadFromApi) async {
+    assetsSearchProgress = AssetSearchProgress.SEARCHING;
     _updateAssetList(new List.empty());
-    
+
     if (forceReloadFromApi) {
       await getAssetsFromApi();
     } else {
@@ -70,7 +71,7 @@ abstract class _AssetStore with Store {
   }
 
   _updateAssetList(List<Asset> newAssets) {
-    if (newAssets.length > 0) {
+    
       this.assetList = newAssets;
 
       groupedAssets.clear();
@@ -104,10 +105,11 @@ abstract class _AssetStore with Store {
           groupedAssets.putIfAbsent(key, () => assets);
         }
       });
-
-    assetsSearchProgress = AssetSearchProgress.ASSETS_FOUND;  
-    } else{
-      assetsSearchProgress = AssetSearchProgress.ASSETS_NOT_FOUND;  
+    
+    if (newAssets.length > 0) {
+      assetsSearchProgress = AssetSearchProgress.ASSETS_FOUND;
+    } else {
+      assetsSearchProgress = AssetSearchProgress.ASSETS_NOT_FOUND;
     }
   }
 }

@@ -1,11 +1,11 @@
 package com.codeinsight.snap_crescent.asset;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,8 +23,6 @@ import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 import com.codeinsight.snap_crescent.metadata.Metadata;
 import com.codeinsight.snap_crescent.metadata.MetadataRepository;
 import com.codeinsight.snap_crescent.metadata.MetadataService;
-import com.codeinsight.snap_crescent.sync_info.SyncInfo;
-import com.codeinsight.snap_crescent.sync_info.SyncInfoService;
 import com.codeinsight.snap_crescent.thumbnail.Thumbnail;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailRepository;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailService;
@@ -55,9 +53,6 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 	@Autowired
 	private AssetConverter assetConverter;
-	
-	@Autowired
-	private SyncInfoService syncInfoService; 
 
 	@Transactional
 	public BaseResponseBean<Long, UiAsset> search(AssetSearchCriteria searchCriteria) {
@@ -85,60 +80,58 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 	@Override
 	@Transactional
-	public void upload(ASSET_TYPE assetType, ArrayList<MultipartFile> multipartFiles) throws Exception {
+	@Async("threadPoolTaskExecutor")
+	public void upload(ASSET_TYPE assetType, MultipartFile multipartFile) throws Exception {
 
 		String x = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_SKIP_UPLOADING);
 		if (x != null & Boolean.parseBoolean(x) == true) {
 			return;
 		}
-		
+
 		StringBuilder pathBuilder = new StringBuilder(EnvironmentProperties.STORAGE_PATH);
-		
-		if(assetType == ASSET_TYPE.PHOTO) {
+
+		if (assetType == ASSET_TYPE.PHOTO) {
 			pathBuilder.append(Constant.PHOTO_FOLDER);
 		}
-		
-		if(assetType == ASSET_TYPE.VIDEO) {
+
+		if (assetType == ASSET_TYPE.VIDEO) {
 			pathBuilder.append(Constant.VIDEO_FOLDER);
 		}
-		
+
 		File directory = new File(pathBuilder.toString());
 		if (!directory.exists()) {
 			directory.mkdir();
 		}
-		for (MultipartFile multipartFile : multipartFiles) {
-			
+
+		try {
 			String originalFilename = multipartFile.getOriginalFilename();
-			String extension =  originalFilename.substring(originalFilename.lastIndexOf("."));
-			
+			String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+
 			String path = pathBuilder.toString() + UUID.randomUUID().toString() + extension;
-			
+
 			multipartFile.transferTo(new File(path));
 
 			File file = new File(path);
-			if (isAlreadyExist(file)) {
-				continue;
+			if (isAlreadyExist(file) == false) {
+				Asset image = new Asset();
+
+				image.setAssetType(assetType);
+
+				Metadata metadata = metadataService.extractMetaData(originalFilename, file);
+				Thumbnail thumbnail = thumbnailService.generateThumbnail(file, metadata, assetType);
+
+				metadataRepository.save(metadata);
+				thumbnailRepository.save(thumbnail);
+
+				image.setMetadataId(metadata.getId());
+				image.setThumbnailId(thumbnail.getId());
+
+				assetRepository.save(image);
 			}
-			Asset image = new Asset();
-			
-			image.setAssetType(assetType);
 
-			Metadata metadata = metadataService.extractMetaData(originalFilename, file);
-			Thumbnail thumbnail = thumbnailService.generateThumbnail(file, metadata, assetType);
-
-			metadataRepository.save(metadata);
-			thumbnailRepository.save(thumbnail);
-
-			image.setMetadataId(metadata.getId());
-			image.setThumbnailId(thumbnail.getId());
-
-			assetRepository.save(image);
-
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		SyncInfo syncInfo = new SyncInfo();
-		syncInfoService.create(syncInfo);
-
 	}
 
 	private boolean isAlreadyExist(File file) throws Exception {
@@ -147,12 +140,11 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		exist = metadataRepository.existsByName(fileName);
 		return exist;
 	}
-	
+
 	@Override
 	public UiAsset getById(Long id) {
-		return assetConverter.getBeanFromEntity(assetRepository.findById(id), ResultType.FULL) ;
+		return assetConverter.getBeanFromEntity(assetRepository.findById(id), ResultType.FULL);
 	}
-
 
 	@Override
 	@Transactional
@@ -160,16 +152,15 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		Asset asset = assetRepository.findById(id);
 		String fileUniqueName = asset.getMetadata().getPath();
 		FILE_TYPE fileType = null;
-		
-		if(asset.getAssetType() == ASSET_TYPE.PHOTO) {
+
+		if (asset.getAssetType() == ASSET_TYPE.PHOTO) {
 			fileType = FILE_TYPE.PHOTO;
 		}
-		
-		if(asset.getAssetType() == ASSET_TYPE.VIDEO) {
+
+		if (asset.getAssetType() == ASSET_TYPE.VIDEO) {
 			fileType = FILE_TYPE.VIDEO;
 		}
-		
-		 
+
 		return fileService.readFileBytes(fileType, fileUniqueName);
 	}
 
@@ -177,8 +168,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	@Transactional
 	public void update(UiAsset enity) throws Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-	
 }

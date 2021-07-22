@@ -10,7 +10,8 @@ class Constants {
   
 }
 
-enum AssetSearchProgress {  
+enum AssetSearchProgress { 
+   IDLE,
    SEARCHING,
    ASSETS_FOUND,
    ASSETS_NOT_FOUND

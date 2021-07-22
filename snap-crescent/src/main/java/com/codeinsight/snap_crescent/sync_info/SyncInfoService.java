@@ -6,6 +6,7 @@ public interface SyncInfoService {
 
 	public BaseResponseBean<Long, UiSyncInfo> search(SyncInfoSearchCriteria syncInfoSearchCriteria);
 
+	public void createNewSyncInfo() throws Exception;
 	public void create(SyncInfo syncInfo) throws Exception;
 
 	public void update(SyncInfo syncInfo) throws Exception;
