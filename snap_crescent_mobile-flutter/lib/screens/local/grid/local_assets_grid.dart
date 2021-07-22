@@ -26,7 +26,7 @@ class LocalAssetsGridScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _LocalPhotoGridView(arguments.type,arguments.folderName);
+    return _LocalPhotoGridView(arguments.type, arguments.folderName);
   }
 }
 
@@ -34,74 +34,74 @@ class _LocalPhotoGridView extends StatefulWidget {
   final String folderName;
   final ASSET_TYPE type;
 
-  _LocalPhotoGridView(this.type,this.folderName);
+  _LocalPhotoGridView(this.type, this.folderName);
 
   @override
   _LocalPhotoGridViewState createState() => _LocalPhotoGridViewState();
 }
 
 class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
-
   final controller = DragSelectGridViewController();
+  bool fileUploadInProgress = false;
 
   _onAssetTap(BuildContext context, int assetIndex) {
+    AssetDetailArguments arguments =
+        new AssetDetailArguments(type: widget.type, assetIndex: assetIndex);
 
-      AssetDetailArguments arguments = new AssetDetailArguments(type: widget.type, assetIndex : assetIndex);
-   
-      Navigator.pushNamed(
+    Navigator.pushNamed(
       context,
       LocalAssetDetailScreen.routeName,
       arguments: arguments,
     );
-    
   }
 
   _gridView(Orientation orientation, LocalAssetStore localAssetStore) {
-    return new ListView.builder(
-        itemCount: 1,
-        itemBuilder: (BuildContext ctxt, int index) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              if (localAssetStore.groupedAssets[widget.folderName]!.length > 0)
-                Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                          padding: EdgeInsets.all(5), child: Text(widget.folderName)),
-                      DragSelectGridView(
-                        gridController: controller,
-                        padding: const EdgeInsets.all(8),
-                        itemCount : localAssetStore.groupedAssets[widget.folderName]!.length,
-                        itemBuilder: (context, index, selected) {
-                            final asset = localAssetStore.groupedAssets[widget.folderName]![index];
-                            return LocalAssetThumbnail(
-                              index,
-                              asset,
-                              asset.thumbData,
-                              selected,
-                              controller,
-                              () {
-                                _onAssetTap(context,localAssetStore.assetList.indexOf(asset));
-                              }
-                            );
-                          },
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 150,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                          ),
-                        physics:
-                            NeverScrollableScrollPhysics(), // to disable GridView's scrolling
-                        shrinkWrap: true,
-                        
-                      )
-                    ])
-            ],
-          );
-        });
+    return new Container(
+        color: Colors.black,
+        child: ListView.builder(
+            itemCount: 1,
+            itemBuilder: (BuildContext ctxt, int index) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  if (localAssetStore.groupedAssets[widget.folderName]!.length >
+                      0)
+                    Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                              padding: EdgeInsets.all(5),
+                              child: Text(widget.folderName)),
+                          DragSelectGridView(
+                            gridController: controller,
+                            padding: const EdgeInsets.all(8),
+                            itemCount: localAssetStore
+                                .groupedAssets[widget.folderName]!.length,
+                            itemBuilder: (context, index, selected) {
+                              final asset = localAssetStore
+                                  .groupedAssets[widget.folderName]![index];
+                              return LocalAssetThumbnail(index, asset,
+                                  asset.thumbData, selected, controller, () {
+                                _onAssetTap(context,
+                                    localAssetStore.assetList.indexOf(asset));
+                              });
+                            },
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 150,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                            physics:
+                                NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+                            shrinkWrap: true,
+                          )
+                        ])
+                ],
+              );
+            }));
   }
 
   @override
@@ -110,7 +110,7 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
     controller.addListener(scheduleRebuild);
   }
 
-   @override
+  @override
   void dispose() {
     controller.removeListener(scheduleRebuild);
     super.dispose();
@@ -118,63 +118,104 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
 
   @override
   Widget build(BuildContext context) {
-    final LocalAssetStore localAssetStore = widget.type == ASSET_TYPE.PHOTO ? Provider.of<LocalPhotoStore>(context) : Provider.of<LocalVideoStore>(context);
+    final LocalAssetStore localAssetStore = widget.type == ASSET_TYPE.PHOTO
+        ? Provider.of<LocalPhotoStore>(context)
+        : Provider.of<LocalVideoStore>(context);
 
-    _getAssetFiles(Set<int> assetIndexes) async{
-      final List<AssetEntity> assets = assetIndexes.map((assetIndex) => localAssetStore.groupedAssets[widget.folderName]![assetIndex]).toList();
+    _getAssetFiles(Set<int> assetIndexes) async {
+      final List<AssetEntity> assets = assetIndexes
+          .map((assetIndex) =>
+              localAssetStore.groupedAssets[widget.folderName]![assetIndex])
+          .toList();
 
       List<File> assetFiles = [];
       for (final AssetEntity asset in assets) {
-            final File? assetFile = await asset.file;
-            assetFiles.add(assetFile!);
+        final File? assetFile = await asset.file;
+        assetFiles.add(assetFile!);
       }
       return assetFiles;
     }
 
-    _uploadAssetFiles() async{
-      ToastService.showSuccess((widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") + " upload in Progress");
-      final List<File> assetFiles = await _getAssetFiles(controller.value.selectedIndexes);
+    _uploadAssetFiles() async {
+      fileUploadInProgress = true;
 
-      if(widget.type == ASSET_TYPE.PHOTO) {
-        await AssetService().save(ASSET_TYPE.PHOTO, assetFiles);
-      } else{
-        await AssetService().save(ASSET_TYPE.VIDEO, assetFiles);
+      setState(() {});
+
+      ToastService.showSuccess(
+          (widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") +
+              " upload in Progress");
+      final List<File> assetFiles =
+          await _getAssetFiles(controller.value.selectedIndexes);
+
+      try {
+        if (widget.type == ASSET_TYPE.PHOTO) {
+          await AssetService().save(ASSET_TYPE.PHOTO, assetFiles);
+        } else {
+          await AssetService().save(ASSET_TYPE.VIDEO, assetFiles);
+        }
+
+        ToastService.showSuccess(
+            (widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") +
+                " uploaded successfully");
+      } catch (e) {
+        ToastService.showError("Unable to reach server");
+        print(e);
       }
-      
-      ToastService.showSuccess((widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") + " uploaded successfully");
+
+      fileUploadInProgress = false;
+
+      setState(() {});
     }
 
     _shareAssetFiles() async {
-      final List<File> assetFiles = await _getAssetFiles(controller.value.selectedIndexes);
-      final List<String> filePaths = assetFiles.map((assetFile) => assetFile.path).toList();
+      final List<File> assetFiles =
+          await _getAssetFiles(controller.value.selectedIndexes);
+      final List<String> filePaths =
+          assetFiles.map((assetFile) => assetFile.path).toList();
       await Share.shareFiles(filePaths, mimeTypes: <String>['image/jpg']);
+    }
+
+    _getLeadingIcon() {
+      if (controller.value.amount > 0) {
+        return IconButton(
+          onPressed: () {
+            controller.clear();
+          },
+          icon: Icon(Icons.cancel),
+        );
+      }
     }
 
     _body() {
       return Scaffold(
         appBar: AppBar(
-          title: Text(widget.folderName),
+          leading: _getLeadingIcon(),
+          title: Text(controller.value.amount == 0
+              ? widget.folderName
+              : (controller.value.amount.toString() + " Selected")),
           backgroundColor: Colors.black,
           actions: [
-            if(controller.value.amount > 0) 
-            IconButton(
-                onPressed: () {
-                  _uploadAssetFiles();
-                },
-                icon: Icon(Icons.upload, color: Colors.white)),
-            if(controller.value.amount > 0) 
-            IconButton(
-                onPressed: () {
-                  _shareAssetFiles();
-                },
-                icon: Icon(Icons.share, color: Colors.white))
+            if (controller.value.amount > 0)
+              IconButton(
+                  onPressed: () {
+                    _uploadAssetFiles();
+                  },
+                  icon: Icon(Icons.upload, color: Colors.white)),
+            if (controller.value.amount > 0)
+              IconButton(
+                  onPressed: () {
+                    _shareAssetFiles();
+                  },
+                  icon: Icon(Icons.share, color: Colors.white))
           ],
         ),
         body: Row(
           children: <Widget>[
             Expanded(
                 child: Observer(
-                    builder: (context) => localAssetStore.groupedAssets.isNotEmpty
+                    builder: (context) => localAssetStore
+                                .groupedAssets.isNotEmpty &&
+                            fileUploadInProgress == false
                         ? OrientationBuilder(builder: (context, orientation) {
                             return _gridView(orientation, localAssetStore);
                           })

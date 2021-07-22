@@ -30,6 +30,7 @@ public class MetadataServiceImpl implements MetadataService {
 	public Metadata extractMetaData(String originalFilename, File file) throws Exception {
 
 		com.drew.metadata.Metadata drewMetadata = getMetadata(file);
+		
 		Map<String, String> metaDataMap = new HashMap<>();
 
 		for (Directory directory : drewMetadata.getDirectories()) {
@@ -38,8 +39,9 @@ public class MetadataServiceImpl implements MetadataService {
 			}
 		}
 		Metadata metadata = new Metadata();
-
-		metadata.setName(metaDataMap.get(Constant.METADATA_FILE_NAME));
+		
+		
+		metadata.setName(originalFilename);
 		metadata.setInternalName(file.getName());
 		metadata.setPath(file.getName());
 		metadata.setSize(metaDataMap.get(Constant.METADATA_FILE_SIZE));
@@ -74,8 +76,8 @@ public class MetadataServiceImpl implements MetadataService {
 			if (geoLocation != null) {
 				Double longitude = geoLocation.getLongitude();
 				Double latitude = geoLocation.getLatitude();
-				Long locationId = locationService.saveLocation(longitude, latitude);
-				metadata.setLocationId(locationId);
+				//Long locationId = locationService.saveLocation(longitude, latitude);
+				//metadata.setLocationId(locationId);
 			}
 		}
 		return metadata;

@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.FileImageInputStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -24,6 +26,7 @@ import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.FileService;
 import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 import com.codeinsight.snap_crescent.metadata.Metadata;
+import com.luciad.imageio.webp.WebPReadParam;
 
 @Service
 public class ThumbnailServiceImpl implements ThumbnailService {
@@ -68,9 +71,25 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 		boolean isThumbnailCreated = false;
 		try {
+			
+			BufferedImage original = null;
 
-			BufferedImage original = ImageIO.read(file);
+			if(metadata.getFileExtension().equals("webp")) {
+				ImageReader reader = ImageIO.getImageReadersByMIMEType("image/webp").next();
 
+		        // Configure decoding parameters
+		        WebPReadParam readParam = new WebPReadParam();
+		        readParam.setBypassFiltering(true);
+
+		        // Configure the input on the ImageReader
+		        reader.setInput(new FileImageInputStream(file));
+
+		        // Decode the image
+		        original = reader.read(0, readParam);
+			} else {
+				original = ImageIO.read(file);	
+			}
+			
 			// Rotate Image based on EXIF orientation
 			AffineTransform transform = getExifTransformation(metadata.getOrientation(), original.getWidth(),
 					original.getHeight());
