@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:quiver/iterables.dart';
 import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
@@ -29,19 +30,32 @@ class AssetService extends BaseService {
     }
   }
 
-  save(ASSET_TYPE assetType,List<File> files) async {
-    Dio dio = await getDio();
+  save(ASSET_TYPE assetType, List<File> files) async {
+    try {
+      Dio dio = await getDio();
 
-    List<MultipartFile> multipartFiles = [];
-    for(final File file in files) {
-          multipartFiles.add(await MultipartFile.fromFile(file.path, filename: file.path.split('/').last));
+      final Iterable<List<File>> partitionedFiles = partition(files, 5);
+
+      for (final partitionedFile in partitionedFiles) {
+        List<MultipartFile> multipartFiles = [];
+        for (final File file in partitionedFile) {
+          multipartFiles.add(await MultipartFile.fromFile(file.path,
+              filename: file.path.split('/').last));
+        }
+
+        FormData formData = FormData.fromMap({
+          "assetType": assetType.index,
+          "files": multipartFiles,
+        });
+        await dio.post("/asset/upload", data: formData);
+      }
+    } on DioError catch (ex) {
+      if (ex.type == DioErrorType.connectTimeout) {
+        throw Exception("Connection  Timeout Exception");
+      }
+      throw Exception(ex.message);
     }
 
-    FormData formData = FormData.fromMap({
-      "assetType": assetType.index,
-      "files": multipartFiles,
-    });
-    await dio.post("/asset/upload", data: formData);
     return Future.value(true);
   }
 
@@ -100,8 +114,8 @@ class AssetService extends BaseService {
         ThumbnailResository.instance.save(entity.thumbnail!);
       }
 
-      final assetMetadataExistsById = await MetadataResository.instance
-          .existsById(entity.metadataId!);
+      final assetMetadataExistsById =
+          await MetadataResository.instance.existsById(entity.metadataId!);
 
       if (assetMetadataExistsById == false) {
         MetadataResository.instance.save(entity.metadata!);
@@ -113,7 +127,8 @@ class AssetService extends BaseService {
     }
   }
 
-  Future<List<Asset>> searchOnLocal(AssetSearchCriteria assetSearchCriteria) async {
+  Future<List<Asset>> searchOnLocal(
+      AssetSearchCriteria assetSearchCriteria) async {
     return AssetResository.instance.searchOnLocal(assetSearchCriteria);
   }
 }

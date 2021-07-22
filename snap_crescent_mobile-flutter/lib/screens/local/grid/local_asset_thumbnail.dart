@@ -35,7 +35,7 @@ class _LocalAssetThumbnailState extends State<LocalAssetThumbnail>
 
     _controller = AnimationController(
       value: widget.selected ? 1 : 0,
-      duration: kThemeChangeDuration,
+      duration: Duration(milliseconds: 500),
       vsync: this,
     );
 
@@ -83,49 +83,86 @@ class _LocalAssetThumbnailState extends State<LocalAssetThumbnail>
   _body(Uint8List bytes) {
     return GestureDetector(
         onTap: onTap,
-        child: AnimatedBuilder(
-          animation: _scaleAnimation,
-          builder: (context, child) {
-            return Container(
-              child: Transform.scale(
-                scale: _scaleAnimation.value,
-                child: DecoratedBox(
-                  child: child,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(2),
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            );
-          },
-          child: Stack(
-            children: [
-              // Wrap the image in a Positioned.fill to fill the space
-              Positioned.fill(
-                child: Image.memory(bytes, fit: BoxFit.cover),
-              ),
-              // Display a Play icon if the asset is a video
-              if (asset.type == AssetType.video)
-                Center(
-                    child: ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(12.0),
-                    topRight: Radius.circular(12.0),
-                    bottomLeft: Radius.circular(12.0),
-                    bottomRight: Radius.circular(12.0),
-                  ),
-                  child: Container(
-                    color: Colors.grey,
-                    child: Icon(
-                      Icons.play_arrow,
-                      color: Colors.white,
+        child: Stack(children: [
+          AnimatedBuilder(
+            animation: _scaleAnimation,
+            builder: (context, child) {
+              return Container(
+                color: Colors.grey,
+                child: Transform.scale(
+                  scale: _scaleAnimation.value,
+                  child: DecoratedBox(
+                    child: child,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: Colors.grey,
                     ),
                   ),
-                )),
-            ],
+                ),
+              );
+            },
+            child: Stack(
+              children: [
+                // Wrap the image in a Positioned.fill to fill the space
+                Positioned.fill(
+                  child: Image.memory(bytes, fit: BoxFit.cover),
+                ),
+                // Display a Play icon if the asset is a video
+                if (asset.type == AssetType.video)
+                  Center(
+                      child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12.0),
+                      topRight: Radius.circular(12.0),
+                      bottomLeft: Radius.circular(12.0),
+                      bottomRight: Radius.circular(12.0),
+                    ),
+                    child: Container(
+                      color: Colors.grey,
+                      child: Icon(
+                        Icons.play_arrow,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )),
+              ],
+            ),
           ),
-        ));
+          // Display a Circle icon if the asset is not selected
+          if (widget.gridController.value.amount > 0 &&
+              widget.selected == false)
+            Positioned.fill(
+              child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                      child: Icon(
+                        Icons.radio_button_unchecked,
+                        color: Colors.white,
+                      ),
+                    )),
+            ),
+          // Display a Checked icon if the asset is selected
+          if (widget.selected)
+            Positioned.fill(
+              child: Align(
+                  alignment: Alignment.topLeft,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12.0),
+                      topRight: Radius.circular(12.0),
+                      bottomLeft: Radius.circular(12.0),
+                      bottomRight: Radius.circular(12.0),
+                    ),
+                    child: Container(
+                      color: Colors.blue.shade300,
+                      child: Icon(
+                        Icons.check_circle,
+                        color: Colors.black,
+                      ),
+                    ),
+                  )),
+            )
+        ]));
   }
 
   @override

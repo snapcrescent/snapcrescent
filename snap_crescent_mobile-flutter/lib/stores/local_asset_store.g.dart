@@ -9,18 +9,20 @@ part of 'local_asset_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$LocalAssetStore on _LocalAssetStore, Store {
-  final _$groupedAssetsAtom = Atom(name: '_LocalAssetStore.groupedAssets');
+  final _$assetsSearchProgressAtom =
+      Atom(name: '_LocalAssetStore.assetsSearchProgress');
 
   @override
-  Map<String, List<AssetEntity>> get groupedAssets {
-    _$groupedAssetsAtom.reportRead();
-    return super.groupedAssets;
+  AssetSearchProgress get assetsSearchProgress {
+    _$assetsSearchProgressAtom.reportRead();
+    return super.assetsSearchProgress;
   }
 
   @override
-  set groupedAssets(Map<String, List<AssetEntity>> value) {
-    _$groupedAssetsAtom.reportWrite(value, super.groupedAssets, () {
-      super.groupedAssets = value;
+  set assetsSearchProgress(AssetSearchProgress value) {
+    _$assetsSearchProgressAtom.reportWrite(value, super.assetsSearchProgress,
+        () {
+      super.assetsSearchProgress = value;
     });
   }
 
@@ -34,7 +36,7 @@ mixin _$LocalAssetStore on _LocalAssetStore, Store {
   @override
   String toString() {
     return '''
-groupedAssets: ${groupedAssets}
+assetsSearchProgress: ${assetsSearchProgress}
     ''';
   }
 }

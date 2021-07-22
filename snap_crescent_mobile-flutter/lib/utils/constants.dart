@@ -17,6 +17,11 @@ enum AssetSearchProgress {
    ASSETS_NOT_FOUND
 }
 
+enum ASSET_SOURCE {  
+   CLOUD,
+   DEVICE
+}
+
 enum ASSET_TYPE {  
    PHOTO,
    VIDEO

@@ -1,5 +1,8 @@
 package com.codeinsight.snap_crescent.asset;
 
+import java.io.File;
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
@@ -8,7 +11,8 @@ import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
 public interface AssetService {
 	
 	public BaseResponseBean<Long, UiAsset> search(AssetSearchCriteria assetSearchCriteria);
-	public void upload(ASSET_TYPE assetType, MultipartFile multipartFiles) throws Exception;
+	public List<File> uploadAssets(ASSET_TYPE assetType, List<MultipartFile> multipartFiles) throws Exception;
+	public void processAsset(ASSET_TYPE assetType, File temporaryFile) throws Exception;
 	public UiAsset getById(Long id);
 	public byte[] getAssetById(Long id) throws Exception;
 	public void update(UiAsset enity) throws Exception;

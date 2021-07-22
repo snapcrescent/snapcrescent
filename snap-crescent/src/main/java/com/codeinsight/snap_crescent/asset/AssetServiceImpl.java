@@ -1,8 +1,8 @@
 package com.codeinsight.snap_crescent.asset;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -19,6 +19,7 @@ import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
 import com.codeinsight.snap_crescent.common.utils.FileService;
+import com.codeinsight.snap_crescent.common.utils.StringUtils;
 import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 import com.codeinsight.snap_crescent.metadata.Metadata;
 import com.codeinsight.snap_crescent.metadata.MetadataRepository;
@@ -79,13 +80,12 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	}
 
 	@Override
-	@Transactional
-	@Async("threadPoolTaskExecutor")
-	public void upload(ASSET_TYPE assetType, MultipartFile multipartFile) throws Exception {
+	public List<File> uploadAssets(ASSET_TYPE assetType, List<MultipartFile> multipartFiles) throws Exception {
 
+		List<File> files = new ArrayList<>();
 		String x = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_SKIP_UPLOADING);
 		if (x != null & Boolean.parseBoolean(x) == true) {
-			return;
+			return files;
 		}
 
 		StringBuilder pathBuilder = new StringBuilder(EnvironmentProperties.STORAGE_PATH);
@@ -103,42 +103,57 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			directory.mkdir();
 		}
 
-		try {
-			String originalFilename = multipartFile.getOriginalFilename();
-			String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+		for (MultipartFile multipartFile : multipartFiles) {
+			try {
+				
 
-			String path = pathBuilder.toString() + UUID.randomUUID().toString() + extension;
+				String path = pathBuilder.toString() + StringUtils.generateTemporaryFileName(multipartFile.getOriginalFilename());
 
-			multipartFile.transferTo(new File(path));
+				multipartFile.transferTo(new File(path));
 
-			File file = new File(path);
-			if (isAlreadyExist(file) == false) {
-				Asset image = new Asset();
+				File file = new File(path);
 
-				image.setAssetType(assetType);
-
-				Metadata metadata = metadataService.extractMetaData(originalFilename, file);
-				Thumbnail thumbnail = thumbnailService.generateThumbnail(file, metadata, assetType);
-
-				metadataRepository.save(metadata);
-				thumbnailRepository.save(thumbnail);
-
-				image.setMetadataId(metadata.getId());
-				image.setThumbnailId(thumbnail.getId());
-
-				assetRepository.save(image);
+				files.add(file);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+		}
 
+		return files;
+
+	}
+
+	@Override
+	@Transactional
+	@Async("threadPoolTaskExecutor")
+	public void processAsset(ASSET_TYPE assetType, File temporaryFile) throws Exception {
+
+		try {
+			String originalFilename = StringUtils.extractFileNameFromTemporary(temporaryFile.getName());
+			String path = temporaryFile.getParent();
+			File finalFile = new File(path + "/" + StringUtils.generateFinalFileName(temporaryFile.getName()));
+			temporaryFile.renameTo(finalFile);
+			
+			Metadata metadata = metadataService.extractMetaData(originalFilename, finalFile);
+			
+			
+			
+			Thumbnail thumbnail = thumbnailService.generateThumbnail(finalFile, metadata, assetType);
+
+			Asset asset = new Asset();
+			asset.setAssetType(assetType);
+
+			metadataRepository.save(metadata);
+			thumbnailRepository.save(thumbnail);
+
+			asset.setMetadataId(metadata.getId());
+			asset.setThumbnailId(thumbnail.getId());
+
+			assetRepository.save(asset);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
 
-	private boolean isAlreadyExist(File file) throws Exception {
-		boolean exist = false;
-		String fileName = file.getName();
-		exist = metadataRepository.existsByName(fileName);
-		return exist;
 	}
 
 	@Override

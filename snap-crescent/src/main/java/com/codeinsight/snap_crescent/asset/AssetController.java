@@ -1,6 +1,9 @@
 package com.codeinsight.snap_crescent.asset;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,11 +98,18 @@ public class AssetController extends BaseController{
 
 		BaseResponse response = new BaseResponse();
 		try {
-			for (MultipartFile multipartFile : files) {
-				assetService.upload(ASSET_TYPE.findByValue(assetType), multipartFile);	
+			
+			ASSET_TYPE assetTypeEnum =  ASSET_TYPE.findByValue(assetType);
+			List<File> temporaryFiles = assetService.uploadAssets(assetTypeEnum, Arrays.asList(files));	
+			
+			for (File temporaryFile : temporaryFiles) {
+				assetService.processAsset(assetTypeEnum, temporaryFile);
 			}
 			
-			syncInfoService.createNewSyncInfo();
+			if(temporaryFiles.size() > 0) {
+				syncInfoService.createNewSyncInfo();	
+			}
+			
 			response.setMessage("Asset uploaded successfully.");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {

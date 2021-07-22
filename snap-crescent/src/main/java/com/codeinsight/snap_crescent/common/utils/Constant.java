@@ -5,6 +5,8 @@ public class Constant {
 	public static final String DEMO_ADDRESS = "demo.snapcrescent.com";
 	public static final String DB_MYSQL = "MYSQL";
 	public static final String DB_SQLITE = "SQLITE";
+	
+	public static final String UPLOAD_FILE_NAME_TEMPORARY_SEPARATOR = "FILE_NAME_SEPARATOR";
 
 	public static final String METADATA_FILE_NAME = "File Name";
 	public static final String METADATA_FILE_SIZE = "File Size";
