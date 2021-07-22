@@ -135,9 +135,6 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			temporaryFile.renameTo(finalFile);
 			
 			Metadata metadata = metadataService.extractMetaData(originalFilename, finalFile);
-			
-			
-			
 			Thumbnail thumbnail = thumbnailService.generateThumbnail(finalFile, metadata, assetType);
 
 			Asset asset = new Asset();
@@ -165,7 +162,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	@Transactional
 	public byte[] getAssetById(Long id) throws Exception {
 		Asset asset = assetRepository.findById(id);
-		String fileUniqueName = asset.getMetadata().getPath();
+		String fileUniquePathAndName = asset.getMetadata().getPath() + asset.getMetadata().getInternalName();
 		FILE_TYPE fileType = null;
 
 		if (asset.getAssetType() == ASSET_TYPE.PHOTO) {
@@ -176,7 +173,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			fileType = FILE_TYPE.VIDEO;
 		}
 
-		return fileService.readFileBytes(fileType, fileUniqueName);
+		return fileService.readFileBytes(fileType, fileUniquePathAndName);
 	}
 
 	@Override

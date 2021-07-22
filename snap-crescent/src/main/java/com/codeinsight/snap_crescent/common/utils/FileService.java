@@ -13,9 +13,9 @@ import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 @Service
 public class FileService {
 
-	public byte[] readFileBytes(FILE_TYPE fileType, String fileUniqueName) {
+	public byte[] readFileBytes(FILE_TYPE fileType, String fileUniquePathAndName) {
 		
-		File file = getFile(fileType, fileUniqueName);
+		File file = getFile(fileType, fileUniquePathAndName);
 		
 		byte[] image = null;
 		try {
@@ -28,7 +28,7 @@ public class FileService {
 		return image;
 	}
 	
-	public File getFile(FILE_TYPE fileType, String fileUniqueName) {
+	public File getFile(FILE_TYPE fileType, String fileUniquePathAndName) {
 		
 		String basepath = null;
 		
@@ -40,7 +40,7 @@ public class FileService {
 			basepath = EnvironmentProperties.STORAGE_PATH + Constant.VIDEO_FOLDER;
 		}
 		
-		return new File(basepath + fileUniqueName);
+		return new File(basepath + fileUniquePathAndName);
 		
 	}
 
