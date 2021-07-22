@@ -25,8 +25,6 @@ import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.FileService;
 import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 import com.codeinsight.snap_crescent.metadata.Metadata;
-import com.luciad.imageio.webp.WebPReadParam;
-
 @Service
 public class ThumbnailServiceImpl implements ThumbnailService {
 
@@ -83,6 +81,8 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 			if(assetType == ASSET_TYPE.PHOTO) {
 				if(metadata.getFileExtension().equals("webp")) {
+					
+					/*
 					ImageReader reader = ImageIO.getImageReadersByMIMEType("image/webp").next();
 
 			        // Configure decoding parameters
@@ -94,6 +94,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 			        // Decode the image
 			        original = reader.read(0, readParam);
+			        */
 				} else {
 					original = ImageIO.read(file);	
 				}
