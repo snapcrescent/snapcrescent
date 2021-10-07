@@ -190,7 +190,7 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
       return Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: true,
-          //leading: _getLeadingIcon(),
+          leading: _getLeadingIcon(),
           title: Text(controller.value.amount == 0
               ? widget.folderName
               : (controller.value.amount.toString() + " Selected")),

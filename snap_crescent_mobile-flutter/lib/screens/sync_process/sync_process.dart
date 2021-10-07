@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
-import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/sync_info_search_criteria.dart';
@@ -11,8 +10,6 @@ import 'package:snap_crescent/resository/sync_info_resository.dart';
 import 'package:snap_crescent/screens/cloud/grid/assets_grid.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
-import 'package:snap_crescent/stores/local_photo_store.dart';
-import 'package:snap_crescent/stores/local_video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class SyncProcessScreen extends StatelessWidget {
@@ -34,7 +31,6 @@ class _SyncProcessView extends StatefulWidget {
 }
 
 class _SyncProcessViewState extends State<_SyncProcessView> {
-
   @observable
   int _syncProgressState = 1;
 
@@ -47,8 +43,9 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
   _navigateToPhotoGrid() {
     Timer(
         Duration(seconds: 2),
-        () =>
-            Navigator.pushReplacementNamed(context, AssetsGridScreen.routeName, arguments: ASSET_TYPE.PHOTO));
+        () => Navigator.pushReplacementNamed(
+            context, AssetsGridScreen.routeName,
+            arguments: ASSET_TYPE.PHOTO));
   }
 
   _syncPhotosFromServer(SyncInfo serverSyncInfo) async {
@@ -97,7 +94,7 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
 
     AssetSearchCriteria searchCriteria = AssetSearchCriteria.defaultCriteria();
 
-     searchCriteria.assetType = ASSET_TYPE.VIDEO.index;
+    searchCriteria.assetType = ASSET_TYPE.VIDEO.index;
     searchCriteria.resultPerPage = 1;
     searchCriteria.resultType = ResultType.OPTION;
 
@@ -163,7 +160,7 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
             //Local sync info date is not matching with server
             await SyncInfoService().deleteAllData();
             await _syncLocalSyncInfoFromServer(serverSyncInfo);
-          } 
+          }
         }
       } else {
         // No server sync info is present
@@ -224,10 +221,6 @@ class _SyncProcessViewState extends State<_SyncProcessView> {
 
   @override
   Widget build(BuildContext context) {
-    
-    final LocalPhotoStore photosStore = Provider.of<LocalPhotoStore>(context);
-    final LocalVideoStore videosStore = Provider.of<LocalVideoStore>(context);
-
     return Observer(
         builder: (context) => _syncProgressState != 0
             ? OrientationBuilder(builder: (context, orientation) {

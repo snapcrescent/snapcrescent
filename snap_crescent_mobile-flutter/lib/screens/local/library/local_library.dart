@@ -24,20 +24,18 @@ class LocalLibraryScreen extends StatelessWidget {
 }
 
 class _LocalLibraryView extends StatefulWidget {
+  final ASSET_TYPE type;
 
-   final ASSET_TYPE type;
-
-   _LocalLibraryView(this.type);
+  _LocalLibraryView(this.type);
 
   @override
   _LocalLibraryViewState createState() => _LocalLibraryViewState();
 }
 
 class _LocalLibraryViewState extends State<_LocalLibraryView> {
-  
   _onFolderTap(BuildContext context, String folderName) {
-    
-    AssetGridArguments arguments = new AssetGridArguments(type: widget.type, folderName: folderName);
+    AssetGridArguments arguments =
+        new AssetGridArguments(type: widget.type, folderName: folderName);
 
     Navigator.pushNamed(
       context,
@@ -47,19 +45,21 @@ class _LocalLibraryViewState extends State<_LocalLibraryView> {
   }
 
   _gridView(Orientation orientation, LocalAssetStore localAssetStore) {
-       final filteredKeys = localAssetStore.groupedAssets.keys.where((key) => localAssetStore.groupedAssets[key]!.length > 0).toList();
-       return GridView.count(
-                        mainAxisSpacing: 1,
-                        crossAxisSpacing: 1,
-                        crossAxisCount:
-                            orientation == Orientation.portrait ? 3 : 6,
-                        childAspectRatio: orientation ==  Orientation.portrait ? (2 / 2.7) : (2 / 3),
-                        children: filteredKeys
-                            .map((assetFolder) => GestureDetector(
-                                child: LibraryTile(widget.type,assetFolder),
-                                onTap: () => _onFolderTap(context,assetFolder)))
-                            .toList(),
-                      );
+    final filteredKeys = localAssetStore.groupedAssets.keys
+        .where((key) => localAssetStore.groupedAssets[key]!.length > 0)
+        .toList();
+    return GridView.count(
+      mainAxisSpacing: 1,
+      crossAxisSpacing: 1,
+      crossAxisCount: orientation == Orientation.portrait ? 3 : 6,
+      childAspectRatio:
+          orientation == Orientation.portrait ? (2 / 2.7) : (2 / 3),
+      children: filteredKeys
+          .map((assetFolder) => GestureDetector(
+              child: LibraryTile(widget.type, assetFolder),
+              onTap: () => _onFolderTap(context, assetFolder)))
+          .toList(),
+    );
   }
 
   @override
@@ -69,12 +69,15 @@ class _LocalLibraryViewState extends State<_LocalLibraryView> {
 
   @override
   Widget build(BuildContext context) {
-    final LocalAssetStore localAssetStore = widget.type == ASSET_TYPE.PHOTO ? Provider.of<LocalPhotoStore>(context) : Provider.of<LocalVideoStore>(context);
-   
+    final LocalAssetStore localAssetStore = widget.type == ASSET_TYPE.PHOTO
+        ? Provider.of<LocalPhotoStore>(context)
+        : Provider.of<LocalVideoStore>(context);
+
     _body() {
       return Scaffold(
         appBar: AppBar(
-          title: Text((widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") + ' Library'),
+          title: Text((widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") +
+              ' Library'),
           backgroundColor: Colors.black,
         ),
         drawer: AppDrawer(),
@@ -82,7 +85,9 @@ class _LocalLibraryViewState extends State<_LocalLibraryView> {
           children: <Widget>[
             Expanded(
                 child: Observer(
-                    builder: (context) => localAssetStore.assetsSearchProgress != AssetSearchProgress.IDLE
+                    builder: (context) => localAssetStore
+                                .assetsSearchProgress !=
+                            AssetSearchProgress.IDLE
                         ? OrientationBuilder(builder: (context, orientation) {
                             return _gridView(orientation, localAssetStore);
                           })
