@@ -51,20 +51,27 @@ class App extends StatelessWidget {
         return MaterialPageRoute(builder: (_) => SettingsScreen());
       case AutoBackupFoldersScreen.routeName:
         return MaterialPageRoute(builder: (_) => AutoBackupFoldersScreen());
-      
+
       case AssetsGridScreen.routeName:
-        return MaterialPageRoute(builder: (_) => AssetsGridScreen(settings.arguments as ASSET_TYPE));
+        return MaterialPageRoute(
+            builder: (_) => AssetsGridScreen(settings.arguments as ASSET_TYPE));
       case AssetDetailScreen.routeName:
-        return MaterialPageRoute(builder: (_) => AssetDetailScreen(settings.arguments as AssetDetailArguments));
+        return MaterialPageRoute(
+            builder: (_) =>
+                AssetDetailScreen(settings.arguments as AssetDetailArguments));
 
       case LocalLibraryScreen.routeName:
-        return MaterialPageRoute(builder: (_) => LocalLibraryScreen(settings.arguments.toString() as ASSET_TYPE));
+        return MaterialPageRoute(
+            builder: (_) => LocalLibraryScreen(
+                settings.arguments.toString() as ASSET_TYPE));
       case LocalAssetsGridScreen.routeName:
-        return MaterialPageRoute(builder: (_) => LocalAssetsGridScreen(settings.arguments as AssetGridArguments));
+        return MaterialPageRoute(
+            builder: (_) => LocalAssetsGridScreen(
+                settings.arguments as AssetGridArguments));
       case LocalAssetDetailScreen.routeName:
-        return MaterialPageRoute(builder: (_) => LocalAssetDetailScreen(settings.arguments as AssetDetailArguments));
-     
-      
+        return MaterialPageRoute(
+            builder: (_) => LocalAssetDetailScreen(
+                settings.arguments as AssetDetailArguments));
 
       default:
         return MaterialPageRoute(

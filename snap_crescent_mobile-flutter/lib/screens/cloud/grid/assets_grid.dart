@@ -3,7 +3,6 @@ import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
 import 'package:snap_crescent/screens/cloud/grid/asset_detail.dart';
@@ -189,11 +188,11 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
           backgroundColor: Colors.black,
           actions: [
             if (_gridViewController.value.amount > 0)
-            IconButton(
-                onPressed: () {
-                  _shareAsset();
-                },
-                icon: Icon(Icons.share, color: Colors.white))
+              IconButton(
+                  onPressed: () {
+                    _shareAsset();
+                  },
+                  icon: Icon(Icons.share, color: Colors.white))
           ],
         ),
         drawer: AppDrawer(),
