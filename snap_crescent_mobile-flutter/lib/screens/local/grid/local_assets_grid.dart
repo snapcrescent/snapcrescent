@@ -12,9 +12,9 @@ import 'package:snap_crescent/screens/local/grid/local_asset_thumbnail.dart';
 import 'package:snap_crescent/screens/local/grid/local_asset_detail.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
-import 'package:snap_crescent/stores/local_asset_store.dart';
-import 'package:snap_crescent/stores/local_photo_store.dart';
-import 'package:snap_crescent/stores/local_video_store.dart';
+import 'package:snap_crescent/stores/local/local_asset_store.dart';
+import 'package:snap_crescent/stores/local/local_photo_store.dart';
+import 'package:snap_crescent/stores/local/local_video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class LocalAssetsGridScreen extends StatelessWidget {
@@ -139,7 +139,7 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
     _uploadAssetFiles() async {
       fileUploadInProgress = true;
 
-      setState(() {});
+      
 
       ToastService.showSuccess(
           (widget.type == ASSET_TYPE.PHOTO ? "Photo" : "Video") +
@@ -164,7 +164,6 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
 
       fileUploadInProgress = false;
 
-      setState(() {});
     }
 
     _shareAssetFiles() async {

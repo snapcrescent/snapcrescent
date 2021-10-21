@@ -7,9 +7,9 @@ import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
 import 'package:snap_crescent/screens/cloud/grid/asset_detail.dart';
 import 'package:snap_crescent/screens/cloud/grid/asset_thumbnail.dart';
-import 'package:snap_crescent/stores/asset_store.dart';
-import 'package:snap_crescent/stores/photo_store.dart';
-import 'package:snap_crescent/stores/video_store.dart';
+import 'package:snap_crescent/stores/cloud/asset_store.dart';
+import 'package:snap_crescent/stores/cloud/photo_store.dart';
+import 'package:snap_crescent/stores/cloud/video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class AssetsGridScreen extends StatelessWidget {
@@ -205,8 +205,9 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
                         ? OrientationBuilder(builder: (context, orientation) {
                             return RefreshIndicator(
                                 onRefresh: _pullRefresh,
-                                child:
-                                    _scrollableView(orientation, assetStore));
+                                child:Stack(
+                                          children: <Widget>[_scrollableView(orientation, assetStore)]
+                                          ));
                           })
                         : Center(
                             child: Container(
