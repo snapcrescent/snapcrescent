@@ -195,6 +195,12 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
               : (controller.value.amount.toString() + " Selected")),
           backgroundColor: Colors.black,
           actions: [
+            if (controller.value.amount == 0) 
+              IconButton(
+                onPressed: () async {
+                  await AssetService().saveOnCloud();
+                }, 
+                icon: Icon(Icons.sync, color: Colors.white)),
             if (controller.value.amount > 0)
               IconButton(
                   onPressed: () {
