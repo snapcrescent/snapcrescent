@@ -33,7 +33,6 @@ class _AutoBackupFoldersScreenViewState
   String _autoBackupFolders = "None";
 
   Future<List<AssetPathEntity>> _getDeviceFolderList() async {
-    await _getAutoBackupInfo();
     await _getAutoBackupFolderInfo();
 
     if (!await PhotoManager.requestPermission()) {
@@ -56,14 +55,7 @@ class _AutoBackupFoldersScreenViewState
     return Future.value(folders);
   }
 
-  Future<void> _getAutoBackupInfo() async {
-    AppConfig value = await AppConfigResository.instance
-        .findByKey(Constants.appConfigAutoBackupFlag);
 
-    if (value.configValue != null) {
-      //_autoBackup = value.configValue == 'true' ? true : false;
-    }
-  }
 
   Future<void> _getAutoBackupFolderInfo() async {
     AppConfig value = await AppConfigResository.instance

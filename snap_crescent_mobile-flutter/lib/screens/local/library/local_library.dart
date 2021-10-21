@@ -5,9 +5,9 @@ import 'package:snap_crescent/models/assets_grid_arguments.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
 import 'package:snap_crescent/screens/local/grid/local_assets_grid.dart';
 import 'package:snap_crescent/screens/local/library/library_tile.dart';
-import 'package:snap_crescent/stores/local_asset_store.dart';
-import 'package:snap_crescent/stores/local_photo_store.dart';
-import 'package:snap_crescent/stores/local_video_store.dart';
+import 'package:snap_crescent/stores/local/local_asset_store.dart';
+import 'package:snap_crescent/stores/local/local_photo_store.dart';
+import 'package:snap_crescent/stores/local/local_video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class LocalLibraryScreen extends StatelessWidget {

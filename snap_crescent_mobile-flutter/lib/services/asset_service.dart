@@ -3,10 +3,13 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:quiver/iterables.dart';
+import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
+import 'package:snap_crescent/resository/app_config_resository.dart';
 import 'package:snap_crescent/resository/metadata_resository.dart';
 import 'package:snap_crescent/resository/asset_resository.dart';
 import 'package:snap_crescent/resository/thumbnail_resository.dart';
@@ -131,4 +134,44 @@ class AssetService extends BaseService {
       AssetSearchCriteria assetSearchCriteria) async {
     return AssetResository.instance.searchOnLocal(assetSearchCriteria);
   }
+
+  saveOnCloud() async {
+       AppConfig value = await AppConfigResository.instance
+        .findByKey(Constants.appConfigAutoBackupFolders);
+
+        if (value.configValue != null) {
+          final List<AssetPathEntity> folders = await PhotoManager.getAssetPathList();
+          folders.sort((AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
+
+          List<String> autoBackupFolderNameList = value.configValue!.split(",");
+          List<AssetPathEntity> autoBackupFolders = [];
+
+          for(int i=0 ; i < folders.length ; i++) {
+              if(autoBackupFolderNameList.indexOf(folders[i].id) > -1) {
+                autoBackupFolders.add(folders[i]);
+              }
+          }
+            
+          for(int i=0 ; i < autoBackupFolders.length ; i++) {
+              AssetPathEntity folder = autoBackupFolders[i];
+
+              final allAssets = await folder.getAssetListRange(
+              start: 0, // start at index 0
+              end: 100000, // end at a very big index (to get all the assets)
+            );
+
+            final photos = allAssets.where((asset) => asset.type == AssetType.image);
+
+            List<File> assetFiles = [];
+            for (final AssetEntity asset in photos) {
+              final File? assetFile = await asset.file;
+              assetFiles.add(assetFile!);
+            }
+
+            save(ASSET_TYPE.PHOTO, assetFiles);
+          }  
+        }
+  }
+
+
 }

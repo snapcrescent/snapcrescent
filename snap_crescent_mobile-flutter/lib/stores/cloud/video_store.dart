@@ -1,6 +1,6 @@
 
 import 'package:snap_crescent/models/asset_search_criteria.dart';
-import 'package:snap_crescent/stores/asset_store.dart';
+import 'package:snap_crescent/stores/cloud/asset_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class VideoStore extends AssetStore {

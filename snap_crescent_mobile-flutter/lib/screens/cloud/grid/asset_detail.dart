@@ -9,9 +9,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/services/asset_service.dart';
-import 'package:snap_crescent/stores/asset_store.dart';
-import 'package:snap_crescent/stores/photo_store.dart';
-import 'package:snap_crescent/stores/video_store.dart';
+import 'package:snap_crescent/stores/cloud/asset_store.dart';
+import 'package:snap_crescent/stores/cloud/photo_store.dart';
+import 'package:snap_crescent/stores/cloud/video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:video_player/video_player.dart';
 
