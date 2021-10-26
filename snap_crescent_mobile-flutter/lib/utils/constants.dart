@@ -1,5 +1,7 @@
 class Constants {
 
+  static final String appConfigFirstBootFlag = 'FIRST_BOOT';
+
   static final String appConfigServerURL = 'SERVER_URL';
   static final String appConfigServerUserName = 'SERVER_USERNAME';
   static final String appConfigServerPassword = 'SERVER_PASSWORD';
@@ -7,6 +9,8 @@ class Constants {
   static final String appConfigAutoBackupFlag = 'AUTO_BACKUP';
   static final String appConfigAutoBackupFolders = 'AUTO_BACKUP_FOLDERS';
 
+  static final String appConfigShowDeviceAssetsFlag = 'SHOW_DEVICE_ASSETS';
+  static final String appConfigShowDeviceAssetsFolders = 'SHOW_DEVICE_ASSETS_FOLDERS';
   
 }
 
@@ -17,7 +21,7 @@ enum AssetSearchProgress {
    ASSETS_NOT_FOUND
 }
 
-enum ASSET_SOURCE {  
+enum AssetSource {  
    CLOUD,
    DEVICE
 }

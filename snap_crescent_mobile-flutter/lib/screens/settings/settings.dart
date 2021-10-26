@@ -7,7 +7,7 @@ import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/resository/app_config_resository.dart';
 import 'package:snap_crescent/screens/login/login.dart';
-import 'package:snap_crescent/screens/settings/auto_backup_folders/auto_backup_folders.dart';
+import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/style.dart';
@@ -34,8 +34,10 @@ class _SettingsScreenView extends StatefulWidget {
 
 class _SettingsScreenViewState extends State<_SettingsScreenView> {
   bool _autoBackup = false;
+  bool _showDeviceAssets = false;
   String _lastSyncDate = "Never";
   String _autoBackupFolders = "None";
+  String _showDeviceAssetsFolders = "None";
 
   FutureOr onBackFromChild(dynamic value) {
     _getSettingsData();
@@ -45,6 +47,8 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   Future<bool> _getSettingsData() async{
     await _getAutoBackupInfo();
     await _getAutoBackupFolderInfo();
+    await _getShowDeviceAssetsInfo();
+    await _getShowDeviceAssetsFolderInfo();
     await _getLastSyncInfo();
     return Future.value(true);
   }
@@ -87,6 +91,35 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     }
   }
 
+  Future<void> _getShowDeviceAssetsInfo() async {
+    AppConfig value = await AppConfigResository.instance
+        .findByKey(Constants.appConfigShowDeviceAssetsFlag);
+
+    if (value.configValue != null) {
+      _showDeviceAssets = value.configValue == 'true' ? true : false;
+    }
+  }
+
+  Future<void> _getShowDeviceAssetsFolderInfo() async {
+    AppConfig value = await AppConfigResository.instance
+        .findByKey(Constants.appConfigShowDeviceAssetsFolders);
+
+    if (value.configValue != null) {
+      List<String> showDeviceAssetsFolderIdList = value.configValue!.split(",");
+      
+      final List<AssetPathEntity> assets = await PhotoManager.getAssetPathList();
+      List<String> showDeviceAssetsFolderNameList = assets.where((asset) => showDeviceAssetsFolderIdList.indexOf(asset.id) > -1).map((asset) => asset.name).toList();
+
+      if(showDeviceAssetsFolderNameList.isEmpty) {
+        _showDeviceAssetsFolders = "None";
+      } else if (showDeviceAssetsFolderNameList.length == assets.length) {
+        _showDeviceAssetsFolders = "All";
+      } else {
+        _showDeviceAssetsFolders = showDeviceAssetsFolderNameList.join(", ");
+      }
+    }
+  }
+
   Future<void> _getLastSyncInfo() async {
     List<SyncInfo> localSyncInfoList = await SyncInfoService().searchOnLocal();
 
@@ -106,6 +139,18 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
     await AppConfigResository.instance
         .saveOrUpdateConfig(appConfigAutoBackupFlagConfig);
+
+    setState(() {});
+  }
+
+  _updateShowDeviceAssetsFlag(bool value) async {
+    _showDeviceAssets = value;
+    AppConfig appConfigShowDeviceAssetsFlagConfig = new AppConfig(
+        configkey: Constants.appConfigShowDeviceAssetsFlag,
+        configValue: value.toString());
+
+    await AppConfigResository.instance
+        .saveOrUpdateConfig(appConfigShowDeviceAssetsFlagConfig);
 
     setState(() {});
   }
@@ -133,7 +178,11 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
             child: const Icon(Icons.folder),
           ),
           onTap: () {
-            Navigator.push(context,MaterialPageRoute(builder: (context) => AutoBackupFoldersScreen())).then(onBackFromChild);
+             AppConfig appConfigAutoBackupFlagConfig = new AppConfig(
+                configkey: Constants.appConfigAutoBackupFlag,
+                configValue: "");
+
+            Navigator.push(context,MaterialPageRoute(builder: (context) => FolderSelectionScreen(appConfigAutoBackupFlagConfig))).then(onBackFromChild);
           },
         ),
       ListTile(
@@ -147,7 +196,35 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         onTap: () {
           _clearCache();
         },
-      ),  
+      ),
+      SwitchListTile(
+        title: Text("Show Device Phtos And Videos", style: TitleTextStyle),
+        secondary: const Icon(Icons.photo_album),
+        subtitle: Text(
+            "Show photos and videos on your device on snap-cresent"),
+        isThreeLine: true,
+        value: _showDeviceAssets,
+        onChanged: (bool value) {
+          _updateShowDeviceAssetsFlag(value);
+        },
+      ),
+      if (_showDeviceAssets)
+        ListTile(
+          title: Text("Device Folders", style: TitleTextStyle),
+          subtitle: Text(_showDeviceAssetsFolders
+          ),
+          leading: Container(
+            width: 10,
+            alignment: Alignment.center,
+            child: const Icon(Icons.folder),
+          ),
+          onTap: () {
+             AppConfig appConfigShowDeviceAssetsFoldersFlagConfig = new AppConfig(
+                configkey: Constants.appConfigShowDeviceAssetsFolders,
+                configValue: "");
+            Navigator.push(context,MaterialPageRoute(builder: (context) => FolderSelectionScreen(appConfigShowDeviceAssetsFoldersFlagConfig))).then(onBackFromChild);
+          },
+        ),  
       ListTile(
         title: Text("Logout", style: TitleTextStyle),
         leading: Container(

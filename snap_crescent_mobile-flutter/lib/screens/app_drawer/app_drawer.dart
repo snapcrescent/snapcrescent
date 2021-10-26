@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:snap_crescent/screens/cloud/grid/assets_grid.dart';
+import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/local/library/local_library.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/utils/constants.dart';

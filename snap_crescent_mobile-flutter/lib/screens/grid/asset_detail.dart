@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
+import 'package:snap_crescent/models/unified_asset.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/stores/cloud/asset_store.dart';
 import 'package:snap_crescent/stores/cloud/photo_store.dart';
@@ -44,23 +46,39 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
   PageController? pageController;
   String? _genericAssetByIdUrl;
   
-  _videoPlayer(Asset? asset) {
+  _videoPlayer(UniFiedAsset? unifiedAsset) async{
 
-     String assetURL = AssetService().getAssetByIdUrl(_genericAssetByIdUrl!, asset!.id!);
+      if (_videoPlayerController == null) {
+          if (_videoPlayerController != null) {
+            _videoPlayerController!.dispose();
+          }
 
-    if (_videoPlayerController == null) {
-      if (_videoPlayerController != null) {
-        _videoPlayerController!.dispose();
-      }
+          if(unifiedAsset!.assetSource == AssetSource.CLOUD) {
+              Asset asset = unifiedAsset.asset!;
+              String assetURL = AssetService().getAssetByIdUrl(_genericAssetByIdUrl!, asset.id!);
 
-      _videoPlayerController = VideoPlayerController.network(assetURL)
-        ..setLooping(true)
-        ..initialize().then((_) {
-          setState(() {
+              _videoPlayerController = VideoPlayerController.network(assetURL)
+                ..setLooping(true)
+                ..initialize().then((_) {
+                  setState(() {
 
-          });
-        });
-    }
+                  });
+                });
+            } else {
+
+              AssetEntity asset = unifiedAsset.assetEntity!;
+              File? file = await asset.file;
+      
+              _videoPlayerController = VideoPlayerController.file(file!)
+                  ..setLooping(true)
+                  ..initialize().then((_) {
+                    setState(() {
+                      
+                    });
+                  });
+            }
+            
+    } 
 
     return _videoPlayerController != null &&
             _videoPlayerController!.value.isInitialized
@@ -76,27 +94,33 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
           );
   }
   
-  _imageBanner(Asset? asset) {
-    String base64EncodedPhoto;
-    if (asset != null &&
-        asset.metadata != null &&
-        asset.metadata!.base64EncodedPhoto != null) {
-      base64EncodedPhoto = asset.metadata!.base64EncodedPhoto!;
-    } else {
-      base64EncodedPhoto = asset!.thumbnail!.base64EncodedThumbnail!;
-    }
+  _imageBanner(UniFiedAsset unifiedAsset, Object? object) {
 
-    return PhotoView(
-        loadingBuilder: (context, progress) => Center(
-              child: Container(
-                child: Image.memory(base64Decode(base64EncodedPhoto),
-                    fit: BoxFit.scaleDown),
+    if(unifiedAsset.assetSource == AssetSource.CLOUD && object is Asset) {
+
+      Asset asset = object;
+      String base64EncodedPhoto;
+
+      if (asset.metadata != null &&
+          asset.metadata!.base64EncodedPhoto != null) {
+        base64EncodedPhoto = asset.metadata!.base64EncodedPhoto!;
+      } else {
+        base64EncodedPhoto = asset.thumbnail!.base64EncodedThumbnail!;
+      }
+
+      return PhotoView(
+          loadingBuilder: (context, progress) => Center(
+                child: Container(
+                  child: Image.memory(base64Decode(base64EncodedPhoto),
+                      fit: BoxFit.scaleDown),
+                ),
               ),
-            ),
-        imageProvider: CachedNetworkImageProvider(
-            AssetService().getAssetByIdUrl(_genericAssetByIdUrl!, asset.id!)));
+          imageProvider: CachedNetworkImageProvider(
+              AssetService().getAssetByIdUrl(_genericAssetByIdUrl!, asset.id!)));
 
-    
+    } else if(unifiedAsset.assetSource == AssetSource.DEVICE && object is File){
+      return Image.file(object);
+    }
   }
 
   @override
@@ -118,8 +142,18 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
     final AssetStore assetStore = widget.type == ASSET_TYPE.PHOTO ? Provider.of<PhotoStore>(context) : Provider.of<VideoStore>(context);
 
     _getAssetFile(int assetIndex) async{
-      final Asset asset = assetStore.assetList[assetIndex];
-      final File assetFile = await AssetService().downloadAssetById(asset.id!, asset.metadata!.name!);
+      final UniFiedAsset unifiedAsset = assetStore.assetList[assetIndex];
+
+      File? assetFile;
+
+      if(unifiedAsset.assetSource == AssetSource.CLOUD) {
+        Asset asset = unifiedAsset.asset!;
+        assetFile = await AssetService().downloadAssetById(asset.id!, asset.metadata!.name!);
+      } else {
+        AssetEntity asset = unifiedAsset.assetEntity!;
+        assetFile = await asset.file;
+      }
+       
       return assetFile;
     }
 
@@ -130,15 +164,18 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
     }
 
     _assetView(index) {
-      return FutureBuilder<Asset?>(
-          future: Future.value(assetStore.assetList[index]),
-          builder: (BuildContext context, AsyncSnapshot<Asset?> snapshot) {
+      
+      return FutureBuilder<Object?>(
+          future: Future.value(assetStore.assetList[index].assetSource == AssetSource.CLOUD ? assetStore.assetList[index].asset : assetStore.assetList[index].assetEntity!.file),
+          builder: (BuildContext context, AsyncSnapshot<Object?> snapshot) {
             if (snapshot.data == null) {
               return Container();
             } else {
-              return widget.type == ASSET_TYPE.PHOTO ? _imageBanner(snapshot.data) : _videoPlayer(snapshot.data);
+              UniFiedAsset asset = assetStore.assetList[index];
+              return widget.type == ASSET_TYPE.PHOTO ? _imageBanner(asset, snapshot.data) : _videoPlayer(asset);
             }
           });
+          
     }
 
     _pageView() {

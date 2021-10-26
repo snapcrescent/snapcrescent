@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/resository/app_config_resository.dart';
 import 'package:snap_crescent/screens/sync_process/sync_process.dart';
@@ -36,6 +37,43 @@ class _LoginScreenViewState extends State<_LoginScreenView> {
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  _setDefaultAppConfig() async {
+
+      AppConfig firstBootConfig = await AppConfigResository.instance
+        .findByKey(Constants.appConfigFirstBootFlag);
+
+        // This is first boot of application
+        if (firstBootConfig.configValue == null) {
+          firstBootConfig.configkey = Constants.appConfigFirstBootFlag;
+          firstBootConfig.configValue = "false";
+
+          await AppConfigResository.instance.saveOrUpdateConfig(firstBootConfig);
+
+          AppConfig appConfigShowDeviceAssetsFlagConfig = new AppConfig(
+                configkey: Constants.appConfigShowDeviceAssetsFlag,
+                configValue: "true");
+          
+           await AppConfigResository.instance.saveOrUpdateConfig(appConfigShowDeviceAssetsFlagConfig);
+
+           if (!await PhotoManager.requestPermission()) {
+              ToastService.showError('Permission to device folders denied!');
+              return Future.value([]);
+            }
+
+            final List<AssetPathEntity> folders = await PhotoManager.getAssetPathList();
+            folders.sort(
+                (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
+
+            AssetPathEntity cameraFolder = folders.firstWhere((folder) => folder.name.toLowerCase() == "camera");  
+
+           AppConfig appConfigShowDeviceAssetsFoldersFlagConfig = new AppConfig(
+                configkey: Constants.appConfigShowDeviceAssetsFolders,
+                configValue: cameraFolder.id);
+          
+           await AppConfigResository.instance.saveOrUpdateConfig(appConfigShowDeviceAssetsFoldersFlagConfig);
+        }
+  }
+
   _onLoginPressed() async {
     AppConfig serverUrlConfig = new AppConfig(
         configkey: Constants.appConfigServerURL,
@@ -52,9 +90,12 @@ class _LoginScreenViewState extends State<_LoginScreenView> {
     await AppConfigResository.instance.saveOrUpdateConfig(serverUrlConfig);
     await AppConfigResository.instance.saveOrUpdateConfig(serverUserNameConfig);
     await AppConfigResository.instance.saveOrUpdateConfig(serverPasswordConfig);
-    Navigator.pushReplacementNamed(context, SyncProcessScreen.routeName);
-            
+
+    await this._setDefaultAppConfig();
+
+    Navigator.pushReplacementNamed(context, SyncProcessScreen.routeName);         
   }
+  
 
   _showValidationErrors() {
     ToastService.showError("Please fix the errors");
@@ -70,7 +111,7 @@ class _LoginScreenViewState extends State<_LoginScreenView> {
               if (value.configValue != null)
                 {this.serverURLController.text = value.configValue!}
               else
-                {this.serverURLController.text = "http://192.168.0.61:8080"}
+                {this.serverURLController.text = "http://192.168.0.16:8080"}
             });
 
     AppConfigResository.instance

@@ -4,10 +4,13 @@ import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/resository/app_config_resository.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/style.dart';
-import 'package:snap_crescent/utils/constants.dart';
 
-class AutoBackupFoldersScreen extends StatelessWidget {
-  static const routeName = '/auto_backup_folders';
+class FolderSelectionScreen extends StatelessWidget {
+  static const routeName = '/folder_selection';
+
+  final AppConfig appConfigShowDeviceAssetsFlagConfig;
+
+  FolderSelectionScreen(this.appConfigShowDeviceAssetsFlagConfig);
 
   @override
   Widget build(BuildContext context) {
@@ -16,24 +19,29 @@ class AutoBackupFoldersScreen extends StatelessWidget {
           title: Text('Device Folders'),
           backgroundColor: Colors.black,
         ),
-        body: _AutoBackupFoldersScreenView());
+        body: _FoldersScreenView(this.appConfigShowDeviceAssetsFlagConfig));
   }
 }
 
-class _AutoBackupFoldersScreenView extends StatefulWidget {
+class _FoldersScreenView extends StatefulWidget {
+
+  final AppConfig appConfigShowDeviceAssetsFlagConfig;
+
+  _FoldersScreenView(this.appConfigShowDeviceAssetsFlagConfig);
+
   @override
-  _AutoBackupFoldersScreenViewState createState() =>
-      _AutoBackupFoldersScreenViewState();
+  _FoldersScreenViewState createState() =>
+      _FoldersScreenViewState();
 }
 
-class _AutoBackupFoldersScreenViewState
-    extends State<_AutoBackupFoldersScreenView> {
-  List<bool> _autoBackupFolderStatusList = [];
-  List<String> _autoBackupFolderList = [];
-  String _autoBackupFolders = "None";
+class _FoldersScreenViewState
+    extends State<_FoldersScreenView> {
+  List<bool> _folderStatusList = [];
+  List<String> _folderList = [];
+  String _folders = "None";
 
   Future<List<AssetPathEntity>> _getDeviceFolderList() async {
-    await _getAutoBackupFolderInfo();
+    await _getFolderInfo();
 
     if (!await PhotoManager.requestPermission()) {
       ToastService.showError('Permission to device folders denied!');
@@ -44,46 +52,44 @@ class _AutoBackupFoldersScreenViewState
     folders.sort(
         (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
-    List<String> autoBackupFolderNameList = _autoBackupFolders.split(",");
+    List<String> folderNameList = _folders.split(",");
 
-    _autoBackupFolderStatusList = folders
+    _folderStatusList = folders
         .map((asset) =>
-            autoBackupFolderNameList.indexOf(asset.id) > -1 ? true : false)
+            folderNameList.indexOf(asset.id) > -1 ? true : false)
         .toList();
-    _autoBackupFolderList = folders.map((asset) => asset.id).toList();
+    _folderList = folders.map((asset) => asset.id).toList();
 
     return Future.value(folders);
   }
 
 
 
-  Future<void> _getAutoBackupFolderInfo() async {
+  Future<void> _getFolderInfo() async {
     AppConfig value = await AppConfigResository.instance
-        .findByKey(Constants.appConfigAutoBackupFolders);
+        .findByKey(widget.appConfigShowDeviceAssetsFlagConfig.configkey!);
 
     if (value.configValue != null) {
-      _autoBackupFolders = value.configValue!;
+      _folders = value.configValue!;
     }
   }
 
-  _updateAppConfigAutoBackupFolders(int index, bool value) async {
-    _autoBackupFolderStatusList[index] = value;
+  _updateAppConfig(int index, bool value) async {
+    _folderStatusList[index] = value;
 
     List<String> newAutoBackupFolderList = [];
-    for (int i = 0; i < _autoBackupFolderStatusList.length; i++) {
-      if (_autoBackupFolderStatusList[i] == true) {
-        newAutoBackupFolderList.add(_autoBackupFolderList[i]);
+    for (int i = 0; i < _folderStatusList.length; i++) {
+      if (_folderStatusList[i] == true) {
+        newAutoBackupFolderList.add(_folderList[i]);
       }
     }
 
-    _autoBackupFolders = newAutoBackupFolderList.join(",");
+    _folders = newAutoBackupFolderList.join(",");
 
-    AppConfig appConfigAutoBackupFoldersConfig = new AppConfig(
-        configkey: Constants.appConfigAutoBackupFolders,
-        configValue: _autoBackupFolders);
-
+    widget.appConfigShowDeviceAssetsFlagConfig.configValue = _folders;
+    
     await AppConfigResository.instance
-        .saveOrUpdateConfig(appConfigAutoBackupFoldersConfig);
+        .saveOrUpdateConfig(widget.appConfigShowDeviceAssetsFlagConfig);
 
     setState(() {});
   }
@@ -104,9 +110,9 @@ class _AutoBackupFoldersScreenViewState
                   return new SwitchListTile(
                     title: Text(assets[index].name, style: TitleTextStyle),
                     secondary: const Icon(Icons.folder),
-                    value: _autoBackupFolderStatusList[index],
+                    value: _folderStatusList[index],
                     onChanged: (bool value) {
-                      _updateAppConfigAutoBackupFolders(index, value);
+                      _updateAppConfig(index, value);
                     },
                   );
                 }))

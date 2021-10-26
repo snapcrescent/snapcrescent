@@ -1,31 +1,36 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
-import 'package:drag_select_grid_view/drag_select_grid_view.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/asset.dart';
+import 'package:snap_crescent/models/unified_asset.dart';
+import 'package:snap_crescent/stores/cloud/asset_store.dart';
+import 'package:snap_crescent/stores/cloud/photo_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class AssetThumbnail extends StatefulWidget {
   final index;
-  final Asset asset;
+  final UniFiedAsset unifiedAsset;
+  final Future<Object?> assetThumbnail;
   final bool selected;
-  final Function onTapCallback;
-  final DragSelectGridViewController gridController;
-
-  AssetThumbnail(this.index, this.asset, this.selected, this.gridController,
-      this.onTapCallback);
+  
+  AssetThumbnail(this.index, this.unifiedAsset, this.assetThumbnail, this.selected);
 
   @override
-  _AssetThumbnailState createState() => _AssetThumbnailState(asset);
+  _AssetThumbnailState createState() =>
+      _AssetThumbnailState(unifiedAsset, assetThumbnail);
 }
 
 class _AssetThumbnailState extends State<AssetThumbnail>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scaleAnimation;
-  final Asset asset;
+  final UniFiedAsset unifiedAsset;
+  final Future<Object?> assetThumbnail;
 
-  _AssetThumbnailState(this.asset);
+  _AssetThumbnailState(this.unifiedAsset, this.assetThumbnail);
 
   @override
   void initState() {
@@ -63,25 +68,8 @@ class _AssetThumbnailState extends State<AssetThumbnail>
     super.dispose();
   }
 
-  void onTap() {
-    final Selection selection = widget.gridController.value;
-    if (selection.isSelecting) {
-      final Set<int> selectedIndexes = selection.selectedIndexes.toSet();
-      if (selectedIndexes.contains(widget.index)) {
-        selectedIndexes.remove(widget.index);
-      } else {
-        selectedIndexes.add(widget.index);
-      }
-      widget.gridController.value = Selection(selectedIndexes);
-      return;
-    }
-    widget.onTapCallback();
-  }
-
-  _body(Asset asset) {
-    return GestureDetector(
-        onTap: onTap,
-        child: Stack(children: [
+  _body(AssetStore assetStore, Object object) {
+    return Stack(children: [
           AnimatedBuilder(
             animation: _scaleAnimation,
             builder: (context, child) {
@@ -101,14 +89,31 @@ class _AssetThumbnailState extends State<AssetThumbnail>
             },
             child: Stack(
               children: [
-                // Wrap the image in a Positioned.fill to fill the space
-                Positioned.fill(
-                  child: Image.memory(
-                      base64Decode(asset.thumbnail!.base64EncodedThumbnail!),
+                if(unifiedAsset.assetSource == AssetSource.CLOUD && object is Asset) 
+                  Positioned.fill(
+                  child: Image.memory(base64Decode(object.thumbnail!.base64EncodedThumbnail!),
                       fit: BoxFit.cover),
+                  )
+                else if(unifiedAsset.assetSource == AssetSource.DEVICE && object is Uint8List) 
+                  Positioned.fill(
+                  child: Image.memory(object, fit: BoxFit.cover),
                 ),
+
+
+              if(unifiedAsset.assetSource == AssetSource.DEVICE && object is Uint8List) 
+                Positioned.fill(
+                  child: Align(
+                      alignment: Alignment.topRight,
+                      child: Icon(
+                            Icons.cloud_off_outlined,
+                            color: Colors.grey.shade300,
+                          )
+                      ),
+                ),
+                
                 // Display a Play icon if the asset is a video
-                if (asset.assetType == ASSET_TYPE.VIDEO.index)
+                if ((unifiedAsset.assetSource == AssetSource.CLOUD && unifiedAsset.asset!.assetType == ASSET_TYPE.VIDEO.index )
+                     || (unifiedAsset.assetSource == AssetSource.DEVICE && unifiedAsset.assetEntity!.type == AssetType.video))
                   Center(
                       child: ClipRRect(
                     borderRadius: BorderRadius.only(
@@ -129,20 +134,22 @@ class _AssetThumbnailState extends State<AssetThumbnail>
             ),
           ),
           // Display a Circle icon if the asset is not selected
-          if (widget.gridController.value.amount > 0 &&
+          
+          if (assetStore.isAnyItemSelected() && 
               widget.selected == false)
             Positioned.fill(
               child: Align(
                   alignment: Alignment.topLeft,
                   child: Container(
-                    child: Icon(
-                      Icons.radio_button_unchecked,
-                      color: Colors.white,
-                    ),
-                  )),
+                      child: Icon(
+                        Icons.radio_button_unchecked,
+                        color: Colors.white,
+                      ),
+                    )),
             ),
+            
           // Display a Checked icon if the asset is selected
-          if (widget.selected)
+          if (assetStore.isAnyItemSelected() && widget.selected)
             Positioned.fill(
               child: Align(
                   alignment: Alignment.topLeft,
@@ -162,19 +169,21 @@ class _AssetThumbnailState extends State<AssetThumbnail>
                     ),
                   )),
             )
-        ]));
+        ]);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: Future.value(asset.thumbnail!.base64EncodedThumbnail),
+    final AssetStore assetStore = Provider.of<PhotoStore>(context);
+        
+    return FutureBuilder<Object?>(
+      future: assetThumbnail,
       builder: (context, snapshot) {
-        final base64EncodedThumbnail = snapshot.data;
+        final bytes = snapshot.data;
         // If we have no data, display a spinner
-        if (base64EncodedThumbnail == null) return CircularProgressIndicator();
+        if (bytes == null) return CircularProgressIndicator();
         // If there's data, display it as an image
-        return _body(asset);
+        return _body(assetStore,bytes);
       },
     );
   }
