@@ -1,16 +1,16 @@
-import 'package:drag_select_grid_view/drag_select_grid_view.dart';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
-import 'package:snap_crescent/screens/cloud/grid/asset_detail.dart';
-import 'package:snap_crescent/screens/cloud/grid/asset_thumbnail.dart';
+import 'package:snap_crescent/screens/grid/asset_detail.dart';
+import 'package:snap_crescent/screens/grid/asset_thumbnail.dart';
 import 'package:snap_crescent/stores/cloud/asset_store.dart';
 import 'package:snap_crescent/stores/cloud/photo_store.dart';
 import 'package:snap_crescent/stores/cloud/video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
+
 
 class AssetsGridScreen extends StatelessWidget {
   static const routeName = '/assets';
@@ -35,8 +35,6 @@ class _LocalPhotoGridView extends StatefulWidget {
 }
 
 class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
-  final DragSelectGridViewController _gridViewController =
-      DragSelectGridViewController();
   final ScrollController _scrollController = new ScrollController();
 
   _onAssetTap(BuildContext context, int assetIndex) {
@@ -57,12 +55,10 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
   @override
   void initState() {
     super.initState();
-    _gridViewController.addListener(scheduleRebuild);
   }
 
   @override
   void dispose() {
-    _gridViewController.removeListener(scheduleRebuild);
     super.dispose();
   }
 
@@ -119,31 +115,51 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
                                 color: Colors.white,
                               )),
                         ),
-                        DragSelectGridView(
-                          gridController: _gridViewController,
-                          padding: const EdgeInsets.all(8),
-                          itemCount: assetStore
-                              .groupedAssets[keys[groupIndex]]!.length,
-                          itemBuilder: (context, index, selected) {
-                            final asset = assetStore
-                                .groupedAssets[keys[groupIndex]]![index];
-                            return AssetThumbnail(
-                                index, asset, selected, _gridViewController,
-                                () {
-                              _onAssetTap(
-                                  context, assetStore.assetList.indexOf(asset));
-                            });
-                          },
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 150,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                          ),
-                          physics:
-                              NeverScrollableScrollPhysics(), // to disable GridView's scrolling
-                          shrinkWrap: true,
-                        )
+                        GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 150,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                            physics:
+                                NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+                            shrinkWrap: true,
+                            itemCount: assetStore.groupedAssets[keys[groupIndex]]!.length,
+                            itemBuilder: (BuildContext ctx, index) {
+                              final asset = assetStore
+                                  .groupedAssets[keys[groupIndex]]![index];
+
+                              return GestureDetector(
+                                onLongPress: () {
+                                  asset.selected = !asset.selected;
+                                  setState(() {
+                                    
+                                  });
+                                },
+                                onTap: () {
+                                  //Grid is in selction mode
+                                  if(assetStore.isAnyItemSelected()) {
+                                        asset.selected = !asset.selected;
+                                        setState(() {
+                                    
+                                  });
+                                  } //No asset is selected, proceed to asset detail page 
+                                  else {
+                                        _onAssetTap(context,assetStore.assetList.indexOf(asset));
+                                  }
+                                },
+                                child: AssetThumbnail(
+                                  index,
+                                  asset,
+                                  asset.assetSource == AssetSource.CLOUD
+                                      ? Future.value(asset.asset)
+                                      : asset.assetEntity!.thumbData,
+                                  asset.selected),
+                              );
+
+                          
+                            })
                       ])
               ],
             );
@@ -168,31 +184,36 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
     }
 
     _getLeadingIcon() {
-      if (_gridViewController.value.amount > 0) {
+      
+      if (assetStore.isAnyItemSelected()) {
         return IconButton(
           onPressed: () {
-            _gridViewController.clear();
+            assetStore.assetList.forEach((asset) { asset.selected = false; });
           },
           icon: Icon(Icons.cancel),
         );
       }
+      
     }
 
     _body() {
       return Scaffold(
         appBar: AppBar(
           leading: _getLeadingIcon(),
-          title: Text(_gridViewController.value.amount == 0
+          title: Text(!assetStore.isAnyItemSelected()
               ? (widget.type == ASSET_TYPE.PHOTO ? "Photos" : "Videos")
-              : (_gridViewController.value.amount.toString() + " Selected")),
+              : (assetStore.getSelectedCount().toString() + " Selected")),
+              
           backgroundColor: Colors.black,
           actions: [
-            if (_gridViewController.value.amount > 0)
+            
+            if (assetStore.isAnyItemSelected())
               IconButton(
                   onPressed: () {
                     _shareAsset();
                   },
                   icon: Icon(Icons.share, color: Colors.white))
+            
           ],
         ),
         drawer: AppDrawer(),
@@ -205,9 +226,9 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
                         ? OrientationBuilder(builder: (context, orientation) {
                             return RefreshIndicator(
                                 onRefresh: _pullRefresh,
-                                child:Stack(
-                                          children: <Widget>[_scrollableView(orientation, assetStore)]
-                                          ));
+                                child: Stack(children: <Widget>[
+                                  _scrollableView(orientation, assetStore)
+                                ]));
                           })
                         : Center(
                             child: Container(

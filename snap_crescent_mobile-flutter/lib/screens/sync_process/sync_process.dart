@@ -7,7 +7,7 @@ import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/sync_info_search_criteria.dart';
 import 'package:snap_crescent/resository/sync_info_resository.dart';
-import 'package:snap_crescent/screens/cloud/grid/assets_grid.dart';
+import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/utils/constants.dart';

@@ -26,7 +26,7 @@ class _SplashScreenView extends StatefulWidget {
 
 class _SplashScreenViewState extends State<_SplashScreenView> {
   @override
-  void initState() {
+  void initState()  {
     super.initState();
 
     AppConfigResository.instance

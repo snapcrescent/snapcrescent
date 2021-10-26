@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/models/assets_grid_arguments.dart';
-import 'package:snap_crescent/screens/cloud/grid/asset_detail.dart';
-import 'package:snap_crescent/screens/cloud/grid/assets_grid.dart';
+import 'package:snap_crescent/screens/grid/asset_detail.dart';
+import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/local/grid/local_asset_detail.dart';
 import 'package:snap_crescent/screens/local/grid/local_assets_grid.dart';
 import 'package:snap_crescent/screens/local/library/local_library.dart';
 import 'package:snap_crescent/screens/login/login.dart';
-import 'package:snap_crescent/screens/settings/auto_backup_folders/auto_backup_folders.dart';
+import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
 import 'package:snap_crescent/screens/sync_process/sync_process.dart';
@@ -49,9 +50,9 @@ class App extends StatelessWidget {
         return MaterialPageRoute(builder: (_) => SyncProcessScreen());
       case SettingsScreen.routeName:
         return MaterialPageRoute(builder: (_) => SettingsScreen());
-      case AutoBackupFoldersScreen.routeName:
-        return MaterialPageRoute(builder: (_) => AutoBackupFoldersScreen());
-
+      case FolderSelectionScreen.routeName:
+        return MaterialPageRoute(
+            builder: (_) => FolderSelectionScreen(settings.arguments as AppConfig));
       case AssetsGridScreen.routeName:
         return MaterialPageRoute(
             builder: (_) => AssetsGridScreen(settings.arguments as ASSET_TYPE));
