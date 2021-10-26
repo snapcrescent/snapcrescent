@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/resository/app_config_resository.dart';
@@ -10,6 +11,9 @@ import 'package:snap_crescent/screens/login/login.dart';
 import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
+import 'package:snap_crescent/stores/cloud/asset_store.dart';
+import 'package:snap_crescent/stores/cloud/photo_store.dart';
+import 'package:snap_crescent/stores/cloud/video_store.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -39,6 +43,27 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   String _autoBackupFolders = "None";
   String _showDeviceAssetsFolders = "None";
 
+  AssetStore? photoStore;
+  AssetStore? videoStore;
+
+  @override
+  Widget build(BuildContext context) {
+
+    photoStore = Provider.of<PhotoStore>(context);
+    videoStore = Provider.of<VideoStore>(context);
+    
+
+    return FutureBuilder<bool>(
+          future: _getSettingsData(),
+          builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+            if (snapshot.data == null) {
+              return Container();
+            } else {
+              return _settingsList(context);
+            }
+          });
+  }
+
   FutureOr onBackFromChild(dynamic value) {
     _getSettingsData();
     setState(() {});
@@ -57,6 +82,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     await SyncInfoService().deleteAllData();
     await _getLastSyncInfo();
     ToastService.showSuccess("Successfully deleted locally cached data.");
+    await _refreshAssetStores();
     setState(() {
       
     });
@@ -151,7 +177,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
     await AppConfigResository.instance
         .saveOrUpdateConfig(appConfigShowDeviceAssetsFlagConfig);
-
+    await _refreshAssetStores();
     setState(() {});
   }
 
@@ -241,22 +267,15 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     ]);
   }
 
+  _refreshAssetStores() async {
+    await this.photoStore!.getAssets(false);
+    await this.videoStore!.getAssets(false);
+  }
+
   @override
   void initState() {
     super.initState();
   }
 
-  @override
-  Widget build(BuildContext context) {
-
-    return FutureBuilder<bool>(
-          future: _getSettingsData(),
-          builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-            if (snapshot.data == null) {
-              return Container();
-            } else {
-              return _settingsList(context);
-            }
-          });
-  }
+  
 }
