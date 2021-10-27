@@ -10,7 +10,6 @@ import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/metadata_service.dart';
 import 'package:snap_crescent/services/thumbnail_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
-import 'package:snap_crescent/utils/common_utils.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:collection/collection.dart';
 
@@ -23,11 +22,11 @@ abstract class _AssetStore with Store {
     getAssets(false);
   }
 
- DateTime currentDateTime = DateTime.now();
- final DateFormat currentWeekFormatter = DateFormat('EEEE');
- final DateFormat currentYearFormatter = DateFormat('E, MMM dd');
- final DateFormat defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
-  
+  DateTime currentDateTime = DateTime.now();
+  final DateFormat currentWeekFormatter = DateFormat('EEEE');
+  final DateFormat currentYearFormatter = DateFormat('E, MMM dd');
+  final DateFormat defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
+
   List<UniFiedAsset> assetList = new List.empty();
   Map<String, List<UniFiedAsset>> groupedAssets = new Map();
 
@@ -41,28 +40,27 @@ abstract class _AssetStore with Store {
   @action
   Future<void> getAssets(bool forceReloadFromApi) async {
     assetsSearchProgress = AssetSearchProgress.SEARCHING;
-    
+
     currentDateTime = DateTime.now();
 
     groupedAssets.clear();
     this.assetList = [];
-    
-    
-    if(await _getShowDeviceAssetsInfo()) {
 
-      List<String> selecteDeviceFolders = await _getShowDeviceAssetsFolderInfo();
-
+    if (await _getShowDeviceAssetsInfo()) {
+      List<String> selecteDeviceFolders =
+          await _getShowDeviceAssetsFolderInfo();
 
       final albums = await PhotoManager.getAssetPathList();
-      albums.sort((AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
+      albums.sort(
+          (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
       albums.forEach((album) {
-        if(selecteDeviceFolders.indexOf(album.id) != -1) {
+        if (selecteDeviceFolders.indexOf(album.id) != -1) {
           _addLocalAssetsToList(album);
         }
-      });  
+      });
     }
-    
+
     if (forceReloadFromApi) {
       await getAssetsFromApi();
     } else {
@@ -86,15 +84,15 @@ abstract class _AssetStore with Store {
       }
     }
 
-
     if (this.assetList.length > 0) {
       assetsSearchProgress = AssetSearchProgress.ASSETS_FOUND;
-      this.assetList.sort((UniFiedAsset a, UniFiedAsset b) => b.assetCreationDate.compareTo(a.assetCreationDate));
+      this.assetList.sort((UniFiedAsset a, UniFiedAsset b) =>
+          b.assetCreationDate.compareTo(a.assetCreationDate));
 
       this.groupedAssets.keys.forEach((key) {
-        this.groupedAssets[key]!.sort((UniFiedAsset a, UniFiedAsset b) => b.assetCreationDate.compareTo(a.assetCreationDate));
+        this.groupedAssets[key]!.sort((UniFiedAsset a, UniFiedAsset b) =>
+            b.assetCreationDate.compareTo(a.assetCreationDate));
       });
-      
     } else {
       assetsSearchProgress = AssetSearchProgress.ASSETS_NOT_FOUND;
     }
@@ -126,57 +124,42 @@ abstract class _AssetStore with Store {
 
       assets.forEach((asset) {
         final assetDate = asset.createDateTime;
-        _addUnifiedAssetToGroup(assetDate, _getUnifiedAssetFromDeviceAsset(asset,assetDate));
+        _addUnifiedAssetToGroup(
+            assetDate, _getUnifiedAssetFromDeviceAsset(asset, assetDate));
       });
-  
     }
   }
 
   _addCloudAssetsToList(List<Asset> newAssets) {
-
-      newAssets.forEach((asset) {
-        final assetDate = asset.metadata!.creationDatetime!;
-        _addUnifiedAssetToGroup(assetDate, _getUnifiedAssetFromCloudAsset(asset,assetDate));
-      });
+    newAssets.forEach((asset) {
+      final assetDate = asset.metadata!.creationDatetime!;
+      _addUnifiedAssetToGroup(
+          assetDate, _getUnifiedAssetFromCloudAsset(asset, assetDate));
+    });
   }
 
   _addUnifiedAssetToGroup(DateTime assetDate, UniFiedAsset asset) {
+    String key = defaultYearFormatter.format(assetDate);
 
-    String key;
-        if (currentDateTime.year == assetDate.year) {
-          if (CommonUtils().weekNumber(currentDateTime) ==
-              CommonUtils().weekNumber(assetDate)) {
-            if (currentDateTime.day == assetDate.day) {
-              key = 'Today';
-            } else {
-              key = currentWeekFormatter.format(assetDate);
-            }
-          } else {
-            key = currentYearFormatter.format(assetDate);
-          }
-        } else {
-          key = defaultYearFormatter.format(assetDate);
-        }
+    if (groupedAssets.containsKey(key)) {
+      groupedAssets[key]!.add(asset);
+    } else {
+      List<UniFiedAsset> assets = [];
+      assets.add(asset);
+      groupedAssets.putIfAbsent(key, () => assets);
+    }
 
-        if (groupedAssets.containsKey(key)) {
-          groupedAssets[key]!.add(asset);
-        } else {
-          List<UniFiedAsset> assets = [];
-          assets.add(asset);
-          groupedAssets.putIfAbsent(key, () => assets);
-        }
-
-        this.assetList.add(asset);
-
+    this.assetList.add(asset);
   }
 
   _getUnifiedAssetFromDeviceAsset(AssetEntity deviceAsset, DateTime assetDate) {
-    return new UniFiedAsset(AssetSource.DEVICE, assetDate, assetEntity: deviceAsset);
+    return new UniFiedAsset(AssetSource.DEVICE, assetDate,
+        assetEntity: deviceAsset);
   }
 
   _getUnifiedAssetFromCloudAsset(Asset cloudAsset, DateTime assetDate) {
-    return new UniFiedAsset(AssetSource.CLOUD,assetDate,asset: cloudAsset);
-  } 
+    return new UniFiedAsset(AssetSource.CLOUD, assetDate, asset: cloudAsset);
+  }
 
   Future<bool> _getShowDeviceAssetsInfo() async {
     AppConfig value = await AppConfigResository.instance
@@ -201,11 +184,22 @@ abstract class _AssetStore with Store {
   }
 
   bool isAnyItemSelected() {
-    return this.assetList.firstWhereOrNull((asset) => asset.selected == true) != null;
+    return this.assetList.firstWhereOrNull((asset) => asset.selected == true) !=
+        null;
   }
 
   int getSelectedCount() {
     return this.assetList.where((asset) => asset.selected == true).length;
   }
 
+  List<String> getGroupedMapKeys() {
+    List<DateTime> dateTimeKeys = groupedAssets.keys
+        .toList()
+        .map((key) => defaultYearFormatter.parse(key))
+        .toList();
+    dateTimeKeys.sort((DateTime a, DateTime b) => b.compareTo(a));
+    return dateTimeKeys
+        .map((datetime) => defaultYearFormatter.format(datetime))
+        .toList();
+  }
 }
