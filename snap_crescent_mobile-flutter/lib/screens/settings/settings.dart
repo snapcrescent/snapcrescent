@@ -48,20 +48,18 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   @override
   Widget build(BuildContext context) {
-
     photoStore = Provider.of<PhotoStore>(context);
     videoStore = Provider.of<VideoStore>(context);
-    
 
     return FutureBuilder<bool>(
-          future: _getSettingsData(),
-          builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-            if (snapshot.data == null) {
-              return Container();
-            } else {
-              return _settingsList(context);
-            }
-          });
+        future: _getSettingsData(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.data == null) {
+            return Container();
+          } else {
+            return _settingsList(context);
+          }
+        });
   }
 
   FutureOr onBackFromChild(dynamic value) {
@@ -69,7 +67,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     setState(() {});
   }
 
-  Future<bool> _getSettingsData() async{
+  Future<bool> _getSettingsData() async {
     await _getAutoBackupInfo();
     await _getAutoBackupFolderInfo();
     await _getShowDeviceAssetsInfo();
@@ -83,9 +81,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     await _getLastSyncInfo();
     ToastService.showSuccess("Successfully deleted locally cached data.");
     await _refreshAssetStores();
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
   Future<void> _getAutoBackupInfo() async {
@@ -103,11 +99,15 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
     if (value.configValue != null) {
       List<String> autoBackupFolderIdList = value.configValue!.split(",");
-      
-      final List<AssetPathEntity> assets = await PhotoManager.getAssetPathList();
-      List<String> autoBackupFolderNameList = assets.where((asset) => autoBackupFolderIdList.indexOf(asset.id) > -1).map((asset) => asset.name).toList();
 
-      if(autoBackupFolderNameList.isEmpty) {
+      final List<AssetPathEntity> assets =
+          await PhotoManager.getAssetPathList();
+      List<String> autoBackupFolderNameList = assets
+          .where((asset) => autoBackupFolderIdList.indexOf(asset.id) > -1)
+          .map((asset) => asset.name)
+          .toList();
+
+      if (autoBackupFolderNameList.isEmpty) {
         _autoBackupFolders = "None";
       } else if (autoBackupFolderNameList.length == assets.length) {
         _autoBackupFolders = "All";
@@ -132,11 +132,15 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
     if (value.configValue != null) {
       List<String> showDeviceAssetsFolderIdList = value.configValue!.split(",");
-      
-      final List<AssetPathEntity> assets = await PhotoManager.getAssetPathList();
-      List<String> showDeviceAssetsFolderNameList = assets.where((asset) => showDeviceAssetsFolderIdList.indexOf(asset.id) > -1).map((asset) => asset.name).toList();
 
-      if(showDeviceAssetsFolderNameList.isEmpty) {
+      final List<AssetPathEntity> assets =
+          await PhotoManager.getAssetPathList();
+      List<String> showDeviceAssetsFolderNameList = assets
+          .where((asset) => showDeviceAssetsFolderIdList.indexOf(asset.id) > -1)
+          .map((asset) => asset.name)
+          .toList();
+
+      if (showDeviceAssetsFolderNameList.isEmpty) {
         _showDeviceAssetsFolders = "None";
       } else if (showDeviceAssetsFolderNameList.length == assets.length) {
         _showDeviceAssetsFolders = "All";
@@ -150,8 +154,9 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     List<SyncInfo> localSyncInfoList = await SyncInfoService().searchOnLocal();
 
     if (localSyncInfoList.isEmpty == false) {
-        final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss ');
-      _lastSyncDate = formatter.format(localSyncInfoList.last.lastModifiedDatetime!);
+      final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss ');
+      _lastSyncDate =
+          formatter.format(localSyncInfoList.last.lastModifiedDatetime!);
     } else {
       _lastSyncDate = "Never";
     }
@@ -204,15 +209,19 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
             child: const Icon(Icons.folder),
           ),
           onTap: () {
-             AppConfig appConfigAutoBackupFlagConfig = new AppConfig(
-                configkey: Constants.appConfigAutoBackupFlag,
-                configValue: "");
+            AppConfig appConfigAutoBackupFlagConfig = new AppConfig(
+                configkey: Constants.appConfigAutoBackupFlag, configValue: "");
 
-            Navigator.push(context,MaterialPageRoute(builder: (context) => FolderSelectionScreen(appConfigAutoBackupFlagConfig))).then(onBackFromChild);
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => FolderSelectionScreen(
+                        appConfigAutoBackupFlagConfig))).then(onBackFromChild);
           },
         ),
       ListTile(
-        title: Text("Clear Locally Cached Photos and Videos", style: TitleTextStyle),
+        title: Text("Clear Locally Cached Photos and Videos",
+            style: TitleTextStyle),
         subtitle: Text("Last Synced : " + _lastSyncDate),
         leading: Container(
           width: 10,
@@ -224,10 +233,9 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         },
       ),
       SwitchListTile(
-        title: Text("Show Device Phtos And Videos", style: TitleTextStyle),
+        title: Text("Show Device Photos And Videos", style: TitleTextStyle),
         secondary: const Icon(Icons.photo_album),
-        subtitle: Text(
-            "Show photos and videos on your device on snap-cresent"),
+        subtitle: Text("Show photos and videos on your device on snap-cresent"),
         isThreeLine: true,
         value: _showDeviceAssets,
         onChanged: (bool value) {
@@ -237,20 +245,25 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
       if (_showDeviceAssets)
         ListTile(
           title: Text("Device Folders", style: TitleTextStyle),
-          subtitle: Text(_showDeviceAssetsFolders
-          ),
+          subtitle: Text(_showDeviceAssetsFolders),
           leading: Container(
             width: 10,
             alignment: Alignment.center,
             child: const Icon(Icons.folder),
           ),
           onTap: () {
-             AppConfig appConfigShowDeviceAssetsFoldersFlagConfig = new AppConfig(
-                configkey: Constants.appConfigShowDeviceAssetsFolders,
-                configValue: "");
-            Navigator.push(context,MaterialPageRoute(builder: (context) => FolderSelectionScreen(appConfigShowDeviceAssetsFoldersFlagConfig))).then(onBackFromChild);
+            AppConfig appConfigShowDeviceAssetsFoldersFlagConfig =
+                new AppConfig(
+                    configkey: Constants.appConfigShowDeviceAssetsFolders,
+                    configValue: "");
+            Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => FolderSelectionScreen(
+                            appConfigShowDeviceAssetsFoldersFlagConfig)))
+                .then(onBackFromChild);
           },
-        ),  
+        ),
       ListTile(
         title: Text("Logout", style: TitleTextStyle),
         leading: Container(
@@ -276,6 +289,4 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   void initState() {
     super.initState();
   }
-
-  
 }

@@ -1,6 +1,7 @@
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
@@ -9,8 +10,8 @@ import 'package:snap_crescent/screens/grid/asset_thumbnail.dart';
 import 'package:snap_crescent/stores/cloud/asset_store.dart';
 import 'package:snap_crescent/stores/cloud/photo_store.dart';
 import 'package:snap_crescent/stores/cloud/video_store.dart';
+import 'package:snap_crescent/utils/common_utils.dart';
 import 'package:snap_crescent/utils/constants.dart';
-
 
 class AssetsGridScreen extends StatelessWidget {
   static const routeName = '/assets';
@@ -35,6 +36,11 @@ class _LocalPhotoGridView extends StatefulWidget {
 }
 
 class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
+  DateTime currentDateTime = DateTime.now();
+  final DateFormat currentWeekFormatter = DateFormat('EEEE');
+  final DateFormat currentYearFormatter = DateFormat('E, MMM dd');
+  final DateFormat defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
+
   final ScrollController _scrollController = new ScrollController();
 
   _onAssetTap(BuildContext context, int assetIndex) {
@@ -62,6 +68,27 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
     super.dispose();
   }
 
+  _getFormattedGroupKey(String key) {
+    String formattedKey = "";
+    DateTime groupDateTime = defaultYearFormatter.parse(key);
+    if (currentDateTime.year == groupDateTime.year) {
+      if (CommonUtils().weekNumber(currentDateTime) ==
+          CommonUtils().weekNumber(groupDateTime)) {
+        if (currentDateTime.day == groupDateTime.day) {
+          formattedKey = 'Today';
+        } else {
+          formattedKey = currentWeekFormatter.format(groupDateTime);
+        }
+      } else {
+        formattedKey = currentYearFormatter.format(groupDateTime);
+      }
+    } else {
+      formattedKey = defaultYearFormatter.format(groupDateTime);
+    }
+
+    return formattedKey;
+  }
+
   @override
   Widget build(BuildContext context) {
     final AssetStore assetStore = widget.type == ASSET_TYPE.PHOTO
@@ -84,17 +111,17 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
     }
 
     Text getScrollLabel() {
-      final keys = List.from(assetStore.groupedAssets.keys);
+      final keys = List.from(assetStore.getGroupedMapKeys());
       final label = keys[getPhotoGroupIndexInScrollView()];
 
       if (label == null) {
         return const Text('');
       }
-      return Text(label);
+      return Text(this._getFormattedGroupKey(label));
     }
 
     _gridView(Orientation orientation, AssetStore assetStore) {
-      final keys = assetStore.groupedAssets.keys.toList();
+      final keys = assetStore.getGroupedMapKeys();
       return new ListView.builder(
           controller: _scrollController,
           itemCount: keys.length,
@@ -110,22 +137,24 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
                       children: <Widget>[
                         Padding(
                           padding: EdgeInsets.all(5),
-                          child: Text(keys[groupIndex],
-                              style: TextStyle(
-                                color: Colors.white,
-                              )),
+                          child:
+                              Text(this._getFormattedGroupKey(keys[groupIndex]),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  )),
                         ),
                         GridView.builder(
                             gridDelegate:
                                 const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 150,
+                              maxCrossAxisExtent: 100,
                               crossAxisSpacing: 8,
                               mainAxisSpacing: 8,
                             ),
                             physics:
                                 NeverScrollableScrollPhysics(), // to disable GridView's scrolling
                             shrinkWrap: true,
-                            itemCount: assetStore.groupedAssets[keys[groupIndex]]!.length,
+                            itemCount: assetStore
+                                .groupedAssets[keys[groupIndex]]!.length,
                             itemBuilder: (BuildContext ctx, index) {
                               final asset = assetStore
                                   .groupedAssets[keys[groupIndex]]![index];
@@ -133,32 +162,27 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
                               return GestureDetector(
                                 onLongPress: () {
                                   asset.selected = !asset.selected;
-                                  setState(() {
-                                    
-                                  });
+                                  setState(() {});
                                 },
                                 onTap: () {
                                   //Grid is in selction mode
-                                  if(assetStore.isAnyItemSelected()) {
-                                        asset.selected = !asset.selected;
-                                        setState(() {
-                                    
-                                  });
-                                  } //No asset is selected, proceed to asset detail page 
+                                  if (assetStore.isAnyItemSelected()) {
+                                    asset.selected = !asset.selected;
+                                    setState(() {});
+                                  } //No asset is selected, proceed to asset detail page
                                   else {
-                                        _onAssetTap(context,assetStore.assetList.indexOf(asset));
+                                    _onAssetTap(context,
+                                        assetStore.assetList.indexOf(asset));
                                   }
                                 },
                                 child: AssetThumbnail(
-                                  index,
-                                  asset,
-                                  asset.assetSource == AssetSource.CLOUD
-                                      ? Future.value(asset.asset)
-                                      : asset.assetEntity!.thumbData,
-                                  asset.selected),
+                                    index,
+                                    asset,
+                                    asset.assetSource == AssetSource.CLOUD
+                                        ? Future.value(asset.asset)
+                                        : asset.assetEntity!.thumbData,
+                                    asset.selected),
                               );
-
-                          
                             })
                       ])
               ],
@@ -184,16 +208,16 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
     }
 
     _getLeadingIcon() {
-      
       if (assetStore.isAnyItemSelected()) {
         return IconButton(
           onPressed: () {
-            assetStore.assetList.forEach((asset) { asset.selected = false; });
+            assetStore.assetList.forEach((asset) {
+              asset.selected = false;
+            });
           },
           icon: Icon(Icons.cancel),
         );
       }
-      
     }
 
     _body() {
@@ -203,17 +227,14 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
           title: Text(!assetStore.isAnyItemSelected()
               ? (widget.type == ASSET_TYPE.PHOTO ? "Photos" : "Videos")
               : (assetStore.getSelectedCount().toString() + " Selected")),
-              
           backgroundColor: Colors.black,
           actions: [
-            
             if (assetStore.isAnyItemSelected())
               IconButton(
                   onPressed: () {
                     _shareAsset();
                   },
                   icon: Icon(Icons.share, color: Colors.white))
-            
           ],
         ),
         drawer: AppDrawer(),

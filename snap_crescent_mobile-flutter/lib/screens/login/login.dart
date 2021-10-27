@@ -38,47 +38,60 @@ class _LoginScreenViewState extends State<_LoginScreenView> {
   TextEditingController passwordController = TextEditingController();
 
   _setDefaultAppConfig() async {
-
-      AppConfig firstBootConfig = await AppConfigResository.instance
+    AppConfig firstBootConfig = await AppConfigResository.instance
         .findByKey(Constants.appConfigFirstBootFlag);
 
-        // This is first boot of application
-        if (firstBootConfig.configValue == null) {
-          firstBootConfig.configkey = Constants.appConfigFirstBootFlag;
-          firstBootConfig.configValue = "false";
+    // This is first boot of application
+    if (firstBootConfig.configValue == null) {
+      firstBootConfig.configkey = Constants.appConfigFirstBootFlag;
+      firstBootConfig.configValue = "false";
 
-          await AppConfigResository.instance.saveOrUpdateConfig(firstBootConfig);
+      await AppConfigResository.instance.saveOrUpdateConfig(firstBootConfig);
 
-          AppConfig appConfigShowDeviceAssetsFlagConfig = new AppConfig(
-                configkey: Constants.appConfigShowDeviceAssetsFlag,
-                configValue: "true");
-          
-           await AppConfigResository.instance.saveOrUpdateConfig(appConfigShowDeviceAssetsFlagConfig);
+      AppConfig appConfigShowDeviceAssetsFlagConfig = new AppConfig(
+          configkey: Constants.appConfigShowDeviceAssetsFlag,
+          configValue: "true");
 
-           if (!await PhotoManager.requestPermission()) {
-              ToastService.showError('Permission to device folders denied!');
-              return Future.value([]);
-            }
+      await AppConfigResository.instance
+          .saveOrUpdateConfig(appConfigShowDeviceAssetsFlagConfig);
 
-            final List<AssetPathEntity> folders = await PhotoManager.getAssetPathList();
-            folders.sort(
-                (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
+      if (!await PhotoManager.requestPermission()) {
+        ToastService.showError('Permission to device folders denied!');
+        return Future.value([]);
+      }
 
-            AssetPathEntity cameraFolder = folders.firstWhere((folder) => folder.name.toLowerCase() == "camera");  
+      final List<AssetPathEntity> folders =
+          await PhotoManager.getAssetPathList();
+      folders.sort(
+          (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
-           AppConfig appConfigShowDeviceAssetsFoldersFlagConfig = new AppConfig(
-                configkey: Constants.appConfigShowDeviceAssetsFolders,
-                configValue: cameraFolder.id);
-          
-           await AppConfigResository.instance.saveOrUpdateConfig(appConfigShowDeviceAssetsFoldersFlagConfig);
-        }
+      List<AssetPathEntity> cameraFolders = folders
+          .where((folder) =>
+              folder.name.toLowerCase() == "camera" ||
+              folder.name.toLowerCase() == "pictures" ||
+              folder.name.toLowerCase() == "portrait" ||
+              folder.name.toLowerCase() == "selfies" ||
+              folder.name.toLowerCase() == "portrait" ||
+              folder.name.toLowerCase() == "raw" ||
+              folder.name.toLowerCase() == "videos")
+          .toList();
+
+      AppConfig appConfigShowDeviceAssetsFoldersFlagConfig = new AppConfig(
+          configkey: Constants.appConfigShowDeviceAssetsFolders,
+          configValue: cameraFolders
+              .map((assetPathEntity) => assetPathEntity.id)
+              .join(","));
+
+      await AppConfigResository.instance
+          .saveOrUpdateConfig(appConfigShowDeviceAssetsFoldersFlagConfig);
+    }
   }
 
   _onLoginPressed() async {
     AppConfig serverUrlConfig = new AppConfig(
         configkey: Constants.appConfigServerURL,
         configValue: serverURLController.text);
-    
+
     AppConfig serverUserNameConfig = new AppConfig(
         configkey: Constants.appConfigServerUserName,
         configValue: nameController.text);
@@ -93,9 +106,8 @@ class _LoginScreenViewState extends State<_LoginScreenView> {
 
     await this._setDefaultAppConfig();
 
-    Navigator.pushReplacementNamed(context, SyncProcessScreen.routeName);         
+    Navigator.pushReplacementNamed(context, SyncProcessScreen.routeName);
   }
-  
 
   _showValidationErrors() {
     ToastService.showError("Please fix the errors");
