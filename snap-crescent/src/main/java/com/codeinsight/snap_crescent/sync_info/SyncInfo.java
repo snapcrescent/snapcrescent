@@ -15,4 +15,6 @@ import lombok.EqualsAndHashCode;
 public class SyncInfo extends BaseEntity {
 
 	private static final long serialVersionUID = -4250460739319965956L;
+	
+	private int syncCount = 1; 
 }

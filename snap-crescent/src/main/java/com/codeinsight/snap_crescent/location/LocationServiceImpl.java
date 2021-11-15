@@ -22,7 +22,8 @@ public class LocationServiceImpl implements LocationService {
 	public Long saveLocation(Double longitude, Double latitude) throws Exception {
 		
 		try {
-			Location location = executeReverseGeoCoding(longitude, latitude);
+			//Location location = executeReverseGeoCoding(longitude, latitude);
+			Location location = new Location();
 			location.setLongitude(longitude);
 			location.setLatitude(latitude);
 			locationRepository.save(location);
@@ -35,7 +36,6 @@ public class LocationServiceImpl implements LocationService {
 	}
 
 	private Location executeReverseGeoCoding(Double longitude, Double latitude) throws Exception {
-
 		String url = "https://nominatim.openstreetmap.org/reverse?format=json&lon=" + longitude + "&lat=" + latitude;
 
 		ResponseEntity<GeolocationApiResponse> responseEntity = restApiUtil.callApi(url, GeolocationApiResponse.class);

@@ -8,9 +8,9 @@ import 'package:snap_crescent/style.dart';
 class FolderSelectionScreen extends StatelessWidget {
   static const routeName = '/folder_selection';
 
-  final AppConfig appConfigShowDeviceAssetsFlagConfig;
+  final AppConfig appConfig;
 
-  FolderSelectionScreen(this.appConfigShowDeviceAssetsFlagConfig);
+  FolderSelectionScreen(this.appConfig);
 
   @override
   Widget build(BuildContext context) {
@@ -19,15 +19,15 @@ class FolderSelectionScreen extends StatelessWidget {
           title: Text('Device Folders'),
           backgroundColor: Colors.black,
         ),
-        body: _FoldersScreenView(this.appConfigShowDeviceAssetsFlagConfig));
+        body: _FoldersScreenView(this.appConfig));
   }
 }
 
 class _FoldersScreenView extends StatefulWidget {
 
-  final AppConfig appConfigShowDeviceAssetsFlagConfig;
+  final AppConfig appConfig;
 
-  _FoldersScreenView(this.appConfigShowDeviceAssetsFlagConfig);
+  _FoldersScreenView(this.appConfig);
 
   @override
   _FoldersScreenViewState createState() =>
@@ -67,7 +67,7 @@ class _FoldersScreenViewState
 
   Future<void> _getFolderInfo() async {
     AppConfig value = await AppConfigResository.instance
-        .findByKey(widget.appConfigShowDeviceAssetsFlagConfig.configkey!);
+        .findByKey(widget.appConfig.configkey!);
 
     if (value.configValue != null) {
       _folders = value.configValue!;
@@ -86,10 +86,10 @@ class _FoldersScreenViewState
 
     _folders = newAutoBackupFolderList.join(",");
 
-    widget.appConfigShowDeviceAssetsFlagConfig.configValue = _folders;
+    widget.appConfig.configValue = _folders;
     
     await AppConfigResository.instance
-        .saveOrUpdateConfig(widget.appConfigShowDeviceAssetsFlagConfig);
+        .saveOrUpdateConfig(widget.appConfig);
 
     setState(() {});
   }

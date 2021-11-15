@@ -4,14 +4,15 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
-import 'package:snap_crescent/screens/app_drawer/app_drawer.dart';
 import 'package:snap_crescent/screens/grid/asset_detail.dart';
-import 'package:snap_crescent/screens/grid/asset_thumbnail.dart';
+import 'package:snap_crescent/widgets/sync_process/sync_process.dart';
 import 'package:snap_crescent/stores/cloud/asset_store.dart';
 import 'package:snap_crescent/stores/cloud/photo_store.dart';
 import 'package:snap_crescent/stores/cloud/video_store.dart';
 import 'package:snap_crescent/utils/common_utils.dart';
 import 'package:snap_crescent/utils/constants.dart';
+import 'package:snap_crescent/widgets/asset_thumbnail/asset_thumbnail.dart';
+import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_bar.dart';
 
 class AssetsGridScreen extends StatelessWidget {
   static const routeName = '/assets';
@@ -202,6 +203,14 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
               child: _gridView(orientation, assetStore)));
     }
 
+    _syncProgress() {
+      return Container(
+                color: Colors.black,
+                width: double.infinity,
+                child : new SyncProcessWidget() 
+          );
+    }
+
     Future<void> _pullRefresh() async {
       await assetStore.getAssets(true);
       setState(() {});
@@ -237,27 +246,36 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
                   icon: Icon(Icons.share, color: Colors.white))
           ],
         ),
-        drawer: AppDrawer(),
-        body: Row(
+        bottomNavigationBar: AppBottomNavigationBar(),
+        body: Column(
           children: <Widget>[
+             _syncProgress(),
             Expanded(
-                child: Observer(
-                    builder: (context) => assetStore.assetsSearchProgress !=
-                            AssetSearchProgress.IDLE
-                        ? OrientationBuilder(builder: (context, orientation) {
-                            return RefreshIndicator(
-                                onRefresh: _pullRefresh,
-                                child: Stack(children: <Widget>[
-                                  _scrollableView(orientation, assetStore)
-                                ]));
-                          })
-                        : Center(
-                            child: Container(
-                              width: 60,
-                              height: 60,
-                              child: const CircularProgressIndicator(),
-                            ),
-                          )))
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                        child: Observer(
+                            builder: (context) => assetStore
+                                        .assetsSearchProgress !=
+                                    AssetSearchProgress.IDLE
+                                ? OrientationBuilder(
+                                    builder: (context, orientation) {
+                                    return RefreshIndicator(
+                                        onRefresh: _pullRefresh,
+                                        child: Stack(children: <Widget>[
+                                          _scrollableView(
+                                              orientation, assetStore)
+                                        ]));
+                                  })
+                                : Center(
+                                    child: Container(
+                                      width: 60,
+                                      height: 60,
+                                      child: const CircularProgressIndicator(),
+                                    ),
+                                  )))
+                  ],
+                ))
           ],
         ),
       );

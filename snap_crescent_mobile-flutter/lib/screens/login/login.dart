@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/resository/app_config_resository.dart';
-import 'package:snap_crescent/screens/sync_process/sync_process.dart';
+import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -106,7 +106,7 @@ class _LoginScreenViewState extends State<_LoginScreenView> {
 
     await this._setDefaultAppConfig();
 
-    Navigator.pushReplacementNamed(context, SyncProcessScreen.routeName);
+    Navigator.pushReplacementNamed(context,  AssetsGridScreen.routeName,arguments: ASSET_TYPE.PHOTO);
   }
 
   _showValidationErrors() {

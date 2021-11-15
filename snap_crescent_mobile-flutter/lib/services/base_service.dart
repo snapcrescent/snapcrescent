@@ -13,8 +13,8 @@ class BaseService {
           BaseOptions options = new BaseOptions(
               baseUrl: baseURL.configValue!,
               receiveDataWhenStatusError: true,
-              connectTimeout: 10*1000, // 30 seconds
-              receiveTimeout: 500*1000 // 30 seconds
+              connectTimeout: 30*1000, // 5 seconds
+              receiveTimeout: 300*1000 // 300 seconds
               );
 
           _dio = new Dio(options);

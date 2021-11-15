@@ -12,7 +12,6 @@ import 'package:snap_crescent/screens/login/login.dart';
 import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
-import 'package:snap_crescent/screens/sync_process/sync_process.dart';
 import 'package:snap_crescent/stores/local/local_photo_store.dart';
 import 'package:snap_crescent/stores/local/local_video_store.dart';
 import 'package:snap_crescent/stores/cloud/photo_store.dart';
@@ -42,12 +41,13 @@ class App extends StatelessWidget {
 
   Route<dynamic> _generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case "/":
+        return MaterialPageRoute(
+            builder: (_) => AssetsGridScreen(ASSET_TYPE.PHOTO));
       case SplashScreen.routeName:
         return MaterialPageRoute(builder: (_) => SplashScreen());
       case LoginScreen.routeName:
         return MaterialPageRoute(builder: (_) => LoginScreen());
-      case SyncProcessScreen.routeName:
-        return MaterialPageRoute(builder: (_) => SyncProcessScreen());
       case SettingsScreen.routeName:
         return MaterialPageRoute(builder: (_) => SettingsScreen());
       case FolderSelectionScreen.routeName:
