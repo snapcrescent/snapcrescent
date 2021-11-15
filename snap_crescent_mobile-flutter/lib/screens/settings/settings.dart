@@ -16,6 +16,7 @@ import 'package:snap_crescent/stores/cloud/photo_store.dart';
 import 'package:snap_crescent/stores/cloud/video_store.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
+import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_bar.dart';
 
 class SettingsScreen extends StatelessWidget {
   static const routeName = '/settings';
@@ -27,6 +28,7 @@ class SettingsScreen extends StatelessWidget {
           title: Text('Settings'),
           backgroundColor: Colors.black,
         ),
+        bottomNavigationBar: AppBottomNavigationBar(),
         body: _SettingsScreenView());
   }
 }
@@ -185,6 +187,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     await _refreshAssetStores();
     setState(() {});
   }
+  
 
   _settingsList(BuildContext context) {
     return ListView(padding: EdgeInsets.zero, children: <Widget>[
@@ -209,14 +212,14 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
             child: const Icon(Icons.folder),
           ),
           onTap: () {
-            AppConfig appConfigAutoBackupFlagConfig = new AppConfig(
-                configkey: Constants.appConfigAutoBackupFlag, configValue: "");
+            AppConfig appConfigAutoBackupFoldersConfig = new AppConfig(
+                configkey: Constants.appConfigAutoBackupFolders, configValue: "");
 
             Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => FolderSelectionScreen(
-                        appConfigAutoBackupFlagConfig))).then(onBackFromChild);
+                        appConfigAutoBackupFoldersConfig))).then(onBackFromChild);
           },
         ),
       ListTile(

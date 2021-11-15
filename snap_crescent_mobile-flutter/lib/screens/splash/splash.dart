@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:snap_crescent/resository/app_config_resository.dart';
+import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/login/login.dart';
-import 'package:snap_crescent/screens/sync_process/sync_process.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -44,7 +44,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
                   Timer(
                       Duration(seconds: 1),
                       () => Navigator.pushReplacementNamed(
-                          context, SyncProcessScreen.routeName))
+                          context,  AssetsGridScreen.routeName,arguments: ASSET_TYPE.PHOTO))
                 }
             });
   }

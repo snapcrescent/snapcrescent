@@ -76,8 +76,8 @@ public class MetadataServiceImpl implements MetadataService {
 			if (geoLocation != null) {
 				Double longitude = geoLocation.getLongitude();
 				Double latitude = geoLocation.getLatitude();
-				//Long locationId = locationService.saveLocation(longitude, latitude);
-				//metadata.setLocationId(locationId);
+				Long locationId = locationService.saveLocation(longitude, latitude);
+				metadata.setLocationId(locationId);
 			}
 		}
 		return metadata;

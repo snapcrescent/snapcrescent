@@ -44,28 +44,23 @@ public class SyncInfoServiceImpl implements SyncInfoService{
 	
 	@Override
 	@Transactional
-	public void createNewSyncInfo() throws Exception {
-		SyncInfo syncInfo = new SyncInfo();
-		create(syncInfo);
-	}
-	
-	@Override
-	@Transactional
-	public void create(SyncInfo syncInfo) throws Exception {
-		syncInfoRepository.save(syncInfo);
-		
-	}
-
-	@Override
-	@Transactional
-	public void update(SyncInfo syncInfo) throws Exception {
-		syncInfoRepository.save(syncInfo);
-	}
-
-	@Override
-	@Transactional
 	public UiSyncInfo getById(Long id) {
 		return syncInfoConverter.getBeanFromEntity(syncInfoRepository.findById(id), ResultType.FULL) ;
+	}
+
+	@Override
+	@Transactional
+	public void creatOrUpdate() throws Exception {
+		List<SyncInfo> syncInfoList = syncInfoRepository.findAll();
+		
+		if(syncInfoList.isEmpty()) {
+			syncInfoRepository.save(new SyncInfo());
+		}else {
+			SyncInfo syncInfo =  syncInfoList.get(syncInfoList.size() -1);
+			syncInfo.setSyncCount(syncInfo.getSyncCount() + 1);
+			syncInfoRepository.save(syncInfo);
+		}
+		
 	}
 
 }
