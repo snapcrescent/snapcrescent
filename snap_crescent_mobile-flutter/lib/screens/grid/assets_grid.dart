@@ -23,20 +23,23 @@ class AssetsGridScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _LocalPhotoGridView(type);
+    return _AssetGridView(type);
   }
 }
 
-class _LocalPhotoGridView extends StatefulWidget {
+class _AssetGridView extends StatefulWidget {
   final ASSET_TYPE type;
 
-  _LocalPhotoGridView(this.type);
+  _AssetGridView(this.type);
 
   @override
-  _LocalPhotoGridViewState createState() => _LocalPhotoGridViewState();
+  _AssetGridViewState createState() => _AssetGridViewState();
 }
 
-class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
+class _AssetGridViewState extends State<_AssetGridView> {
+
+  AssetStore? _assetStore;
+
   DateTime currentDateTime = DateTime.now();
   final DateFormat currentWeekFormatter = DateFormat('EEEE');
   final DateFormat currentYearFormatter = DateFormat('E, MMM dd');
@@ -62,6 +65,11 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
   @override
   void initState() {
     super.initState();
+    
+    WidgetsBinding.instance!.addPostFrameCallback((_){
+            _assetStore!.getAssets(true);
+          });
+
   }
 
   @override
@@ -92,13 +100,13 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
 
   @override
   Widget build(BuildContext context) {
-    final AssetStore assetStore = widget.type == ASSET_TYPE.PHOTO
+    _assetStore = widget.type == ASSET_TYPE.PHOTO
         ? Provider.of<PhotoStore>(context)
         : Provider.of<VideoStore>(context);
 
     int getPhotoGroupIndexInScrollView() {
       try {
-        final double currentAsset = (assetStore.groupedAssets.length - 1) *
+        final double currentAsset = (_assetStore!.groupedAssets.length - 1) *
             _scrollController.offset /
             (_scrollController.position.maxScrollExtent -
                 _scrollController.position.minScrollExtent);
@@ -112,7 +120,7 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
     }
 
     Text getScrollLabel() {
-      final keys = List.from(assetStore.getGroupedMapKeys());
+      final keys = List.from(_assetStore!.getGroupedMapKeys());
       final label = keys[getPhotoGroupIndexInScrollView()];
 
       if (label == null) {
@@ -212,15 +220,15 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
     }
 
     Future<void> _pullRefresh() async {
-      await assetStore.getAssets(true);
+      await _assetStore!.getAssets(true);
       setState(() {});
     }
 
     _getLeadingIcon() {
-      if (assetStore.isAnyItemSelected()) {
+      if (_assetStore!.isAnyItemSelected()) {
         return IconButton(
           onPressed: () {
-            assetStore.assetList.forEach((asset) {
+            _assetStore!.assetList.forEach((asset) {
               asset.selected = false;
             });
           },
@@ -233,12 +241,12 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
       return Scaffold(
         appBar: AppBar(
           leading: _getLeadingIcon(),
-          title: Text(!assetStore.isAnyItemSelected()
+          title: Text(!_assetStore!.isAnyItemSelected()
               ? (widget.type == ASSET_TYPE.PHOTO ? "Photos" : "Videos")
-              : (assetStore.getSelectedCount().toString() + " Selected")),
+              : (_assetStore!.getSelectedCount().toString() + " Selected")),
           backgroundColor: Colors.black,
           actions: [
-            if (assetStore.isAnyItemSelected())
+            if (_assetStore!.isAnyItemSelected())
               IconButton(
                   onPressed: () {
                     _shareAsset();
@@ -255,8 +263,8 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
                   children: <Widget>[
                     Expanded(
                         child: Observer(
-                            builder: (context) => assetStore
-                                        .assetsSearchProgress !=
+                            builder: (context) => _assetStore!
+                                        .assetsSearchProgress ==
                                     AssetSearchProgress.IDLE
                                 ? OrientationBuilder(
                                     builder: (context, orientation) {
@@ -264,7 +272,7 @@ class _LocalPhotoGridViewState extends State<_LocalPhotoGridView> {
                                         onRefresh: _pullRefresh,
                                         child: Stack(children: <Widget>[
                                           _scrollableView(
-                                              orientation, assetStore)
+                                              orientation, _assetStore!)
                                         ]));
                                   })
                                 : Center(

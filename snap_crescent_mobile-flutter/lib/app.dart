@@ -8,7 +8,6 @@ import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/local/grid/local_asset_detail.dart';
 import 'package:snap_crescent/screens/local/grid/local_assets_grid.dart';
 import 'package:snap_crescent/screens/local/library/local_library.dart';
-import 'package:snap_crescent/screens/login/login.dart';
 import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
@@ -46,8 +45,6 @@ class App extends StatelessWidget {
             builder: (_) => AssetsGridScreen(ASSET_TYPE.PHOTO));
       case SplashScreen.routeName:
         return MaterialPageRoute(builder: (_) => SplashScreen());
-      case LoginScreen.routeName:
-        return MaterialPageRoute(builder: (_) => LoginScreen());
       case SettingsScreen.routeName:
         return MaterialPageRoute(builder: (_) => SettingsScreen());
       case FolderSelectionScreen.routeName:

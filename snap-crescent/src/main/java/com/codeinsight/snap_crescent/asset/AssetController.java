@@ -107,7 +107,7 @@ public class AssetController extends BaseController{
 			}
 			
 			if(temporaryFiles.size() > 0) {
-				syncInfoService.creatOrUpdate();	
+				syncInfoService.creatOrUpdate();
 			}
 			
 			response.setMessage("Asset uploaded successfully.");

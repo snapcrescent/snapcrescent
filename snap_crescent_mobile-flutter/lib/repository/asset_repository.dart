@@ -1,15 +1,15 @@
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
-import 'package:snap_crescent/resository/base_repository.dart';
-import 'package:snap_crescent/resository/database_helper.dart';
+import 'package:snap_crescent/repository/base_repository.dart';
+import 'package:snap_crescent/repository/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
-class AssetResository extends BaseResository{
+class AssetRepository extends BaseRepository{
 
   static final _tableName = 'ASSET'; 
 
-  AssetResository._privateConstructor():super(_tableName);
-  static final AssetResository instance = AssetResository._privateConstructor();
+  AssetRepository._privateConstructor():super(_tableName);
+  static final AssetRepository instance = AssetRepository._privateConstructor();
 
    Future<List<Asset>> searchOnLocal(AssetSearchCriteria assetSearchCriteria) async {
     Database database = await DatabaseHelper.instance.database;

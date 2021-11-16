@@ -1,8 +1,14 @@
 package com.codeinsight.snap_crescent.asset;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -136,17 +142,28 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			
 			Metadata metadata = metadataService.extractMetaData(originalFilename, finalFile);
 			Thumbnail thumbnail = thumbnailService.generateThumbnail(finalFile, metadata, assetType);
+			
+			long assetHash = getPerceptualHash(ImageIO.read(fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getName())));
+			
+			if(metadataRepository.existsByHash(assetHash) == false) {
+				Asset asset = new Asset();
+				asset.setAssetType(assetType);
+				
+				metadata.setHash(assetHash);
 
-			Asset asset = new Asset();
-			asset.setAssetType(assetType);
+				metadataRepository.save(metadata);
+				thumbnailRepository.save(thumbnail);
 
-			metadataRepository.save(metadata);
-			thumbnailRepository.save(thumbnail);
+				asset.setMetadataId(metadata.getId());
+				asset.setThumbnailId(thumbnail.getId());
 
-			asset.setMetadataId(metadata.getId());
-			asset.setThumbnailId(thumbnail.getId());
+				assetRepository.save(asset);
+			} else {
+				fileService.removeFile(FILE_TYPE.PHOTO,metadata.getInternalName());
+				fileService.removeFile(FILE_TYPE.THUMBNAIL,thumbnail.getName());
+			}
 
-			assetRepository.save(asset);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -182,5 +199,43 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		// TODO Auto-generated method stub
 
 	}
+	
+	public long getPerceptualHash(final Image image) {
+        final BufferedImage scaledImage = new BufferedImage(8, 8, BufferedImage.TYPE_BYTE_GRAY);
+        {
+            final Graphics2D graphics = scaledImage.createGraphics();
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+            graphics.drawImage(image, 0, 0, 8, 8, null);
+
+            graphics.dispose();
+        }
+
+        final int[] pixels = new int[64];
+        scaledImage.getData().getPixels(0, 0, 8, 8, pixels);
+
+        final int average;
+        {
+            int total = 0;
+
+            for (int pixel : pixels) {
+                total += pixel;
+            }
+
+            average = total / 64;
+        }
+
+        long hash = 0;
+
+        for (final int pixel : pixels) {
+            hash <<= 1;
+
+            if (pixel > average) {
+                hash |= 1;
+            }
+        }
+
+        return hash;
+    }
 
 }

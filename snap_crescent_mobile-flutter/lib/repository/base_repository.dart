@@ -1,12 +1,12 @@
 import 'package:snap_crescent/models/base_model.dart';
-import 'package:snap_crescent/resository/database_helper.dart';
+import 'package:snap_crescent/repository/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
-class BaseResository {
+class BaseRepository {
 
   String tableName;
 
-  BaseResository(this.tableName);
+  BaseRepository(this.tableName);
 
   Future<int> save(BaseUiBean entity) async {
       return await DatabaseHelper.instance.save(tableName,entity.toMap());

@@ -1,14 +1,14 @@
 import 'package:snap_crescent/models/app_config.dart';
-import 'package:snap_crescent/resository/base_repository.dart';
-import 'package:snap_crescent/resository/database_helper.dart';
+import 'package:snap_crescent/repository/base_repository.dart';
+import 'package:snap_crescent/repository/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
-class AppConfigResository extends BaseResository {
+class AppConfigRepository extends BaseRepository {
   static final _tableName = 'APP_CONFIG';
 
-  AppConfigResository._privateConstructor() : super(_tableName);
-  static final AppConfigResository instance =
-      AppConfigResository._privateConstructor();
+  AppConfigRepository._privateConstructor() : super(_tableName);
+  static final AppConfigRepository instance =
+      AppConfigRepository._privateConstructor();
 
   Future<int> saveOrUpdateConfig(AppConfig entity) async {
     AppConfig config = await findByKey(entity.configkey!);

@@ -20,6 +20,15 @@ class BaseResponseBean<ID, T> extends BaseResponse {
       this.currentPageIndex})
       : super(logoutResponse: logoutResponse, message: message);
 
+  factory BaseResponseBean.defaultResponse() {
+    return BaseResponseBean(
+      objects : [],
+      totalResultsCount : 0,
+      resultCountPerPage : 0,
+      currentPageIndex : 0,
+    );
+  } 
+
   factory BaseResponseBean.fromJson(Map<String, dynamic> json, Function fromJsonModel) {
     final objects = json['objects'].cast<Map<String, dynamic>>();
     return BaseResponseBean(

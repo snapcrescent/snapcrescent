@@ -34,6 +34,7 @@ public class Metadata extends BaseEntity {
 	private String width;
 	private int orientation;
 	private String fstop;
+	private long hash;
 	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "LOCATION_ID", insertable = false, updatable = false)

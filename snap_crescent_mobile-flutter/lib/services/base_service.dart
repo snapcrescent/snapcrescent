@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:snap_crescent/resository/app_config_resository.dart';
+import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class BaseService {
@@ -8,7 +8,7 @@ class BaseService {
 
   Future<Dio> getDio() async {
     if (_dio == null) {
-          final baseURL =  await AppConfigResository.instance.findByKey(Constants.appConfigServerURL);
+          final baseURL =  await AppConfigRepository.instance.findByKey(Constants.appConfigServerURL);
 
           BaseOptions options = new BaseOptions(
               baseUrl: baseURL.configValue!,
@@ -23,8 +23,21 @@ class BaseService {
   }
   
   Future<String> getServerUrl() async {
-    final result =  await AppConfigResository.instance.findByKey(Constants.appConfigServerURL);
+    final result =  await AppConfigRepository.instance.findByKey(Constants.appConfigServerURL);
     return Future.value(result.configValue);
+  }
+
+  Future<bool> isUserLoggedIn() async {
+    final result = await AppConfigRepository.instance.findByKey(Constants.appConfigLoggedInFlag);
+    return Future.value(result.configValue == "true" ? true : false);
+  }
+
+  Future<Options> getHeaders() async {
+    final appConfigSessionTokenConfig = await AppConfigRepository.instance.findByKey(Constants.appConfigSessionToken);
+
+    return Options(
+        headers: {"Authorization": "Bearer " + appConfigSessionTokenConfig.configValue!},
+      );
   }
 
   String getQueryString(Map params, {String prefix: '&', bool inRecursion: false}) {
