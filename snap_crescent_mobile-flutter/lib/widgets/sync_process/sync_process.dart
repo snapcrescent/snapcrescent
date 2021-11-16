@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,8 +10,8 @@ import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/sync_info_search_criteria.dart';
-import 'package:snap_crescent/resository/app_config_resository.dart';
-import 'package:snap_crescent/resository/sync_info_resository.dart';
+import 'package:snap_crescent/repository/app_config_repository.dart';
+import 'package:snap_crescent/repository/sync_info_repository.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/stores/cloud/asset_store.dart';
@@ -67,14 +68,12 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
           // It is a first boot or app is reset
           // Need to sync everything
           await _downloadAssetsFromServer(serverSyncInfo);
-          await refreshAssetStores();
         } else {
           if (localSyncInfo.lastModifiedDatetime !=
               serverSyncInfo.lastModifiedDatetime) {
             //Local sync info date is not matching with server
             await SyncInfoService().deleteAllData();
             await _downloadAssetsFromServer(serverSyncInfo);
-            await refreshAssetStores();
           }
         }
 
@@ -86,15 +85,21 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
         // Empty the local sync info
         await SyncInfoService().deleteAllData();
         await _uploadAssetsToServer(null);
-        await refreshAssetStores();
       }
+
+    //await refreshAssetStores();
 
       
     } catch (e) {
       print("Network error");
     } finally {
-      _syncProgressState = SyncProgress.SYNC_COMPLETED;
-      setState(() {});
+      Timer(
+                      Duration(seconds: 2),
+                      () => {
+                        _syncProgressState = SyncProgress.SYNC_COMPLETED,
+                        setState(() {})
+                      });
+      
     }
   }
 
@@ -106,7 +111,7 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
   _downloadAssetsFromServer(SyncInfo serverSyncInfo) async {
     await _downloadAssetsByTypeFromServer(serverSyncInfo, ASSET_TYPE.PHOTO);
     await _downloadAssetsByTypeFromServer(serverSyncInfo, ASSET_TYPE.VIDEO);
-    await SyncInfoResository.instance.save(serverSyncInfo);
+    await SyncInfoRepository.instance.save(serverSyncInfo);
   }
 
   _uploadAssetsToServer(SyncInfo? serverSyncInfo) async {
@@ -119,6 +124,7 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
     AssetSearchCriteria searchCriteria = AssetSearchCriteria.defaultCriteria();
     searchCriteria.assetType = assetType.index;
     searchCriteria.resultPerPage = 1;
+    searchCriteria.fromDate = serverSyncInfo.lastModifiedDatetime;
 
     final photoCountResponse = await AssetService().search(searchCriteria);
     final _totalAssetPhotoCount = photoCountResponse.totalResultsCount;
@@ -135,7 +141,7 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
           : SyncProgress.DOWNLOADING_VIDEO_THUMNAILS;
       setState(() {});
 
-      final itemsPerBatch = 500;
+      final itemsPerBatch = 1;
       final numberOfPages = _totalAssetPhotoCount / itemsPerBatch;
       final itemsInLastBatch = _totalAssetPhotoCount % itemsPerBatch;
 
@@ -183,7 +189,7 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
       _syncProgressState = assetType == ASSET_TYPE.PHOTO
           ? SyncProgress.UPLOADING_PHOTOS
           : SyncProgress.UPLOADING_VIDEOS;
-
+      
       for (final File asset in assets) {
             await AssetService().save(assetType, [asset]);
 
@@ -211,7 +217,7 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
     List<File> assetFiles = [];
 
     try {
-      AppConfig value = await AppConfigResository.instance
+      AppConfig value = await AppConfigRepository.instance
           .findByKey(Constants.appConfigAutoBackupFolders);
 
       if (value.configValue != null) {
@@ -244,7 +250,7 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
           if(serverSyncInfo == null) {
             filteredAssetsByDate.addAll(targetAssets);
           } else{
-            filteredAssetsByDate.addAll(targetAssets.where((asset) => (asset.createDtSecond! * 1000) > serverSyncInfo.creationDatetime!.millisecondsSinceEpoch));
+            filteredAssetsByDate.addAll(targetAssets.where((asset) => (asset.createDtSecond! * 1000) > serverSyncInfo.lastModifiedDatetime!.millisecondsSinceEpoch));
           }
           
           for (final AssetEntity asset in filteredAssetsByDate) {

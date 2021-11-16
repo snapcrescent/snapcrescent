@@ -2,20 +2,28 @@ import 'package:dio/dio.dart';
 import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/sync_info_search_criteria.dart';
-import 'package:snap_crescent/resository/metadata_resository.dart';
-import 'package:snap_crescent/resository/asset_resository.dart';
-import 'package:snap_crescent/resository/sync_info_resository.dart';
-import 'package:snap_crescent/resository/thumbnail_resository.dart';
+import 'package:snap_crescent/repository/metadata_repository.dart';
+import 'package:snap_crescent/repository/asset_repository.dart';
+import 'package:snap_crescent/repository/sync_info_repository.dart';
+import 'package:snap_crescent/repository/thumbnail_repository.dart';
 import 'package:snap_crescent/services/base_service.dart';
 
 class SyncInfoService extends BaseService {
   Future<BaseResponseBean<int, SyncInfo>> search(
       SyncInfoSearchCriteria searchCriteria) async {
     try {
-      Dio dio = await getDio();
-      final response = await dio.get('/sync-info', queryParameters: searchCriteria.toMap());
+      bool isUserLoggedIn = await super.isUserLoggedIn();
 
-      return BaseResponseBean.fromJson(response.data, SyncInfo.fromJsonModel);
+      if (isUserLoggedIn) {
+        Dio dio = await getDio();
+        Options options = await getHeaders();
+        final response = await dio.get('/sync-info',
+            queryParameters: searchCriteria.toMap(), options: options);
+
+        return BaseResponseBean.fromJson(response.data, SyncInfo.fromJsonModel);
+      } else {
+        return new BaseResponseBean.defaultResponse();
+      }
     } on DioError catch (ex) {
       if (ex.type == DioErrorType.connectTimeout) {
         throw Exception("Connection  Timeout Exception");
@@ -26,27 +34,26 @@ class SyncInfoService extends BaseService {
 
   Future<int> saveOnLocal(SyncInfo entity) async {
     final syncInfoExistsById =
-        await SyncInfoResository.instance.existsById(entity.id!);
+        await SyncInfoRepository.instance.existsById(entity.id!);
 
     if (syncInfoExistsById == false) {
-      return SyncInfoResository.instance.save(entity);
+      return SyncInfoRepository.instance.save(entity);
     } else {
       return Future.value(0);
     }
   }
 
   Future<List<SyncInfo>> searchOnLocal() async {
-    final localSyncInfosMap = await SyncInfoResository.instance.findAll();
+    final localSyncInfosMap = await SyncInfoRepository.instance.findAll();
     return new List<SyncInfo>.from(localSyncInfosMap
         .map((syncInfoMap) => SyncInfo.fromMap(syncInfoMap))
         .toList());
   }
 
   Future<void> deleteAllData() async {
-    await SyncInfoResository.instance.deleteAll();
-    await ThumbnailResository.instance.deleteAll();
-    await MetadataResository.instance.deleteAll();
-    await AssetResository.instance.deleteAll();
- 
+    await SyncInfoRepository.instance.deleteAll();
+    await ThumbnailRepository.instance.deleteAll();
+    await MetadataRepository.instance.deleteAll();
+    await AssetRepository.instance.deleteAll();
   }
 }

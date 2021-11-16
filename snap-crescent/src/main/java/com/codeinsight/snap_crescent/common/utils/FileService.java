@@ -2,7 +2,10 @@ package com.codeinsight.snap_crescent.common.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,18 @@ public class FileService {
 	
 	public File getFile(FILE_TYPE fileType, String fileUniquePathAndName) {
 		
+		
+		
+		return new File(getBasePath(fileType) + fileUniquePathAndName);
+		
+	}
+	
+	public void removeFile(FILE_TYPE fileType, String fileUniquePathAndName) throws IOException {
+		Files.delete(Paths.get(getBasePath(fileType) + fileUniquePathAndName));
+	}
+	
+	private String getBasePath(FILE_TYPE fileType) {
+		
 		String basepath = null;
 		
 		if(fileType == FILE_TYPE.THUMBNAIL) {
@@ -39,9 +54,7 @@ public class FileService {
 		} else if(fileType == FILE_TYPE.VIDEO) {
 			basepath = EnvironmentProperties.STORAGE_PATH + Constant.VIDEO_FOLDER;
 		}
-		
-		return new File(basepath + fileUniquePathAndName);
-		
+		return basepath;
 	}
 
 }

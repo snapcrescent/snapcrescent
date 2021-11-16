@@ -2,6 +2,9 @@ class Constants {
 
   static final String appConfigFirstBootFlag = 'FIRST_BOOT';
 
+  static final String appConfigLoggedInFlag = 'LOGGED_IN';
+  static final String appConfigSessionToken = 'SESSION_TOKEN';
+
   static final String appConfigServerURL = 'SERVER_URL';
   static final String appConfigServerUserName = 'SERVER_USERNAME';
   static final String appConfigServerPassword = 'SERVER_PASSWORD';

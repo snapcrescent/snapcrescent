@@ -1,5 +1,6 @@
 package com.codeinsight.snap_crescent.common;
 
+import java.util.Date;
 import java.util.Map;
 
 import org.springframework.data.domain.Sort.Direction;
@@ -40,6 +41,14 @@ public class BaseController {
 
 		if (searchParams.get("resultType") != null) {
 			searchCriteria.setResultType(ResultType.valueOf(searchParams.get("resultType")));
+		}
+		
+		if (searchParams.get("fromDate") != null) {
+			searchCriteria.setFromDate(new Date(Long.parseLong(searchParams.get("fromDate"))));
+		}
+		
+		if (searchParams.get("toDate") != null) {
+			searchCriteria.setToDate(new Date(Long.parseLong(searchParams.get("toDate"))));
 		}
 	}
 

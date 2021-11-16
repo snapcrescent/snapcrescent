@@ -4,8 +4,10 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
+import 'package:snap_crescent/models/metadata.dart';
 import 'package:snap_crescent/models/unified_asset.dart';
-import 'package:snap_crescent/resository/app_config_resository.dart';
+import 'package:snap_crescent/repository/app_config_repository.dart';
+import 'package:snap_crescent/repository/metadata_repository.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/metadata_service.dart';
 import 'package:snap_crescent/services/thumbnail_service.dart';
@@ -31,7 +33,7 @@ abstract class _AssetStore with Store {
   Map<String, List<UniFiedAsset>> groupedAssets = new Map();
 
   @observable
-  AssetSearchProgress assetsSearchProgress = AssetSearchProgress.IDLE;
+  AssetSearchProgress assetsSearchProgress = AssetSearchProgress.SEARCHING;
 
   AssetSearchCriteria getAssetSearchCriteria();
 
@@ -54,15 +56,15 @@ abstract class _AssetStore with Store {
       albums.sort(
           (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
-      albums.forEach((album) {
+      for(final album in albums) {
         if (selecteDeviceFolders.indexOf(album.id) != -1) {
-          _addLocalAssetsToList(album);
+           await _addLocalAssetsToList(album);
         }
-      });
+      };
     }
 
     if (forceReloadFromApi) {
-      await getAssetsFromApi();
+      await _getAssetsFromApi();
     } else {
       final newAssets =
           await AssetService().searchOnLocal(getAssetSearchCriteria());
@@ -80,12 +82,11 @@ abstract class _AssetStore with Store {
 
         _addCloudAssetsToList(newAssets);
       } else {
-        await getAssetsFromApi();
+        await _getAssetsFromApi();
       }
     }
 
     if (this.assetList.length > 0) {
-      assetsSearchProgress = AssetSearchProgress.ASSETS_FOUND;
       this.assetList.sort((UniFiedAsset a, UniFiedAsset b) =>
           b.assetCreationDate.compareTo(a.assetCreationDate));
 
@@ -93,12 +94,12 @@ abstract class _AssetStore with Store {
         this.groupedAssets[key]!.sort((UniFiedAsset a, UniFiedAsset b) =>
             b.assetCreationDate.compareTo(a.assetCreationDate));
       });
-    } else {
-      assetsSearchProgress = AssetSearchProgress.ASSETS_NOT_FOUND;
-    }
+    } 
+
+    assetsSearchProgress = AssetSearchProgress.IDLE;
   }
 
-  Future<void> getAssetsFromApi() async {
+  Future<void> _getAssetsFromApi() async {
     try {
       final data = await AssetService().searchAndSync(getAssetSearchCriteria());
       _addCloudAssetsToList(new List<Asset>.from(data));
@@ -107,10 +108,6 @@ abstract class _AssetStore with Store {
       print(e);
       return getAssets(false);
     }
-  }
-
-  UniFiedAsset getAssetAtIndex(int assetIndex) {
-    return assetList[assetIndex];
   }
 
   _addLocalAssetsToList(AssetPathEntity? album) async {
@@ -122,11 +119,16 @@ abstract class _AssetStore with Store {
 
       final assets = getFilteredAssets(allAssets);
 
-      assets.forEach((asset) {
-        final assetDate = asset.createDateTime;
-        _addUnifiedAssetToGroup(
-            assetDate, _getUnifiedAssetFromDeviceAsset(asset, assetDate));
-      });
+      for(final asset in assets) {
+        //final asset = assets.elementAt(i);
+          Metadata metadata = await MetadataRepository.instance.findByName(asset.title!);
+
+          if(metadata.id == null) {
+            final assetDate = asset.createDateTime;
+              _addUnifiedAssetToGroup(
+                  assetDate, _getUnifiedAssetFromDeviceAsset(asset, assetDate));
+          }   
+      }
     }
   }
 
@@ -162,7 +164,7 @@ abstract class _AssetStore with Store {
   }
 
   Future<bool> _getShowDeviceAssetsInfo() async {
-    AppConfig value = await AppConfigResository.instance
+    AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigShowDeviceAssetsFlag);
 
     if (value.configValue != null) {
@@ -173,7 +175,7 @@ abstract class _AssetStore with Store {
   }
 
   Future<List<String>> _getShowDeviceAssetsFolderInfo() async {
-    AppConfig value = await AppConfigResository.instance
+    AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigShowDeviceAssetsFolders);
 
     if (value.configValue != null) {
@@ -201,5 +203,10 @@ abstract class _AssetStore with Store {
     return dateTimeKeys
         .map((datetime) => defaultYearFormatter.format(datetime))
         .toList();
+  }
+
+  clearStore() {
+    assetList = new List.empty();
+    groupedAssets = new Map();
   }
 }

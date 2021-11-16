@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/sync_info.dart';
-import 'package:snap_crescent/resository/app_config_resository.dart';
-import 'package:snap_crescent/screens/login/login.dart';
+import 'package:snap_crescent/models/user_login_response.dart';
+import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
+import 'package:snap_crescent/services/login_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/stores/cloud/asset_store.dart';
@@ -39,6 +41,9 @@ class _SettingsScreenView extends StatefulWidget {
 }
 
 class _SettingsScreenViewState extends State<_SettingsScreenView> {
+  bool _connectedToServer = false;
+  String _loggedInUserName = "";
+  String _loggedServerName = "";
   bool _autoBackup = false;
   bool _showDeviceAssets = false;
   String _lastSyncDate = "Never";
@@ -47,6 +52,17 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   AssetStore? photoStore;
   AssetStore? videoStore;
+
+  final _formKey = GlobalKey<FormState>();
+  AutovalidateMode _autovalidateMode = AutovalidateMode.onUserInteraction;
+
+  final RegExp _urlRegex = RegExp(
+      r"(https?|http)://([-A-Z0-9.]+)(/[-A-Z0-9+&@#/%=~_|!:,.;]*)?(\?[A-Z0-9+&@#/%=~_|!:‌​,.;]*)?",
+      caseSensitive: false);
+
+  TextEditingController serverURLController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +86,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   Future<bool> _getSettingsData() async {
+    await _getAccountInfo();
     await _getAutoBackupInfo();
     await _getAutoBackupFolderInfo();
     await _getShowDeviceAssetsInfo();
@@ -86,8 +103,51 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     setState(() {});
   }
 
+  Future<void> _getAccountInfo() async {
+ 
+    AppConfig appConfigLoggedInFlag = await AppConfigRepository.instance.findByKey(Constants.appConfigLoggedInFlag);
+
+    if (appConfigLoggedInFlag.configValue != null) {
+          _connectedToServer = appConfigLoggedInFlag.configValue == "true" ? true : false;
+    }
+
+    AppConfig appConfigServerURL = await AppConfigRepository.instance
+        .findByKey(Constants.appConfigServerURL);
+
+    if (appConfigServerURL.configValue != null) {
+      
+      this.serverURLController.text = appConfigServerURL.configValue!;
+      _loggedServerName = this.serverURLController.text;
+      _loggedServerName = _loggedServerName.replaceAll("http://", "");
+      _loggedServerName = _loggedServerName.replaceAll("https://", "");
+      _loggedServerName =
+          _loggedServerName.substring(0, _loggedServerName.lastIndexOf(":"));
+    } else {
+      this.serverURLController.text = "http://192.168.0.62:8080";
+    }
+
+    AppConfig appConfigServerUserName = await AppConfigRepository.instance
+        .findByKey(Constants.appConfigServerUserName);
+
+    if (appConfigServerUserName.configValue != null) {
+      this.nameController.text = appConfigServerUserName.configValue!;
+      _loggedInUserName = this.nameController.text;
+    } else {
+      this.nameController.text = "";
+    }
+
+    AppConfig appConfigServerPassword = await AppConfigRepository.instance
+        .findByKey(Constants.appConfigServerPassword);
+
+    if (appConfigServerPassword.configValue != null) {
+      this.passwordController.text = appConfigServerPassword.configValue!;
+    } else {
+      this.passwordController.text = "";
+    }
+  }
+
   Future<void> _getAutoBackupInfo() async {
-    AppConfig value = await AppConfigResository.instance
+    AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigAutoBackupFlag);
 
     if (value.configValue != null) {
@@ -96,7 +156,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   Future<void> _getAutoBackupFolderInfo() async {
-    AppConfig value = await AppConfigResository.instance
+    AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigAutoBackupFolders);
 
     if (value.configValue != null) {
@@ -120,7 +180,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   Future<void> _getShowDeviceAssetsInfo() async {
-    AppConfig value = await AppConfigResository.instance
+    AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigShowDeviceAssetsFlag);
 
     if (value.configValue != null) {
@@ -129,7 +189,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   Future<void> _getShowDeviceAssetsFolderInfo() async {
-    AppConfig value = await AppConfigResository.instance
+    AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigShowDeviceAssetsFolders);
 
     if (value.configValue != null) {
@@ -164,13 +224,130 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     }
   }
 
+  _showAccountInfoDialog() {
+    Alert(
+        context: context,
+        title: "Account",
+        content: Form(
+            key: _formKey,
+            child: Column(children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(10),
+                child: TextFormField(
+                  autovalidateMode: _autovalidateMode,
+                  controller: serverURLController,
+                  validator: (v) {
+                    if (v!.length > 0 && _urlRegex.hasMatch(v)) {
+                      return null;
+                    } else {
+                      return 'Please enter a valid url';
+                    }
+                  },
+                  decoration: InputDecoration(labelText: 'Server'),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.all(10),
+                child: TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: 'User Name',
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                child: TextField(
+                  obscureText: true,
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                  ),
+                ),
+              )
+            ])),
+        buttons: [
+          if(_connectedToServer) 
+          DialogButton(
+            onPressed: () => _onLogoutPressed(),
+            child: Text(
+              "Logout",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+           else 
+            DialogButton(
+            onPressed: () => _onLoginPressed(),
+            child: Text(
+              "Login",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+        ]).show();
+  }
+  
+
+  _onLoginPressed() async {
+    if (_formKey.currentState!.validate()) {
+
+      AppConfig appConfigLoggedInFlagConfig = new AppConfig(
+          configkey: Constants.appConfigLoggedInFlag,
+          configValue: true.toString());
+
+      AppConfig serverUrlConfig = new AppConfig(
+          configkey: Constants.appConfigServerURL,
+          configValue: serverURLController.text);
+
+      AppConfig serverUserNameConfig = new AppConfig(
+          configkey: Constants.appConfigServerUserName,
+          configValue: nameController.text);
+
+      AppConfig serverPasswordConfig = new AppConfig(
+          configkey: Constants.appConfigServerPassword,
+          configValue: passwordController.text);
+
+      await AppConfigRepository.instance.saveOrUpdateConfig(serverUrlConfig);
+      await AppConfigRepository.instance.saveOrUpdateConfig(serverUserNameConfig);
+      await AppConfigRepository.instance.saveOrUpdateConfig(serverPasswordConfig);
+
+      UserLoginResponse userLoginResponse = await LoginService().login();
+
+      if(userLoginResponse.token != null) {
+          await AppConfigRepository.instance.saveOrUpdateConfig(appConfigLoggedInFlagConfig);
+          await _getAccountInfo();
+          setState(() {});
+          Navigator.pop(context);
+      } else {
+        ToastService.showError("Incorrect Username or Password");
+          setState(() {
+            _autovalidateMode = AutovalidateMode.always;
+          });
+      }
+
+      
+    } else {
+      ToastService.showError("Please fix the errors");
+      setState(() {
+        _autovalidateMode = AutovalidateMode.always;
+      });
+    }
+  }
+
+  _onLogoutPressed() async {
+      AppConfig appConfigLoggedInFlagConfig = new AppConfig(
+          configkey: Constants.appConfigLoggedInFlag,
+          configValue: false.toString());
+
+      await AppConfigRepository.instance.saveOrUpdateConfig(appConfigLoggedInFlagConfig);
+  }
+
   _updateAutoBackupFlag(bool value) async {
     _autoBackup = value;
     AppConfig appConfigAutoBackupFlagConfig = new AppConfig(
         configkey: Constants.appConfigAutoBackupFlag,
         configValue: value.toString());
 
-    await AppConfigResository.instance
+    await AppConfigRepository.instance
         .saveOrUpdateConfig(appConfigAutoBackupFlagConfig);
 
     setState(() {});
@@ -182,15 +359,28 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         configkey: Constants.appConfigShowDeviceAssetsFlag,
         configValue: value.toString());
 
-    await AppConfigResository.instance
+    await AppConfigRepository.instance
         .saveOrUpdateConfig(appConfigShowDeviceAssetsFlagConfig);
     await _refreshAssetStores();
     setState(() {});
   }
-  
 
   _settingsList(BuildContext context) {
     return ListView(padding: EdgeInsets.zero, children: <Widget>[
+      ListTile(
+        title: Text("Account", style: TitleTextStyle),
+        subtitle: Text(_connectedToServer == true
+            ? '''$_loggedInUserName@$_loggedServerName'''
+            : "Not Connected"),
+        leading: Container(
+          width: 10,
+          alignment: Alignment.center,
+          child: const Icon(Icons.account_circle),
+        ),
+        onTap: () {
+          _showAccountInfoDialog();
+        },
+      ),
       SwitchListTile(
         title: Text("Auto Backup", style: TitleTextStyle),
         secondary: const Icon(Icons.cloud_upload),
@@ -213,13 +403,15 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           ),
           onTap: () {
             AppConfig appConfigAutoBackupFoldersConfig = new AppConfig(
-                configkey: Constants.appConfigAutoBackupFolders, configValue: "");
+                configkey: Constants.appConfigAutoBackupFolders,
+                configValue: "");
 
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => FolderSelectionScreen(
-                        appConfigAutoBackupFoldersConfig))).then(onBackFromChild);
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => FolderSelectionScreen(
+                            appConfigAutoBackupFoldersConfig)))
+                .then(onBackFromChild);
           },
         ),
       ListTile(
@@ -266,26 +458,18 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
                             appConfigShowDeviceAssetsFoldersFlagConfig)))
                 .then(onBackFromChild);
           },
-        ),
-      ListTile(
-        title: Text("Logout", style: TitleTextStyle),
-        leading: Container(
-          width: 10,
-          alignment: Alignment.center,
-          child: const Icon(Icons.logout),
-        ),
-        onTap: () {
-          Navigator.pop(context);
-          Navigator.pushNamedAndRemoveUntil(
-              context, LoginScreen.routeName, (r) => false);
-        },
-      )
+        )
     ]);
   }
 
   _refreshAssetStores() async {
     await this.photoStore!.getAssets(false);
     await this.videoStore!.getAssets(false);
+  }
+
+  _clearAssetStores() {
+    photoStore!.clearStore();
+    videoStore!.clearStore();
   }
 
   @override

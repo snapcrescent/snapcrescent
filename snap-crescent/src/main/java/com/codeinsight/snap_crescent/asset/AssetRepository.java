@@ -66,6 +66,18 @@ public class AssetRepository extends BaseRepository<Asset>{
 					true));
 		}
 		
+		if(searchCriteria.getFromDate() != null)
+		{
+			hql.append(" AND metadata.creationDatetime >= :fromDate");
+			paramsMap.put("fromDate", searchCriteria.getFromDate());
+		}
+
+		if(searchCriteria.getToDate() != null)
+		{
+			hql.append(" AND metadata.creationDatetime <= :toDate");
+			paramsMap.put("toDate", searchCriteria.getToDate());
+		}
+		
 		if(searchCriteria.getActive() != null)
 		{
 			hql.append(" AND asset.active = :active ");

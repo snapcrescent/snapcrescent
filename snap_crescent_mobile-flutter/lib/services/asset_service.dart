@@ -9,10 +9,10 @@ import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
-import 'package:snap_crescent/resository/app_config_resository.dart';
-import 'package:snap_crescent/resository/metadata_resository.dart';
-import 'package:snap_crescent/resository/asset_resository.dart';
-import 'package:snap_crescent/resository/thumbnail_resository.dart';
+import 'package:snap_crescent/repository/app_config_repository.dart';
+import 'package:snap_crescent/repository/metadata_repository.dart';
+import 'package:snap_crescent/repository/asset_repository.dart';
+import 'package:snap_crescent/repository/thumbnail_repository.dart';
 import 'package:snap_crescent/services/base_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -20,11 +20,17 @@ class AssetService extends BaseService {
   Future<BaseResponseBean<int, Asset>> search(
       AssetSearchCriteria searchCriteria) async {
     try {
-      Dio dio = await getDio();
-      final response =
-          await dio.get('/asset', queryParameters: searchCriteria.toMap());
+      bool isUserLoggedIn = await super.isUserLoggedIn();
 
-      return BaseResponseBean.fromJson(response.data, Asset.fromJsonModel);
+      if (isUserLoggedIn) {
+        Dio dio = await getDio();
+        Options options = await getHeaders();
+        final response = await dio.get('/asset', queryParameters: searchCriteria.toMap(), options: options);
+
+        return BaseResponseBean.fromJson(response.data, Asset.fromJsonModel);
+      } else {
+        return new BaseResponseBean.defaultResponse();
+      }
     } on DioError catch (ex) {
       if (ex.type == DioErrorType.connectTimeout) {
         throw Exception("Connection  Timeout Exception");
@@ -35,22 +41,27 @@ class AssetService extends BaseService {
 
   save(ASSET_TYPE assetType, List<File> files) async {
     try {
-      Dio dio = await getDio();
+      bool isUserLoggedIn = await super.isUserLoggedIn();
 
-      final Iterable<List<File>> partitionedFiles = partition(files, 5);
+      if (isUserLoggedIn) {
+        Dio dio = await getDio();
+        Options options = await getHeaders();
 
-      for (final partitionedFile in partitionedFiles) {
-        List<MultipartFile> multipartFiles = [];
-        for (final File file in partitionedFile) {
-          multipartFiles.add(await MultipartFile.fromFile(file.path,
-              filename: file.path.split('/').last));
+        final Iterable<List<File>> partitionedFiles = partition(files, 5);
+
+        for (final partitionedFile in partitionedFiles) {
+          List<MultipartFile> multipartFiles = [];
+          for (final File file in partitionedFile) {
+            multipartFiles.add(await MultipartFile.fromFile(file.path,
+                filename: file.path.split('/').last));
+          }
+
+          FormData formData = FormData.fromMap({
+            "assetType": assetType.index,
+            "files": multipartFiles,
+          });
+          await dio.post("/asset/upload", data: formData, options: options);
         }
-
-        FormData formData = FormData.fromMap({
-          "assetType": assetType.index,
-          "files": multipartFiles,
-        });
-        await dio.post("/asset/upload", data: formData);
       }
     } on DioError catch (ex) {
       if (ex.type == DioErrorType.connectTimeout) {
@@ -83,12 +94,18 @@ class AssetService extends BaseService {
 
   Future<File> downloadAssetById(int assetId, String assetName) async {
     try {
-      Dio dio = await getDio();
-      final url = getAssetByIdUrl(getGenericRelativeAssetByIdUrl(), assetId);
-      Directory documentDirectory = await getApplicationDocumentsDirectory();
-      await dio.download(url, join(documentDirectory.path, assetName));
-      File file = new File(join(documentDirectory.path, assetName));
-      return file;
+      bool isUserLoggedIn = await super.isUserLoggedIn();
+
+      if (isUserLoggedIn) {
+        Dio dio = await getDio();
+        final url = getAssetByIdUrl(getGenericRelativeAssetByIdUrl(), assetId);
+        Directory documentDirectory = await getApplicationDocumentsDirectory();
+        await dio.download(url, join(documentDirectory.path, assetName));
+        File file = new File(join(documentDirectory.path, assetName));
+        return file;
+      } else {
+        return new File("");
+      }
     } on DioError catch (ex) {
       if (ex.type == DioErrorType.connectTimeout) {
         throw Exception("Connection  Timeout Exception");
@@ -107,24 +124,24 @@ class AssetService extends BaseService {
 
   Future<int> saveOnLocal(Asset entity) async {
     final assetExistsById =
-        await AssetResository.instance.existsById(entity.id!);
+        await AssetRepository.instance.existsById(entity.id!);
 
     if (assetExistsById == false) {
       final thumbnailExistsById =
-          await ThumbnailResository.instance.existsById(entity.thumbnailId!);
+          await ThumbnailRepository.instance.existsById(entity.thumbnailId!);
 
       if (thumbnailExistsById == false) {
-        ThumbnailResository.instance.save(entity.thumbnail!);
+        ThumbnailRepository.instance.save(entity.thumbnail!);
       }
 
       final assetMetadataExistsById =
-          await MetadataResository.instance.existsById(entity.metadataId!);
+          await MetadataRepository.instance.existsById(entity.metadataId!);
 
       if (assetMetadataExistsById == false) {
-        MetadataResository.instance.save(entity.metadata!);
+        MetadataRepository.instance.save(entity.metadata!);
       }
 
-      return AssetResository.instance.save(entity);
+      return AssetRepository.instance.save(entity);
     } else {
       return Future.value(0);
     }
@@ -132,46 +149,47 @@ class AssetService extends BaseService {
 
   Future<List<Asset>> searchOnLocal(
       AssetSearchCriteria assetSearchCriteria) async {
-    return AssetResository.instance.searchOnLocal(assetSearchCriteria);
+    return AssetRepository.instance.searchOnLocal(assetSearchCriteria);
   }
 
   saveOnCloud() async {
-       AppConfig value = await AppConfigResository.instance
+    AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigAutoBackupFolders);
 
-        if (value.configValue != null) {
-          final List<AssetPathEntity> folders = await PhotoManager.getAssetPathList();
-          folders.sort((AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
+    if (value.configValue != null) {
+      final List<AssetPathEntity> folders =
+          await PhotoManager.getAssetPathList();
+      folders.sort(
+          (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
-          List<String> autoBackupFolderNameList = value.configValue!.split(",");
-          List<AssetPathEntity> autoBackupFolders = [];
+      List<String> autoBackupFolderNameList = value.configValue!.split(",");
+      List<AssetPathEntity> autoBackupFolders = [];
 
-          for(int i=0 ; i < folders.length ; i++) {
-              if(autoBackupFolderNameList.indexOf(folders[i].id) > -1) {
-                autoBackupFolders.add(folders[i]);
-              }
-          }
-            
-          for(int i=0 ; i < autoBackupFolders.length ; i++) {
-              AssetPathEntity folder = autoBackupFolders[i];
-
-              final allAssets = await folder.getAssetListRange(
-              start: 0, // start at index 0
-              end: 100000, // end at a very big index (to get all the assets)
-            );
-
-            final photos = allAssets.where((asset) => asset.type == AssetType.image);
-
-            List<File> assetFiles = [];
-            for (final AssetEntity asset in photos) {
-              final File? assetFile = await asset.file;
-              assetFiles.add(assetFile!);
-            }
-
-            save(ASSET_TYPE.PHOTO, assetFiles);
-          }  
+      for (int i = 0; i < folders.length; i++) {
+        if (autoBackupFolderNameList.indexOf(folders[i].id) > -1) {
+          autoBackupFolders.add(folders[i]);
         }
+      }
+
+      for (int i = 0; i < autoBackupFolders.length; i++) {
+        AssetPathEntity folder = autoBackupFolders[i];
+
+        final allAssets = await folder.getAssetListRange(
+          start: 0, // start at index 0
+          end: 100000, // end at a very big index (to get all the assets)
+        );
+
+        final photos =
+            allAssets.where((asset) => asset.type == AssetType.image);
+
+        List<File> assetFiles = [];
+        for (final AssetEntity asset in photos) {
+          final File? assetFile = await asset.file;
+          assetFiles.add(assetFile!);
+        }
+
+        save(ASSET_TYPE.PHOTO, assetFiles);
+      }
+    }
   }
-
-
 }

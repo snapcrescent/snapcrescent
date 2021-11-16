@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
-import 'package:snap_crescent/resository/app_config_resository.dart';
+import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/style.dart';
 
@@ -66,7 +66,7 @@ class _FoldersScreenViewState
 
 
   Future<void> _getFolderInfo() async {
-    AppConfig value = await AppConfigResository.instance
+    AppConfig value = await AppConfigRepository.instance
         .findByKey(widget.appConfig.configkey!);
 
     if (value.configValue != null) {
@@ -88,7 +88,7 @@ class _FoldersScreenViewState
 
     widget.appConfig.configValue = _folders;
     
-    await AppConfigResository.instance
+    await AppConfigRepository.instance
         .saveOrUpdateConfig(widget.appConfig);
 
     setState(() {});
