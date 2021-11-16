@@ -46,7 +46,7 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
   PageController? pageController;
   String? _genericAssetByIdUrl;
   
-  _videoPlayer(UniFiedAsset? unifiedAsset) async{
+  _videoPlayer(UniFiedAsset? unifiedAsset) {
 
       if (_videoPlayerController == null) {
           if (_videoPlayerController != null) {
@@ -67,15 +67,17 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
             } else {
 
               AssetEntity asset = unifiedAsset.assetEntity!;
-              File? file = await asset.file;
-      
-              _videoPlayerController = VideoPlayerController.file(file!)
+
+              asset.file.then((file) => _videoPlayerController = VideoPlayerController.file(file!)
                   ..setLooping(true)
                   ..initialize().then((_) {
                     setState(() {
                       
                     });
-                  });
+                  }));
+              
+      
+              
             }
             
     } 
@@ -92,6 +94,7 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
             height: 200,
             child: Center(child: CircularProgressIndicator()),
           );
+      
   }
   
   _imageBanner(UniFiedAsset unifiedAsset, Object? object) {
