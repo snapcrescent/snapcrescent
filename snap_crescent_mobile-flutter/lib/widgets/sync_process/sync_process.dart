@@ -47,6 +47,7 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
   void initState() {
     super.initState();
 
+    
     SyncInfoService().searchOnLocal().then((localSyncInfoList) => {
           if (localSyncInfoList.isEmpty)
             {_compareLocalSyncInfoWithServer(null)}
@@ -57,7 +58,9 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
 
   _compareLocalSyncInfoWithServer(SyncInfo? localSyncInfo) async {
     try {
-      final serverResponse = await SyncInfoService()
+
+      if(await SyncInfoService().isUserLoggedIn()) {
+        final serverResponse = await SyncInfoService()
           .search(SyncInfoSearchCriteria.defaultCriteria());
 
       if (serverResponse.objects!.length > 0) {
@@ -87,8 +90,7 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
         await _uploadAssetsToServer(null);
       }
 
-    //await refreshAssetStores();
-
+      }
       
     } catch (e) {
       print("Network error");
@@ -123,7 +125,7 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
       SyncInfo serverSyncInfo, ASSET_TYPE assetType) async {
     AssetSearchCriteria searchCriteria = AssetSearchCriteria.defaultCriteria();
     searchCriteria.assetType = assetType.index;
-    searchCriteria.resultPerPage = 1;
+    searchCriteria.resultPerPage = 50;
     searchCriteria.fromDate = serverSyncInfo.lastModifiedDatetime;
 
     final photoCountResponse = await AssetService().search(searchCriteria);
@@ -314,14 +316,11 @@ class _SyncProcessWidgetState extends State<SyncProcessWidget> {
     _videoStore = Provider.of<VideoStore>(context);
 
     return Observer(
-        builder: (context) =>
-            _syncProgressState != SyncProgress.CONTACTING_SERVER
+        builder: (context) => _syncProgressState != SyncProgress.CONTACTING_SERVER
                 ? OrientationBuilder(builder: (context, orientation) {
                     return _syncProgress();
                   })
-                : Container(
-                    height: 5,
-                    child: const LinearProgressIndicator(),
-                  ));
+                : Container()
+              );
   }
 }

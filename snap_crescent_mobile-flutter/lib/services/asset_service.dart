@@ -20,9 +20,8 @@ class AssetService extends BaseService {
   Future<BaseResponseBean<int, Asset>> search(
       AssetSearchCriteria searchCriteria) async {
     try {
-      bool isUserLoggedIn = await super.isUserLoggedIn();
-
-      if (isUserLoggedIn) {
+      
+      if (await  super.isUserLoggedIn()) {
         Dio dio = await getDio();
         Options options = await getHeaders();
         final response = await dio.get('/asset', queryParameters: searchCriteria.toMap(), options: options);
@@ -41,9 +40,8 @@ class AssetService extends BaseService {
 
   save(ASSET_TYPE assetType, List<File> files) async {
     try {
-      bool isUserLoggedIn = await super.isUserLoggedIn();
-
-      if (isUserLoggedIn) {
+      
+      if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
         Options options = await getHeaders();
 
@@ -79,28 +77,19 @@ class AssetService extends BaseService {
     return new List<Asset>.from(data.objects!);
   }
 
-  String getGenericRelativeAssetByIdUrl() {
-    return '/asset/ASSET_ID/raw';
-  }
-
-  Future<String> getGenericAssetByIdUrl() async {
-    final baseUrl = await getServerUrl();
-    return '$baseUrl' + getGenericRelativeAssetByIdUrl();
-  }
-
-  String getAssetByIdUrl(String genericURL, int assetId) {
-    return genericURL.replaceAll("ASSET_ID", assetId.toString());
+  String getAssetByIdUrl(String serverURL, int assetId) {
+    return serverURL + '/asset/$assetId/raw';
   }
 
   Future<File> downloadAssetById(int assetId, String assetName) async {
     try {
-      bool isUserLoggedIn = await super.isUserLoggedIn();
-
-      if (isUserLoggedIn) {
+      
+      if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
-        final url = getAssetByIdUrl(getGenericRelativeAssetByIdUrl(), assetId);
+        Options options = await getHeaders();
+        final url = getAssetByIdUrl(await getServerUrl(), assetId);
         Directory documentDirectory = await getApplicationDocumentsDirectory();
-        await dio.download(url, join(documentDirectory.path, assetName));
+        await dio.download(url, join(documentDirectory.path, assetName), options: options);
         File file = new File(join(documentDirectory.path, assetName));
         return file;
       } else {

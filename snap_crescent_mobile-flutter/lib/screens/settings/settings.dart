@@ -225,6 +225,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   _showAccountInfoDialog() {
+    
     Alert(
         context: context,
         title: "Account",
@@ -251,7 +252,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
                 child: TextField(
                   controller: nameController,
                   decoration: InputDecoration(
-                    labelText: 'User Name',
+                    labelText: 'Username',
                   ),
                 ),
               ),
@@ -339,6 +340,9 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           configValue: false.toString());
 
       await AppConfigRepository.instance.saveOrUpdateConfig(appConfigLoggedInFlagConfig);
+      await _getAccountInfo();
+      setState(() {});
+      Navigator.pop(context);
   }
 
   _updateAutoBackupFlag(bool value) async {
@@ -465,11 +469,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   _refreshAssetStores() async {
     await this.photoStore!.getAssets(false);
     await this.videoStore!.getAssets(false);
-  }
-
-  _clearAssetStores() {
-    photoStore!.clearStore();
-    videoStore!.clearStore();
   }
 
   @override

@@ -12,9 +12,7 @@ class SyncInfoService extends BaseService {
   Future<BaseResponseBean<int, SyncInfo>> search(
       SyncInfoSearchCriteria searchCriteria) async {
     try {
-      bool isUserLoggedIn = await super.isUserLoggedIn();
-
-      if (isUserLoggedIn) {
+      if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
         Options options = await getHeaders();
         final response = await dio.get('/sync-info',
