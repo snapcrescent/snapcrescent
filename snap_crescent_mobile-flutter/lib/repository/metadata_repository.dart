@@ -10,9 +10,9 @@ class MetadataRepository extends BaseRepository {
   MetadataRepository._privateConstructor():super(_tableName);
   static final MetadataRepository instance = MetadataRepository._privateConstructor();
 
-  Future<Metadata> findByName(String name) async {
+  Future<Metadata> findByNameEndWith(String name) async {
     Database database = await DatabaseHelper.instance.database;
-    final result = await database.rawQuery('''SELECT * from $tableName where NAME = ? ''', [name]);
+    final result = await database.rawQuery('''SELECT * from $tableName where NAME LIKE ? ''', ['%$name']);
 
     if (result.length == 1) {
       return Metadata.fromMap(result.single);

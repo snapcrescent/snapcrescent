@@ -33,11 +33,21 @@ class BaseService {
   }
 
   Future<Options> getHeaders() async {
-    final appConfigSessionTokenConfig = await AppConfigRepository.instance.findByKey(Constants.appConfigSessionToken);
-
+    
     return Options(
-        headers: {"Authorization": "Bearer " + appConfigSessionTokenConfig.configValue!},
+        headers: await getHeadersMap(),
       );
+  }
+
+  Future<Map<String, String>> getHeadersMap() async{
+
+    Map<String, String> headers = {};
+
+    final appConfigSessionTokenConfig = await AppConfigRepository.instance.findByKey(Constants.appConfigSessionToken);
+    headers["Authorization"] = "Bearer " + appConfigSessionTokenConfig.configValue!;
+    
+
+    return headers;
   }
 
   String getQueryString(Map params, {String prefix: '&', bool inRecursion: false}) {

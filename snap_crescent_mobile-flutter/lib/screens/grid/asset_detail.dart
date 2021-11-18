@@ -44,7 +44,8 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
   
   VideoPlayerController? _videoPlayerController;
   PageController? pageController;
-  String? _genericAssetByIdUrl;
+  Map<String, String> headers = {};
+  String serverUrl = "";
   
   _videoPlayer(UniFiedAsset? unifiedAsset) {
 
@@ -55,9 +56,9 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
 
           if(unifiedAsset!.assetSource == AssetSource.CLOUD) {
               Asset asset = unifiedAsset.asset!;
-              String assetURL = AssetService().getAssetByIdUrl(_genericAssetByIdUrl!, asset.id!);
+              String assetURL = AssetService().getAssetByIdUrl(serverUrl, asset.id!);
 
-              _videoPlayerController = VideoPlayerController.network(assetURL)
+              _videoPlayerController = VideoPlayerController.network(assetURL,httpHeaders : headers)
                 ..setLooping(true)
                 ..initialize().then((_) {
                   setState(() {
@@ -118,8 +119,7 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
                       fit: BoxFit.scaleDown),
                 ),
               ),
-          imageProvider: CachedNetworkImageProvider(
-              AssetService().getAssetByIdUrl(_genericAssetByIdUrl!, asset.id!)));
+          imageProvider: CachedNetworkImageProvider(AssetService().getAssetByIdUrl(serverUrl, asset.id!), headers: headers));
 
     } else if(unifiedAsset.assetSource == AssetSource.DEVICE && object is File){
       return Image.file(object);
@@ -130,9 +130,14 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
   void initState() {
     super.initState();
 
-    AssetService()
-        .getGenericAssetByIdUrl()
-        .then((value) => _genericAssetByIdUrl = value);
+    AssetService().getHeadersMap().then((value) => {
+      headers = value
+    });
+
+    AssetService().getServerUrl().then((value) => {
+      serverUrl = value
+    });
+
     
     pageController = PageController(
       initialPage: widget.assetIndex,

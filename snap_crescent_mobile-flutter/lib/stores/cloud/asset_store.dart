@@ -48,21 +48,6 @@ abstract class _AssetStore with Store {
     groupedAssets.clear();
     this.assetList = [];
 
-    if (await _getShowDeviceAssetsInfo()) {
-      List<String> selecteDeviceFolders =
-          await _getShowDeviceAssetsFolderInfo();
-
-      final albums = await PhotoManager.getAssetPathList();
-      albums.sort(
-          (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
-
-      for(final album in albums) {
-        if (selecteDeviceFolders.indexOf(album.id) != -1) {
-           await _addLocalAssetsToList(album);
-        }
-      };
-    }
-
     if (forceReloadFromApi) {
       await _getAssetsFromApi();
     } else {
@@ -83,6 +68,21 @@ abstract class _AssetStore with Store {
         _addCloudAssetsToList(newAssets);
       } else {
         await _getAssetsFromApi();
+      }
+    }
+
+    if (await _getShowDeviceAssetsInfo()) {
+      List<String> selecteDeviceFolders =
+          await _getShowDeviceAssetsFolderInfo();
+
+      final albums = await PhotoManager.getAssetPathList();
+      albums.sort(
+          (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
+
+      for(final album in albums) {
+        if (selecteDeviceFolders.indexOf(album.id) != -1) {
+           await _addLocalAssetsToList(album);
+        }
       }
     }
 
@@ -121,7 +121,7 @@ abstract class _AssetStore with Store {
 
       for(final asset in assets) {
         //final asset = assets.elementAt(i);
-          Metadata metadata = await MetadataRepository.instance.findByName(asset.title!);
+          Metadata metadata = await MetadataRepository.instance.findByNameEndWith(asset.title!);
 
           if(metadata.id == null) {
             final assetDate = asset.createDateTime;
