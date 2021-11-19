@@ -14,10 +14,8 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[Expanded(child: _SplashScreenView())],
-    ));
+        body: _SplashScreenView()
+        );
   }
 }
 
@@ -28,24 +26,34 @@ class _SplashScreenView extends StatefulWidget {
 
 class _SplashScreenViewState extends State<_SplashScreenView> {
   @override
-  void initState()  {
+  void initState() {
     super.initState();
 
-    WidgetsBinding.instance!.addPostFrameCallback((_){
-            _setDefaultAppConfig();
-          });
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _setDefaultAppConfig();
+    });
 
+    
     Timer(
-          Duration(seconds: 1),
-          () => Navigator.pushReplacementNamed(
-              context,  AssetsGridScreen.routeName,arguments: ASSET_TYPE.PHOTO));
+        Duration(seconds: 1),
+        () => Navigator.pushReplacementNamed(
+            context, AssetsGridScreen.routeName,
+            arguments: ASSET_TYPE.PHOTO));
+            
   }
-  
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        color: Colors.black, child: Image.asset("assets/images/logo.png"));
+    return  Container(
+            color: Colors.black,
+            child: Center(
+              child: 
+                Image.asset(
+                  "assets/images/logo.png",
+                  width: 200,
+                  height: 200,
+                )
+            ));
   }
 
   _setDefaultAppConfig() async {
@@ -100,7 +108,8 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
           configkey: Constants.appConfigLoggedInFlag,
           configValue: false.toString());
 
-      await AppConfigRepository.instance.saveOrUpdateConfig(appConfigLoggedInFlagConfig);
+      await AppConfigRepository.instance
+          .saveOrUpdateConfig(appConfigLoggedInFlagConfig);
     }
   }
 }
