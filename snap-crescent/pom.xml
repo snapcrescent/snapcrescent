@@ -233,7 +233,7 @@
 				</executions>
 				<configuration>
 					<nodeVersion>${node.version}</nodeVersion>
-					<workingDirectory>src/main/webapp</workingDirectory>
+					<workingDirectory>src/main/angular</workingDirectory>
 					<skip>${skip.build}</skip>
 				</configuration>
 
@@ -248,7 +248,7 @@
 							<skip>${skip.build.copy}</skip>
 							<target>
 								<copy todir="target/classes/public">
-									<fileset dir="src/main/webapp/build" />
+									<fileset dir="src/main/webapp" />
 								</copy>
 							</target>
 						</configuration>
