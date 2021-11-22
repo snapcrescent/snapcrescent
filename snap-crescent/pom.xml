@@ -18,7 +18,7 @@
 	<description>SNAP-CRESCENT</description>
 
 	<properties>
-		<java.version>11</java.version>
+		<java.version>8</java.version>
 		<node.version>v14.15.4</node.version>
 		<npm.version>6.13.4</npm.version>
 	</properties>
