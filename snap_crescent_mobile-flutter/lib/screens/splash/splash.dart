@@ -36,9 +36,13 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
     
     Timer(
         Duration(seconds: 1),
-        () => Navigator.pushReplacementNamed(
-            context, AssetsGridScreen.routeName,
-            arguments: ASSET_TYPE.PHOTO));
+        () => Navigator.pushAndRemoveUntil<dynamic>(
+        context,
+        MaterialPageRoute<dynamic>(
+          builder: (BuildContext context) => AssetsGridScreen(ASSET_TYPE.PHOTO),
+        ),
+        (route) => false,//if you want to disable back feature set to false
+      ));
             
   }
 

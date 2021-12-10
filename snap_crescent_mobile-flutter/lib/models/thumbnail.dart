@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:snap_crescent/models/base_model.dart';
 
 class Thumbnail extends BaseUiBean {
   String? name;
   String? base64EncodedThumbnail;
+  File? thumbnailFile;  
+
 
   Thumbnail(
       {
@@ -28,16 +32,15 @@ class Thumbnail extends BaseUiBean {
 
     return Thumbnail(
         bean:  BaseUiBean.fromMap(map),
-        name: map['NAME'],
-        base64EncodedThumbnail: map['BASE_64_ENCODED_THUMBNAIL']);
+        name: map['NAME']
+        );
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = super.toMap();
 
     map['NAME'] = name;
-    map['BASE_64_ENCODED_THUMBNAIL'] = base64EncodedThumbnail;
-
+    
     return map;
   }
 }

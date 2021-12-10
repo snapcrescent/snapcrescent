@@ -18,7 +18,7 @@ class AssetRepository extends BaseRepository{
 
     StringBuffer buffer = new StringBuffer();
 
-    buffer.write(" SELECT * from ");
+    buffer.write(" SELECT $_tableName.* from ");
     buffer.write(tableName);
     buffer.write(" JOIN METADATA on METADATA.ID = $_tableName.METADATA_ID ");
     buffer.write(" WHERE 1=1 ");

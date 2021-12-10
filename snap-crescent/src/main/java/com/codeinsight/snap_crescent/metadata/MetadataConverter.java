@@ -79,7 +79,7 @@ public class MetadataConverter extends BaseConverter<Metadata, UiMetadata> {
 			}
 			
 			if(resultType == ResultType.FULL) {
-				bean.setBase64EncodedPhoto(Base64.getEncoder().encodeToString(fileService.readFileBytes(FILE_TYPE.PHOTO,entity.getPath() + entity.getInternalName())));
+				bean.setBase64EncodedPhoto(Base64.getEncoder().encodeToString(fileService.readFileBytes(FILE_TYPE.PHOTO,entity.getPath(), entity.getInternalName())));
 			}
 
 			populateBeanWithAuditValues(bean, entity, resultType);

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:chewie/chewie.dart';
@@ -12,9 +11,9 @@ import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/models/unified_asset.dart';
 import 'package:snap_crescent/services/asset_service.dart';
-import 'package:snap_crescent/stores/cloud/asset_store.dart';
-import 'package:snap_crescent/stores/cloud/photo_store.dart';
-import 'package:snap_crescent/stores/cloud/video_store.dart';
+import 'package:snap_crescent/stores/asset/asset_store.dart';
+import 'package:snap_crescent/stores/asset/photo_store.dart';
+import 'package:snap_crescent/stores/asset/video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:video_player/video_player.dart';
 
@@ -100,19 +99,11 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
   _imageBanner(UniFiedAsset unifiedAsset, Object? object) {
     if (unifiedAsset.assetSource == AssetSource.CLOUD && object is Asset) {
       Asset asset = object;
-      String base64EncodedPhoto;
-
-      if (asset.metadata != null &&
-          asset.metadata!.base64EncodedPhoto != null) {
-        base64EncodedPhoto = asset.metadata!.base64EncodedPhoto!;
-      } else {
-        base64EncodedPhoto = asset.thumbnail!.base64EncodedThumbnail!;
-      }
 
       return PhotoView(
           loadingBuilder: (context, progress) => Center(
                 child: Container(
-                  child: Image.memory(base64Decode(base64EncodedPhoto),
+                  child: Image.file(asset.thumbnail!.thumbnailFile!,
                       fit: BoxFit.fitWidth),
                 ),
               ),

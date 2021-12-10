@@ -13,7 +13,7 @@ class BaseService {
           BaseOptions options = new BaseOptions(
               baseUrl: baseURL.configValue!,
               receiveDataWhenStatusError: true,
-              connectTimeout: 5*1000, // 5 seconds
+              connectTimeout: 60*1000, // 60 seconds
               receiveTimeout: 300*1000 // 300 seconds
               );
 

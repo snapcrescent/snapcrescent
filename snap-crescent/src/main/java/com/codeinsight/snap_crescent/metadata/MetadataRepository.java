@@ -23,4 +23,13 @@ public class MetadataRepository extends BaseRepository<Metadata>{
 		List<Metadata> results = typedQuery.getResultList();
 		return results.isEmpty() ? false : true;
 	}
+	
+	public boolean existByName(String name) {
+		String query = "SELECT metadata FROM Metadata metadata WHERE metadata.name = :name";
+		
+		TypedQuery<Metadata> typedQuery = getCurrentSession().createQuery(query,Metadata.class);
+		typedQuery.setParameter("name", name);
+		List<Metadata> results = typedQuery.getResultList();
+		return results.isEmpty() ? false : true;
+	}
 }
