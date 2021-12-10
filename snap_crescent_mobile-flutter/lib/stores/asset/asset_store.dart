@@ -33,7 +33,7 @@ abstract class _AssetStore with Store {
   Map<String, List<UniFiedAsset>> groupedAssets = new Map();
 
   @observable
-  AssetSearchProgress assetsSearchProgress = AssetSearchProgress.SEARCHING;
+  int assetsCount = 0;
 
   AssetSearchCriteria getAssetSearchCriteria();
 
@@ -41,8 +41,7 @@ abstract class _AssetStore with Store {
 
   @action
   Future<void> getAssets(bool forceReloadFromApi) async {
-    assetsSearchProgress = AssetSearchProgress.SEARCHING;
-
+    
     currentDateTime = DateTime.now();
 
     groupedAssets.clear();
@@ -51,21 +50,18 @@ abstract class _AssetStore with Store {
     if (forceReloadFromApi) {
       await _getAssetsFromApi();
     } else {
-      final newAssets =
-          await AssetService().searchOnLocal(getAssetSearchCriteria());
+      final newAssets = await AssetService().searchOnLocal(getAssetSearchCriteria());
 
       if (newAssets.isNotEmpty) {
         for (Asset asset in newAssets) {
-          final thumbnail =
-              await ThumbnailService().findByIdOnLocal(asset.thumbnailId!);
+          final thumbnail = await ThumbnailService().findByIdOnLocal(asset.thumbnailId!);
           asset.thumbnail = thumbnail;
 
-          final metadata =
-              await MetadataService().findByIdOnLocal(asset.metadataId!);
+          final metadata = await MetadataService().findByIdOnLocal(asset.metadataId!);
           asset.metadata = metadata;
         }
 
-        _addCloudAssetsToList(newAssets);
+        await _addCloudAssetsToList(newAssets);
       } else {
         await _getAssetsFromApi();
       }
@@ -79,9 +75,10 @@ abstract class _AssetStore with Store {
       albums.sort(
           (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
-      for(final album in albums) {
+       for(final album in albums) {
         if (selecteDeviceFolders.indexOf(album.id) != -1) {
            await _addLocalAssetsToList(album);
+           
         }
       }
     }
@@ -95,14 +92,12 @@ abstract class _AssetStore with Store {
             b.assetCreationDate.compareTo(a.assetCreationDate));
       });
     } 
-
-    assetsSearchProgress = AssetSearchProgress.IDLE;
   }
 
   Future<void> _getAssetsFromApi() async {
     try {
       final data = await AssetService().searchAndSync(getAssetSearchCriteria());
-      _addCloudAssetsToList(new List<Asset>.from(data));
+      await _addCloudAssetsToList(new List<Asset>.from(data));
     } catch (e) {
       ToastService.showError("Unable to reach server");
       print(e);
@@ -132,12 +127,15 @@ abstract class _AssetStore with Store {
     }
   }
 
-  _addCloudAssetsToList(List<Asset> newAssets) {
-    newAssets.forEach((asset) {
+  _addCloudAssetsToList(List<Asset> newAssets) async {
+    for(final asset in newAssets) {  
       final assetDate = asset.metadata!.creationDatetime!;
+
+      asset.thumbnail!.thumbnailFile = await AssetService().readThumbnailFile(asset.thumbnail!.name!);
+
       _addUnifiedAssetToGroup(
           assetDate, _getUnifiedAssetFromCloudAsset(asset, assetDate));
-    });
+    }
   }
 
   _addUnifiedAssetToGroup(DateTime assetDate, UniFiedAsset asset) {
@@ -152,6 +150,7 @@ abstract class _AssetStore with Store {
     }
 
     this.assetList.add(asset);
+    this.assetsCount = this.assetList.length;
   }
 
   _getUnifiedAssetFromDeviceAsset(AssetEntity deviceAsset, DateTime assetDate) {

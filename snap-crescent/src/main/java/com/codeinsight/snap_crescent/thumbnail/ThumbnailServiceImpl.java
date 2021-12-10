@@ -8,7 +8,6 @@ import java.io.File;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.FilenameUtils;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
@@ -17,11 +16,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.codeinsight.snap_crescent.common.utils.Constant;
+
 import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.FileService;
-import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 import com.codeinsight.snap_crescent.metadata.Metadata;
 @Service
 public class ThumbnailServiceImpl implements ThumbnailService {
@@ -45,29 +43,26 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 	public Thumbnail generateThumbnail(File file, Metadata metadata, ASSET_TYPE assetType) throws Exception {
 
-		File directory = new File(EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER);
-		if (!directory.exists()) {
-			directory.mkdir();
-		}
-
 		File thumbnailFile = createThumbnail(assetType, file, metadata);
 		
 		Thumbnail thumbnail = new Thumbnail();
 		String thumbnailName = thumbnailFile.getName();
 		thumbnail.setName(thumbnailName);
-		thumbnail.setPath("");
+		thumbnail.setPath(metadata.getPath());
 		return thumbnail;
 		
 	}
 
 	private File createThumbnail(ASSET_TYPE assetType , File file, Metadata metadata) throws Exception {
-
+		
+			String directoryPath = fileService.getBasePath(FILE_TYPE.THUMBNAIL) + metadata.getPath();
+			fileService.mkdirs(directoryPath);
 			
 			BufferedImage extractedImage = extractImage(assetType, file, metadata);
 			BufferedImage resizedImage = rotateCropAndResizeThumnail(extractedImage, metadata);
 
 			// Save Image as generated thumbnail
-			File outputFile = new File(EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER + getThumbnailName(file));
+			File outputFile = new File(directoryPath + "/" + getThumbnailName(metadata));
 			ImageIO.write(resizedImage,"jpg", outputFile);
 	
 			return outputFile;
@@ -78,7 +73,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 			BufferedImage original = null;
 
 			if(assetType == ASSET_TYPE.PHOTO) {
-				if(metadata.getFileExtension().equals("webp")) {
+				if(metadata.getFileExtension() != null && metadata.getFileExtension().equals("webp")) {
 					
 					/*
 					ImageReader reader = ImageIO.getImageReadersByMIMEType("image/webp").next();
@@ -141,18 +136,16 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 		return bufferedImage;
 	}
 
-	private String getThumbnailName(File file) {
+	private String getThumbnailName(Metadata metadata) {
 		String extension = "jpg";
-		String fileName = FilenameUtils.removeExtension(file.getName());
-		return fileName + THUMBNAIL_OUTPUT_NAME_SUFFIX + FILE_TYPE_SEPARATOR + extension;
+		return metadata.getInternalName() + THUMBNAIL_OUTPUT_NAME_SUFFIX + FILE_TYPE_SEPARATOR + extension;
 	}
 
 	@Override
 	@Transactional
 	public byte[] getById(Long id) {
 		Thumbnail thumbnail = thumbnailRepository.findById(id);
-		String fileUniquePathAndName = thumbnail.getPath() + thumbnail.getName();
-		return fileService.readFileBytes(FILE_TYPE.THUMBNAIL, fileUniquePathAndName);
+		return fileService.readFileBytes(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName());
 	}
 
 	public static AffineTransform getExifTransformation(int orientation, int width, int height) {

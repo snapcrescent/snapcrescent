@@ -20,6 +20,7 @@ class Constants {
 enum AssetSearchProgress { 
    IDLE,
    SEARCHING,
+   PROCESSING,
    ASSETS_FOUND,
    ASSETS_NOT_FOUND
 }
@@ -47,6 +48,7 @@ enum Direction {
 
 enum SyncProgress { 
    CONTACTING_SERVER,
+   PROCESSING,
    DOWNLOADING_PHOTO_THUMNAILS,
    DOWNLOADING_VIDEO_THUMNAILS,
    UPLOADING_PHOTOS,

@@ -1,5 +1,7 @@
 package com.codeinsight.snap_crescent.common.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +11,8 @@ import com.codeinsight.snap_crescent.common.beans.BaseSearchCriteria;
 import com.codeinsight.snap_crescent.common.utils.BeanXSSCleaner;
 
 public class BaseService {
+	
+	protected static final Logger logger = LoggerFactory.getLogger(BaseService.class);
 
 	@Autowired
 	protected BeanXSSCleaner beanXSSCleaner;

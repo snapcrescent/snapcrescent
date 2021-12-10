@@ -13,8 +13,8 @@ import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
 import 'package:snap_crescent/stores/local/local_photo_store.dart';
 import 'package:snap_crescent/stores/local/local_video_store.dart';
-import 'package:snap_crescent/stores/cloud/photo_store.dart';
-import 'package:snap_crescent/stores/cloud/video_store.dart';
+import 'package:snap_crescent/stores/asset/photo_store.dart';
+import 'package:snap_crescent/stores/asset/video_store.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -73,10 +73,7 @@ class App extends StatelessWidget {
 
       default:
         return MaterialPageRoute(
-            builder: (_) => Scaffold(
-                  body: Center(
-                      child: Text('No route defined for ${settings.name}')),
-                ));
+            builder: (_) => AssetsGridScreen(ASSET_TYPE.PHOTO));
     }
   }
 

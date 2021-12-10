@@ -10,15 +10,16 @@ import java.nio.file.Paths;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 
+import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 
 @Service
 public class FileService {
-
-	public byte[] readFileBytes(FILE_TYPE fileType, String fileUniquePathAndName) {
+	
+	public byte[] readFileBytes(FILE_TYPE fileType,String path, String fileName) {
 		
-		File file = getFile(fileType, fileUniquePathAndName);
+		File file = getFile(fileType, path, fileName);
 		
 		byte[] image = null;
 		try {
@@ -31,19 +32,29 @@ public class FileService {
 		return image;
 	}
 	
-	public File getFile(FILE_TYPE fileType, String fileUniquePathAndName) {
-		
-		
-		
-		return new File(getBasePath(fileType) + fileUniquePathAndName);
+	public File getFile(FILE_TYPE fileType, String path, String fileName) {
+		return new File(getBasePath(fileType) + path + fileName);
 		
 	}
 	
-	public void removeFile(FILE_TYPE fileType, String fileUniquePathAndName) throws IOException {
-		Files.delete(Paths.get(getBasePath(fileType) + fileUniquePathAndName));
+	public void removeFile(FILE_TYPE fileType,String path, String fileName) throws IOException {
+		Files.delete(Paths.get(getBasePath(fileType) + path + fileName));
 	}
 	
-	private String getBasePath(FILE_TYPE fileType) {
+	public String getBasePath(ASSET_TYPE assetType) {
+		
+		String basepath = null;
+		
+		if(assetType == ASSET_TYPE.PHOTO) {
+			basepath =  getBasePath(FILE_TYPE.PHOTO);
+		} else  if(assetType == ASSET_TYPE.VIDEO) {
+			basepath =  getBasePath(FILE_TYPE.VIDEO);
+		} 
+		
+		return basepath;
+	}
+	
+	public String getBasePath(FILE_TYPE fileType) {
 		
 		String basepath = null;
 		
@@ -55,6 +66,16 @@ public class FileService {
 			basepath = EnvironmentProperties.STORAGE_PATH + Constant.VIDEO_FOLDER;
 		}
 		return basepath;
+	}
+	
+	public boolean mkdirs(String directoryPath) {
+		File directory = new File(directoryPath);
+		
+		if(!directory.exists()) {
+			directory.mkdirs();
+		}
+		
+		return true;
 	}
 
 }

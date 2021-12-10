@@ -6,9 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/grid/asset_detail.dart';
 import 'package:snap_crescent/widgets/sync_process/sync_process.dart';
-import 'package:snap_crescent/stores/cloud/asset_store.dart';
-import 'package:snap_crescent/stores/cloud/photo_store.dart';
-import 'package:snap_crescent/stores/cloud/video_store.dart';
+import 'package:snap_crescent/stores/asset/asset_store.dart';
+import 'package:snap_crescent/stores/asset/photo_store.dart';
+import 'package:snap_crescent/stores/asset/video_store.dart';
 import 'package:snap_crescent/utils/common_utils.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:snap_crescent/widgets/asset_thumbnail/asset_thumbnail.dart';
@@ -37,7 +37,6 @@ class _AssetGridView extends StatefulWidget {
 }
 
 class _AssetGridViewState extends State<_AssetGridView> {
-
   AssetStore? _assetStore;
 
   DateTime currentDateTime = DateTime.now();
@@ -65,11 +64,10 @@ class _AssetGridViewState extends State<_AssetGridView> {
   @override
   void initState() {
     super.initState();
-    
-    WidgetsBinding.instance!.addPostFrameCallback((_){
-            _assetStore!.getAssets(true);
-          });
 
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _assetStore!.getAssets(false);
+    });
   }
 
   @override
@@ -213,10 +211,9 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
     _syncProgress() {
       return Container(
-                color: Colors.black,
-                width: double.infinity,
-                child : new SyncProcessWidget() 
-          );
+          color: Colors.black,
+          width: double.infinity,
+          child: new SyncProcessWidget());
     }
 
     Future<void> _pullRefresh() async {
@@ -246,6 +243,12 @@ class _AssetGridViewState extends State<_AssetGridView> {
               : (_assetStore!.getSelectedCount().toString() + " Selected")),
           backgroundColor: Colors.black,
           actions: [
+            if (!_assetStore!.isAnyItemSelected())
+              IconButton(
+                  onPressed: () {
+                    _pullRefresh();
+                  },
+                  icon: Icon(Icons.refresh, color: Colors.white)),
             if (_assetStore!.isAnyItemSelected())
               IconButton(
                   onPressed: () {
@@ -257,33 +260,43 @@ class _AssetGridViewState extends State<_AssetGridView> {
         bottomNavigationBar: AppBottomNavigationBar(),
         body: Column(
           children: <Widget>[
-             _syncProgress(),
+            _syncProgress(),
             Expanded(
                 child: Row(
-                  children: <Widget>[
-                    Expanded(
-                        child: Observer(
-                            builder: (context) => _assetStore!
-                                        .assetsSearchProgress ==
-                                    AssetSearchProgress.IDLE
-                                ? OrientationBuilder(
-                                    builder: (context, orientation) {
-                                    return RefreshIndicator(
-                                        onRefresh: _pullRefresh,
-                                        child: Stack(children: <Widget>[
-                                          _scrollableView(
-                                              orientation, _assetStore!)
-                                        ]));
-                                  })
-                                : Center(
-                                    child: Container(
+              children: <Widget>[
+                Expanded(
+                    child: Observer(
+                        builder: (context) => _assetStore!.assetsCount > 0
+                            ? 
+                            
+                            OrientationBuilder(
+                                builder: (context, orientation) {
+                                return RefreshIndicator(
+                                    onRefresh: _pullRefresh,
+                                    child: Stack(children: <Widget>[
+                                      _scrollableView(orientation, _assetStore!)
+                                    ]));
+                              })
+                              
+                            : Container(
+                                color: Colors.black,
+                                child: Expanded(
+                                    child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Container(
+                                      color: Colors.black,
                                       width: 60,
                                       height: 60,
                                       child: const CircularProgressIndicator(),
                                     ),
-                                  )))
-                  ],
-                ))
+                                  ],
+                                )))
+                                ))
+              ],
+            ))
           ],
         ),
       );
@@ -291,6 +304,4 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
     return _body();
   }
-
-  void scheduleRebuild() => setState(() {});
 }

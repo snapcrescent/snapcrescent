@@ -9,20 +9,18 @@ part of 'asset_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$AssetStore on _AssetStore, Store {
-  final _$assetsSearchProgressAtom =
-      Atom(name: '_AssetStore.assetsSearchProgress');
+  final _$assetsCountAtom = Atom(name: '_AssetStore.assetsCount');
 
   @override
-  AssetSearchProgress get assetsSearchProgress {
-    _$assetsSearchProgressAtom.reportRead();
-    return super.assetsSearchProgress;
+  int get assetsCount {
+    _$assetsCountAtom.reportRead();
+    return super.assetsCount;
   }
 
   @override
-  set assetsSearchProgress(AssetSearchProgress value) {
-    _$assetsSearchProgressAtom.reportWrite(value, super.assetsSearchProgress,
-        () {
-      super.assetsSearchProgress = value;
+  set assetsCount(int value) {
+    _$assetsCountAtom.reportWrite(value, super.assetsCount, () {
+      super.assetsCount = value;
     });
   }
 
@@ -37,7 +35,7 @@ mixin _$AssetStore on _AssetStore, Store {
   @override
   String toString() {
     return '''
-assetsSearchProgress: ${assetsSearchProgress}
+assetsCount: ${assetsCount}
     ''';
   }
 }

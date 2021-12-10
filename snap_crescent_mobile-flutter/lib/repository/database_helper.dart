@@ -89,8 +89,7 @@ class DatabaseHelper {
         CREATION_DATETIME INTEGER,
         LAST_MODIFIED_DATETIME INTEGER,
         ACTIVE INTEGER,
-        NAME TEXT,
-        BASE_64_ENCODED_THUMBNAIL TEXT
+        NAME TEXT
         );
       ''');
   }

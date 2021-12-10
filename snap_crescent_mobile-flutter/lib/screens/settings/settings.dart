@@ -13,9 +13,9 @@ import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.
 import 'package:snap_crescent/services/login_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
-import 'package:snap_crescent/stores/cloud/asset_store.dart';
-import 'package:snap_crescent/stores/cloud/photo_store.dart';
-import 'package:snap_crescent/stores/cloud/video_store.dart';
+import 'package:snap_crescent/stores/asset/asset_store.dart';
+import 'package:snap_crescent/stores/asset/photo_store.dart';
+import 'package:snap_crescent/stores/asset/video_store.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_bar.dart';
@@ -99,7 +99,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     await SyncInfoService().deleteAllData();
     await _getLastSyncInfo();
     ToastService.showSuccess("Successfully deleted locally cached data.");
-    await _refreshAssetStores();
     setState(() {});
   }
 
@@ -123,7 +122,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
       _loggedServerName =
           _loggedServerName.substring(0, _loggedServerName.lastIndexOf(":"));
     } else {
-      this.serverURLController.text = "http://192.168.0.62:8080";
+      this.serverURLController.text = "http://192.168.0.61:8080";
     }
 
     AppConfig appConfigServerUserName = await AppConfigRepository.instance
@@ -133,7 +132,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
       this.nameController.text = appConfigServerUserName.configValue!;
       _loggedInUserName = this.nameController.text;
     } else {
-      this.nameController.text = "";
+      this.nameController.text = "admin";
     }
 
     AppConfig appConfigServerPassword = await AppConfigRepository.instance
@@ -142,7 +141,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     if (appConfigServerPassword.configValue != null) {
       this.passwordController.text = appConfigServerPassword.configValue!;
     } else {
-      this.passwordController.text = "";
+      this.passwordController.text = "password";
     }
   }
 
@@ -365,7 +364,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
     await AppConfigRepository.instance
         .saveOrUpdateConfig(appConfigShowDeviceAssetsFlagConfig);
-    await _refreshAssetStores();
     setState(() {});
   }
 
@@ -390,7 +388,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         secondary: const Icon(Icons.cloud_upload),
         subtitle: Text(
             "Keep your photos and videos by backing them up to your snap-crecent server"),
-        isThreeLine: true,
+        isThreeLine: false,
         value: _autoBackup,
         onChanged: (bool value) {
           _updateAutoBackupFlag(value);
@@ -435,7 +433,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         title: Text("Show Device Photos And Videos", style: TitleTextStyle),
         secondary: const Icon(Icons.photo_album),
         subtitle: Text("Show photos and videos on your device on snap-cresent"),
-        isThreeLine: true,
+        isThreeLine: false,
         value: _showDeviceAssets,
         onChanged: (bool value) {
           _updateShowDeviceAssetsFlag(value);
@@ -464,11 +462,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           },
         )
     ]);
-  }
-
-  _refreshAssetStores() async {
-    await this.photoStore!.getAssets(false);
-    await this.videoStore!.getAssets(false);
   }
 
   @override

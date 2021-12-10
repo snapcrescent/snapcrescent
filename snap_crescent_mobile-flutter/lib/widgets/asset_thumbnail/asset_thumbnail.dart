@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -6,8 +5,8 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/unified_asset.dart';
-import 'package:snap_crescent/stores/cloud/asset_store.dart';
-import 'package:snap_crescent/stores/cloud/photo_store.dart';
+import 'package:snap_crescent/stores/asset/asset_store.dart';
+import 'package:snap_crescent/stores/asset/photo_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class AssetThumbnail extends StatefulWidget {
@@ -91,7 +90,7 @@ class _AssetThumbnailState extends State<AssetThumbnail>
               children: [
                 if(unifiedAsset.assetSource == AssetSource.CLOUD && object is Asset) 
                   Positioned.fill(
-                  child: Image.memory(base64Decode(object.thumbnail!.base64EncodedThumbnail!),
+                  child: Image.file(object.thumbnail!.thumbnailFile!,
                       fit: BoxFit.cover),
                   )
                 else if(unifiedAsset.assetSource == AssetSource.DEVICE && object is Uint8List) 

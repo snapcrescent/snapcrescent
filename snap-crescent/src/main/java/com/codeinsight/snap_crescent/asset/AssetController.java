@@ -2,9 +2,11 @@ package com.codeinsight.snap_crescent.asset;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -102,9 +104,19 @@ public class AssetController extends BaseController{
 			ASSET_TYPE assetTypeEnum =  ASSET_TYPE.findByValue(assetType);
 			List<File> temporaryFiles = assetService.uploadAssets(assetTypeEnum, Arrays.asList(files));	
 			
+			List<Future<Boolean>> processingStatusList = new ArrayList<>(temporaryFiles.size());
 			for (File temporaryFile : temporaryFiles) {
-				assetService.processAsset(assetTypeEnum, temporaryFile);
+				processingStatusList.add(assetService.processAsset(assetTypeEnum, temporaryFile));
 			}
+			
+			// wait for all threads
+			processingStatusList.forEach(result -> {
+			    try {
+			      result.get();
+			    } catch (Exception e) {
+			      
+			    }
+			  });
 			
 			if(temporaryFiles.size() > 0) {
 				syncInfoService.creatOrUpdate();

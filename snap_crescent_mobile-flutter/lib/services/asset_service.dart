@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:path/path.dart';
@@ -104,9 +106,9 @@ class AssetService extends BaseService {
   }
 
   Future<int> saveAllOnLocal(List<Asset> entities) async {
-    entities.forEach((entity) {
-      saveOnLocal(entity);
-    });
+    for(Asset entity in entities) {
+      await saveOnLocal(entity);
+    }
 
     return Future.value(0);
   }
@@ -120,6 +122,7 @@ class AssetService extends BaseService {
           await ThumbnailRepository.instance.existsById(entity.thumbnailId!);
 
       if (thumbnailExistsById == false) {
+        await _writeThumbnailFile(entity.thumbnail!.base64EncodedThumbnail!, entity.thumbnail!.name!);
         ThumbnailRepository.instance.save(entity.thumbnail!);
       }
 
@@ -135,6 +138,22 @@ class AssetService extends BaseService {
       return Future.value(0);
     }
   }
+
+  Future<File> readThumbnailFile(String name) async {
+    String dir = (await getApplicationDocumentsDirectory()).path;
+    String fullPath = '$dir/$name';
+    return File(fullPath);
+  }
+
+  Future<String> _writeThumbnailFile(String base64EncodedThumbnail,String name) async {
+    Uint8List bytes = base64.decode(base64EncodedThumbnail);
+    String dir = (await getApplicationDocumentsDirectory()).path;
+    String fullPath = '$dir/$name';
+    File file = File(fullPath);
+    await file.writeAsBytes(bytes);
+
+    return file.path;
+}
 
   Future<List<Asset>> searchOnLocal(
       AssetSearchCriteria assetSearchCriteria) async {
