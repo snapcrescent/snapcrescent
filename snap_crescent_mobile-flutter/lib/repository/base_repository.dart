@@ -1,4 +1,5 @@
 import 'package:snap_crescent/models/base_model.dart';
+import 'package:snap_crescent/models/base_search_criteria.dart';
 import 'package:snap_crescent/repository/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -42,5 +43,13 @@ class BaseRepository {
 
   Future<int> delete(int id) async {
       return await DatabaseHelper.instance.delete(tableName,id);
+  }
+
+  String getPagingQuery(BaseSearchCriteria searchCriteria) {
+    int resultPerPage = searchCriteria.resultPerPage!;
+    int pageNumber = searchCriteria.pageNumber!;
+    int offset = (pageNumber * resultPerPage);
+    
+    return ''' LIMIT $resultPerPage OFFSET $offset''';
   }
 }

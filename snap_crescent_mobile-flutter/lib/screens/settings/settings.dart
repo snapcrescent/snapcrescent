@@ -1,21 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:photo_manager/photo_manager.dart';
-import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:snap_crescent/models/app_config.dart';
-import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
-import 'package:snap_crescent/services/login_service.dart';
+import 'package:snap_crescent/services/settings_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
-import 'package:snap_crescent/stores/asset/asset_store.dart';
-import 'package:snap_crescent/stores/asset/photo_store.dart';
-import 'package:snap_crescent/stores/asset/video_store.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_bar.dart';
@@ -50,9 +43,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   String _autoBackupFolders = "None";
   String _showDeviceAssetsFolders = "None";
 
-  AssetStore? photoStore;
-  AssetStore? videoStore;
-
   final _formKey = GlobalKey<FormState>();
   AutovalidateMode _autovalidateMode = AutovalidateMode.onUserInteraction;
 
@@ -66,14 +56,18 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   @override
   Widget build(BuildContext context) {
-    photoStore = Provider.of<PhotoStore>(context);
-    videoStore = Provider.of<VideoStore>(context);
-
+    
     return FutureBuilder<bool>(
         future: _getSettingsData(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
-            return Container();
+            return Center(
+                  child: Container(
+                      width: 60,
+                      height: 60,
+                      child: const CircularProgressIndicator(),
+                    ),
+                );
           } else {
             return _settingsList(context);
           }
@@ -87,144 +81,40 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   Future<bool> _getSettingsData() async {
     await _getAccountInfo();
-    await _getAutoBackupInfo();
-    await _getAutoBackupFolderInfo();
-    await _getShowDeviceAssetsInfo();
-    await _getShowDeviceAssetsFolderInfo();
-    await _getLastSyncInfo();
+    _connectedToServer =
+        await SettingsService.instance.getFlag(Constants.appConfigLoggedInFlag);
+    _autoBackup =
+        await SettingsService.instance.getFlag(Constants.appConfigAutoBackupFlag);
+    _autoBackupFolders = await SettingsService.instance.getAutoBackupFolderInfo();
+    _showDeviceAssets = await SettingsService.instance
+        .getFlag(Constants.appConfigShowDeviceAssetsFlag);
+    _showDeviceAssetsFolders =
+        await SettingsService.instance.getShowDeviceAssetsFolderInfo();
+    _lastSyncDate = await SettingsService.instance.getLastSyncInfo();
     return Future.value(true);
   }
 
   _clearCache() async {
-    await SyncInfoService().deleteAllData();
-    await _getLastSyncInfo();
+    await SyncInfoService.instance.deleteAllData();
+    _lastSyncDate = await SettingsService.instance.getLastSyncInfo();
     ToastService.showSuccess("Successfully deleted locally cached data.");
     setState(() {});
   }
 
   Future<void> _getAccountInfo() async {
- 
-    AppConfig appConfigLoggedInFlag = await AppConfigRepository.instance.findByKey(Constants.appConfigLoggedInFlag);
+    List<String> result = await SettingsService.instance.getAccountInformation();
 
-    if (appConfigLoggedInFlag.configValue != null) {
-          _connectedToServer = appConfigLoggedInFlag.configValue == "true" ? true : false;
-    }
-
-    AppConfig appConfigServerURL = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigServerURL);
-
-    if (appConfigServerURL.configValue != null) {
-      
-      this.serverURLController.text = appConfigServerURL.configValue!;
-      _loggedServerName = this.serverURLController.text;
-      _loggedServerName = _loggedServerName.replaceAll("http://", "");
-      _loggedServerName = _loggedServerName.replaceAll("https://", "");
-      _loggedServerName =
-          _loggedServerName.substring(0, _loggedServerName.lastIndexOf(":"));
-    } else {
-      this.serverURLController.text = "http://192.168.0.61:8080";
-    }
-
-    AppConfig appConfigServerUserName = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigServerUserName);
-
-    if (appConfigServerUserName.configValue != null) {
-      this.nameController.text = appConfigServerUserName.configValue!;
-      _loggedInUserName = this.nameController.text;
-    } else {
-      this.nameController.text = "admin";
-    }
-
-    AppConfig appConfigServerPassword = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigServerPassword);
-
-    if (appConfigServerPassword.configValue != null) {
-      this.passwordController.text = appConfigServerPassword.configValue!;
-    } else {
-      this.passwordController.text = "password";
-    }
-  }
-
-  Future<void> _getAutoBackupInfo() async {
-    AppConfig value = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigAutoBackupFlag);
-
-    if (value.configValue != null) {
-      _autoBackup = value.configValue == 'true' ? true : false;
-    }
-  }
-
-  Future<void> _getAutoBackupFolderInfo() async {
-    AppConfig value = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigAutoBackupFolders);
-
-    if (value.configValue != null) {
-      List<String> autoBackupFolderIdList = value.configValue!.split(",");
-
-      final List<AssetPathEntity> assets =
-          await PhotoManager.getAssetPathList();
-      List<String> autoBackupFolderNameList = assets
-          .where((asset) => autoBackupFolderIdList.indexOf(asset.id) > -1)
-          .map((asset) => asset.name)
-          .toList();
-
-      if (autoBackupFolderNameList.isEmpty) {
-        _autoBackupFolders = "None";
-      } else if (autoBackupFolderNameList.length == assets.length) {
-        _autoBackupFolders = "All";
-      } else {
-        _autoBackupFolders = autoBackupFolderNameList.join(", ");
-      }
-    }
-  }
-
-  Future<void> _getShowDeviceAssetsInfo() async {
-    AppConfig value = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigShowDeviceAssetsFlag);
-
-    if (value.configValue != null) {
-      _showDeviceAssets = value.configValue == 'true' ? true : false;
-    }
-  }
-
-  Future<void> _getShowDeviceAssetsFolderInfo() async {
-    AppConfig value = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigShowDeviceAssetsFolders);
-
-    if (value.configValue != null) {
-      List<String> showDeviceAssetsFolderIdList = value.configValue!.split(",");
-
-      final List<AssetPathEntity> assets =
-          await PhotoManager.getAssetPathList();
-      List<String> showDeviceAssetsFolderNameList = assets
-          .where((asset) => showDeviceAssetsFolderIdList.indexOf(asset.id) > -1)
-          .map((asset) => asset.name)
-          .toList();
-
-      if (showDeviceAssetsFolderNameList.isEmpty) {
-        _showDeviceAssetsFolders = "None";
-      } else if (showDeviceAssetsFolderNameList.length == assets.length) {
-        _showDeviceAssetsFolders = "All";
-      } else {
-        _showDeviceAssetsFolders = showDeviceAssetsFolderNameList.join(", ");
-      }
-    }
-  }
-
-  Future<void> _getLastSyncInfo() async {
-    List<SyncInfo> localSyncInfoList = await SyncInfoService().searchOnLocal();
-
-    if (localSyncInfoList.isEmpty == false) {
-      final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss ');
-      _lastSyncDate =
-          formatter.format(localSyncInfoList.last.lastModifiedDatetime!);
-    } else {
-      _lastSyncDate = "Never";
-    }
+    this.serverURLController.text = result[0];
+    _loggedServerName = this.serverURLController.text.replaceAll("https://", "").replaceAll("http://", "");
+    _loggedServerName = _loggedServerName.substring(0, _loggedServerName.lastIndexOf(":"));
+    
+    this.nameController.text = result[1];
+    _loggedInUserName = this.nameController.text;
+    
+    this.passwordController.text = result[2];
   }
 
   _showAccountInfoDialog() {
-    
     Alert(
         context: context,
         title: "Account",
@@ -267,64 +157,42 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
               )
             ])),
         buttons: [
-          if(_connectedToServer) 
-          DialogButton(
-            onPressed: () => _onLogoutPressed(),
-            child: Text(
-              "Logout",
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          )
-           else 
+          if (_connectedToServer)
             DialogButton(
-            onPressed: () => _onLoginPressed(),
-            child: Text(
-              "Login",
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          )
+              onPressed: () => _onLogoutPressed(),
+              child: Text(
+                "Logout",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            )
+          else
+            DialogButton(
+              onPressed: () => _onLoginPressed(),
+              child: Text(
+                "Login",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            )
         ]).show();
   }
-  
 
   _onLoginPressed() async {
     if (_formKey.currentState!.validate()) {
+      UserLoginResponse userLoginResponse = await SettingsService.instance
+          .saveAccountInformation(serverURLController.text, nameController.text,
+              passwordController.text);
 
-      AppConfig appConfigLoggedInFlagConfig = new AppConfig(
-          configkey: Constants.appConfigLoggedInFlag,
-          configValue: true.toString());
-
-      AppConfig serverUrlConfig = new AppConfig(
-          configkey: Constants.appConfigServerURL,
-          configValue: serverURLController.text);
-
-      AppConfig serverUserNameConfig = new AppConfig(
-          configkey: Constants.appConfigServerUserName,
-          configValue: nameController.text);
-
-      AppConfig serverPasswordConfig = new AppConfig(
-          configkey: Constants.appConfigServerPassword,
-          configValue: passwordController.text);
-
-      await AppConfigRepository.instance.saveOrUpdateConfig(serverUrlConfig);
-      await AppConfigRepository.instance.saveOrUpdateConfig(serverUserNameConfig);
-      await AppConfigRepository.instance.saveOrUpdateConfig(serverPasswordConfig);
-
-      UserLoginResponse userLoginResponse = await LoginService().login();
-
-      if(userLoginResponse.token != null) {
-          await AppConfigRepository.instance.saveOrUpdateConfig(appConfigLoggedInFlagConfig);
-          await _getAccountInfo();
-          setState(() {});
-          Navigator.pop(context);
+      if (userLoginResponse.token != null) {
+        SettingsService.instance.updateFlag(Constants.appConfigLoggedInFlag, true);
+        await _getAccountInfo();
+        setState(() {});
+        Navigator.pop(context);
       } else {
         ToastService.showError("Incorrect Username or Password");
-          setState(() {
-            _autovalidateMode = AutovalidateMode.always;
-          });
+        setState(() {
+          _autovalidateMode = AutovalidateMode.always;
+        });
       }
-
-      
     } else {
       ToastService.showError("Please fix the errors");
       setState(() {
@@ -334,36 +202,28 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   _onLogoutPressed() async {
-      AppConfig appConfigLoggedInFlagConfig = new AppConfig(
-          configkey: Constants.appConfigLoggedInFlag,
-          configValue: false.toString());
+    AppConfig appConfigLoggedInFlagConfig = new AppConfig(
+        configkey: Constants.appConfigLoggedInFlag,
+        configValue: false.toString());
 
-      await AppConfigRepository.instance.saveOrUpdateConfig(appConfigLoggedInFlagConfig);
-      await _getAccountInfo();
-      setState(() {});
-      Navigator.pop(context);
+    await AppConfigRepository.instance
+        .saveOrUpdateConfig(appConfigLoggedInFlagConfig);
+    await _getAccountInfo();
+    setState(() {});
+    Navigator.pop(context);
   }
 
   _updateAutoBackupFlag(bool value) async {
     _autoBackup = value;
-    AppConfig appConfigAutoBackupFlagConfig = new AppConfig(
-        configkey: Constants.appConfigAutoBackupFlag,
-        configValue: value.toString());
-
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(appConfigAutoBackupFlagConfig);
-
+    await SettingsService.instance
+        .updateFlag(Constants.appConfigAutoBackupFlag, value);
     setState(() {});
   }
 
   _updateShowDeviceAssetsFlag(bool value) async {
     _showDeviceAssets = value;
-    AppConfig appConfigShowDeviceAssetsFlagConfig = new AppConfig(
-        configkey: Constants.appConfigShowDeviceAssetsFlag,
-        configValue: value.toString());
-
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(appConfigShowDeviceAssetsFlagConfig);
+    await SettingsService.instance
+        .updateFlag(Constants.appConfigShowDeviceAssetsFlag, value);
     setState(() {});
   }
 
@@ -375,7 +235,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
             ? '''$_loggedInUserName@$_loggedServerName'''
             : "Not Connected"),
         leading: Container(
-          width: 10,
+          width: 40,
           alignment: Alignment.center,
           child: const Icon(Icons.account_circle),
         ),
@@ -399,7 +259,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           title: Text("Backup Folders", style: TitleTextStyle),
           subtitle: Text(_autoBackupFolders),
           leading: Container(
-            width: 10,
+            width: 40,
             alignment: Alignment.center,
             child: const Icon(Icons.folder),
           ),
@@ -421,7 +281,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
             style: TitleTextStyle),
         subtitle: Text("Last Synced : " + _lastSyncDate),
         leading: Container(
-          width: 10,
+          width: 40,
           alignment: Alignment.center,
           child: const Icon(Icons.delete),
         ),
@@ -444,7 +304,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           title: Text("Device Folders", style: TitleTextStyle),
           subtitle: Text(_showDeviceAssetsFolders),
           leading: Container(
-            width: 10,
+            width: 40,
             alignment: Alignment.center,
             child: const Icon(Icons.folder),
           ),

@@ -25,26 +25,28 @@ class AssetDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _LocalPhotoDetailView(_arguments.type, _arguments.assetIndex);
+    return _AssetDetailView(_arguments.type, _arguments.assetIndex);
   }
 }
 
-class _LocalPhotoDetailView extends StatefulWidget {
+class _AssetDetailView extends StatefulWidget {
   final ASSET_TYPE type;
   final int assetIndex;
 
-  _LocalPhotoDetailView(this.type, this.assetIndex);
+  _AssetDetailView(this.type, this.assetIndex);
 
   @override
-  _LocalPhotoDetailViewState createState() => _LocalPhotoDetailViewState();
+  _AssetDetailViewState createState() => _AssetDetailViewState();
 }
 
-class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
+class _AssetDetailViewState extends State<_AssetDetailView> {
+
   ChewieController? _chewieController;
   VideoPlayerController? _videoPlayerController;
   PageController? pageController;
   Map<String, String> headers = {};
   String serverUrl = "";
+  late AssetStore _assetStore;
 
   _videoPlayer(UniFiedAsset? unifiedAsset) {
     if (_videoPlayerController == null) {
@@ -54,7 +56,7 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
 
       if (unifiedAsset!.assetSource == AssetSource.CLOUD) {
         Asset asset = unifiedAsset.asset!;
-        String assetURL = AssetService().getAssetByIdUrl(serverUrl, asset.id!);
+        String assetURL = AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!);
 
         _videoPlayerController =
             VideoPlayerController.network(assetURL, httpHeaders: headers)
@@ -108,7 +110,7 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
                 ),
               ),
           imageProvider: CachedNetworkImageProvider(
-              AssetService().getAssetByIdUrl(serverUrl, asset.id!),
+              AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!),
               headers: headers));
     } else if (unifiedAsset.assetSource == AssetSource.DEVICE &&
         object is File) {
@@ -120,9 +122,8 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
   void initState() {
     super.initState();
 
-    AssetService().getHeadersMap().then((value) => {headers = value});
-
-    AssetService().getServerUrl().then((value) => {serverUrl = value});
+    AssetService.instance.getHeadersMap().then((value) => {headers = value});
+    AssetService.instance.getServerUrl().then((value) => {serverUrl = value});
 
     pageController = PageController(
       initialPage: widget.assetIndex,
@@ -130,20 +131,14 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final AssetStore assetStore = widget.type == ASSET_TYPE.PHOTO
-        ? Provider.of<PhotoStore>(context)
-        : Provider.of<VideoStore>(context);
-
-    _getAssetFile(int assetIndex) async {
-      final UniFiedAsset unifiedAsset = assetStore.assetList[assetIndex];
+  _getAssetFile(int assetIndex) async {
+      final UniFiedAsset unifiedAsset = _assetStore.assetList[assetIndex];
 
       File? assetFile;
 
       if (unifiedAsset.assetSource == AssetSource.CLOUD) {
         Asset asset = unifiedAsset.asset!;
-        assetFile = await AssetService()
+        assetFile = await AssetService.instance
             .downloadAssetById(asset.id!, asset.metadata!.name!);
       } else {
         AssetEntity asset = unifiedAsset.assetEntity!;
@@ -169,14 +164,14 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
         onTap: () {},
         child: FutureBuilder<Object?>(
             future: Future.value(
-                assetStore.assetList[index].assetSource == AssetSource.CLOUD
-                    ? assetStore.assetList[index].asset
-                    : assetStore.assetList[index].assetEntity!.file),
+                _assetStore.assetList[index].assetSource == AssetSource.CLOUD
+                    ? _assetStore.assetList[index].asset
+                    : _assetStore.assetList[index].assetEntity!.file),
             builder: (BuildContext context, AsyncSnapshot<Object?> snapshot) {
               if (snapshot.data == null) {
                 return Container();
               } else {
-                UniFiedAsset asset = assetStore.assetList[index];
+                UniFiedAsset asset = _assetStore.assetList[index];
                 return widget.type == ASSET_TYPE.PHOTO
                     ? _imageBanner(asset, snapshot.data)
                     : _videoPlayer(asset);
@@ -196,9 +191,9 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
               physics: widget.type == ASSET_TYPE.PHOTO
                   ? PageScrollPhysics()
                   : NeverScrollableScrollPhysics(),
-              itemCount: assetStore.assetList.length,
+              itemCount: _assetStore.assetList.length,
               itemBuilder: (BuildContext context, int index) {
-                if (assetStore.assetList.isEmpty) {
+                if (_assetStore.assetList.isEmpty) {
                   return Container();
                 } else {
                   return _assetView(index);
@@ -278,6 +273,13 @@ class _LocalPhotoDetailViewState extends State<_LocalPhotoDetailView> {
         //floatingActionButton: _getFloatingActionButton(),
       );
     }
+
+  @override
+  Widget build(BuildContext context) {
+    
+     _assetStore = widget.type == ASSET_TYPE.PHOTO
+        ?  Provider.of<PhotoStore>(context)
+        : Provider.of<VideoStore>(context);
 
     return _body();
   }

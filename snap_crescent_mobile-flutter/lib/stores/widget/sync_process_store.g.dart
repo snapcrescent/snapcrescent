@@ -29,7 +29,7 @@ mixin _$SyncProcessStore on _SyncProcessStore, Store {
       AsyncAction('_SyncProcessStore.startSyncProcess');
 
   @override
-  Future<SyncProgress> startSyncProcess() {
+  Future<void> startSyncProcess() {
     return _$startSyncProcessAsyncAction.run(() => super.startSyncProcess());
   }
 

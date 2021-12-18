@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ToastService {
+
+  ToastService._privateConstructor():super();
+  static final ToastService instance = ToastService._privateConstructor();
+
   static showError(String message) {
     Fluttertoast.showToast(
         msg: message,

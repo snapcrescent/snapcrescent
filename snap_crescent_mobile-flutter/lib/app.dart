@@ -2,19 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
-import 'package:snap_crescent/models/assets_grid_arguments.dart';
 import 'package:snap_crescent/screens/grid/asset_detail.dart';
 import 'package:snap_crescent/screens/grid/assets_grid.dart';
-import 'package:snap_crescent/screens/local/grid/local_asset_detail.dart';
-import 'package:snap_crescent/screens/local/grid/local_assets_grid.dart';
-import 'package:snap_crescent/screens/local/library/local_library.dart';
 import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
-import 'package:snap_crescent/stores/local/local_photo_store.dart';
-import 'package:snap_crescent/stores/local/local_video_store.dart';
 import 'package:snap_crescent/stores/asset/photo_store.dart';
 import 'package:snap_crescent/stores/asset/video_store.dart';
+import 'package:snap_crescent/stores/widget/sync_process_store.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -26,8 +21,7 @@ class App extends StatelessWidget {
       providers: [
         Provider<PhotoStore>(create: (_) => PhotoStore()),
         Provider<VideoStore>(create: (_) => VideoStore()),
-        Provider<LocalPhotoStore>(create: (_) => LocalPhotoStore()),
-        Provider<LocalVideoStore>(create: (_) => LocalVideoStore())
+        Provider<SyncProcessStore>(create: (_) => SyncProcessStore()),
       ],
       child: MaterialApp(
         title: 'Snap Crescent',
@@ -57,19 +51,6 @@ class App extends StatelessWidget {
         return MaterialPageRoute(
             builder: (_) =>
                 AssetDetailScreen(settings.arguments as AssetDetailArguments));
-
-      case LocalLibraryScreen.routeName:
-        return MaterialPageRoute(
-            builder: (_) => LocalLibraryScreen(
-                settings.arguments.toString() as ASSET_TYPE));
-      case LocalAssetsGridScreen.routeName:
-        return MaterialPageRoute(
-            builder: (_) => LocalAssetsGridScreen(
-                settings.arguments as AssetGridArguments));
-      case LocalAssetDetailScreen.routeName:
-        return MaterialPageRoute(
-            builder: (_) => LocalAssetDetailScreen(
-                settings.arguments as AssetDetailArguments));
 
       default:
         return MaterialPageRoute(

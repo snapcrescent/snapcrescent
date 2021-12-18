@@ -33,7 +33,6 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
       _setDefaultAppConfig();
     });
 
-    
     Timer(
         Duration(seconds: 1),
         () => Navigator.pushAndRemoveUntil<dynamic>(
@@ -43,7 +42,6 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
         ),
         (route) => false,//if you want to disable back feature set to false
       ));
-            
   }
 
   @override
@@ -115,5 +113,9 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
       await AppConfigRepository.instance
           .saveOrUpdateConfig(appConfigLoggedInFlagConfig);
     }
+
+  
+
   }
+
 }

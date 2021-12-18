@@ -9,33 +9,41 @@ part of 'asset_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$AssetStore on _AssetStore, Store {
-  final _$assetsCountAtom = Atom(name: '_AssetStore.assetsCount');
+  final _$assetSearchProgressAtom =
+      Atom(name: '_AssetStore.assetSearchProgress');
 
   @override
-  int get assetsCount {
-    _$assetsCountAtom.reportRead();
-    return super.assetsCount;
+  AssetSearchProgress get assetSearchProgress {
+    _$assetSearchProgressAtom.reportRead();
+    return super.assetSearchProgress;
   }
 
   @override
-  set assetsCount(int value) {
-    _$assetsCountAtom.reportWrite(value, super.assetsCount, () {
-      super.assetsCount = value;
+  set assetSearchProgress(AssetSearchProgress value) {
+    _$assetSearchProgressAtom.reportWrite(value, super.assetSearchProgress, () {
+      super.assetSearchProgress = value;
     });
+  }
+
+  final _$loadMoreAssetsAsyncAction = AsyncAction('_AssetStore.loadMoreAssets');
+
+  @override
+  Future<void> loadMoreAssets(int pageNumber) {
+    return _$loadMoreAssetsAsyncAction
+        .run(() => super.loadMoreAssets(pageNumber));
   }
 
   final _$getAssetsAsyncAction = AsyncAction('_AssetStore.getAssets');
 
   @override
-  Future<void> getAssets(bool forceReloadFromApi) {
-    return _$getAssetsAsyncAction
-        .run(() => super.getAssets(forceReloadFromApi));
+  Future<void> getAssets() {
+    return _$getAssetsAsyncAction.run(() => super.getAssets());
   }
 
   @override
   String toString() {
     return '''
-assetsCount: ${assetsCount}
+assetSearchProgress: ${assetSearchProgress}
     ''';
   }
 }

@@ -9,6 +9,10 @@ import 'package:snap_crescent/repository/thumbnail_repository.dart';
 import 'package:snap_crescent/services/base_service.dart';
 
 class SyncInfoService extends BaseService {
+
+  SyncInfoService._privateConstructor():super();
+  static final SyncInfoService instance = SyncInfoService._privateConstructor();
+
   Future<BaseResponseBean<int, SyncInfo>> search(
       SyncInfoSearchCriteria searchCriteria) async {
     try {

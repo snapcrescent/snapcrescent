@@ -9,6 +9,10 @@ import 'package:snap_crescent/services/base_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class LoginService extends BaseService {
+
+  LoginService._privateConstructor():super();
+  static final LoginService instance = LoginService._privateConstructor();
+
   Future<UserLoginResponse> login() async {
     try {
       final appConfigServerUserNameConfig = await AppConfigRepository.instance.findByKey(Constants.appConfigServerUserName);

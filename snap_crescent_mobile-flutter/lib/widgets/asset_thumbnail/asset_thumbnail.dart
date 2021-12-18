@@ -22,12 +22,13 @@ class AssetThumbnail extends StatefulWidget {
       _AssetThumbnailState(unifiedAsset, assetThumbnail);
 }
 
-class _AssetThumbnailState extends State<AssetThumbnail>
-    with SingleTickerProviderStateMixin {
+class _AssetThumbnailState extends State<AssetThumbnail> with SingleTickerProviderStateMixin {
+  
   late final AnimationController _controller;
   late final Animation<double> _scaleAnimation;
   final UniFiedAsset unifiedAsset;
   final Future<Object?> assetThumbnail;
+  late AssetStore _assetStore;
 
   _AssetThumbnailState(this.unifiedAsset, this.assetThumbnail);
 
@@ -67,7 +68,7 @@ class _AssetThumbnailState extends State<AssetThumbnail>
     super.dispose();
   }
 
-  _body(AssetStore assetStore, Object object) {
+  _body(Object object) {
     return Stack(children: [
           AnimatedBuilder(
             animation: _scaleAnimation,
@@ -134,7 +135,7 @@ class _AssetThumbnailState extends State<AssetThumbnail>
           ),
           // Display a Circle icon if the asset is not selected
           
-          if (assetStore.isAnyItemSelected() && 
+          if (_assetStore.isAnyItemSelected() && 
               widget.selected == false)
             Positioned.fill(
               child: Align(
@@ -148,7 +149,7 @@ class _AssetThumbnailState extends State<AssetThumbnail>
             ),
             
           // Display a Checked icon if the asset is selected
-          if (assetStore.isAnyItemSelected() && widget.selected)
+          if (_assetStore.isAnyItemSelected() && widget.selected)
             Positioned.fill(
               child: Align(
                   alignment: Alignment.topLeft,
@@ -173,7 +174,9 @@ class _AssetThumbnailState extends State<AssetThumbnail>
 
   @override
   Widget build(BuildContext context) {
-    final AssetStore assetStore = Provider.of<PhotoStore>(context);
+
+    _assetStore = Provider.of<PhotoStore>(context);
+
         
     return FutureBuilder<Object?>(
       future: assetThumbnail,
@@ -182,7 +185,7 @@ class _AssetThumbnailState extends State<AssetThumbnail>
         // If we have no data, display a spinner
         if (bytes == null) return CircularProgressIndicator();
         // If there's data, display it as an image
-        return _body(assetStore,bytes);
+        return _body(bytes);
       },
     );
   }
