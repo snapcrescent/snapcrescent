@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -5,10 +7,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/grid/asset_detail.dart';
-import 'package:snap_crescent/widgets/sync_process/sync_process.dart';
-import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/stores/asset/photo_store.dart';
 import 'package:snap_crescent/stores/asset/video_store.dart';
+import 'package:snap_crescent/widgets/sync_process/sync_process.dart';
+import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/utils/common_utils.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:snap_crescent/widgets/asset_thumbnail/asset_thumbnail.dart';
@@ -37,14 +39,15 @@ class _AssetGridView extends StatefulWidget {
 }
 
 class _AssetGridViewState extends State<_AssetGridView> {
-  AssetStore? _assetStore;
-
   DateTime currentDateTime = DateTime.now();
   final DateFormat currentWeekFormatter = DateFormat('EEEE');
   final DateFormat currentYearFormatter = DateFormat('E, MMM dd');
   final DateFormat defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
 
   final ScrollController _scrollController = new ScrollController();
+  late AssetStore _assetStore;
+
+  int pageNumber = 0;
 
   _onAssetTap(BuildContext context, int assetIndex) {
     AssetDetailArguments arguments =
@@ -64,9 +67,13 @@ class _AssetGridViewState extends State<_AssetGridView> {
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _assetStore.loadMoreAssets(++pageNumber);
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      _assetStore!.getAssets(false);
+        Timer(Duration(seconds: 2), () => setState(() {}));
+      }
     });
   }
 
@@ -96,43 +103,46 @@ class _AssetGridViewState extends State<_AssetGridView> {
     return formattedKey;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    _assetStore = widget.type == ASSET_TYPE.PHOTO
-        ? Provider.of<PhotoStore>(context)
-        : Provider.of<VideoStore>(context);
-
-    int getPhotoGroupIndexInScrollView() {
-      try {
-        final double currentAsset = (_assetStore!.groupedAssets.length - 1) *
-            _scrollController.offset /
-            (_scrollController.position.maxScrollExtent -
-                _scrollController.position.minScrollExtent);
-        if (currentAsset.isNaN || currentAsset.isInfinite) {
-          return 0;
-        }
-        return currentAsset.floor();
-      } catch (_) {
+  int getPhotoGroupIndexInScrollView() {
+    try {
+      final double currentAsset = (_assetStore.groupedAssets.length - 1) *
+          _scrollController.offset /
+          (_scrollController.position.maxScrollExtent -
+              _scrollController.position.minScrollExtent);
+      if (currentAsset.isNaN || currentAsset.isInfinite) {
         return 0;
       }
+      return currentAsset.floor();
+    } catch (_) {
+      return 0;
     }
+  }
 
-    Text getScrollLabel() {
-      final keys = List.from(_assetStore!.getGroupedMapKeys());
-      final label = keys[getPhotoGroupIndexInScrollView()];
+  Text getScrollLabel() {
+    final keys = List.from(_assetStore.getGroupedMapKeys());
+    final label = keys[getPhotoGroupIndexInScrollView()];
 
-      if (label == null) {
-        return const Text('');
-      }
-      return Text(this._getFormattedGroupKey(label));
+    if (label == null) {
+      return const Text('');
     }
+    return Text(this._getFormattedGroupKey(label));
+  }
 
-    _gridView(Orientation orientation, AssetStore assetStore) {
-      final keys = assetStore.getGroupedMapKeys();
-      return new ListView.builder(
-          controller: _scrollController,
-          itemCount: keys.length,
-          itemBuilder: (BuildContext ctxt, int groupIndex) {
+  _gridView(Orientation orientation, AssetStore assetStore) {
+    final keys = assetStore.getGroupedMapKeys();
+    return new ListView.builder(
+        controller: _scrollController,
+        itemCount: keys.length + 1,
+        itemBuilder: (BuildContext ctxt, int groupIndex) {
+          if (groupIndex == keys.length) {
+            return Center(
+              child: Container(
+                width: 60,
+                height: 60,
+                child: const CircularProgressIndicator(),
+              ),
+            );
+          } else {
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,113 +204,107 @@ class _AssetGridViewState extends State<_AssetGridView> {
                       ])
               ],
             );
+          }
+        });
+  }
+
+  _scrollableView(Orientation orientation, AssetStore assetStore) {
+    return Container(
+        color: Colors.black,
+        child: DraggableScrollbar.semicircle(
+            labelTextBuilder: (offset) => getScrollLabel(),
+            labelConstraints:
+                BoxConstraints.tightFor(width: 150.0, height: 30.0),
+            heightScrollThumb: 50.0,
+            controller: _scrollController,
+            child: _gridView(orientation, assetStore)));
+  }
+
+  _syncProgress() {
+    return Container(
+        color: Colors.black,
+        width: double.infinity,
+        child: new SyncProcessWidget());
+  }
+
+  Future<void> _refreshGrid() async {
+    _assetStore.getAssets();
+  }
+
+  _getLeadingIcon() {
+    if (_assetStore.isAnyItemSelected()) {
+      return IconButton(
+        onPressed: () {
+          _assetStore.assetList.forEach((asset) {
+            asset.selected = false;
           });
+        },
+        icon: Icon(Icons.cancel),
+      );
     }
+  }
 
-    _scrollableView(Orientation orientation, AssetStore assetStore) {
-      return Container(
-          color: Colors.black,
-          child: DraggableScrollbar.semicircle(
-              labelTextBuilder: (offset) => getScrollLabel(),
-              labelConstraints:
-                  BoxConstraints.tightFor(width: 150.0, height: 30.0),
-              heightScrollThumb: 50.0,
-              controller: _scrollController,
-              child: _gridView(orientation, assetStore)));
-    }
-
-    _syncProgress() {
-      return Container(
-          color: Colors.black,
-          width: double.infinity,
-          child: new SyncProcessWidget());
-    }
-
-    Future<void> _pullRefresh() async {
-      await _assetStore!.getAssets(true);
-      setState(() {});
-    }
-
-    _getLeadingIcon() {
-      if (_assetStore!.isAnyItemSelected()) {
-        return IconButton(
-          onPressed: () {
-            _assetStore!.assetList.forEach((asset) {
-              asset.selected = false;
-            });
-          },
-          icon: Icon(Icons.cancel),
-        );
-      }
-    }
-
-    _body() {
-      return Scaffold(
-        appBar: AppBar(
-          leading: _getLeadingIcon(),
-          title: Text(!_assetStore!.isAnyItemSelected()
-              ? (widget.type == ASSET_TYPE.PHOTO ? "Photos" : "Videos")
-              : (_assetStore!.getSelectedCount().toString() + " Selected")),
-          backgroundColor: Colors.black,
-          actions: [
-            if (!_assetStore!.isAnyItemSelected())
-              IconButton(
-                  onPressed: () {
-                    _pullRefresh();
-                  },
-                  icon: Icon(Icons.refresh, color: Colors.white)),
-            if (_assetStore!.isAnyItemSelected())
-              IconButton(
-                  onPressed: () {
-                    _shareAsset();
-                  },
-                  icon: Icon(Icons.share, color: Colors.white))
-          ],
-        ),
-        bottomNavigationBar: AppBottomNavigationBar(),
-        body: Column(
-          children: <Widget>[
-            _syncProgress(),
-            Expanded(
-                child: Row(
-              children: <Widget>[
-                Expanded(
-                    child: Observer(
-                        builder: (context) => _assetStore!.assetsCount > 0
-                            ? 
-                            
-                            OrientationBuilder(
-                                builder: (context, orientation) {
-                                return RefreshIndicator(
-                                    onRefresh: _pullRefresh,
-                                    child: Stack(children: <Widget>[
-                                      _scrollableView(orientation, _assetStore!)
-                                    ]));
-                              })
-                              
-                            : Container(
-                                color: Colors.black,
-                                child: Expanded(
-                                    child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Container(
-                                      color: Colors.black,
+  _body() {
+    return Scaffold(
+      appBar: AppBar(
+        leading: _getLeadingIcon(),
+        title: Text(!_assetStore.isAnyItemSelected()
+            ? (widget.type == ASSET_TYPE.PHOTO ? "Photos" : "Videos")
+            : (_assetStore.getSelectedCount().toString() + " Selected")),
+        backgroundColor: Colors.black,
+        actions: [
+          if (!_assetStore.isAnyItemSelected())
+            IconButton(
+                onPressed: () {
+                  _refreshGrid();
+                },
+                icon: Icon(Icons.refresh, color: Colors.white)),
+          if (_assetStore.isAnyItemSelected())
+            IconButton(
+                onPressed: () {
+                  _shareAsset();
+                },
+                icon: Icon(Icons.share, color: Colors.white))
+        ],
+      ),
+      bottomNavigationBar: AppBottomNavigationBar(),
+      body: Column(
+        children: <Widget>[
+          _syncProgress(),
+          Expanded(
+              child: Row(
+            children: <Widget>[
+              Expanded(
+                  child: Observer(
+                      builder: (context) => _assetStore.assetSearchProgress ==
+                              AssetSearchProgress.ASSETS_FOUND
+                          ? OrientationBuilder(builder: (context, orientation) {
+                              return _scrollableView(orientation, _assetStore);
+                            })
+                          : _assetStore.assetSearchProgress ==
+                                  AssetSearchProgress.PROCESSING
+                              ? Container(
+                                  color: Colors.black,
+                                  child: Center(
+                                    child: Container(
                                       width: 60,
                                       height: 60,
                                       child: const CircularProgressIndicator(),
                                     ),
-                                  ],
-                                )))
-                                ))
-              ],
-            ))
-          ],
-        ),
-      );
-    }
+                                  ))
+                              : Container(color: Colors.black)))
+            ],
+          ))
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _assetStore = widget.type == ASSET_TYPE.PHOTO
+        ? Provider.of<PhotoStore>(context)
+        : Provider.of<VideoStore>(context);
 
     return _body();
   }

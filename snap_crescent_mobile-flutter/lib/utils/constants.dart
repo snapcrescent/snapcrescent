@@ -19,10 +19,8 @@ class Constants {
 
 enum AssetSearchProgress { 
    IDLE,
-   SEARCHING,
    PROCESSING,
-   ASSETS_FOUND,
-   ASSETS_NOT_FOUND
+   ASSETS_FOUND
 }
 
 enum AssetSource {  

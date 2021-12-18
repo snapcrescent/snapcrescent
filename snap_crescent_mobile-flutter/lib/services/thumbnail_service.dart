@@ -2,6 +2,9 @@ import 'package:snap_crescent/models/thumbnail.dart';
 import 'package:snap_crescent/repository/thumbnail_repository.dart';
 
 class ThumbnailService {
+
+  ThumbnailService._privateConstructor():super();
+  static final ThumbnailService instance = ThumbnailService._privateConstructor();
   
   Future<int> saveOnLocal(Thumbnail entity) async {
     return ThumbnailRepository.instance.save(entity);

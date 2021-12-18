@@ -28,7 +28,10 @@ class AssetRepository extends BaseRepository{
       arguments.add(assetSearchCriteria.assetType);
     }
 
+
     buffer.write(" ORDER BY METADATA.CREATION_DATETIME DESC ");
+    buffer.write(getPagingQuery(assetSearchCriteria));
+    
 
     final result = await database.rawQuery(buffer.toString(),arguments);
     

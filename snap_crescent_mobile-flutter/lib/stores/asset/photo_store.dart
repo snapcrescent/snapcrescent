@@ -9,6 +9,7 @@ class PhotoStore extends AssetStore {
   getAssetSearchCriteria() {
     AssetSearchCriteria assetSearchCriteria = AssetSearchCriteria.defaultCriteria();
     assetSearchCriteria.assetType = ASSET_TYPE.PHOTO.index;
+    assetSearchCriteria.resultPerPage = 100;
     return assetSearchCriteria;
   }
 

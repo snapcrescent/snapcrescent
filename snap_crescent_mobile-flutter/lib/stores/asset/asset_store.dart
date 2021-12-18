@@ -11,7 +11,6 @@ import 'package:snap_crescent/repository/metadata_repository.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/metadata_service.dart';
 import 'package:snap_crescent/services/thumbnail_service.dart';
-import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:collection/collection.dart';
 
@@ -20,53 +19,63 @@ part 'asset_store.g.dart';
 abstract class AssetStore = _AssetStore with _$AssetStore;
 
 abstract class _AssetStore with Store {
-  _AssetStore() {
-    getAssets(false);
-  }
-
-  DateTime currentDateTime = DateTime.now();
-  final DateFormat currentWeekFormatter = DateFormat('EEEE');
-  final DateFormat currentYearFormatter = DateFormat('E, MMM dd');
-  final DateFormat defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
+  
+  final DateFormat _defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
 
   List<UniFiedAsset> assetList = new List.empty();
   Map<String, List<UniFiedAsset>> groupedAssets = new Map();
 
+  final int defaultAssetCount = -1;
+
   @observable
-  int assetsCount = 0;
+  AssetSearchProgress assetSearchProgress = AssetSearchProgress.IDLE;
 
   AssetSearchCriteria getAssetSearchCriteria();
-
   Iterable<AssetEntity> getFilteredAssets(List<AssetEntity> allAssets);
 
-  @action
-  Future<void> getAssets(bool forceReloadFromApi) async {
-    
-    currentDateTime = DateTime.now();
+  bool executionInProgress = false;
 
+  @action
+  Future<void> loadMoreAssets(int pageNumber) async{
+    AssetSearchCriteria searchCriteria = getAssetSearchCriteria();
+    searchCriteria.resultPerPage = 100;
+    searchCriteria.pageNumber = pageNumber;
+    await _processAssetRequest(searchCriteria, false);
+  }
+
+  @action
+  Future<void> getAssets() async {
     groupedAssets.clear();
     this.assetList = [];
+    await _processAssetRequest(getAssetSearchCriteria(), true);
+  }
 
-    if (forceReloadFromApi) {
-      await _getAssetsFromApi();
-    } else {
-      final newAssets = await AssetService().searchOnLocal(getAssetSearchCriteria());
-
-      if (newAssets.isNotEmpty) {
-        for (Asset asset in newAssets) {
-          final thumbnail = await ThumbnailService().findByIdOnLocal(asset.thumbnailId!);
-          asset.thumbnail = thumbnail;
-
-          final metadata = await MetadataService().findByIdOnLocal(asset.metadataId!);
-          asset.metadata = metadata;
-        }
-
-        await _addCloudAssetsToList(newAssets);
-      } else {
-        await _getAssetsFromApi();
-      }
+  Future<void> _processAssetRequest(AssetSearchCriteria searchCriteria, bool changeObservables) async {
+    if(executionInProgress) {
+      return;
     }
 
+    executionInProgress = true;
+
+    if(changeObservables) {
+      assetSearchProgress = AssetSearchProgress.PROCESSING;
+    }
+    
+    
+    final newAssets = await AssetService.instance.searchOnLocal(searchCriteria);
+
+    if (newAssets.isNotEmpty) {
+      for (Asset asset in newAssets) {
+        final thumbnail = await ThumbnailService.instance.findByIdOnLocal(asset.thumbnailId!);
+        asset.thumbnail = thumbnail;
+
+        final metadata = await MetadataService.instance.findByIdOnLocal(asset.metadataId!);
+        asset.metadata = metadata;
+      }
+
+      await _addCloudAssetsToList(newAssets);
+    } 
+    
     if (await _getShowDeviceAssetsInfo()) {
       List<String> selecteDeviceFolders =
           await _getShowDeviceAssetsFolderInfo();
@@ -84,25 +93,24 @@ abstract class _AssetStore with Store {
     }
 
     if (this.assetList.length > 0) {
-      this.assetList.sort((UniFiedAsset a, UniFiedAsset b) =>
-          b.assetCreationDate.compareTo(a.assetCreationDate));
+       this.assetList.sort((UniFiedAsset a, UniFiedAsset b) =>         b.assetCreationDate.compareTo(a.assetCreationDate));
 
+      
       this.groupedAssets.keys.forEach((key) {
         this.groupedAssets[key]!.sort((UniFiedAsset a, UniFiedAsset b) =>
             b.assetCreationDate.compareTo(a.assetCreationDate));
       });
+      
+      if(changeObservables) {
+      assetSearchProgress = AssetSearchProgress.ASSETS_FOUND;
+      }
+    } else{
+      if(changeObservables) {
+      assetSearchProgress = AssetSearchProgress.IDLE;
+      }
     } 
-  }
 
-  Future<void> _getAssetsFromApi() async {
-    try {
-      final data = await AssetService().searchAndSync(getAssetSearchCriteria());
-      await _addCloudAssetsToList(new List<Asset>.from(data));
-    } catch (e) {
-      ToastService.showError("Unable to reach server");
-      print(e);
-      return getAssets(false);
-    }
+    executionInProgress = false; 
   }
 
   _addLocalAssetsToList(AssetPathEntity? album) async {
@@ -129,17 +137,18 @@ abstract class _AssetStore with Store {
 
   _addCloudAssetsToList(List<Asset> newAssets) async {
     for(final asset in newAssets) {  
-      final assetDate = asset.metadata!.creationDatetime!;
-
-      asset.thumbnail!.thumbnailFile = await AssetService().readThumbnailFile(asset.thumbnail!.name!);
-
-      _addUnifiedAssetToGroup(
-          assetDate, _getUnifiedAssetFromCloudAsset(asset, assetDate));
+          final assetDate = asset.metadata!.creationDatetime!;
+          _addUnifiedAssetToGroup(assetDate, _getUnifiedAssetFromCloudAsset(asset, assetDate));
+          asset.thumbnail!.thumbnailFile = await AssetService.instance.readThumbnailFile(asset.thumbnail!.name!);
+       
+        
+      
+      
     }
   }
 
   _addUnifiedAssetToGroup(DateTime assetDate, UniFiedAsset asset) {
-    String key = defaultYearFormatter.format(assetDate);
+    String key = _defaultYearFormatter.format(assetDate);
 
     if (groupedAssets.containsKey(key)) {
       groupedAssets[key]!.add(asset);
@@ -150,7 +159,6 @@ abstract class _AssetStore with Store {
     }
 
     this.assetList.add(asset);
-    this.assetsCount = this.assetList.length;
   }
 
   _getUnifiedAssetFromDeviceAsset(AssetEntity deviceAsset, DateTime assetDate) {
@@ -196,11 +204,11 @@ abstract class _AssetStore with Store {
   List<String> getGroupedMapKeys() {
     List<DateTime> dateTimeKeys = groupedAssets.keys
         .toList()
-        .map((key) => defaultYearFormatter.parse(key))
+        .map((key) => _defaultYearFormatter.parse(key))
         .toList();
     dateTimeKeys.sort((DateTime a, DateTime b) => b.compareTo(a));
     return dateTimeKeys
-        .map((datetime) => defaultYearFormatter.format(datetime))
+        .map((datetime) => _defaultYearFormatter.format(datetime))
         .toList();
   }
 

@@ -6,8 +6,6 @@ import 'package:snap_crescent/app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-
-
   await FlutterDownloader.initialize(
     debug: true // optional: set false to disable printing logs to console
   );

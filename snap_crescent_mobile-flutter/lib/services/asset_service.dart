@@ -19,6 +19,10 @@ import 'package:snap_crescent/services/base_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class AssetService extends BaseService {
+
+  AssetService._privateConstructor():super();
+  static final AssetService instance = AssetService._privateConstructor();
+
   Future<BaseResponseBean<int, Asset>> search(
       AssetSearchCriteria searchCriteria) async {
     try {
@@ -74,7 +78,7 @@ class AssetService extends BaseService {
   }
 
   Future<List<Asset>> searchAndSync(AssetSearchCriteria searchCriteria) async {
-    final data = await AssetService().search(searchCriteria);
+    final data = await search(searchCriteria);
     await saveAllOnLocal(data.objects!);
     return new List<Asset>.from(data.objects!);
   }
@@ -110,10 +114,13 @@ class AssetService extends BaseService {
       await saveOnLocal(entity);
     }
 
+    
+
     return Future.value(0);
   }
 
   Future<int> saveOnLocal(Asset entity) async {
+
     final assetExistsById =
         await AssetRepository.instance.existsById(entity.id!);
 
