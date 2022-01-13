@@ -2,9 +2,8 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/asset.dart';
@@ -101,6 +100,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   _imageBanner(UniFiedAsset unifiedAsset, Object? object) {
     if (unifiedAsset.assetSource == AssetSource.CLOUD && object is Asset) {
       Asset asset = object;
+      
 
       return PhotoView(
           loadingBuilder: (context, progress) => Center(
@@ -109,9 +109,13 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
                       fit: BoxFit.fitWidth),
                 ),
               ),
-          imageProvider: CachedNetworkImageProvider(
+          gaplessPlayback:true,
+          minScale: PhotoViewComputedScale.contained * 0.8,
+          maxScale: PhotoViewComputedScale.covered * 1.8,
+          imageProvider: NetworkImage(
               AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!),
               headers: headers));
+      
     } else if (unifiedAsset.assetSource == AssetSource.DEVICE &&
         object is File) {
       return Image.file(object);
@@ -157,12 +161,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
     }
 
     _assetView(index) {
-      return GestureDetector(
-        onLongPress: () {
-          setState(() {});
-        },
-        onTap: () {},
-        child: FutureBuilder<Object?>(
+      return FutureBuilder<Object?>(
             future: Future.value(
                 _assetStore.assetList[index].assetSource == AssetSource.CLOUD
                     ? _assetStore.assetList[index].asset
@@ -176,8 +175,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
                     ? _imageBanner(asset, snapshot.data)
                     : _videoPlayer(asset);
               }
-            }),
-      );
+            });
     }
 
     _pageView() {

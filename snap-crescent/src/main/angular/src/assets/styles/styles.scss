@@ -1,0 +1,41 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "material-theme.scss";
+@import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
+@import "../../../node_modules/animate.css/animate.css";
+@import "helper.css";
+@import "loader.css";
+
+$primary-color: #15c57e;
+$secondary-color: #314e5e;
+
+html,
+body {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0px;
+}
+
+.cursor-hand {
+    cursor: pointer;
+}
+
+.invisible {
+    opacity: 0;
+}
+
+
+.bottom-right-cta {
+    position: fixed !important;
+    right: 50px;
+    margin-top: 20px;
+    button {
+        margin: 0px 5px;
+        -webkit-transition: opacity 600ms, visibility 600ms;
+        transition: opacity 600ms linear, visibility 600ms linear;
+    }
+}

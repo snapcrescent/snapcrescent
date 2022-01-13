@@ -132,7 +132,7 @@ abstract class _SyncProcessStore with Store {
     SyncInfo? serverSyncInfo, ASSET_TYPE assetType) async {
     AssetSearchCriteria searchCriteria = AssetSearchCriteria.defaultCriteria();
     searchCriteria.assetType = assetType.index;
-    searchCriteria.resultPerPage = 1;
+    searchCriteria.resultPerPage = 50;
     searchCriteria.sortOrder = Direction.DESC;
 
     if(serverSyncInfo != null) {
@@ -157,7 +157,7 @@ abstract class _SyncProcessStore with Store {
           : SyncProgress.DOWNLOADING_VIDEO_THUMNAILS;
       
 
-      final itemsPerBatch = 1;
+      final itemsPerBatch = 100;
       double numberOfPages = _totalAssetPhotoCount / itemsPerBatch;
       final itemsInLastBatch = _totalAssetPhotoCount % itemsPerBatch;
 

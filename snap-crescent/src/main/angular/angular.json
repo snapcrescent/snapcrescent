@@ -18,6 +18,7 @@
       "prefix": "app",
       "architect": {
         "build": {
+          "defaultConfiguration": "production",
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "../webapp",
@@ -31,9 +32,12 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/assets/styles/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -62,10 +66,19 @@
                   "maximumError": "4kb"
                 }
               ]
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
           }
         },
         "serve": {
+          "defaultConfiguration": "development",
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "snap-crescent:build"
@@ -73,7 +86,10 @@
           "configurations": {
             "production": {
               "browserTarget": "snap-crescent:build:production"
-            }
+            },
+            "development": {
+              "browserTarget": "snap-crescent:build:development"
+             }
           }
         },
         "extract-i18n": {
