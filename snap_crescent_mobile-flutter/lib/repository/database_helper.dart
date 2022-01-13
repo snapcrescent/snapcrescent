@@ -23,8 +23,7 @@ class DatabaseHelper {
   }
 
   _initiateDatabase() async {
-     var externalDirectory = await getExternalStorageDirectory();
-    Directory directory = await new Directory('${externalDirectory!.path}/snap').create(recursive: true);
+     var directory = await getApplicationDocumentsDirectory();
     String path = join(directory.path, _dbName);
     return await openDatabase(path, version: _dbVersion, onCreate: _onCreate);
   }
