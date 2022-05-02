@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable} from '@angular/core';
 import { ReplaySubject } from 'rxjs';
 
@@ -6,7 +7,7 @@ import { ReplaySubject } from 'rxjs';
   })
 export class SessionService {
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.loggedIn.next(false);
    }
 
