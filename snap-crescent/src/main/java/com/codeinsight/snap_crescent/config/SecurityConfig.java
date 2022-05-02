@@ -78,6 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.antMatchers("/config-jwt").permitAll()
 		.antMatchers("/user-exists").permitAll()
 		.antMatchers("/sign-up").permitAll()
+		.antMatchers("/login").permitAll()
 		.antMatchers("/logout").permitAll();
 		http.formLogin().authenticationDetailsSource(authenticationDetailsSource).loginPage("/login").permitAll();
 

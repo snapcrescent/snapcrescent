@@ -1,6 +1,3 @@
-<ng-particles id="tsparticles" 
-              [options]="particlesOptions">
-</ng-particles>
 <div class="login-box col-4 offset-4 animate__animated animate__bounceInUp"
   [ngClass]="{'animate__bounceOutDown' : redirectingToHome}">
   <mat-card>
@@ -12,13 +9,13 @@
         </div>
       </div>
 
-      <form>
+      <form [formGroup]="form">
         <div class="row">
           <div class="col-12">
 
             <mat-form-field>
               <mat-label>Username</mat-label>
-              <input matInput>
+              <input matInput formControlName="username">
             </mat-form-field>
           </div>
         </div>
@@ -28,7 +25,7 @@
 
             <mat-form-field>
               <mat-label>Password</mat-label>
-              <input matInput type="password">
+              <input matInput type="password" formControlName="password">
             </mat-form-field>
 
           </div>
