@@ -1,7 +1,6 @@
 package com.codeinsight.snap_crescent.location;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 
 import com.codeinsight.snap_crescent.common.BaseEntity;
 
@@ -9,7 +8,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "LOCATION")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class Location extends BaseEntity {

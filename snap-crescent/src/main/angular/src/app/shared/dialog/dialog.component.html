@@ -1,0 +1,19 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<div mat-dialog-content>
+  <p>{{message}}</p>
+</div>
+<div mat-dialog-actions align="center">
+    <ng-container *ngFor="let action of actions" [ngSwitch]="action.type">
+        <ng-container [ngSwitch]="action.type">
+          <ng-container *ngSwitchCase="'flat'">
+            <button mat-flat-button class="dialog-button" color="primary" (click)="click(action)" cdkFocusInitial>{{action.label}}</button>
+          </ng-container>
+          <ng-container *ngSwitchCase="'stroked'">
+            <button mat-stroked-button color="primary" (click)="click(action)" cdkFocusInitial>{{action.label}}</button>
+          </ng-container>
+          <ng-container *ngSwitchDefault>
+            <button mat-button color="primary" class="dialog" (click)="click(action)" cdkFocusInitial>{{action.label}}</button>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+</div>

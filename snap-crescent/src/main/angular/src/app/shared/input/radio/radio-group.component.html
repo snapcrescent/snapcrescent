@@ -1,0 +1,31 @@
+<ng-container *ngIf="!disabled">
+    <div *ngIf="placeholder" class="m-b-10">
+        <span >{{placeholder}}</span>
+    </div>
+    <mat-radio-group [disabled]="disabled"  [(ngModel)]="value"
+        (change)="changeValue(value)">
+
+        <mat-radio-button *ngFor="let option of options" class="m-r-5" [value]="option.value"
+            [disabled]="disabled" color="primary">
+            <span attr.aria-label="{{option.label}}" [tabindex]="!disabled ? 0 : -1">
+                {{ option.label }}
+            </span>
+        </mat-radio-button>
+    </mat-radio-group>
+    <div *ngIf="error">
+        <mat-hint class="error">{{ error }}</mat-hint>
+    </div>
+
+</ng-container>
+
+
+<ng-container *ngIf="selectedValue && disabled">
+    <div *ngIf="placeholder"  class="m-b-10">
+        <label class="non-empty">{{placeholder}}</label>
+        <div class="disabled-value">
+            <span>
+                {{selectedValue}}
+            </span>
+        </div>
+    </div>
+</ng-container>

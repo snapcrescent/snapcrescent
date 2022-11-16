@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -58,7 +59,7 @@ public class DataSourceConfig {
 		LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
 		sessionFactoryBean.setDataSource(dataSource);
 		sessionFactoryBean.setHibernateProperties(getHibernateProperties());
-		sessionFactoryBean.setPhysicalNamingStrategy(new DaoSQLImprovedNamingStrategy());
+		sessionFactoryBean.setPhysicalNamingStrategy(new CamelCaseToUnderscoresNamingStrategy());
 		sessionFactoryBean.setPackagesToScan(new String[] { "com.codeinsight.snap_crescent" });
 		sessionFactoryBean.setEntityInterceptor(daoSQLEntityInterceptor);
 		return sessionFactoryBean;
@@ -86,7 +87,7 @@ public class DataSourceConfig {
 		
 		properties.put("hibernate.show_sql", HIBERNATE_SHOW_SQL);
 		properties.put("hibernate.hbm2ddl.auto", HIBERNATE_HBM2DDL_AUTO);
-		properties.put("hibernate.physical_naming_strategy", DaoSQLImprovedNamingStrategy.class.getPackage().getName() + "." + DaoSQLImprovedNamingStrategy.class.getSimpleName());
+		properties.put("hibernate.physical_naming_strategy", CamelCaseToUnderscoresNamingStrategy.class.getPackage().getName() + "." + CamelCaseToUnderscoresNamingStrategy.class.getSimpleName());
 		properties.put("hibernate.enable_lazy_load_no_trans", "true");
 		
 

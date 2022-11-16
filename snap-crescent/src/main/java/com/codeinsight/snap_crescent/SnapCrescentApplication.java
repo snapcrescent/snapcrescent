@@ -15,13 +15,5 @@ public class SnapCrescentApplication {
 		SpringApplication.run(SnapCrescentApplication.class, args);
 	}
 	
-	@Bean("threadPoolTaskExecutor")
-    public TaskExecutor getAsyncExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(20);
-        executor.setMaxPoolSize(1000);
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setThreadNamePrefix("Async-");
-        return executor;
-    }
+	
 }

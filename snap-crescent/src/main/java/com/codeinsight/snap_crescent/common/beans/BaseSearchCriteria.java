@@ -26,6 +26,6 @@ public class BaseSearchCriteria{
 	private ResultType resultType;
 	
 	private Integer pageNumber = 0;
-	private Integer resultPerPage = 100000;
+	private Integer resultPerPage = 100;
 
 }

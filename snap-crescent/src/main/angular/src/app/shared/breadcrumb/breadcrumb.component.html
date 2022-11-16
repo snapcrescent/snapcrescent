@@ -1,0 +1,5 @@
+<div class="bread-crumb-container">
+<ng-container *ngFor="let breadCrumb of breadCrumbs">
+    <span class="bread-crumb" (click)="breadCrumb.onClick && breadCrumb.onClick()">{{breadCrumb.label}}</span>
+</ng-container>
+</div>

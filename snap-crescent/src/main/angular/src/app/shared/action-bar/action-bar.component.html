@@ -1,0 +1,20 @@
+<div *ngIf="position === 'page'" class="row m-t-100">
+  <div class="col-12">
+
+  </div>
+</div>
+<div class="row action-bar" [ngClass]="position">
+    <div class="col-12">
+      <ng-container *ngFor="let action of actions">
+        <button 
+        *ngIf="!action.hidden || action.hidden && !action.hidden()" 
+        [matTooltip]="getTooltip(action)"
+        mat-fab color="primary"
+        (click)="action.onClick()"
+        [ngClass]="action.styleClass"
+        [disabled]="action.disabled && action.disabled() ">
+          <i class="material-icons" ngClass="{{action.iconClass && action.iconClass()}}">{{getIcon(action)}}</i>
+        </button>
+      </ng-container>
+    </div>
+  </div>

@@ -1,0 +1,61 @@
+@import "/src/assets/styles/variables.scss";
+
+.action-bar {
+    button {
+        margin: 0px 5px;
+        -webkit-transition: opacity 600ms, visibility 600ms;
+        transition: opacity 600ms linear, visibility 600ms linear;
+        
+        &.mat-button-base {
+            &.plain {
+                background-color: #FFFFFF;
+                color: rgba(0, 0, 0, 0.54);
+            }
+
+            &.primary {
+                background-color: $primary-color;
+            }
+            &.secondary {
+                background-color: $secondary-color;
+            }
+            &.accent {
+                background-color: $accent-color;
+            }
+            &.orange {
+                background-color: chocolate;
+            }
+            &.blue {
+                background-color: dodgerblue;
+            }
+            &.red {
+                background-color: crimson;
+            }
+        }
+
+        .rotating {
+            animation: rotation 2s infinite linear;
+        }
+
+        @keyframes rotation {
+            50% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          } 
+    }
+
+    &.table {
+        position: sticky;
+        text-align: right;
+        margin-top: 20px;
+    }
+
+    &.page {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index:101;
+    }
+}

@@ -7,22 +7,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SidebarComponent implements OnInit{
 
-  menuItems: any[] = [];
+  menuItems:any[] = [];
 
   ngOnInit() {
-    this.menuItems.push(
-      {
-        icon:"",
-        label:"Photos",
-        link:"/home/employee/list",
-      });
-
-    this.menuItems.push(
-        {
-          icon:"",
-          label:"Videos",
-          link:"/home/pay-slip/generate",
-        });  
+    
   }
 
 }

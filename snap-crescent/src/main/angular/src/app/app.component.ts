@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { NavigationStart, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { SessionService } from './core/services/session-service';
+
+export let browserRefresh = false;
 
 @Component({
   selector: 'app-root',
@@ -8,20 +12,33 @@ import { SessionService } from './core/services/session-service';
 })
 export class AppComponent implements OnInit {
 
-  loggedIn: boolean = false;
-  redirectingToLogin: boolean = false;
-  redirectingToHome: boolean = false;
+  loggedIn: Boolean = false;
+  redirectingToLogin: Boolean = false;
+  redirectingToHome: Boolean = false;
 
-  constructor(private sessionService: SessionService) {
+  subscription: Subscription;
+
+  constructor(
+    private router: Router,
+    private sessionService: SessionService) {
 
   }
   
   ngOnInit() {
     this.registerListeners();
+    this.sessionService.getLoginState();
   }
 
   registerListeners(): void {
-    this.sessionService.onloggedInStateChange.subscribe(loggedIn => {
+
+    this.subscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        browserRefresh = !this.router.navigated;
+      }
+  });
+    
+
+    this.sessionService.onLoggedInStateChange.subscribe(loggedIn => {
       this.redirectingToHome = loggedIn; 
       this.redirectingToLogin = !loggedIn;
 

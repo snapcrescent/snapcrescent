@@ -1,20 +1,24 @@
 <div class="container">
+      <app-loader></app-loader>
+      <app-alert></app-alert>
       <div *ngIf="loggedIn" class="col-12 animate__animated"
             [ngClass]="{'animate__bounceInDown': redirectingToHome , 'animate__bounceOutUp' : redirectingToLogin}">
             <app-header></app-header>
       </div>
-      <div class="col-12">
-            <div class="row main">
-                  <div *ngIf="loggedIn" class="col-2">
-                        <div class="animate__animated "
-                              [ngClass]="{'animate__bounceInLeft': redirectingToHome , 'animate__bounceOutLeft' : redirectingToLogin}">
-                              <app-sidebar></app-sidebar>
-                        </div>
-                  </div>
-                  <div class="content" [ngClass]="{'col-10' : redirectingToHome, 'col-12' : redirectingToLogin}">
-                        <router-outlet></router-outlet>
-                  </div>
-            </div>
+
+      <div class="content">
+            <router-outlet></router-outlet>
       </div>
 
+      <!-- In case Sidebar is needed in future
+      <div *ngIf="loggedIn" class="col-2">
+            <div class="animate__animated "
+                  [ngClass]="{'animate__bounceInLeft': redirectingToHome , 'animate__bounceOutLeft' : redirectingToLogin}">
+                  <app-sidebar></app-sidebar>
+            </div>
+      </div>
+      <div class="content" [ngClass]="{'col-10' : redirectingToHome, 'col-12' : redirectingToLogin}">
+            <router-outlet></router-outlet>
+      </div>
+      -->
 </div>

@@ -10,5 +10,8 @@ public class EnvironmentProperties {
 	
     public static String STORAGE_PATH = System.getenv("STORAGE_PATH") == null? "/media/" : System.getenv("STORAGE_PATH");
 	public static String DATA_PATH = "/data/";
+	
+	public static String ADMIN_PASSWORD = System.getenv("ADMIN_PASSWORD");
+	
 
 }
