@@ -1,0 +1,82 @@
+<form class="advanced-search-panel" [formGroup]="searchFormGroup">
+    <div class="row manage-page-title-bar">
+        <div class="col-md-9">
+            <h2>{{pageTitle}}</h2>
+        </div>
+        <div class="col-md-3 text-end" *ngIf="showQuickSearch">
+            <mat-form-field>
+                <input matInput placeholder="{{quickSearchTitle}}" formControlName="searchKeyword"
+                    (keyup.enter)="callQuickSearch()">
+                <button type="button" *ngIf="advancedSearchFields && advancedSearchFields.length > 0"
+                    matTooltip="Open Advance Search" matSuffix mat-icon-button (click)="toggleAdvancedSearch()">
+                    <mat-icon>expand_more</mat-icon>
+                </button>
+            </mat-form-field>
+
+        </div>
+    </div>
+
+    <mat-expansion-panel collapsedHeight="0" hideToggle>
+
+        <div class="row text-center">
+            <ng-container *ngFor="let item of advancedSearchFields" [ngSwitch]="item.type">
+                <div class="col-lg-3 col-6">
+                    <ng-container *ngSwitchCase="'text'">
+                        <app-text [placeholder]="item.label" [formControlName]="item.key" (keyup.enter)="callSearch()">
+                        </app-text>
+                    </ng-container>
+
+                    <ng-container *ngSwitchCase="'date'">
+                        <app-date [placeholder]="item.label" [formControlName]="item.key"></app-date>
+                    </ng-container>
+
+                    <ng-container *ngSwitchCase="'dropdown'">
+                        <app-select [placeholder]="item.label" [formControlName]="item.key" [options]="item.options">
+                        </app-select>
+                    </ng-container>
+                </div>
+            </ng-container>
+
+        </div>
+        <div class="row">
+            <div class="col-lg-2 col-12 offset-lg-10">
+                <div class="row text-center">
+                    <div class="col-lg-4 col-6">
+                        <button type="button" mat-raised-button (click)="reset()">Reset</button>
+                    </div>
+                    <div class="col-lg-4 col-6">
+                        <button type="button" mat-raised-button color="primary" (click)="callSearch()">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </mat-expansion-panel>
+</form>
+<div class="row">
+    <div class="col-md-9">
+        
+    </div>
+    <div class="col-md-3 text-end">
+        <span>{{paginationInfo}}</span>
+    </div>
+
+    <div class="col-md-2" *ngFor="let item of dataSource.data">
+        <mat-card>
+            <mat-card-content>
+                <img mat-card-image src="{{'data:image/jpg;base64,' + item.thumbnail.base64EncodedThumbnail}}" alt="Asset">
+            </mat-card-content>
+            <mat-card-actions>
+
+            </mat-card-actions>
+        </mat-card>
+    </div>
+
+    <div class="col-md-12">
+        <mat-paginator *ngIf="enablePagination" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons (page)="pagingChanged($event)">
+        </mat-paginator>    
+    </div>
+    
+</div>
+
+<app-action-bar [position]="'page'" [actions]="actions"></app-action-bar>

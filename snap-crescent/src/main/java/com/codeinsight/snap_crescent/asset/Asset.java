@@ -7,7 +7,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
 
 import com.codeinsight.snap_crescent.common.BaseEntity;
 import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
@@ -18,7 +17,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "ASSET")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class Asset extends BaseEntity {

@@ -1,0 +1,31 @@
+<mat-form-field>
+
+  <mat-select
+    #select
+    [placeholder]="placeholder"
+    [value]="value"
+    [attr.opened]="select.panelOpen"
+    (selectionChange)="onSelectionChange($event)"
+    (click)="onTouched()"
+    [disabled]="disabled"
+    disableOptionCentering
+    disableRipple
+    #selectTooltip="matTooltip"
+    [matTooltip]="disabled ? '' : viewValue"
+    [required]="isRequired"
+    [attr.aria-required]="isRequired"
+    [attr.aria-disabled]="disabled ? 'true' : 'false'">
+    <div class="options">
+      <mat-option
+        role="option"
+        *ngFor="let item of options"
+        [attr.data-index]="item.index"
+        [value]="item.value"
+        [style.display]="item.hidden ? 'none' : ''">
+        {{item.label}}
+      </mat-option>
+    </div>
+  </mat-select>
+  <mat-hint class="error">{{ error }}</mat-hint>
+</mat-form-field>
+<br>

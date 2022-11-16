@@ -1,0 +1,31 @@
+<mat-form-field>
+    <ng-container *ngIf="type === 'input' || type === 'number' || type === 'password'; else textArea">
+        <input 
+        matInput 
+        [placeholder]="placeholder" 
+        [disabled]="disabled"
+        [value]="value"
+        [type]="type"
+        [required]="isRequired"
+        (input)="$event.stopPropagation(); onInput($event)"
+        (change)="$event.stopPropagation(); onChange($event)"
+        (blur)="$event.stopPropagation(); onBlur()"
+        >
+    </ng-container>
+    <ng-template #textArea>
+        <textarea 
+        [rows]="textAreaSize"
+        matInput
+        [placeholder]="placeholder" 
+        [disabled]="disabled"
+        [value]="value"
+        [type]="type"
+        [required]="isRequired"
+        (input)="$event.stopPropagation(); onInput($event)"
+        (change)="$event.stopPropagation(); onChange($event)"
+        (blur)="$event.stopPropagation(); onBlur()"
+        ></textarea>
+    </ng-template>
+    
+            <mat-hint class="error">{{ error }}</mat-hint>
+</mat-form-field>

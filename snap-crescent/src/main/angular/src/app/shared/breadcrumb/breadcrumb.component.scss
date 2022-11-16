@@ -1,0 +1,18 @@
+@import "/src/assets/styles/variables.scss";
+
+.bread-crumb-container {
+    font-size: 14px;
+    cursor: pointer;
+    color : $primary-color;
+    
+    .bread-crumb:not(:last-child) {
+        &:after {
+            content: " > ";
+        }
+    }
+
+    .bread-crumb:last-child {
+        font-weight: bold;
+    }
+}
+

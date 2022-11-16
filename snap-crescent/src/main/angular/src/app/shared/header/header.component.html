@@ -1,11 +1,50 @@
-<header class="p-1 header text-white">
+<nav class="navbar navbar-expand-lg header text-white">
+  <div class="container-fluid">
+    <div class="col-6 col-sm-2">
+      <img src="assets/images/header-logo.png" class="img-fluid" alt="Logo">
+    </div>
+    
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item" *ngFor="let menuItem of menuItems"  [ngClass]="{'active': activeMenu === menuItem}" (click)="navigate(menuItem)">
+          <span class="label" >{{menuItem.label}}</span>
+        </li>
+      </ul>
+      <form class="d-flex" role="search">
+        <span class="logout-button material-icons cursor-hand" (click)="logout()">logout</span>
+      </form>
+    </div>
+
+    <button mat-icon-button [matMenuTriggerFor]="menu" class="navbar-toggler" >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item  *ngFor="let menuItem of menuItems" (click)="navigate(menuItem)">
+        <span class="label" >{{menuItem.label}}</span>
+      </button>
+      <button mat-menu-item >
+        <span class="logout-button material-icons cursor-hand" (click)="logout()">logout</span>
+      </button>
+    </mat-menu>
+  </div>
+</nav>
+
+<!--
+<header class="p-1 ">
   <div class="container">
     <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-      <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-        <li></li>
+      
+      <ul class="nav col-10 me-lg-auto mb-2 mb-md-0">
+        <li class="col-3">
+          
+        </li>
+        <li *ngFor="let menuItem of menuItems">
+          <span class="label">{{menuItem.label}}</span>
+        </li>
       </ul>
 
-      <span class="logout-button material-icons cursor-hand" (click)="logout()">logout</span>
+      
     </div>
   </div>
 </header>
+-->

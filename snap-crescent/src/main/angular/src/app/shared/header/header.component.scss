@@ -1,15 +1,37 @@
 @import "/src/assets/styles/variables.scss";
 
 .header {
+    flex: 0 1 auto;
     background: $primary-color;
-    height: 50px;
+    height: 51px;
 
     box-shadow: 0px 3px 14px 0px rgba(0, 0, 0, 0.75);
     -webkit-box-shadow: 0px 3px 14px 0px rgba(0, 0, 0, 0.75);
     -moz-box-shadow: 0px 3px 14px 0px rgba(0, 0, 0, 0.75);
 
-    .logout-button {
-        margin: 8px;
+    .nav-item{
+        padding: 16px 20px;
+        cursor: pointer;
+
+        &.active {
+            background: $secondary-color;    
+        }
+    }
+
+    .me-auto {
+        background: $primary-color;
+    }
+
+    .navbar-toggler-icon{
+        color: $secondary-color;
+    }
+
+    .d-flex {
+        background: $primary-color;
+
+        .logout-button {
+            margin: 8px;
+        }
     }
 }
 

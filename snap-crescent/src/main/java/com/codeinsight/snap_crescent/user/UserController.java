@@ -1,10 +1,14 @@
 package com.codeinsight.snap_crescent.user;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,5 +52,16 @@ public class UserController {
 			exception.printStackTrace();
 			return ResponseEntity.badRequest().body(exception.getLocalizedMessage());
 		}
+	}
+	
+	@GetMapping("/listHeaders")
+	public ResponseEntity<String> listAllHeaders(
+	  @RequestHeader Map<String, String> headers) {
+	    headers.forEach((key, value) -> {
+	       System.out.println(String.format("Header '%s' = %s", key, value));
+	    });
+
+	    return new ResponseEntity<String>(
+	      String.format("Listed %d headers", headers.size()), HttpStatus.OK);
 	}
 }

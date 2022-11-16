@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "snap-crescent": {
+    "talenthunt": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -57,8 +57,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "1mb",
+                  "maximumError": "5mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -81,21 +81,21 @@
           "defaultConfiguration": "development",
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "snap-crescent:build"
+            "browserTarget": "talenthunt:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "snap-crescent:build:production"
+              "browserTarget": "talenthunt:build:production"
             },
             "development": {
-              "browserTarget": "snap-crescent:build:development"
+              "browserTarget": "talenthunt:build:development"
              }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "snap-crescent:build"
+            "browserTarget": "talenthunt:build"
           }
         },
         "test": {
@@ -132,16 +132,15 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "snap-crescent:serve"
+            "devServerTarget": "talenthunt:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "snap-crescent:serve:production"
+              "devServerTarget": "talenthunt:serve:production"
             }
           }
         }
       }
     }
-  },
-  "defaultProject": "snap-crescent"
+  }
 }
