@@ -1,0 +1,92 @@
+@import "/src/assets/styles/variables.scss";
+
+mat-expansion-panel {
+    border-radius: 0px;
+
+    &.mat-expanded {
+        background-color: #15c57f1b;
+        padding: 18px 0px 0px 0px;
+        border-bottom: 2px solid $primary-color;
+    }
+}
+
+.assets-group-title-container {
+  margin-bottom: 5px;
+
+  .select{
+    float: left;
+    margin-right: 5px;
+
+    &.active {
+      color: $accent-color;
+    }
+
+    &:hover {
+      cursor: pointer;
+    }
+
+  }
+
+  .title{
+    float: left;
+    font-weight: 500;
+    margin-top: 3px;
+  }
+  
+}
+
+.asset-container {
+  padding: 0px;
+
+  .mat-card{
+    padding: 0px;
+
+    .thumbnail {
+
+      .asset{
+        padding: 1px;
+      }
+
+      .select{
+        display: none;
+        position: absolute;
+        cursor: pointer;
+        width: 100%;
+        color: gray;
+        background: rgb(64,70,68);
+        background: linear-gradient(180deg, rgba(64,70,68,0.7674779384410014) 0%, rgba(49,78,94,0) 100%);
+
+        &:hover {
+          color: white;
+        }  
+      }
+
+      &:hover {
+        .select{
+            display: block;
+        }
+      }
+
+      &.selected {
+
+        .asset{
+          padding: 15px;
+        }
+        
+        .select{
+          display: block;
+          color: $accent-color;
+          background:none;
+          }
+      }
+  
+
+      
+
+      
+    }
+    
+  }
+}
+
+

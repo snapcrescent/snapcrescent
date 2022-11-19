@@ -1,9 +1,8 @@
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { AssetModule } from './asset/asset.module';
 import { AuthenticationGuard } from './core/services/auth.guard';
-import { ImageModule } from './image/image.module';
-import { VideoModule } from './video/video.module';
 
 const routes: Routes = [
   {
@@ -16,15 +15,10 @@ const routes: Routes = [
     loadChildren: () => import('./login/login.module').then(m => m.LoginModule)
   },
   {
-    path: "image",
-    loadChildren: () => import('./image/image.module').then(m => ImageModule),
+    path: "asset",
+    loadChildren: () => import('./asset/asset.module').then(m => AssetModule),
     canActivate: [AuthenticationGuard]
   },
-  {
-    path: "video",
-    loadChildren: () => import('./video/video.module').then(m => VideoModule),
-    canActivate: [AuthenticationGuard]
-  }
   
 ];
 

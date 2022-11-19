@@ -1,4 +1,4 @@
 export const environment = {
-  backendUrl: "https://snapcrescent.thecodeinsight.com",
+  backendUrl: "",
   production: true
 };

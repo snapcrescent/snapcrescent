@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { VideoListComponent } from './list/video-list.component';
-import { VideoUploadComponent } from './upload/video-upload.component';
+import { AssetListComponent } from './list/asset-list.component';
+import { AssetUploadComponent } from './upload/asset-upload.component';
 
 const routes: Routes = [
   {
@@ -12,12 +12,12 @@ const routes: Routes = [
 
   {
     path: "list",
-    component: VideoListComponent,
+    component: AssetListComponent,
   },  
 
   {
     path: "upload",
-    component: VideoUploadComponent
+    component: AssetUploadComponent
   },  
   
 ];
@@ -26,4 +26,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class VideoRoutingModule { }
+export class AssetRoutingModule { }

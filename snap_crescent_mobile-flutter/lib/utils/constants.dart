@@ -14,6 +14,8 @@ class Constants {
 
   static final String appConfigShowDeviceAssetsFlag = 'SHOW_DEVICE_ASSETS';
   static final String appConfigShowDeviceAssetsFolders = 'SHOW_DEVICE_ASSETS_FOLDERS';
+
+  static final String appConfigSyncSpeed = 'SYNC_SPEED';
   
 }
 

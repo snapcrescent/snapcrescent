@@ -12,6 +12,4 @@ public class AssetSearchCriteria extends BaseSearchCriteria{
 
 	private ASSET_TYPE assetType;
 	private Boolean favorite;
-	private String month;
-	private String year;
 }

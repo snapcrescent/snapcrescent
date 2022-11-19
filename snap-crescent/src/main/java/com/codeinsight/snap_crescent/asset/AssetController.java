@@ -1,6 +1,7 @@
 package com.codeinsight.snap_crescent.asset;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,10 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,14 +59,6 @@ public class AssetController extends BaseController{
 		if (searchParams.get("favorite") != null) {
 			searchCriteria.setFavorite(Boolean.parseBoolean(searchParams.get("favorite")));
 		}
-		
-		if (searchParams.get("month") != null) {
-			searchCriteria.setMonth(searchParams.get("month"));
-		}
-		
-		if (searchParams.get("year") != null) {
-			searchCriteria.setYear(searchParams.get("year"));
-		}
 	}
 	
 	@GetMapping("/asset/{id}")
@@ -96,7 +91,7 @@ public class AssetController extends BaseController{
 	}
 
 	@PostMapping("/asset/upload")
-	public ResponseEntity<?> uploadImage(@RequestParam("assetType") int assetType,@RequestParam("files") MultipartFile[] files) throws IOException {
+	public ResponseEntity<?> uploadAssets(@RequestParam("assetType") int assetType,@RequestParam("files") MultipartFile[] files) throws IOException {
 
 		BaseResponse response = new BaseResponse();
 		try {
@@ -119,7 +114,7 @@ public class AssetController extends BaseController{
 			  });
 			
 			if(temporaryFiles.size() > 0) {
-				syncInfoService.creatOrUpdate();
+				syncInfoService.save();
 			}
 			
 			response.setMessage("Asset uploaded successfully.");
@@ -130,4 +125,17 @@ public class AssetController extends BaseController{
 		}
 		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	
+	@DeleteMapping(value="/asset")
+	public ResponseEntity<?> delete(@RequestParam List<Long> ids) {
+		try {
+			
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
 }

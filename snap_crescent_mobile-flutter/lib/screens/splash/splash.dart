@@ -112,6 +112,14 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
 
       await AppConfigRepository.instance
           .saveOrUpdateConfig(appConfigLoggedInFlagConfig);
+
+      AppConfig appConfigSyncSpeedConfig = new AppConfig(
+          configkey: Constants.appConfigSyncSpeed,
+          configValue: false.toString());
+
+
+      await AppConfigRepository.instance
+          .saveOrUpdateConfig(appConfigSyncSpeedConfig);    
     }
 
   

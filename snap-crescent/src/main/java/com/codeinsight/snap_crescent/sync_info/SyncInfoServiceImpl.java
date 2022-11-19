@@ -50,17 +50,8 @@ public class SyncInfoServiceImpl implements SyncInfoService{
 
 	@Override
 	@Transactional
-	public void creatOrUpdate() throws Exception {
-		List<SyncInfo> syncInfoList = syncInfoRepository.findAll();
-		
-		if(syncInfoList.isEmpty()) {
-			syncInfoRepository.save(new SyncInfo());
-		}else {
-			SyncInfo syncInfo =  syncInfoList.get(syncInfoList.size() -1);
-			syncInfo.setSyncCount(syncInfo.getSyncCount() + 1);
-			syncInfoRepository.save(syncInfo);
-		}
-		
+	public void save() throws Exception {
+		syncInfoRepository.save(new SyncInfo());	
 	}
 
 }

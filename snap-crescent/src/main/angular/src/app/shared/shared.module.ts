@@ -31,10 +31,9 @@ import { NgxMatNativeDateModule } from '@angular-material-components/datetime-pi
 import { ClipboardModule } from 'ngx-clipboard';
 
 import { HeaderComponent } from './header/header.component';
-import { SidebarComponent } from './sidebar/sidebar.component';
 import { URLInterceptor } from '../core/services/http/url-interceptor';
 import { HeaderInterceptor } from '../core/services/http/header-interceptor';
-import { SearchGridComponent } from './search-grid/search-grid.component';
+import { AssetGridComponent } from './asset-grid/asset-grid.component';
 
 import { DateTimeComponent } from './input/date-time/date-time.component';
 import { AlertComponent } from './alert/alert.component';
@@ -43,7 +42,6 @@ import { RadioGroupComponent } from './input/radio/radio-group.component';
 import { SelectComponent } from './input/select/select.component';
 import { LoaderComponent } from './loader/loader.component';
 import { LoadingInterceptor } from '../core/services/http/loading-interceptor';
-import { SearchTableCellDefDirective, SearchTableFooterCellDefDirective, SearchTableHeaderCellDefDirective } from './search-grid/search-grid.directive';
 import { ActionComponent } from './action-bar/action-bar.component';
 import { DateComponent } from './input/date/date.component';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -52,6 +50,7 @@ import { ErrorInterceptor } from '../core/services/http/error-interceptor';
 import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 import { AuthorizationGuard } from '../core/services/auth.guard';
 import { DragAndDropDirective } from '../core/directives/drag-and-drop.directive';
+import { MonthYearComponent } from './input/month-year/month-year.component';
 
 
 const modules = [
@@ -90,14 +89,11 @@ const modules = [
 
 const components = [
   HeaderComponent,
-  SidebarComponent,
-  SearchGridComponent,
-  SearchTableCellDefDirective,
-  SearchTableHeaderCellDefDirective,
-  SearchTableFooterCellDefDirective,
+  AssetGridComponent,
   TextComponent,
   DateComponent,
   DateTimeComponent,
+  MonthYearComponent,
   AlertComponent,
   RadioGroupComponent,
   SelectComponent,

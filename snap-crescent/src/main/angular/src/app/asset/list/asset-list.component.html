@@ -1,0 +1,52 @@
+<div class="search-page">
+    <div class="row">
+        <div class="col-2" [formGroup]="searchFormGroup">
+            <div class="row text-center">
+                <ng-container *ngFor="let item of advancedSearchFields" [ngSwitch]="item.type">
+                    <div class="col-12">
+                        <ng-container *ngSwitchCase="'text'">
+                            <app-text [placeholder]="item.label" [formControlName]="item.key" (keyup.enter)="assetGridComponent.callSearch()">
+                            </app-text>
+                        </ng-container>
+    
+                        <ng-container *ngSwitchCase="'date'">
+                            <app-date [placeholder]="item.label" [formControlName]="item.key"></app-date>
+                        </ng-container>
+    
+                        <ng-container *ngSwitchCase="'monthYear'">
+                            <app-month-year [placeholder]="item.label" [formControlName]="item.key" [mode]="item.dateMode!"></app-month-year>
+                        </ng-container>
+    
+                        <ng-container *ngSwitchCase="'dropdown'">
+                            <app-select [placeholder]="item.label" [formControlName]="item.key" [options]="item.options">
+                            </app-select>
+                        </ng-container>
+                    </div>
+                </ng-container>
+    
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <button type="button" mat-raised-button (click)="reset()">Reset</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" mat-raised-button color="primary" (click)="assetGridComponent.callSearch()">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-10">
+            <app-asset-grid
+            #assetGridComponent
+            defaultSortColumn="name"
+            [actions]="actions" 
+            [advancedSearchFields]="advancedSearchFields"
+            [search]="search.bind(this)">
+        </app-asset-grid>    
+        </div>
+    </div>
+    
+</div>

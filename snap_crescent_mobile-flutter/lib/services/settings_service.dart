@@ -25,12 +25,12 @@ class SettingsService {
     AppConfig value = await AppConfigRepository.instance
         .findByKey(flag);
 
-    bool _autoBackup = false;
+    bool _flag = false;
     if (value.configValue != null) {
-      _autoBackup = value.configValue == 'true' ? true : false;
+      _flag = value.configValue == 'true' ? true : false;
     }
 
-    return _autoBackup;
+    return _flag;
   }
 
   Future<String> getAutoBackupFolderInfo() async {
@@ -83,7 +83,16 @@ class SettingsService {
     return _showDeviceAssetsFolders;
   }
 
+  Future<int> getSyncSpeedInfo() async {
+     AppConfig value = await AppConfigRepository.instance.findByKey(Constants.appConfigSyncSpeed);
 
+    int _syncingSpeed = 100;
+    if (value.configValue != null) {
+      _syncingSpeed = int.parse(value.configValue!);
+    } 
+
+    return _syncingSpeed;
+  }
 
   Future<String> getLastSyncInfo() async {
     List<SyncInfo> localSyncInfoList = await SyncInfoService.instance.searchOnLocal();

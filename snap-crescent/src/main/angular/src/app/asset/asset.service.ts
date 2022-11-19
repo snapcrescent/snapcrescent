@@ -1,9 +1,10 @@
 import { HttpClient, HttpEvent, HttpRequest } from '@angular/common/http';
 import { Injectable} from '@angular/core';
 import { BaseService } from '../core/services/base.service';
-import { Observable } from "rxjs";
+import { of, Observable } from "rxjs";
 import { BaseResponseBean } from '../core/models/base-response-bean';
-import { Asset } from './asset.model';
+import { Asset, AssetType } from './asset.model';
+import { Option } from '../core/models/option.model';
 
 @Injectable({
     providedIn: "root"
@@ -34,10 +35,10 @@ export class AssetService extends BaseService {
     return this.httpClient.get(this.entityUrl + '/' + id + '/lite');
   }
 
-  save(assetType:number,  files:any): Observable<HttpEvent<unknown>> {
+  save(assetType:number,  file:File): Observable<HttpEvent<unknown>> {
     const formData = new FormData();
     formData.append('assetType',''+assetType);
-    formData.append('files', files);
+    formData.append('files', file);
 
     const request = new HttpRequest('POST', this.entityUrl + '/upload', formData, {
       reportProgress: true,
@@ -51,13 +52,29 @@ export class AssetService extends BaseService {
     return this.httpClient.put(this.entityUrl + '/' + id,this.preparePayload(entity));
   }
 
-  delete(id: number): Observable<BaseResponseBean<number, Asset>> {
-    return this.httpClient.delete(this.entityUrl + '/' + id);
+  delete(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
+    return this.httpClient.delete(`${this.entityUrl}?ids=${ids.join(',')}`);
   }
 
   preparePayload(entity: Asset) {
         return entity;
   }
+
+
+  getAssetTypesAsOptions(): Observable<Option[]> {
+    const questionTypeOptions: Option[] = [];
+
+    for (const [key, value] of Object.entries(AssetType)) {
+      questionTypeOptions.push({
+        value:value.id,
+        label:value.label,
+        rawValue:value
+      });
+
+  }
+
+    return of(questionTypeOptions);
+}
 
  
 }

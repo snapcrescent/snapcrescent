@@ -1,7 +1,7 @@
 FROM fedora:latest as BUILD_STAGE
 
 # Install JDK 8
-RUN dnf install -y java-1.8.0-openjdk.x86_64
+RUN dnf install -y java-17-openjdk
 
 # Install Maven
 RUN dnf install -y maven
@@ -14,7 +14,7 @@ COPY src /tmp/src/
 WORKDIR /tmp/
 
 #Execute maven build
-RUN mvn package
+RUN mvn install
 
 #Copy build from TEMP to /
 RUN cp target/snap-crescent-*.jar /snap-crescent.jar
@@ -22,7 +22,7 @@ RUN cp target/snap-crescent-*.jar /snap-crescent.jar
 #Change working directory to /
 WORKDIR /
 
-FROM openjdk:8-jre-slim
+FROM openjdk:17-jdk-slim-buster
 
 # COPY compiled jar file to new image
 COPY --from=BUILD_STAGE snap-crescent.jar .
