@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -202,6 +203,31 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	@Transactional
 	public void update(UiAsset enity) throws Exception {
 		// TODO Auto-generated method stub
+
+	}
+	
+	@Override
+	public File migrateAssets(ASSET_TYPE assetType, File originalFile) throws Exception {
+
+		File finalFile = null;
+
+		String directoryPath = fileService.getBasePath(assetType) + Constant.UNPROCESSED_ASSET_FOLDER;
+		fileService.mkdirs(directoryPath);
+		
+		
+		
+			try {
+				String path = directoryPath + StringUtils.generateTemporaryFileName(originalFile.getName());
+				finalFile = new File(path);
+				
+				Files.copy(originalFile.toPath(), finalFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		
+
+		return finalFile;
 
 	}
 	

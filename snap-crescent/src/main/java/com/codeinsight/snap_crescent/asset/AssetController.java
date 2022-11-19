@@ -1,7 +1,6 @@
 package com.codeinsight.snap_crescent.asset;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.codeinsight.snap_crescent.bulk_import.BulkImportService;
 import com.codeinsight.snap_crescent.common.BaseController;
 import com.codeinsight.snap_crescent.common.beans.BaseResponse;
 import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
@@ -39,6 +38,9 @@ public class AssetController extends BaseController{
 	
 	@Autowired
 	private SyncInfoService syncInfoService;
+	
+	@Autowired
+	private BulkImportService bulkImportService;
 
 	@GetMapping("/asset")
 	public @ResponseBody BaseResponseBean<Long, UiAsset> search(@RequestParam Map<String, String> searchParams) {
@@ -136,6 +138,24 @@ public class AssetController extends BaseController{
 			e.printStackTrace();
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@PostMapping("/asset/bulk-import")
+	public ResponseEntity<?> bulkImportFromDirectory(
+			@RequestParam("sourceDirectory") String sourceDirectory,
+			@RequestParam("destinationDirectory") String destinationDirectory) throws IOException {
+
+		BaseResponse response = new BaseResponse();
+		try {
+			
+			bulkImportService.bulkImportFromDirectory(sourceDirectory,destinationDirectory );
+			response.setMessage("Asset migrated successfully.");
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setMessage(e.getMessage());
+		}
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }

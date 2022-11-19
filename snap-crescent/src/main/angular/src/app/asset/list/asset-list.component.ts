@@ -1,6 +1,8 @@
-import { Component , ViewChild} from '@angular/core';
+import { Component , ViewChild, AfterViewInit} from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatExpansionPanel } from '@angular/material/expansion';
 import { Router } from '@angular/router';
 import { AssetService } from 'src/app/asset/asset.service';
 import { BaseListComponent } from 'src/app/core/components/base-list.component';
@@ -8,17 +10,24 @@ import { AlertService } from 'src/app/shared/alert/alert.service';
 import { AssetGridComponent } from 'src/app/shared/asset-grid/asset-grid.component';
 import { AssetSearchField } from 'src/app/shared/asset-grid/asset-grid.model';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
+import { ScreenSize } from 'src/app/shared/screen-size-detector/screen-size-detector.model';
+import { ScreenSizeDetectorService } from 'src/app/shared/screen-size-detector/screen-size-detector.service';
+import { delay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-asset-list',
   templateUrl: './asset-list.component.html'
 })
-export class AssetListComponent extends BaseListComponent{
+export class AssetListComponent extends BaseListComponent implements AfterViewInit{
 
   searchFormGroup: FormGroup = this.formBuilder.group({});
 
   @ViewChild("assetGridComponent", { static: false })
   assetGridComponent: AssetGridComponent;
+
+  @ViewChild(MatExpansionPanel) expansionPanel: MatExpansionPanel;
+
+  screenSize: ScreenSize;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -26,6 +35,7 @@ export class AssetListComponent extends BaseListComponent{
     private assetService: AssetService,
     private dialog: MatDialog,
     private alertService: AlertService,
+    private screenSizeDetectorService: ScreenSizeDetectorService
   ) {
     super();
   }
@@ -34,6 +44,28 @@ export class AssetListComponent extends BaseListComponent{
     this.populateAdvancedSearchFields();;
     this.populateActions();
     this.initSearchForm();
+  }
+
+  ngAfterViewInit() {
+
+    this.screenSize = this.screenSizeDetectorService.getCurrentSize();
+    this.adjustUIForScreen();
+
+    this.screenSizeDetectorService.onResize$
+      .pipe(delay(0))
+      .subscribe(x => {
+        this.screenSize = x;
+
+        this.adjustUIForScreen();
+      });
+  }
+
+  private adjustUIForScreen() {
+    if(this.screenSize === ScreenSize.XS 
+      || this.screenSize === ScreenSize.SM
+      || this.screenSize === ScreenSize.MD) {
+      this.expansionPanel.close();
+    }
   }
 
   private populateAdvancedSearchFields() {
@@ -138,6 +170,13 @@ export class AssetListComponent extends BaseListComponent{
     }
   }
 
+  toggleAdvancedSearch() {
+    
+    if(this.expansionPanel) {
+      this.expansionPanel.toggle();
+    }
+  }
+
   search(params:any) {
 
     this.advancedSearchFields.forEach((item:AssetSearchField) => {
@@ -164,5 +203,6 @@ export class AssetListComponent extends BaseListComponent{
       this.searchFormGroup.get(item.key)?.reset();
     });
 
+    this.assetGridComponent.resetPaginatorPageSize();
   }
 }

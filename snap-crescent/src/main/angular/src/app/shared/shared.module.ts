@@ -51,6 +51,7 @@ import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 import { AuthorizationGuard } from '../core/services/auth.guard';
 import { DragAndDropDirective } from '../core/directives/drag-and-drop.directive';
 import { MonthYearComponent } from './input/month-year/month-year.component';
+import { ScreenSizeDetectorComponent } from './screen-size-detector/screen-size-detector.component';
 
 
 const modules = [
@@ -89,6 +90,7 @@ const modules = [
 
 const components = [
   HeaderComponent,
+  ScreenSizeDetectorComponent,
   AssetGridComponent,
   TextComponent,
   DateComponent,

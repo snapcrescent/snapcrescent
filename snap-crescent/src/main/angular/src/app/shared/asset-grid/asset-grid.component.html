@@ -1,23 +1,17 @@
 <div class="row">
-    <div class="col-md-9">
-        
-    </div>
-    <div class="col-md-3 text-end">
-    </div>
-
     <div class="col-md-12" *ngFor="let assetsGroup of assetsGroups">
         <div class="row">
-            <div class="col-2 assets-group-title-container">
+            <div class="col-12 assets-group-title-container">
                 <span 
-                    [ngClass]="{'active': assetsGroup.selection.hasValue() && isAllSelected(assetsGroup)}"
+                    [ngClass]="{'active': isAllSelected(assetsGroup)}"
                     class="select material-symbols-outlined" 
                     [matTooltip]="groupCheckboxLabel(assetsGroup)"
                     (click)="masterToggleGroup(assetsGroup)">check_circle</span>
                 <span class="title" >{{assetsGroup.date}}</span>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-1 asset-container" *ngFor="let asset of assetsGroup.assets">
+        <div class="row asset-container">
+            <div class="col-md-2 col-sm-3 col-4" *ngFor="let asset of assetsGroup.assets">
                 <mat-card>
                     <mat-card-content>
                         <div (click)="isAnyAssetSelected && toggleAsset(assetsGroup,asset)" class="thumbnail" [ngClass]="{'selected': assetsGroup.selection.isSelected(asset)}">
@@ -40,7 +34,7 @@
     </div>
     
 
-    <div class="col-md-12">
+    <div class="col-12 m-t-20">
         <mat-paginator *ngIf="enablePagination" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons (page)="pagingChanged($event)">
         </mat-paginator>    
     </div>

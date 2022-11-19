@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
 
   registerListeners(): void {
 
-    this.subscription = this.router.events.subscribe((event) => {
+    this.subscription = this.router.events.subscribe((event:any) => {
       if (event instanceof NavigationStart) {
         browserRefresh = !this.router.navigated;
       }
