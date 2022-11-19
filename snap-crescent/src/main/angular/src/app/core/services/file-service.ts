@@ -14,7 +14,7 @@ export class FileService extends BaseService {
 
   private entityUrl = '/file';
 
-  getImageRetrievalURL(fileName:string) {
+  getAssetRetrievalURL(fileName:string) {
     return environment.backendUrl + this.entityUrl + "/" + fileName;
   }
 

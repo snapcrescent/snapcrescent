@@ -56,7 +56,7 @@ export class LoginComponent extends BaseComponent implements OnInit {
                   setTimeout(() => {
                     this.sessionService.login(response);
 
-                    this.router.navigate(['/image']);
+                    this.router.navigate(['/asset']);
                   }, 800);
                 } else {
                   this.alertService.showError(response.message!);

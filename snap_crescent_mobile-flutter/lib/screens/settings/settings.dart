@@ -42,6 +42,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   String _lastSyncDate = "Never";
   String _autoBackupFolders = "None";
   String _showDeviceAssetsFolders = "None";
+  int _syncingSpeed = 0;
 
   final _formKey = GlobalKey<FormState>();
   AutovalidateMode _autovalidateMode = AutovalidateMode.onUserInteraction;
@@ -91,6 +92,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     _showDeviceAssetsFolders =
         await SettingsService.instance.getShowDeviceAssetsFolderInfo();
     _lastSyncDate = await SettingsService.instance.getLastSyncInfo();
+    _syncingSpeed = await SettingsService.instance.getSyncSpeedInfo();
     return Future.value(true);
   }
 
@@ -276,6 +278,20 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
                 .then(onBackFromChild);
           },
         ),
+      ListTile(
+        title: Text("Syncing Speed", style: TitleTextStyle),
+        subtitle: Text(_connectedToServer == true
+            ? '''$_syncingSpeed'''
+            : "Not Connected"),
+        leading: Container(
+          width: 40,
+          alignment: Alignment.center,
+          child: const Icon(Icons.account_circle),
+        ),
+        onTap: () {
+          _showAccountInfoDialog();
+        },
+      ),
       ListTile(
         title: Text("Clear Locally Cached Photos and Videos",
             style: TitleTextStyle),

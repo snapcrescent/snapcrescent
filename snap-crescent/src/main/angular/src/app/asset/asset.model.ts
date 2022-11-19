@@ -19,10 +19,10 @@ export class Metadata extends BaseUiBean{
 export let AssetType = {
     PHOTO: {
       id: 0,
-      label: "PHOTO"
+      label: "Photo"
     },
     VIDEO: {
       id: 1,
-      label: "VIDEO"
+      label: "Video"
     }
   };

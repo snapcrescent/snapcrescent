@@ -220,7 +220,7 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>install</phase>
+                        <phase>generate-resources</phase>
 						<configuration>
 							<target>
 								<copy todir="target/classes/public">

@@ -21,22 +21,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
 
-    if(this.sessionService.isAuthenticated()) {
-      this.menuItems.push(
-        {
-          icon: "",
-          label: "Images",
-          link: "/image",
-        });
-  
-      this.menuItems.push(
-        {
-          icon: "",
-          label: "Videos",
-          link: "/video",
-        });
-    } 
-
     
   }
 

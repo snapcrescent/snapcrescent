@@ -33,4 +33,11 @@ export class BaseService {
     ]
   }
 
+  getInvertedYesAndNoOptions() {
+    return [
+      new Option(false,"Yes"),
+      new Option(true,"No"),
+    ]
+  }
+
 }

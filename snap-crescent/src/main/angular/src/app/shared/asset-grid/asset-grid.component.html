@@ -1,0 +1,50 @@
+<div class="row">
+    <div class="col-md-9">
+        
+    </div>
+    <div class="col-md-3 text-end">
+    </div>
+
+    <div class="col-md-12" *ngFor="let assetsGroup of assetsGroups">
+        <div class="row">
+            <div class="col-2 assets-group-title-container">
+                <span 
+                    [ngClass]="{'active': assetsGroup.selection.hasValue() && isAllSelected(assetsGroup)}"
+                    class="select material-symbols-outlined" 
+                    [matTooltip]="groupCheckboxLabel(assetsGroup)"
+                    (click)="masterToggleGroup(assetsGroup)">check_circle</span>
+                <span class="title" >{{assetsGroup.date}}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-1 asset-container" *ngFor="let asset of assetsGroup.assets">
+                <mat-card>
+                    <mat-card-content>
+                        <div (click)="isAnyAssetSelected && toggleAsset(assetsGroup,asset)" class="thumbnail" [ngClass]="{'selected': assetsGroup.selection.isSelected(asset)}">
+                            <span 
+                                class="select material-symbols-outlined" 
+                                [matTooltip]="assetCheckboxLabel(assetsGroup, asset)"
+                                >
+                                <span 
+                                (click)="toggleAsset(assetsGroup,asset);$event.stopPropagation()"
+                                class="material-symbols-outlined" >
+                                check_circle
+                                </span>
+                                </span>
+                            <img class="asset img-fluid" src="{{'data:asset/jpg;base64,' + asset.thumbnail.base64EncodedThumbnail}}" alt="Asset">    
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="col-md-12">
+        <mat-paginator *ngIf="enablePagination" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons (page)="pagingChanged($event)">
+        </mat-paginator>    
+    </div>
+    
+</div>
+
+<app-action-bar [position]="'page'" [actions]="actions"></app-action-bar>

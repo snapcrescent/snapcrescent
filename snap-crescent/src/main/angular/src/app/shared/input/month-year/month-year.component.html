@@ -1,0 +1,36 @@
+<ng-container *ngIf="!(!value && disabled)">
+  <mat-form-field>
+      <mat-label *ngIf="!placeholder">
+          <ng-container [ngTemplateOutlet]="label"></ng-container>
+        </mat-label>
+      <input matInput [matDatepicker]="picker" [placeholder]="placeholder" [min]="min" [max]="max" [disabled]="disabled" [value]="inputValue"
+          (dateChange)="changeValue($event.value)" attr.aria-label="{{inputValue | date:'DD MMM, Y'}} ' is required '" (click)="picker.open()" (blur)="onTouched()" [required]="isRequired" [attr.aria-required]="isRequired" [ngStyle]="inputStyle">
+      <span attr.aria-label="{{inputValue}}" hidden>{{inputValue}}</span>
+      <mat-datepicker-toggle *ngIf="!disabled" matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker startView="multi-year" (opened)="datePickerOpened()"  (monthSelected)="setMonthAndYear($event)"></mat-datepicker>
+      <mat-hint class="error">{{ error }}</mat-hint>
+  </mat-form-field>
+</ng-container>
+<ng-container *ngIf="!value && disabled">
+  <app-text
+     [placeholder]="placeholder"
+     [value]="defaultValue"
+     [disabled]="disabled">
+  </app-text>
+</ng-container>
+
+<ng-template #label>
+  <ng-content select="mat-label"></ng-content>
+  <ng-content select="[mat-label]"></ng-content>
+</ng-template>
+
+<ng-template #suffix>
+  <ng-content select="[matSuffix]"></ng-content>
+</ng-template>
+
+<ng-template #hint>
+    <ng-content select="mat-hint"></ng-content>
+  <ng-content select="[mat-hint]"></ng-content>
+</ng-template>
+
+<ng-content select="[outerNgContent]"></ng-content>
