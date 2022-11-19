@@ -16,5 +16,6 @@ public interface AssetService {
 	public Future<Boolean> processAsset(ASSET_TYPE assetType, File temporaryFile) throws Exception;
 	public UiAsset getById(Long id);
 	public byte[] getAssetById(Long id) throws Exception;
-	public void update(UiAsset enity) throws Exception;	
+	public void update(UiAsset enity) throws Exception;
+	File migrateAssets(ASSET_TYPE assetType, File originalFile) throws Exception;	
 }

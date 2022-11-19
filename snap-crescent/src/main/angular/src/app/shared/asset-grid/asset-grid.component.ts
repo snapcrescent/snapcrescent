@@ -4,15 +4,11 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { ViewChild } from '@angular/core'
 import { AssetSearchField, AssetsGroup } from './asset-grid.model';
-import { Action } from 'src/app/core/models/action.model';
-import { MatExpansionPanel } from '@angular/material/expansion';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { Action } from 'src/app/core/models/action.model'
 import { Observable } from 'rxjs';
 import { BreadCrumb } from '../breadcrumb/breadcrumb.model';
-import { StringUtils } from 'src/app/core/utils/string-utils';
 import { Asset } from 'src/app/asset/asset.model';
 import { formatDate } from '@angular/common';
-import { Sort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-asset-grid',
@@ -52,7 +48,7 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
 
  
 
-  pageSizeOptions:number[] = [120,240, 360];
+  pageSizeOptions:number[] = [240,360, 480];
 
   @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
 
@@ -165,7 +161,7 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   
   isAllSelected(assetsGroup:AssetsGroup) {
     const numSelected = assetsGroup.selection.selected.length;
-    const numRows = this.dataSource.data.length;
+    const numRows = assetsGroup.assets.length;
     return numSelected === numRows;
   }
 
@@ -173,7 +169,7 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   masterToggleGroup(assetsGroup:AssetsGroup) {
     this.isAllSelected(assetsGroup) ?
     assetsGroup.selection.clear() :
-      this.dataSource.data.forEach((row: Asset) => assetsGroup.selection.select(row));
+    assetsGroup.assets.forEach((row: Asset) => assetsGroup.selection.select(row));
   }
 
   toggleAsset(assetsGroup:AssetsGroup, asset: Asset) {
@@ -187,5 +183,9 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
 
   groupCheckboxLabel(assetsGroup:AssetsGroup): string {
       return `${this.isAllSelected(assetsGroup) ? 'Deselect' : 'Select'} all`;
+  }
+
+  resetPaginatorPageSize() {
+    this.paginator._changePageSize(this.pageSizeOptions[0]);
   }
 }
