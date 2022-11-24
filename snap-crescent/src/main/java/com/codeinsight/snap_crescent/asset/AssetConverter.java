@@ -1,12 +1,15 @@
 package com.codeinsight.snap_crescent.asset;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.codeinsight.snap_crescent.common.BaseConverter;
+import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
+import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
 import com.codeinsight.snap_crescent.metadata.MetadataConverter;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailConverter;
@@ -63,12 +66,20 @@ public class AssetConverter extends BaseConverter<Asset, UiAsset> {
 		UiAsset bean = new UiAsset();
 
 		try {
-			bean.setAssetType(entity.getAssetType().ordinal());
+			bean.setAssetTypeName(entity.getAssetTypeEnum().getLabel());
+			bean.setAssetType(entity.getAssetType());
 			bean.setFavorite(entity.getFavorite());
 
 			if (entity.getMetadataId() != null) {
 				bean.setMetadataId(entity.getMetadataId());
 				bean.setMetadata(metadataConverter.getBeanFromEntity(entity.getMetadata(), resultType));
+				
+				if(resultType == ResultType.FULL) {
+					if(entity.getAssetTypeEnum() == AssetType.PHOTO) {
+						bean.getMetadata().setBase64EncodedPhoto(Base64.getEncoder().encodeToString(fileService.readFileBytes(FILE_TYPE.PHOTO,entity.getMetadata().getPath(), entity.getMetadata().getInternalName())));	
+					}
+				}
+				
 			}
 
 			if (entity.getThumbnailId() != null) {

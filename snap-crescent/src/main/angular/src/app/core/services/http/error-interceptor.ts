@@ -9,7 +9,7 @@ import { Router } from "@angular/router";
 
 import { catchError } from "rxjs/operators";
 import { AlertService } from "src/app/shared/alert/alert.service";
-import { SessionService } from "../session-service";
+import { SessionService } from "../session.service";
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {

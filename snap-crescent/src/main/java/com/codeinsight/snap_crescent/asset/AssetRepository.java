@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import org.springframework.stereotype.Repository;
@@ -111,6 +112,22 @@ public class AssetRepository extends BaseRepository<Asset>{
 		}
 
 		return q;
+	}
+	
+	public void markActive(List<Long> ids) {
+		String queryString = "UPDATE Asset asset set asset.active = true WHERE asset.id IN (:ids)";
+		
+		Query query = this.getCurrentSession().createQuery(queryString);
+		query.setParameter("ids", ids);
+		query.executeUpdate();
+	}
+
+	public void markInactive(List<Long> ids) {
+		String queryString = "UPDATE Asset asset set asset.active = false WHERE asset.id IN (:ids)";
+		
+		Query query = this.getCurrentSession().createQuery(queryString);
+		query.setParameter("ids", ids);
+		query.executeUpdate();
 	}
 	
 }

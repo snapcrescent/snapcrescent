@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,8 +30,10 @@ import com.codeinsight.snap_crescent.bulk_import.BulkImportService;
 import com.codeinsight.snap_crescent.common.BaseController;
 import com.codeinsight.snap_crescent.common.beans.BaseResponse;
 import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
-import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
+import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.sync_info.SyncInfoService;
+
+import reactor.core.publisher.Mono;
 
 @RestController
 public class AssetController extends BaseController{
@@ -55,7 +60,7 @@ public class AssetController extends BaseController{
 		parseCommonSearchParams(searchParams, searchCriteria);
 		
 		if (searchParams.get("assetType") != null) {
-			searchCriteria.setAssetType(ASSET_TYPE.findByValue(Integer.parseInt(searchParams.get("assetType"))));
+			searchCriteria.setAssetType(Integer.parseInt(searchParams.get("assetType")));
 		}
 
 		if (searchParams.get("favorite") != null) {
@@ -81,6 +86,11 @@ public class AssetController extends BaseController{
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
+	@GetMapping(value="/asset/{id}/stream")
+	public Mono<ResponseEntity<byte[]>> streamAssetById(HttpServletResponse serverHttpResponse, @RequestHeader(value = "Range", required = false) String httpRangeList,@PathVariable Long id) throws Exception {
+			return Mono.just(assetService.streamAssetById(id, httpRangeList));
+	}
+	
 	@PutMapping(value="/asset/{id}")
 	public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UiAsset asset) {
 		try {
@@ -98,7 +108,7 @@ public class AssetController extends BaseController{
 		BaseResponse response = new BaseResponse();
 		try {
 			
-			ASSET_TYPE assetTypeEnum =  ASSET_TYPE.findByValue(assetType);
+			AssetType assetTypeEnum =  AssetType.findById(assetType);
 			List<File> temporaryFiles = assetService.uploadAssets(assetTypeEnum, Arrays.asList(files));	
 			
 			List<Future<Boolean>> processingStatusList = new ArrayList<>(temporaryFiles.size());
@@ -128,11 +138,33 @@ public class AssetController extends BaseController{
 		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
+	@PutMapping(value="/asset/restore")
+	public ResponseEntity<?> restore(@RequestParam List<Long> ids) {
+		try {
+			assetService.markActive(ids);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
 	
 	@DeleteMapping(value="/asset")
 	public ResponseEntity<?> delete(@RequestParam List<Long> ids) {
 		try {
-			
+			assetService.markInactive(ids);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@DeleteMapping(value="/asset/permanent")
+	public ResponseEntity<?> deletePermanently(@RequestParam List<Long> ids) {
+		try {
+			assetService.deletePermanently(ids);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

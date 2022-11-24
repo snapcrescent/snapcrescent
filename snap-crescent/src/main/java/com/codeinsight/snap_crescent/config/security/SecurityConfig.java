@@ -87,6 +87,8 @@ public class SecurityConfig {
     		.antMatchers("/login").permitAll()
     		.antMatchers("/logout").permitAll()
     		.antMatchers("/file/*").permitAll()
+    		.antMatchers("/asset/**").permitAll()
+    		.antMatchers("/asset/bulk-import").permitAll()
     		.antMatchers("/asset/bulk-import").permitAll()
     		.antMatchers("/websocket/**").permitAll()
     		.anyRequest().authenticated()

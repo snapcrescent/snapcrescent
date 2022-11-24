@@ -1,63 +1,19 @@
-<div class="search-page">
-    <div class="row">
-        <div class="col-xl-2 col-lg-3 col-12" [formGroup]="searchFormGroup">
-            <div class="row d-block d-lg-none d-xl-none">
-                <div class="col-12 text-end">
-                <button type="button" *ngIf="advancedSearchFields && advancedSearchFields.length > 0" matTooltip="Open Advance Search" matSuffix mat-icon-button (click)="toggleAdvancedSearch()">
-                    <mat-icon>filter_list</mat-icon>
-                </button>
-            </div>
-            </div>
-            
-            <mat-expansion-panel class="mat-elevation-z" collapsedHeight="0" expanded="true" hideToggle>
-                <div class="row text-center">
-                    <ng-container *ngFor="let item of advancedSearchFields" [ngSwitch]="item.type">
-                        <div class="col-12">
-                            <ng-container *ngSwitchCase="'text'">
-                                <app-text [placeholder]="item.label" [formControlName]="item.key" (keyup.enter)="assetGridComponent.callSearch()">
-                                </app-text>
-                            </ng-container>
-        
-                            <ng-container *ngSwitchCase="'date'">
-                                <app-date [placeholder]="item.label" [formControlName]="item.key"></app-date>
-                            </ng-container>
-        
-                            <ng-container *ngSwitchCase="'monthYear'">
-                                <app-month-year [placeholder]="item.label" [formControlName]="item.key" [mode]="item.dateMode!"></app-month-year>
-                            </ng-container>
-        
-                            <ng-container *ngSwitchCase="'dropdown'">
-                                <app-select [placeholder]="item.label" [formControlName]="item.key" [options]="item.options">
-                                </app-select>
-                            </ng-container>
-                        </div>
-                    </ng-container>
-        
-                </div>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <button type="button" mat-raised-button (click)="reset()">Reset</button>
-                            </div>
-                            <div class="col-6">
-                                <button type="button" mat-raised-button color="primary" (click)="assetGridComponent.callSearch()">Search</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </mat-expansion-panel>
-            
-        </div>
-        <div class="col-xl-10 col-lg-9 col-12">
-            <app-asset-grid
-            #assetGridComponent
-            defaultSortColumn="name"
-            [actions]="actions" 
-            [advancedSearchFields]="advancedSearchFields"
-            [search]="search.bind(this)">
-        </app-asset-grid>    
-        </div>
+<app-header></app-header>
+<div class="row m-0">
+    <div class="col-xl-2 col-lg-3 d-none d-xl-block d-lg-block">
+        <app-side-bar></app-side-bar>
     </div>
-    
+    <div class="col-xl-10 col-lg-9 col-12">
+        <app-asset-grid
+        #assetGridComponent
+        [searchStoreName]="searchStoreName"
+        defaultSortColumn="creationDate"
+        [actions]="actions" 
+        [advancedSearchFields]="advancedSearchFields"
+        [extraSearchFields]="extraSearchFields"
+        [search]="search.bind(this)"
+        (onOpenAssetView)="openAssetView($event)"
+        >
+    </app-asset-grid>    
+    </div>
 </div>

@@ -5,7 +5,7 @@ import {
   HttpHandler,
   HttpInterceptor
 } from '@angular/common/http';
-import { SessionService } from '../session-service';
+import { SessionService } from '../session.service';
 import { UserLoginResponse } from 'src/app/login/login.model';
 
 @Injectable()

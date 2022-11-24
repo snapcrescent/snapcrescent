@@ -1,14 +1,12 @@
 package com.codeinsight.snap_crescent.metadata;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.codeinsight.snap_crescent.common.BaseConverter;
-import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
 import com.codeinsight.snap_crescent.location.LocationConverter;
 
@@ -78,10 +76,6 @@ public class MetadataConverter extends BaseConverter<Metadata, UiMetadata> {
 				bean.setLocation(locationConverter.getBeanFromEntity(entity.getLocation(), resultType));
 			}
 			
-			if(resultType == ResultType.FULL) {
-				bean.setBase64EncodedPhoto(Base64.getEncoder().encodeToString(fileService.readFileBytes(FILE_TYPE.PHOTO,entity.getPath(), entity.getInternalName())));
-			}
-
 			populateBeanWithAuditValues(bean, entity, resultType);
 
 		} catch (Exception e) {

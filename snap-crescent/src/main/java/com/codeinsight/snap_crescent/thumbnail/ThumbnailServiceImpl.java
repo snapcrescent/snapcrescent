@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
+import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.FileService;
 import com.codeinsight.snap_crescent.metadata.Metadata;
@@ -41,7 +41,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 	private final String FILE_TYPE_SEPARATOR = ".";
 
-	public Thumbnail generateThumbnail(File file, Metadata metadata, ASSET_TYPE assetType) throws Exception {
+	public Thumbnail generateThumbnail(File file, Metadata metadata, AssetType assetType) throws Exception {
 
 		File thumbnailFile = createThumbnail(assetType, file, metadata);
 		
@@ -53,7 +53,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 		
 	}
 
-	private File createThumbnail(ASSET_TYPE assetType , File file, Metadata metadata) throws Exception {
+	private File createThumbnail(AssetType assetType , File file, Metadata metadata) throws Exception {
 		
 			String directoryPath = fileService.getBasePath(FILE_TYPE.THUMBNAIL) + metadata.getPath();
 			fileService.mkdirs(directoryPath);
@@ -68,11 +68,11 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 			return outputFile;
 	}
 	
-	private BufferedImage extractImage(ASSET_TYPE assetType , File file, Metadata metadata) throws Exception {
+	private BufferedImage extractImage(AssetType assetType , File file, Metadata metadata) throws Exception {
 
 			BufferedImage original = null;
 
-			if(assetType == ASSET_TYPE.PHOTO) {
+			if(assetType == AssetType.PHOTO) {
 				if(metadata.getFileExtension() != null && metadata.getFileExtension().equals("webp")) {
 					
 					/*
@@ -93,7 +93,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 				}
 			}
 			
-			if(assetType == ASSET_TYPE.VIDEO) {
+			if(assetType == AssetType.VIDEO) {
 				FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(file);
 				frameGrabber.start();
 

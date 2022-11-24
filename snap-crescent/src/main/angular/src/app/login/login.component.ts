@@ -3,7 +3,7 @@ import { AbstractControl, FormBuilder, ValidatorFn, Validators } from '@angular/
 import { Router } from '@angular/router';
 import {  UserLoginRequest, UserLoginResponse } from './login.model';
 import { LoginService } from './login.service';
-import { SessionService } from '../core/services/session-service';
+import { SessionService } from '../core/services/session.service';
 import { AlertService } from '../shared/alert/alert.service';
 import { Observable, of } from 'rxjs';
 import { BaseComponent } from '../core/components/base.component';

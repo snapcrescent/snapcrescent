@@ -1,0 +1,45 @@
+@import "/src/assets/styles/variables.scss";
+
+.page-controls{
+    position: absolute;
+    color: white;
+    left: 20px;
+    top:20px;
+    cursor: pointer;
+}
+
+.asset-controls{
+    position: absolute;
+    color: white;
+    width: 90vh;
+    right: 20px;
+    top:20px;
+    text-align: right;
+
+    .control{
+        cursor: pointer;
+    }
+}
+
+
+.navigation-controls{
+    position: absolute;
+    color: white;
+    top:40%;
+    width: 100%;
+
+    
+    .left{
+        padding-left: 10px;
+        float:left;
+        cursor: pointer;
+        font-size: 36px;
+    }
+
+    .right{
+        padding-right: 10px;
+        float:right;
+        cursor: pointer;
+        font-size: 36px;
+    }
+}

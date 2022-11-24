@@ -1,14 +1,15 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { Component,Input, SimpleChanges, OnInit, OnChanges, AfterViewInit, Inject, LOCALE_ID  } from '@angular/core';
+import { Component,Input, SimpleChanges, OnInit, OnChanges, AfterViewInit, Inject, LOCALE_ID, Output , EventEmitter, ElementRef } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { ViewChild } from '@angular/core'
 import { AssetSearchField, AssetsGroup } from './asset-grid.model';
 import { Action } from 'src/app/core/models/action.model'
 import { Observable } from 'rxjs';
-import { BreadCrumb } from '../breadcrumb/breadcrumb.model';
 import { Asset } from 'src/app/asset/asset.model';
 import { formatDate } from '@angular/common';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { PageDataService } from 'src/app/core/services/stores/page-data.service';
 
 @Component({
   selector: 'app-asset-grid',
@@ -18,13 +19,13 @@ import { formatDate } from '@angular/common';
 export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
 
   @Input()
-  breadCrumbs:BreadCrumb[] = []
+  searchStoreName: string;
 
   @Input()
   defaultSortColumn: string = '';
 
   @Input()
-  defaultSortDirection: "asc" | "desc" = "asc";
+  defaultSortDirection: "asc" | "desc" = "desc";
 
   @Input()
   actions: Action[] = [];
@@ -33,39 +34,45 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   search: Function;
 
   @Input()
-  enablePagination = true;
-
-  @Input()
-  enableSelection = false;
-
-  @Input()
   dataSource = new MatTableDataSource<Asset>([]);
 
   @Input()
   advancedSearchFields: Array<AssetSearchField> = [];
+
+  @Input()
+  extraSearchFields: Array<AssetSearchField> = [];
+  
+  @Output()
+  onOpenAssetView: EventEmitter<any> = new EventEmitter<any>();
+  
   
   assetsGroups: AssetsGroup[] = [];
+  pageSizeOptions:number[] = [250,500,1000,2000];
 
- 
-
-  pageSizeOptions:number[] = [240,360, 480];
+  searchFormGroup: FormGroup = this.formBuilder.group({});
 
   @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
 
+  @ViewChild('assetGridContainer') 
+  private assetGridContainer: ElementRef;
+  
   
 
   constructor(
     @Inject(LOCALE_ID) public locale: string,
+    private formBuilder: FormBuilder,
+    private pageDataService:PageDataService
   ) {
 
   }
 
   ngOnInit() {
-    this.enableSelection = this.enableSelection;
-    this.callSearch();
+    this.initSearchForm();
   }
 
   ngAfterViewInit() {
+    this.getStoredSearchParams();
+    this.callSearch();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -84,13 +91,66 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
 
   }
 
+  private initSearchForm() {
+
+    if(this.advancedSearchFields && this.advancedSearchFields.length > 0) {
+
+      this.advancedSearchFields.forEach((item:AssetSearchField) => {
+        this.searchFormGroup.addControl(item.key,this.formBuilder.control('', []));
+      });
+
+    }
+
+    if(this.extraSearchFields && this.extraSearchFields.length > 0) {
+
+      this.extraSearchFields.forEach((item:AssetSearchField) => {
+        this.searchFormGroup.addControl(item.key,this.formBuilder.control(item.value, []));
+      });
+
+    }
+
+   
+  }
+
+  getStoredSearchParams() {
+    const params = this.pageDataService.getSearchPageData(this.searchStoreName);
+
+    Object.keys(params).forEach(key => {
+      if(key === 'pageNumber') {
+        this.paginator.pageIndex = params[key];
+      } else if(key === 'resultPerPage') {
+        this.paginator.pageSize = params[key];
+      } else if(key === 'sortBy') {
+        this.defaultSortColumn = params[key];
+      } else if(key === 'sortOrder') {
+       this.defaultSortDirection = params[key];
+      } else {
+        const control = this.searchFormGroup.get(key)
+
+        if(control) {
+          control.patchValue(params[key]);
+        }
+      }
+    });
+  }
+
   pagingChanged(pageEvent: PageEvent) {
     this.callSearch();
   }
 
+  reset() {
+    this.advancedSearchFields.forEach((item:AssetSearchField) => {
+      this.searchFormGroup.get(item.key)?.reset();
+    });
+
+    this.resetPaginatorPageSize();
+  }
+
   callSearch() {
       let params:any = this.getSearchParams();
-  
+ 
+      this.pageDataService.setSearchPageData(this.searchStoreName, params);
+      
       if(!!this.search) {
         this.search(params).subscribe((response:any) => {
           let objects:any = response.objects;
@@ -101,10 +161,26 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
           this.paginator.pageSize = response.resultCountPerPage;
           this.paginator.pageIndex = response.currentPageIndex;
 
+          this.scrollToPreviousPosition();
         });
       }
-    
   }
+
+  scrollToPreviousPosition() {
+      setTimeout(() => {
+        const state =  this.pageDataService.getPageData(this.searchStoreName);
+
+          if(state) {
+            this.assetGridContainer.nativeElement.scroll({
+              top: state.scrollHeight,
+              left: 0,
+              behavior: 'smooth'
+            });
+          }
+      }, 500);
+  }
+
+  
 
   prepareDateGroup() {
 
@@ -130,6 +206,30 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   getSearchParams() {
     let params:any = {};
 
+    this.advancedSearchFields.forEach((item:AssetSearchField) => {
+      const value = this.searchFormGroup.get(item.key)?.value;
+
+      if(typeof value === 'boolean') {
+        params[item.key] = value;
+      } else{
+        if(value) {
+          params[item.key] = value;
+        }
+      }      
+    });
+
+    this.extraSearchFields.forEach((item:AssetSearchField) => {
+      const value = this.searchFormGroup.get(item.key)?.value;
+
+      if(typeof value === 'boolean') {
+        params[item.key] = value;
+      } else{
+        if(value) {
+          params[item.key] = value;
+        }
+      }    
+    });
+
     let pageNumber = 0;
     let resultPerPage = this.pageSizeOptions[0];
 
@@ -140,6 +240,9 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
 
     params['pageNumber'] = pageNumber;
     params['resultPerPage'] = resultPerPage;
+
+    params['sortBy'] = this.defaultSortColumn;
+    params['sortOrder'] = this.defaultSortDirection;
 
     return params;
   }
@@ -172,8 +275,33 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
     assetsGroup.assets.forEach((row: Asset) => assetsGroup.selection.select(row));
   }
 
-  toggleAsset(assetsGroup:AssetsGroup, asset: Asset) {
+  onThumbnailClick(assetsGroup:AssetsGroup, asset: Asset) {
+    if(this.isAnyAssetSelected) {
+      this.toggleAssetSelection(assetsGroup,asset)
+    } else{
+      this.openAssetView(asset);
+    }
+
+  }
+
+  toggleAssetSelection(assetsGroup:AssetsGroup, asset: Asset) {
     assetsGroup.selection.toggle(asset)
+  }
+  
+  openAssetView(asset: Asset) {
+
+    const data = {
+      currentAssetId: asset.id,
+      assetIds: this.dataSource.data.map(asset=> { return asset.id })
+    }
+
+    const state:any = {};
+    state['scrollHeight'] = this.assetGridContainer.nativeElement.scrollTop;
+
+    this.pageDataService.setPageData(this.searchStoreName,state);
+
+
+    this.onOpenAssetView.emit(data);
   }
 
   /** The label for the checkbox on the passed row */

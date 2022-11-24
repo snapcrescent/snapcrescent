@@ -5,6 +5,7 @@ import { ScreenSizeDetectorService } from './screen-size-detector.service';
 @Component({
   selector: 'app-screen-size-detector',
   templateUrl: './screen-size-detector.component.html',
+  styleUrls:['./screen-size-detector.component.scss']
 })
 export class ScreenSizeDetectorComponent implements AfterViewInit {
   prefix = 'is-';
@@ -50,7 +51,7 @@ export class ScreenSizeDetectorComponent implements AfterViewInit {
       return isVisible;
     });
 
-    this.screenSizeDetectorService.onResize(currentSize!.id);
+    this.screenSizeDetectorService.resize(currentSize!.id);
   }
 
 }

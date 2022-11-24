@@ -1,4 +1,4 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, HammerModule } from '@angular/platform-browser';
 import { Injector, NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app.routing.module';
@@ -20,7 +20,8 @@ declare global{
     SharedModule,
     BrowserModule,
     AppRoutingModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    HammerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

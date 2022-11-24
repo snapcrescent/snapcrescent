@@ -1,0 +1,30 @@
+@import "/src/assets/styles/variables.scss";
+
+.side-bar-container{
+    padding: 20px 20px 20px 0px;
+    .item{
+        padding-left: 10px;
+        margin: 15px 0px;
+        cursor: pointer;
+        font-weight: 500;
+        color: $primary-color;
+
+        &.active {
+            background-color: $primary-color;
+            color: white;
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        
+
+        .icon{
+            font-size: 24px;
+            margin-right: 30px;
+        }
+
+        .text {
+            vertical-align: super;
+            font-size: 16px;
+        }
+    }
+}
