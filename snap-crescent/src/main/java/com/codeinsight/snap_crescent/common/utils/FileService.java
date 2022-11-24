@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 
-import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
+import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 
@@ -21,33 +21,40 @@ public class FileService {
 		
 		File file = getFile(fileType, path, fileName);
 		
-		byte[] image = null;
+		byte[] fileBytes = null;
 		try {
 			InputStream in = new FileInputStream(file);
-			image = IOUtils.toByteArray(in);
+			fileBytes = IOUtils.toByteArray(in);
 			in.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return image;
+		return fileBytes;
+	}
+	
+	public long getFileSize(FILE_TYPE fileType,String path, String fileName) throws IOException {
+		return Files.size(Paths.get(getBasePath(fileType) + path + fileName));
 	}
 	
 	public File getFile(FILE_TYPE fileType, String path, String fileName) {
 		return new File(getBasePath(fileType) + path + fileName);
-		
+	}
+	
+	public InputStream getFileInputStream(FILE_TYPE fileType, String path, String fileName) throws IOException {
+		return Files.newInputStream(Paths.get(getBasePath(fileType) + path + fileName));
 	}
 	
 	public void removeFile(FILE_TYPE fileType,String path, String fileName) throws IOException {
 		Files.delete(Paths.get(getBasePath(fileType) + path + fileName));
 	}
 	
-	public String getBasePath(ASSET_TYPE assetType) {
+	public String getBasePath(AssetType assetType) {
 		
 		String basepath = null;
 		
-		if(assetType == ASSET_TYPE.PHOTO) {
+		if(assetType == AssetType.PHOTO) {
 			basepath =  getBasePath(FILE_TYPE.PHOTO);
-		} else  if(assetType == ASSET_TYPE.VIDEO) {
+		} else  if(assetType == AssetType.VIDEO) {
 			basepath =  getBasePath(FILE_TYPE.VIDEO);
 		} 
 		

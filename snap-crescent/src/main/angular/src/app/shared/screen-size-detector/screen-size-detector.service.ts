@@ -8,7 +8,7 @@ import { ScreenSize } from './screen-size-detector.model';
 })
 export class ScreenSizeDetectorService {
   
-  get onResize$(): Observable<ScreenSize> {
+  get onResize(): Observable<ScreenSize> {
     return this.resizeSubject.asObservable().pipe(distinctUntilChanged());
   }
 
@@ -22,7 +22,7 @@ export class ScreenSizeDetectorService {
     return this.resizeSubject.getValue();
   }
 
-  onResize(size: ScreenSize) {
+  resize(size: ScreenSize) {
     this.resizeSubject.next(size);
   }
 

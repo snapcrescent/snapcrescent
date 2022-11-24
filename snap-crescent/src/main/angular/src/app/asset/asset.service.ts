@@ -52,8 +52,16 @@ export class AssetService extends BaseService {
     return this.httpClient.put(this.entityUrl + '/' + id,this.preparePayload(entity));
   }
 
+  restore(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
+    return this.httpClient.put(`${this.entityUrl}/restore?ids=${ids.join(',')}`, {});
+  }
+
   delete(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
     return this.httpClient.delete(`${this.entityUrl}?ids=${ids.join(',')}`);
+  }
+
+  deletePermanently(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
+    return this.httpClient.delete(`${this.entityUrl}/permanent?ids=${ids.join(',')}`);
   }
 
   preparePayload(entity: Asset) {

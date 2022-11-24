@@ -52,6 +52,8 @@ import { AuthorizationGuard } from '../core/services/auth.guard';
 import { DragAndDropDirective } from '../core/directives/drag-and-drop.directive';
 import { MonthYearComponent } from './input/month-year/month-year.component';
 import { ScreenSizeDetectorComponent } from './screen-size-detector/screen-size-detector.component';
+import { AssetFullScreenViewComponent } from './asset-full-screen-view/asset-full-screen-view.component';
+import { SideBarComponent } from './side-bar/side-bar.component';
 
 
 const modules = [
@@ -90,8 +92,10 @@ const modules = [
 
 const components = [
   HeaderComponent,
+  SideBarComponent,
   ScreenSizeDetectorComponent,
   AssetGridComponent,
+  AssetFullScreenViewComponent,
   TextComponent,
   DateComponent,
   DateTimeComponent,

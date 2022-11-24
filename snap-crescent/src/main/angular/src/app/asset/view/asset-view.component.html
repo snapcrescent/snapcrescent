@@ -1,0 +1,27 @@
+
+<div class="page-controls">
+    <div class="material-symbols-outlined" (click)="navigateToAssetSearch()">
+        arrow_back
+    </div>
+</div>
+<div class="asset-controls">
+    <div class="control material-symbols-outlined" (click)="deleteAsset()">
+        delete
+    </div>
+</div>
+<div class="navigation-controls">
+    <div class="left material-symbols-outlined" (click)="previousAsset()">
+        arrow_circle_left
+        </div>
+
+    <div class="right material-symbols-outlined" (click)="nextAsset()">
+        arrow_circle_right
+        </div>
+</div>
+<div (swipeLeft)="nextAsset()" (swipeRight)="previousAsset()">
+    <app-asset-full-screen-view
+    [currentAssetId]="currentAssetId"
+    [assetIds]="assetIds"
+    >
+    </app-asset-full-screen-view>
+</div>

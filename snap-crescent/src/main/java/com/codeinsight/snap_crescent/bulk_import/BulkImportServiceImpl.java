@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import javax.transaction.Transactional;
@@ -13,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.codeinsight.snap_crescent.asset.AssetService;
-import com.codeinsight.snap_crescent.common.utils.Constant.ASSET_TYPE;
+import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.metadata.MetadataRepository;
 import com.codeinsight.snap_crescent.sync_info.SyncInfoService;
 
@@ -50,13 +49,13 @@ public class BulkImportServiceImpl implements BulkImportService {
 				String assetName = assetFileString.substring(0, assetFileString.lastIndexOf("."));
 				String extension = assetFileString.substring(assetFileString.lastIndexOf(".") + 1, assetFileString.length());
 
-				ASSET_TYPE assetType = null;
+				AssetType assetType = null;
 				if (extension.equalsIgnoreCase("gif") || extension.equalsIgnoreCase("jpg")
 						|| extension.equalsIgnoreCase("png") || extension.equalsIgnoreCase("raw")
 						|| extension.equalsIgnoreCase("heif")) {
-					assetType = ASSET_TYPE.PHOTO;
+					assetType = AssetType.PHOTO;
 				} else if (extension.equalsIgnoreCase("mp4") || extension.equalsIgnoreCase("mov")) {
-					// assetType = ASSET_TYPE.VIDEO;
+					assetType = AssetType.VIDEO;
 				}
 
 				if (assetType != null) {

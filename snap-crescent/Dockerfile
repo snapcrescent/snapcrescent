@@ -14,7 +14,7 @@ COPY src /tmp/src/
 WORKDIR /tmp/
 
 #Execute maven build
-RUN mvn install
+RUN mvn clean install package
 
 #Copy build from TEMP to /
 RUN cp target/snap-crescent-*.jar /snap-crescent.jar

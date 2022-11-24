@@ -35,14 +35,59 @@ public class Constant {
 	public static final String METADATA_CREATED_DATE_FORMAT_4 = "yyyy-MM-dd HH:mm:ss";
 	
 	
-	public static enum ASSET_TYPE {
-		PHOTO, VIDEO;
+	
+	public static final String VIDEO = "/video";
+
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String VIDEO_CONTENT = "video/";
+    public static final String CONTENT_RANGE = "Content-Range";
+    public static final String ACCEPT_RANGES = "Accept-Ranges";
+    public static final String BYTES = "bytes";
+    public static final int CHUNK_SIZE = 314700;
+    public static final int BYTE_RANGE = 1024;
+    
+    
+    public interface DbEnum {
+		int getId();
+		String getLabel();
+	}
+    
+    public enum AssetType implements DbEnum {
+    	PHOTO(1,"Photo"),
+    	VIDEO(2, "Video");
 		
-		public static ASSET_TYPE findByValue(int value) {
-			return ASSET_TYPE.values()[value];
+		private int id;
+		private String label;
+		
+		private AssetType(int id, String label) {
+			this.id = id;
+			this.label = label;
+		}
+		
+		@Override
+		public int getId() {
+			return this.id;
+		}
+		
+		@Override
+		public String getLabel() {
+			return this.label;
+		}
+		
+		public static AssetType findById(int id) {
+			
+			for (AssetType item : AssetType.values()) {
+				if(item.getId() == id) {
+					return item;
+				}
+			}
+			
+			return null;
 		}
 	}
-
+	
+	
 	public static enum FILE_TYPE {
 		PHOTO, VIDEO, THUMBNAIL
 	}

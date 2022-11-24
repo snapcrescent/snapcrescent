@@ -15,7 +15,7 @@
       </form>
     </div>
 
-    <button mat-icon-button [matMenuTriggerFor]="menu" class="navbar-toggler" >
+    <button mat-icon-button (click)="toggleSideBar()" class="navbar-toggler" >
       <mat-icon>more_vert</mat-icon>
     </button>
     <mat-menu #menu="matMenu">
@@ -28,23 +28,3 @@
     </mat-menu>
   </div>
 </nav>
-
-<!--
-<header class="p-1 ">
-  <div class="container">
-    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-      
-      <ul class="nav col-10 me-lg-auto mb-2 mb-md-0">
-        <li class="col-3">
-          
-        </li>
-        <li *ngFor="let menuItem of menuItems">
-          <span class="label">{{menuItem.label}}</span>
-        </li>
-      </ul>
-
-      
-    </div>
-  </div>
-</header>
--->

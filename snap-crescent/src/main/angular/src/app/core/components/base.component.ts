@@ -3,6 +3,7 @@ import { BreadCrumb } from "src/app/shared/breadcrumb/breadcrumb.model";
 
 export class BaseComponent {
 
+  
    
     breadCrumbs:BreadCrumb[] = []
 

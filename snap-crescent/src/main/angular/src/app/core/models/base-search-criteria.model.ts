@@ -8,6 +8,6 @@ export class BaseSearchCriteria {
   sortBy: string;
   sortOrder: string;
 
-  pagenumber: number;
+  pageNumber: number;
   resultPerPage: number;
   }

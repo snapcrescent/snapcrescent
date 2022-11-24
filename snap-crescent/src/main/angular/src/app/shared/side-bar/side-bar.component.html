@@ -1,0 +1,8 @@
+<div class="side-bar-container">
+    <div class="row" *ngFor="let menuItem of menuItems">
+        <div class="col-12 item"(click)="navigate(menuItem)" [ngClass]="{'active': activeMenu === menuItem}">
+            <span class="icon material-symbols-outlined">{{menuItem.icon}}</span>
+            <span class="text">{{menuItem.label}}</span>
+        </div>
+    </div>    
+</div>

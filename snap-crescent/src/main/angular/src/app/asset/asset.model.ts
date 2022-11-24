@@ -14,15 +14,17 @@ export class Thumbnail extends BaseUiBean{
 
 export class Metadata extends BaseUiBean{
   name:string
+  base64EncodedPhoto:string
+  mimeType:string
 }
 
 export let AssetType = {
     PHOTO: {
-      id: 0,
+      id: 1,
       label: "Photo"
     },
     VIDEO: {
-      id: 1,
+      id: 2,
       label: "Video"
     }
   };

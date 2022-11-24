@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { CanActivate } from '@angular/router';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterStateSnapshot } from '@angular/router';
-import { SessionService } from './session-service';
+import { SessionService } from './session.service';
 
 
 @Injectable({

@@ -1,5 +1,12 @@
 @import "/src/assets/styles/variables.scss";
 
+.asset-grid-container{
+  max-height: calc(100vh - 50px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+
 mat-expansion-panel {
     border-radius: 0px;
 
@@ -10,83 +17,93 @@ mat-expansion-panel {
     }
 }
 
-.assets-group-title-container {
-  margin-bottom: 5px;
+.asset-container{
+  min-height: calc(100vh - 300px);
 
-  .select{
-    float: left;
-    margin-right: 5px;
-
-    &.active {
-      color: $accent-color;
-    }
-
-    &:hover {
-      cursor: pointer;
-    }
-
-  }
-
-  .title{
-    float: left;
-    font-weight: 500;
-    margin-top: 3px;
-  }
+  .assets-group-title-container {
+    margin-top: 10px;
+    margin-bottom: 5px;
   
-}
-
-.asset-container {
-  padding: 0px;
-
-  .mat-card{
-    padding: 0px;
-
-    .thumbnail {
-
-      .asset{
-        padding: 1px;
+    .select{
+      margin-right: 5px;
+      height: 24px;
+      width: 24px;
+  
+      &.active {
+        color: $accent-color;
       }
-
-      .select{
-        display: none;
-        position: absolute;
-        cursor: pointer;
-        width: 100%;
-        color: gray;
-        background: rgb(64,70,68);
-        background: linear-gradient(180deg, rgba(64,70,68,0.7674779384410014) 0%, rgba(49,78,94,0) 100%);
-
-        &:hover {
-          color: white;
-        }  
-      }
-
+  
       &:hover {
-        .select{
-            display: block;
-        }
-      }
-
-      &.selected {
-
-        .asset{
-          padding: 15px;
-        }
-        
-        .select{
-          display: block;
-          color: $accent-color;
-          background:none;
-          }
+        cursor: pointer;
       }
   
-
-      
-
-      
+    }
+  
+    .title{
+      font-weight: 500;
+      vertical-align: super;
     }
     
   }
+
+  .asset-thumbnail-container {
+    padding: 0px;
+  
+    .mat-card{
+      padding: 0px;
+  
+      .thumbnail {
+  
+        .asset{
+          padding: 1px;
+        }
+  
+        .select{
+          display: none;
+          position: absolute;
+          cursor: pointer;
+          width: 100%;
+          color: gray;
+          background: rgb(64,70,68);
+          background: linear-gradient(180deg, rgba(64,70,68,0.7674779384410014) 0%, rgba(49,78,94,0) 100%);
+  
+          &:hover {
+            color: white;
+          }  
+        }
+  
+        .video{
+          position: absolute;
+          right:0px;
+          color: white;
+        }
+  
+        &:hover {
+          .select{
+              display: block;
+          }
+        }
+  
+        &.selected {
+  
+          .asset{
+            padding: 15px;
+          }
+          
+          .select{
+            display: block;
+            color: $accent-color;
+            background:none;
+            }
+        }
+      }
+    }
+  }
+
 }
+
+
+
+
 
 

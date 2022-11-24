@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { SessionService } from 'src/app/core/services/session-service';
+import { SessionService } from 'src/app/core/services/session.service';
+import { GlobalService } from 'src/app/core/services/global.service';
 
 @Component({
   selector: 'app-header',
@@ -12,8 +13,11 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   activeMenu:any;
   menuItems:any[] = [];
 
+  sideBarOpen = false;
+
   constructor(
     private sessionService: SessionService,
+    private globalService: GlobalService,
     private router: Router
   ) {
     
@@ -46,6 +50,11 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     this.activeMenu = menuItem;
     this.router.navigate([menuItem.link]);
   }
+
+  toggleSideBar() {
+    this.sideBarOpen = !this.sideBarOpen;
+    this.globalService.updateToggleSideBarState(this.sideBarOpen);
+  } 
 
   logout() {
     this.sessionService.logout();

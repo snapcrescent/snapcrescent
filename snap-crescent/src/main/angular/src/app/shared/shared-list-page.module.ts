@@ -1,12 +1,17 @@
 import { NgModule } from '@angular/core';
+import { AssetListComponent } from '../asset/list/asset-list.component';
+import { TrashAssetListComponent } from '../trash/list/trash-asset-list.component';
 import { SharedModule } from './shared.module';
 
 
 const modules = [
-  SharedModule
+  SharedModule,
 ];
 
-const components:any = [];
+const components:any = [
+  AssetListComponent,
+  TrashAssetListComponent
+];
 
 
 @NgModule({
