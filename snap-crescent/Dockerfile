@@ -22,7 +22,8 @@ RUN cp target/snap-crescent-*.jar /snap-crescent.jar
 #Change working directory to /
 WORKDIR /
 
-FROM openjdk:17-jdk-slim-buster
+FROM node:latest
+RUN apt install openjdk-17-jre-headless
 
 # COPY compiled jar file to new image
 COPY --from=BUILD_STAGE snap-crescent.jar .

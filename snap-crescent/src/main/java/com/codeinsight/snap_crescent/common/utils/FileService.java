@@ -10,14 +10,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
-import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 
 @Service
 public class FileService {
+	
+	@Value("${sc.storage.path}")
+	private String STORAGE_PATH;
+	
 	
 	public byte[] readFileBytes(FILE_TYPE fileType,String path, String fileName) {
 		
@@ -87,11 +91,11 @@ public class FileService {
 		String basepath = null;
 		
 		if(fileType == FILE_TYPE.THUMBNAIL) {
-			basepath =  EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER;
+			basepath =  STORAGE_PATH + Constant.THUMBNAIL_FOLDER;
 		} else  if(fileType == FILE_TYPE.PHOTO) {
-			basepath = EnvironmentProperties.STORAGE_PATH + Constant.PHOTO_FOLDER;
+			basepath = STORAGE_PATH + Constant.PHOTO_FOLDER;
 		} else if(fileType == FILE_TYPE.VIDEO) {
-			basepath = EnvironmentProperties.STORAGE_PATH + Constant.VIDEO_FOLDER;
+			basepath = STORAGE_PATH + Constant.VIDEO_FOLDER;
 		}
 		return basepath;
 	}
