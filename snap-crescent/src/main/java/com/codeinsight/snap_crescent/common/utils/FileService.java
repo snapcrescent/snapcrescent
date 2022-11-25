@@ -1,9 +1,7 @@
 package com.codeinsight.snap_crescent.common.utils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -36,25 +34,6 @@ public class FileService {
 			e.printStackTrace();
 		}
 		return fileBytes;
-	}
-	
-	public byte[] readBufferedFileBytes(FILE_TYPE fileType,String path, String fileName, int start, int end) throws FileNotFoundException, IOException {
-		
-		
-		File file = getFile(fileType, path, fileName);
-		
-		try (InputStream inputStream = new FileInputStream(file);
-             ByteArrayOutputStream bufferedOutputStream = new ByteArrayOutputStream()) {
-            byte[] data = new byte[10 * 1024 * 1024];
-            int nRead;
-            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
-                bufferedOutputStream.write(data, 0, nRead);
-            }
-            bufferedOutputStream.flush();
-            byte[] result = new byte[(int) (end - start) + 1];
-            System.arraycopy(bufferedOutputStream.toByteArray(), (int) start, result, 0, result.length);
-            return result;
-        }
 	}
 	
 	public long getFileSize(FILE_TYPE fileType,String path, String fileName) throws IOException {

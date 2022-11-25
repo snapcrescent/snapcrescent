@@ -20,7 +20,5 @@ public interface AssetService {
 	File migrateAssets(AssetType assetType, File originalFile) throws Exception;
 	public void markActive(List<Long> ids);
 	public void markInactive(List<Long> ids);
-	public void deletePermanently(List<Long> ids);
-	public AssetStream streamAssetById(Long id) throws Exception;
-	public AssetStream streamAssetById(Long id, String range) throws Exception;	
+	public void deletePermanently(List<Long> ids);	
 }

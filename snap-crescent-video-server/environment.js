@@ -5,8 +5,11 @@ var mysqlConfig = {
     password : "CodeInsight@123",
 };
 var storageConfig = {
-    path:"/mnt/nfs/snapcrescent/"
+    //path:"/mnt/nfs/snapcrescent/",
+    path:"Y:/"
 };
+
+
 
 exports.mysqlConfig = mysqlConfig;
 exports.storageConfig = storageConfig;

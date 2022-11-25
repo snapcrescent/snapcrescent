@@ -10,6 +10,7 @@ import { Asset, AssetType } from 'src/app/asset/asset.model';
 import { formatDate } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { PageDataService } from 'src/app/core/services/stores/page-data.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-asset-grid',
@@ -57,6 +58,8 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   @ViewChild('assetGridContainer') 
   private assetGridContainer: ElementRef;
   
+
+  appBaseURL:string;
   
 
   constructor(
@@ -64,6 +67,10 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
     private formBuilder: FormBuilder,
     private pageDataService:PageDataService
   ) {
+
+      const parsedUrl = new URL(window.location.href);
+      const baseUrl = parsedUrl.origin;
+      this.appBaseURL = baseUrl.substring(0, baseUrl.lastIndexOf(":"));
 
   }
 
@@ -324,5 +331,9 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
 
   resetPaginatorPageSize() {
     this.paginator._changePageSize(this.pageSizeOptions[0]);
+  }
+
+  getThumbnailStreamUrl(asset:Asset) {
+    return this.appBaseURL + `:${environment.videoServerUrlPort}/asset/${asset.id}/thumbnail`;
   }
 }
