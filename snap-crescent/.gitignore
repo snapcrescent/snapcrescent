@@ -1,5 +1,19 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+.settings/
+target/
+
+src/main/webapp/node_modules
+src/main/webapp/build
+src/main/webapp/node
+src/main/webapp/.eslintcache
+src/main/webapp/npm-debug.log*
+src/main/webapp/yarn-debug.log*
+src/main/webapp/yarn-error.log*
+src/main/webapp/debug.log
+src/main/webapp/package-lock.json
+src/main/webapp/.eslintcache
+
 # compiled output
 /dist
 /tmp

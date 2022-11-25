@@ -4,8 +4,9 @@ import { Asset, AssetType } from 'src/app/asset/asset.model';
 import { BaseComponent } from 'src/app/core/components/base.component';
 import { AssetService } from 'src/app/asset/asset.service';
 import { environment } from 'src/environments/environment';
-import { Router } from '@angular/router';
 
+
+declare var window: any;
 @Component({
   selector: 'app-asset-full-screen-view',
   templateUrl: './asset-full-screen-view.component.html',
@@ -30,10 +31,16 @@ export class AssetFullScreenViewComponent extends BaseComponent implements OnIni
   @ViewChild("videoPlayer", { static: false })
   videoPlayer: ElementRef;
 
+  appBaseURL:string;
+
   constructor(
     private assetService: AssetService,
+    
   ) {
       super();
+      const parsedUrl = new URL(window.location.href);
+      const baseUrl = parsedUrl.origin;
+      this.appBaseURL = baseUrl.substring(0, baseUrl.lastIndexOf(":"));
   }
 
   ngOnInit() {
@@ -51,7 +58,7 @@ export class AssetFullScreenViewComponent extends BaseComponent implements OnIni
   }
 
   getVideoURL() {
-    return environment.backendUrl + `/asset/${this.currentAsset.id}/stream`;
+    return this.appBaseURL + `:${environment.videoServerUrlPort}/video/${this.currentAsset.id}`;
   }
 
   toggleVideo() {
