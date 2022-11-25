@@ -13,6 +13,7 @@ import com.codeinsight.snap_crescent.common.services.BaseService;
 import com.codeinsight.snap_crescent.common.utils.Constant;
 import com.codeinsight.snap_crescent.common.utils.DateUtils;
 import com.codeinsight.snap_crescent.common.utils.StringUtils;
+import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.location.LocationService;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.lang.GeoLocation;
@@ -27,7 +28,7 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 	@Autowired
 	private LocationService locationService;
 
-	public Metadata extractMetaData(String originalFilename, File file) throws Exception {
+	public Metadata extractMetaData(AssetType assetType, String originalFilename, File file) throws Exception {
 		
 		Metadata metadata = new Metadata();
 
@@ -72,6 +73,10 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 			metadata.setWidth(metaDataMap.get(Constant.METADATA_IMAGE_WIDTH));
 			metadata.setModel(metaDataMap.get(Constant.METADATA_MODEL));
 			metadata.setFstop(metaDataMap.get(Constant.METADATA_FSTOP));
+			
+			if(assetType == AssetType.VIDEO) {
+				metadata.setDuration(0);
+			}
 
 		    Directory directory = drewMetadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 		    int orientation = 1;

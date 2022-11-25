@@ -1,18 +1,13 @@
 package com.codeinsight.snap_crescent.asset;
 
-import static com.codeinsight.snap_crescent.common.utils.Constant.ACCEPT_RANGES;
 import static com.codeinsight.snap_crescent.common.utils.Constant.BYTES;
 import static com.codeinsight.snap_crescent.common.utils.Constant.CHUNK_SIZE;
-import static com.codeinsight.snap_crescent.common.utils.Constant.CONTENT_LENGTH;
-import static com.codeinsight.snap_crescent.common.utils.Constant.CONTENT_RANGE;
-import static com.codeinsight.snap_crescent.common.utils.Constant.CONTENT_TYPE;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -24,7 +19,6 @@ import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -140,7 +134,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		try {
 			String originalFilename = StringUtils.extractFileNameFromTemporary(temporaryFile.getName());
 
-			Metadata metadata = metadataService.extractMetaData(originalFilename, temporaryFile);
+			Metadata metadata = metadataService.extractMetaData(assetType, originalFilename, temporaryFile);
 			Thumbnail thumbnail = thumbnailService.generateThumbnail(temporaryFile, metadata, assetType);
 
 			long assetHash = getPerceptualHash(
@@ -208,58 +202,70 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		return fileService.readFileBytes(fileType, asset.getMetadata().getPath(),
 				asset.getMetadata().getInternalName());
 	}
-	
+
 	@Override
-	public ResponseEntity<byte[]> streamAssetById(Long id, String range) throws Exception {
+	public AssetStream streamAssetById(Long id) throws Exception {
 		Asset asset = assetRepository.findById(id);
-		
-		try {
-            long rangeStart = 0;
-            long rangeEnd = CHUNK_SIZE;
-            final Long fileSize = fileService.getFileSize(FILE_TYPE.VIDEO,  asset.getMetadata().getPath(), asset.getMetadata().getInternalName());
-            if (range == null) {
-                return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                        .header(CONTENT_TYPE, asset.getMetadata().getMimeType())
-                        .header(ACCEPT_RANGES, BYTES)
-                        .header(CONTENT_LENGTH, String.valueOf(rangeEnd))
-                        .header(CONTENT_RANGE, BYTES + " " + rangeStart + "-" + rangeEnd + "/" + fileSize)
-                        .header(CONTENT_LENGTH, String.valueOf(fileSize))
-                        .body(readByteRange(id, rangeStart, rangeEnd)); // Read the object and convert it as bytes
-            }
-            String[] ranges = range.split("-");
-            rangeStart = Long.parseLong(ranges[0].substring(6));
-            if (ranges.length > 1) {
-                rangeEnd = Long.parseLong(ranges[1]);
-            } else {
-                rangeEnd = rangeStart + CHUNK_SIZE;
-            }
 
-            rangeEnd = Math.min(rangeEnd, fileSize - 1);
-            final byte[] data = readByteRange(id, rangeStart, rangeEnd);
-            final String contentLength = String.valueOf((rangeEnd - rangeStart) + 1);
-            HttpStatus httpStatus = HttpStatus.PARTIAL_CONTENT;
-            if (rangeEnd >= fileSize) {
-                httpStatus = HttpStatus.OK;
-            }
-            return ResponseEntity.status(httpStatus)
-                    .header(CONTENT_TYPE, asset.getMetadata().getMimeType())
-                    .header(ACCEPT_RANGES, BYTES)
-                    .header(CONTENT_LENGTH, contentLength)
-                    .header(CONTENT_RANGE, BYTES + " " + rangeStart + "-" + rangeEnd + "/" + fileSize)
-                    .body(data);
-        } catch (IOException e) {
-            logger.error("Exception while reading the file {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+		int rangeStart = 0;
+		int rangeEnd = CHUNK_SIZE;
+		final Long fileSize = fileService.getFileSize(FILE_TYPE.VIDEO, asset.getMetadata().getPath(),
+				asset.getMetadata().getInternalName());
+
+		return prepareAssetStream(asset.getMetadata().getMimeType(), BYTES, String.valueOf(rangeEnd), rangeStart, rangeEnd, fileSize, readByteRange(asset, rangeStart, rangeEnd), HttpStatus.PARTIAL_CONTENT);
 	}
-	
-	public byte[] readByteRange(Long id, long start, long end) throws Exception {
-        byte[] data = getAssetById(id);
-        byte[] result = new byte[(int) (end - start) + 1];
-        System.arraycopy(data, (int) start, result, 0, (int) (end - start) + 1);
-        return result;
-    }
 
+	@Override
+	public AssetStream streamAssetById(Long id, String range) throws Exception {
+		Asset asset = assetRepository.findById(id);
+
+		int rangeStart = 0;
+		long rangeEnd = CHUNK_SIZE;
+		final Long fileSize = fileService.getFileSize(FILE_TYPE.VIDEO, asset.getMetadata().getPath(),
+				asset.getMetadata().getInternalName());
+
+		String[] ranges = range.split("-");
+		rangeStart = Integer.parseInt(ranges[0].substring(6));
+		if (ranges.length > 1) {
+			rangeEnd = Integer.parseInt(ranges[1]);
+		} else {
+			rangeEnd = rangeStart + CHUNK_SIZE;
+		}
+
+		rangeEnd = Math.min(rangeEnd, fileSize - 1);
+		final String contentLength = String.valueOf((rangeEnd - rangeStart) + 1);
+
+		HttpStatus httpStatus = HttpStatus.PARTIAL_CONTENT;
+		if (rangeEnd >= fileSize) {
+			httpStatus = HttpStatus.OK;
+		}
+		
+		Long rangeEndLong = rangeEnd;
+
+		return prepareAssetStream(asset.getMetadata().getMimeType(), BYTES, contentLength, rangeStart, rangeEndLong.intValue(), fileSize, readByteRange(asset, rangeStart, rangeEndLong.intValue()), httpStatus);
+
+	}
+
+	private AssetStream prepareAssetStream(String contentType, String acceptRanges, String contentLength,
+			int rangeStart, int rangeEnd, Long fileSize, byte[] data, HttpStatus httpStatus) {
+		
+		AssetStream stream = new AssetStream();
+
+		stream.setContentType(contentType);
+		stream.setAcceptRanges(acceptRanges);
+		stream.setContentLength(contentLength);
+		stream.setContentRange(BYTES + " " + rangeStart + "-" + rangeEnd + "/" + fileSize);
+		stream.setData(data);
+		stream.setHttpStatus(httpStatus);
+		
+		return stream;
+		
+	}
+
+	private byte[] readByteRange(Asset asset, int start, int end) throws Exception {
+		return fileService.readBufferedFileBytes(FILE_TYPE.VIDEO, asset.getMetadata().getPath(),
+				asset.getMetadata().getInternalName(), start, end);
+	}
 
 	@Override
 	@Transactional
@@ -370,8 +376,8 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 					e.printStackTrace();
 				}
 
-				//metadataRepository.delete(metadata);
-				//thumbnailRepository.delete(thumbnail);
+				// metadataRepository.delete(metadata);
+				// thumbnailRepository.delete(thumbnail);
 				assetRepository.delete(asset);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -380,7 +386,5 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		}
 
 	}
-
-
 
 }

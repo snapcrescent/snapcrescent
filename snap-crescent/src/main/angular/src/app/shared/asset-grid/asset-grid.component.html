@@ -9,7 +9,7 @@
             <ng-container *ngFor="let item of advancedSearchFields" [ngSwitch]="item.type">
                 <div class="col-12">
                     <ng-container *ngSwitchCase="'text'">
-                        <app-text [placeholder]="item.label" [formControlName]="item.key" (keyup.enter)="callSearch()">
+                        <app-text [placeholder]="item.label" [formControlName]="item.key" (keyup.enter)="callSearch(true)">
                         </app-text>
                     </ng-container>
     
@@ -37,7 +37,7 @@
                         <button type="button" mat-raised-button (click)="reset()">Reset</button>
                     </div>
                     <div class="col-6">
-                        <button type="button" mat-raised-button color="primary" (click)="callSearch()">Search</button>
+                        <button type="button" mat-raised-button color="primary" (click)="callSearch(true)">Search</button>
                     </div>
                 </div>
             </div>
@@ -64,7 +64,7 @@
                                         check_circle
                                     </span>
                                 </span>
-                                <span *ngIf="asset.assetType === 1" class="video material-symbols-outlined">
+                                <span *ngIf="asset.assetType === AssetType.VIDEO.id" class="video material-symbols-outlined">
                                     play_circle
                                 </span>
                                 <img class="asset img-fluid"

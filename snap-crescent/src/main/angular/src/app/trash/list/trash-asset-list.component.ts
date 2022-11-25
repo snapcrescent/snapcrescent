@@ -79,7 +79,7 @@ export class TrashAssetListComponent extends BaseListComponent implements AfterV
 
                   this.assetService.restore(assetIds).subscribe(response => {
                     this.alertService.showSuccess(`Item${this.assetListComponent.assetGridComponent.selectedAssets.length > 1 ? 's':''} restored successfully`);
-                    this.assetListComponent.assetGridComponent.callSearch();
+                    this.assetListComponent.assetGridComponent.callSearch(false);
                   });
                 }
               }
@@ -119,7 +119,7 @@ export class TrashAssetListComponent extends BaseListComponent implements AfterV
 
                   this.assetService.deletePermanently(assetIds).subscribe(response => {
                     this.alertService.showSuccess(`Item${this.assetListComponent.assetGridComponent.selectedAssets.length > 1 ? 's':''} permanently deleted successfully`);
-                    this.assetListComponent.assetGridComponent.callSearch();
+                    this.assetListComponent.assetGridComponent.callSearch(false);
                   });
                 }
               }

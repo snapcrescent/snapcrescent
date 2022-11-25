@@ -1,6 +1,6 @@
 
 <div class="page-controls">
-    <div class="material-symbols-outlined" (click)="navigateToAssetSearch()">
+    <div class="material-symbols-outlined" (click)="navigateSearch()">
         arrow_back
     </div>
 </div>
@@ -10,15 +10,15 @@
     </div>
 </div>
 <div class="navigation-controls">
-    <div class="left material-symbols-outlined" (click)="previousAsset()">
+    <div #previousAssetButton class="left material-symbols-outlined" (click)="navigateToAssetAtIndex(previousAssetId)">
         arrow_circle_left
         </div>
 
-    <div class="right material-symbols-outlined" (click)="nextAsset()">
+    <div #nextAssetButton class="right material-symbols-outlined" (click)="navigateToAssetAtIndex(nextAssetId)">
         arrow_circle_right
         </div>
 </div>
-<div (swipeLeft)="nextAsset()" (swipeRight)="previousAsset()">
+<div (swipeLeft)="nextAssetButton.click()" (swipeRight)="previousAssetButton.click()">
     <app-asset-full-screen-view
     [currentAssetId]="currentAssetId"
     [assetIds]="assetIds"

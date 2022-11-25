@@ -6,7 +6,7 @@ import { ViewChild } from '@angular/core'
 import { AssetSearchField, AssetsGroup } from './asset-grid.model';
 import { Action } from 'src/app/core/models/action.model'
 import { Observable } from 'rxjs';
-import { Asset } from 'src/app/asset/asset.model';
+import { Asset, AssetType } from 'src/app/asset/asset.model';
 import { formatDate } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { PageDataService } from 'src/app/core/services/stores/page-data.service';
@@ -45,9 +45,10 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   @Output()
   onOpenAssetView: EventEmitter<any> = new EventEmitter<any>();
   
-  
   assetsGroups: AssetsGroup[] = [];
   pageSizeOptions:number[] = [250,500,1000,2000];
+
+  AssetType = AssetType;
 
   searchFormGroup: FormGroup = this.formBuilder.group({});
 
@@ -72,7 +73,7 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
 
   ngAfterViewInit() {
     this.getStoredSearchParams();
-    this.callSearch();
+    this.callSearch(false);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -115,27 +116,30 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   getStoredSearchParams() {
     const params = this.pageDataService.getSearchPageData(this.searchStoreName);
 
-    Object.keys(params).forEach(key => {
-      if(key === 'pageNumber') {
-        this.paginator.pageIndex = params[key];
-      } else if(key === 'resultPerPage') {
-        this.paginator.pageSize = params[key];
-      } else if(key === 'sortBy') {
-        this.defaultSortColumn = params[key];
-      } else if(key === 'sortOrder') {
-       this.defaultSortDirection = params[key];
-      } else {
-        const control = this.searchFormGroup.get(key)
-
-        if(control) {
-          control.patchValue(params[key]);
+    if(params) {
+      Object.keys(params).forEach(key => {
+        if(key === 'pageNumber') {
+          this.paginator.pageIndex = params[key];
+        } else if(key === 'resultPerPage') {
+          this.paginator.pageSize = params[key];
+        } else if(key === 'sortBy') {
+          this.defaultSortColumn = params[key];
+        } else if(key === 'sortOrder') {
+         this.defaultSortDirection = params[key];
+        } else {
+          const control = this.searchFormGroup.get(key)
+  
+          if(control) {
+            control.patchValue(params[key]);
+          }
         }
-      }
-    });
+      });
+    }
+    
   }
 
   pagingChanged(pageEvent: PageEvent) {
-    this.callSearch();
+    this.callSearch(false);
   }
 
   reset() {
@@ -143,11 +147,13 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
       this.searchFormGroup.get(item.key)?.reset();
     });
 
+
+    this.pageDataService.setPageData(this.searchStoreName);
     this.resetPaginatorPageSize();
   }
 
-  callSearch() {
-      let params:any = this.getSearchParams();
+  callSearch(freshSearch:boolean) {
+      let params:any = this.getSearchParams(freshSearch);
  
       this.pageDataService.setSearchPageData(this.searchStoreName, params);
       
@@ -161,7 +167,10 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
           this.paginator.pageSize = response.resultCountPerPage;
           this.paginator.pageIndex = response.currentPageIndex;
 
-          this.scrollToPreviousPosition();
+          if(!freshSearch) {
+            this.scrollToPreviousPosition();
+          }
+          
         });
       }
   }
@@ -203,7 +212,7 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
     });
   }
 
-  getSearchParams() {
+  getSearchParams(freshSearch:boolean) {
     let params:any = {};
 
     this.advancedSearchFields.forEach((item:AssetSearchField) => {
@@ -233,7 +242,7 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
     let pageNumber = 0;
     let resultPerPage = this.pageSizeOptions[0];
 
-    if(this.paginator) {
+    if(!freshSearch && this.paginator) {
       pageNumber = this.paginator.pageIndex;
       resultPerPage = this.paginator.pageSize;
     } 

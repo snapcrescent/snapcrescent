@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.Future;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
@@ -22,5 +21,6 @@ public interface AssetService {
 	public void markActive(List<Long> ids);
 	public void markInactive(List<Long> ids);
 	public void deletePermanently(List<Long> ids);
-	public ResponseEntity<byte[]> streamAssetById(Long id, String range) throws Exception;	
+	public AssetStream streamAssetById(Long id) throws Exception;
+	public AssetStream streamAssetById(Long id, String range) throws Exception;	
 }
