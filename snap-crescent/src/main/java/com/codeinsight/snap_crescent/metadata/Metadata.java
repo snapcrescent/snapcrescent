@@ -33,6 +33,7 @@ public class Metadata extends BaseEntity {
 	private int orientation;
 	private String fstop;
 	private long hash;
+	private long duration;
 	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "LOCATION_ID", insertable = false, updatable = false)

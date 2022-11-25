@@ -1,5 +1,10 @@
 package com.codeinsight.snap_crescent.asset;
 
+import static com.codeinsight.snap_crescent.common.utils.Constant.ACCEPT_RANGES;
+import static com.codeinsight.snap_crescent.common.utils.Constant.CONTENT_LENGTH;
+import static com.codeinsight.snap_crescent.common.utils.Constant.CONTENT_RANGE;
+import static com.codeinsight.snap_crescent.common.utils.Constant.CONTENT_TYPE;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,14 +41,14 @@ import com.codeinsight.snap_crescent.sync_info.SyncInfoService;
 import reactor.core.publisher.Mono;
 
 @RestController
-public class AssetController extends BaseController{
+public class AssetController extends BaseController {
 
 	@Autowired
 	private AssetService assetService;
-	
+
 	@Autowired
 	private SyncInfoService syncInfoService;
-	
+
 	@Autowired
 	private BulkImportService bulkImportService;
 
@@ -52,13 +57,13 @@ public class AssetController extends BaseController{
 		AssetSearchCriteria searchCriteria = new AssetSearchCriteria();
 		parseSearchParams(searchParams, searchCriteria);
 		return assetService.search(searchCriteria);
-		
+
 	}
 
 	private void parseSearchParams(Map<String, String> searchParams, AssetSearchCriteria searchCriteria) {
-		
+
 		parseCommonSearchParams(searchParams, searchCriteria);
-		
+
 		if (searchParams.get("assetType") != null) {
 			searchCriteria.setAssetType(Integer.parseInt(searchParams.get("assetType")));
 		}
@@ -67,16 +72,16 @@ public class AssetController extends BaseController{
 			searchCriteria.setFavorite(Boolean.parseBoolean(searchParams.get("favorite")));
 		}
 	}
-	
+
 	@GetMapping("/asset/{id}")
-	public  @ResponseBody BaseResponseBean<Long, UiAsset> get(@PathVariable Long id) {
-			BaseResponseBean<Long, UiAsset> response = new BaseResponseBean<>();	
-			response.setObjectId(id);
-			response.setObject(assetService.getById(id));
-			return response;
+	public @ResponseBody BaseResponseBean<Long, UiAsset> get(@PathVariable Long id) {
+		BaseResponseBean<Long, UiAsset> response = new BaseResponseBean<>();
+		response.setObjectId(id);
+		response.setObject(assetService.getById(id));
+		return response;
 	}
-	
-	@GetMapping(value="/asset/{id}/raw", produces = MediaType.IMAGE_JPEG_VALUE)
+
+	@GetMapping(value = "/asset/{id}/raw", produces = MediaType.IMAGE_JPEG_VALUE)
 	public ResponseEntity<byte[]> getAssetById(@PathVariable Long id) {
 		try {
 			return new ResponseEntity<>(assetService.getAssetById(id), HttpStatus.OK);
@@ -85,13 +90,40 @@ public class AssetController extends BaseController{
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
-	@GetMapping(value="/asset/{id}/stream")
-	public Mono<ResponseEntity<byte[]>> streamAssetById(HttpServletResponse serverHttpResponse, @RequestHeader(value = "Range", required = false) String httpRangeList,@PathVariable Long id) throws Exception {
-			return Mono.just(assetService.streamAssetById(id, httpRangeList));
+
+	@GetMapping(value = "/asset/{id}/stream")
+	public Mono<ResponseEntity<byte[]>> streamAssetById(HttpServletResponse serverHttpResponse,
+			@RequestHeader(value = "Range", required = false) String httpRangeList, @PathVariable Long id)
+			throws Exception {
+		ResponseEntity<byte[]> response = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		
+		try {
+			AssetStream assetStream = null;
+			if (httpRangeList == null) {
+				assetStream = assetService.streamAssetById(id);
+			} else {
+				assetStream = assetService.streamAssetById(id, httpRangeList);
+			}
+			
+			
+			
+			if(assetStream != null) {
+				
+				response = ResponseEntity.status(assetStream.getHttpStatus())
+	                    .header(CONTENT_TYPE, assetStream.getContentType())
+	                    .header(ACCEPT_RANGES, assetStream.getAcceptRanges())
+	                    .header(CONTENT_LENGTH, assetStream.getContentLength())
+	                    .header(CONTENT_RANGE, assetStream.getContentRange())
+	                    .body(assetStream.getData());
+			} 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return Mono.just(response);
 	}
-	
-	@PutMapping(value="/asset/{id}")
+
+	@PutMapping(value = "/asset/{id}")
 	public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UiAsset asset) {
 		try {
 			// assetService.like(id);
@@ -103,32 +135,33 @@ public class AssetController extends BaseController{
 	}
 
 	@PostMapping("/asset/upload")
-	public ResponseEntity<?> uploadAssets(@RequestParam("assetType") int assetType,@RequestParam("files") MultipartFile[] files) throws IOException {
+	public ResponseEntity<?> uploadAssets(@RequestParam("assetType") int assetType,
+			@RequestParam("files") MultipartFile[] files) throws IOException {
 
 		BaseResponse response = new BaseResponse();
 		try {
-			
-			AssetType assetTypeEnum =  AssetType.findById(assetType);
-			List<File> temporaryFiles = assetService.uploadAssets(assetTypeEnum, Arrays.asList(files));	
-			
+
+			AssetType assetTypeEnum = AssetType.findById(assetType);
+			List<File> temporaryFiles = assetService.uploadAssets(assetTypeEnum, Arrays.asList(files));
+
 			List<Future<Boolean>> processingStatusList = new ArrayList<>(temporaryFiles.size());
 			for (File temporaryFile : temporaryFiles) {
 				processingStatusList.add(assetService.processAsset(assetTypeEnum, temporaryFile));
 			}
-			
+
 			// wait for all threads
 			processingStatusList.forEach(result -> {
-			    try {
-			      result.get();
-			    } catch (Exception e) {
-			      
-			    }
-			  });
-			
-			if(temporaryFiles.size() > 0) {
+				try {
+					result.get();
+				} catch (Exception e) {
+
+				}
+			});
+
+			if (temporaryFiles.size() > 0) {
 				syncInfoService.save();
 			}
-			
+
 			response.setMessage("Asset uploaded successfully.");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
@@ -137,8 +170,8 @@ public class AssetController extends BaseController{
 		}
 		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
-	@PutMapping(value="/asset/restore")
+
+	@PutMapping(value = "/asset/restore")
 	public ResponseEntity<?> restore(@RequestParam List<Long> ids) {
 		try {
 			assetService.markActive(ids);
@@ -148,9 +181,8 @@ public class AssetController extends BaseController{
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
-	
-	@DeleteMapping(value="/asset")
+
+	@DeleteMapping(value = "/asset")
 	public ResponseEntity<?> delete(@RequestParam List<Long> ids) {
 		try {
 			assetService.markInactive(ids);
@@ -160,8 +192,8 @@ public class AssetController extends BaseController{
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
-	@DeleteMapping(value="/asset/permanent")
+
+	@DeleteMapping(value = "/asset/permanent")
 	public ResponseEntity<?> deletePermanently(@RequestParam List<Long> ids) {
 		try {
 			assetService.deletePermanently(ids);
@@ -171,16 +203,15 @@ public class AssetController extends BaseController{
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
+
 	@PostMapping("/asset/bulk-import")
-	public ResponseEntity<?> bulkImportFromDirectory(
-			@RequestParam("sourceDirectory") String sourceDirectory,
+	public ResponseEntity<?> bulkImportFromDirectory(@RequestParam("sourceDirectory") String sourceDirectory,
 			@RequestParam("destinationDirectory") String destinationDirectory) throws IOException {
 
 		BaseResponse response = new BaseResponse();
 		try {
-			
-			bulkImportService.bulkImportFromDirectory(sourceDirectory,destinationDirectory );
+
+			bulkImportService.bulkImportFromDirectory(sourceDirectory, destinationDirectory);
 			response.setMessage("Asset migrated successfully.");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {

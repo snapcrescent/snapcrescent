@@ -133,7 +133,7 @@ export class AssetListComponent extends BaseListComponent implements AfterViewIn
   
                     this.assetService.delete(assetIds).subscribe(response => {
                       this.alertService.showSuccess(`Item${this.assetGridComponent.selectedAssets.length > 1 ? 's':''} deleted successfully`);
-                      this.assetGridComponent.callSearch();
+                      this.assetGridComponent.callSearch(false);
                     });
                   }
                 }

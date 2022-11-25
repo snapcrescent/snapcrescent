@@ -29,4 +29,5 @@ public class UiMetadata extends BaseUiBean {
 	private UiLocation location;
 	private Long locationId;
 	private String base64EncodedPhoto;
+	private long duration;
 }
