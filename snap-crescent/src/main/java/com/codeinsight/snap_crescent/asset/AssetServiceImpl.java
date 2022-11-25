@@ -1,8 +1,5 @@
 package com.codeinsight.snap_crescent.asset;
 
-import static com.codeinsight.snap_crescent.common.utils.Constant.BYTES;
-import static com.codeinsight.snap_crescent.common.utils.Constant.CHUNK_SIZE;
-
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
@@ -18,7 +15,6 @@ import java.util.concurrent.Future;
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -201,70 +197,6 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 		return fileService.readFileBytes(fileType, asset.getMetadata().getPath(),
 				asset.getMetadata().getInternalName());
-	}
-
-	@Override
-	public AssetStream streamAssetById(Long id) throws Exception {
-		Asset asset = assetRepository.findById(id);
-
-		int rangeStart = 0;
-		int rangeEnd = CHUNK_SIZE;
-		final Long fileSize = fileService.getFileSize(FILE_TYPE.VIDEO, asset.getMetadata().getPath(),
-				asset.getMetadata().getInternalName());
-
-		return prepareAssetStream(asset.getMetadata().getMimeType(), BYTES, String.valueOf(rangeEnd), rangeStart, rangeEnd, fileSize, readByteRange(asset, rangeStart, rangeEnd), HttpStatus.PARTIAL_CONTENT);
-	}
-
-	@Override
-	public AssetStream streamAssetById(Long id, String range) throws Exception {
-		Asset asset = assetRepository.findById(id);
-
-		int rangeStart = 0;
-		long rangeEnd = CHUNK_SIZE;
-		final Long fileSize = fileService.getFileSize(FILE_TYPE.VIDEO, asset.getMetadata().getPath(),
-				asset.getMetadata().getInternalName());
-
-		String[] ranges = range.split("-");
-		rangeStart = Integer.parseInt(ranges[0].substring(6));
-		if (ranges.length > 1) {
-			rangeEnd = Integer.parseInt(ranges[1]);
-		} else {
-			rangeEnd = rangeStart + CHUNK_SIZE;
-		}
-
-		rangeEnd = Math.min(rangeEnd, fileSize - 1);
-		final String contentLength = String.valueOf((rangeEnd - rangeStart) + 1);
-
-		HttpStatus httpStatus = HttpStatus.PARTIAL_CONTENT;
-		if (rangeEnd >= fileSize) {
-			httpStatus = HttpStatus.OK;
-		}
-		
-		Long rangeEndLong = rangeEnd;
-
-		return prepareAssetStream(asset.getMetadata().getMimeType(), BYTES, contentLength, rangeStart, rangeEndLong.intValue(), fileSize, readByteRange(asset, rangeStart, rangeEndLong.intValue()), httpStatus);
-
-	}
-
-	private AssetStream prepareAssetStream(String contentType, String acceptRanges, String contentLength,
-			int rangeStart, int rangeEnd, Long fileSize, byte[] data, HttpStatus httpStatus) {
-		
-		AssetStream stream = new AssetStream();
-
-		stream.setContentType(contentType);
-		stream.setAcceptRanges(acceptRanges);
-		stream.setContentLength(contentLength);
-		stream.setContentRange(BYTES + " " + rangeStart + "-" + rangeEnd + "/" + fileSize);
-		stream.setData(data);
-		stream.setHttpStatus(httpStatus);
-		
-		return stream;
-		
-	}
-
-	private byte[] readByteRange(Asset asset, int start, int end) throws Exception {
-		return fileService.readBufferedFileBytes(FILE_TYPE.VIDEO, asset.getMetadata().getPath(),
-				asset.getMetadata().getInternalName(), start, end);
 	}
 
 	@Override

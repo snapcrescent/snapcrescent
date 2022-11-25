@@ -1,10 +1,11 @@
 <div class="col-12 asset-container">
     <ng-container *ngIf="currentAsset && currentAsset.assetType === AssetType.PHOTO.id">
-        <img *ngIf="currentAsset.metadata && currentAsset.metadata.base64EncodedPhoto" class="img-fluid" src="{{'data:asset/jpg;base64,' + currentAsset.metadata.base64EncodedPhoto}}" alt="Asset">    
+        <!--<img *ngIf="currentAsset.metadata && currentAsset.metadata.base64EncodedPhoto" class="img-fluid" src="{{'data:asset/jpg;base64,' + currentAsset.metadata.base64EncodedPhoto}}" alt="Asset"> -->
+        <img class="img-fluid" [src]="getAssetStreamUrl()" alt="Asset">
     </ng-container>
     <ng-container *ngIf="currentAsset && currentAsset.assetType === AssetType.VIDEO.id">
         <video class="img-fluid" autoplay muted controls (click)="toggleVideo()" #videoPlayer>
-            <source [src]="getVideoURL()" type="video/mp4" />
+            <source [src]="getAssetStreamUrl()" type="video/mp4" />
             Browser not supported
         </video>
     </ng-container>

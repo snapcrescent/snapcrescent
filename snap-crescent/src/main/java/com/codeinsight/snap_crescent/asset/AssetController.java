@@ -1,10 +1,5 @@
 package com.codeinsight.snap_crescent.asset;
 
-import static com.codeinsight.snap_crescent.common.utils.Constant.ACCEPT_RANGES;
-import static com.codeinsight.snap_crescent.common.utils.Constant.CONTENT_LENGTH;
-import static com.codeinsight.snap_crescent.common.utils.Constant.CONTENT_RANGE;
-import static com.codeinsight.snap_crescent.common.utils.Constant.CONTENT_TYPE;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,8 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,8 +29,6 @@ import com.codeinsight.snap_crescent.common.beans.BaseResponse;
 import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.sync_info.SyncInfoService;
-
-import reactor.core.publisher.Mono;
 
 @RestController
 public class AssetController extends BaseController {
@@ -89,38 +79,6 @@ public class AssetController extends BaseController {
 			e.printStackTrace();
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	}
-
-	@GetMapping(value = "/asset/{id}/stream")
-	public Mono<ResponseEntity<byte[]>> streamAssetById(HttpServletResponse serverHttpResponse,
-			@RequestHeader(value = "Range", required = false) String httpRangeList, @PathVariable Long id)
-			throws Exception {
-		ResponseEntity<byte[]> response = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		
-		try {
-			AssetStream assetStream = null;
-			if (httpRangeList == null) {
-				assetStream = assetService.streamAssetById(id);
-			} else {
-				assetStream = assetService.streamAssetById(id, httpRangeList);
-			}
-			
-			
-			
-			if(assetStream != null) {
-				
-				response = ResponseEntity.status(assetStream.getHttpStatus())
-	                    .header(CONTENT_TYPE, assetStream.getContentType())
-	                    .header(ACCEPT_RANGES, assetStream.getAcceptRanges())
-	                    .header(CONTENT_LENGTH, assetStream.getContentLength())
-	                    .header(CONTENT_RANGE, assetStream.getContentRange())
-	                    .body(assetStream.getData());
-			} 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return Mono.just(response);
 	}
 
 	@PutMapping(value = "/asset/{id}")

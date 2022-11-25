@@ -68,7 +68,7 @@
                                     play_circle
                                 </span>
                                 <img class="asset img-fluid"
-                                    src="{{'data:asset/jpg;base64,' + asset.thumbnail.base64EncodedThumbnail}}"
+                                    [src]="getThumbnailStreamUrl(asset)"
                                     alt="Asset">
                             </div>
                         </mat-card-content>

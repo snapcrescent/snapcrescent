@@ -57,8 +57,8 @@ export class AssetFullScreenViewComponent extends BaseComponent implements OnIni
     });
   }
 
-  getVideoURL() {
-    return this.appBaseURL + `:${environment.videoServerUrlPort}/video/${this.currentAsset.id}`;
+  getAssetStreamUrl() {
+    return this.appBaseURL + `:${environment.videoServerUrlPort}/asset/${this.currentAsset.id}/stream`;
   }
 
   toggleVideo() {

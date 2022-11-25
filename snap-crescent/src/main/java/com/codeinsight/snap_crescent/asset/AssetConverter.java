@@ -76,7 +76,7 @@ public class AssetConverter extends BaseConverter<Asset, UiAsset> {
 				
 				if(resultType == ResultType.FULL) {
 					if(entity.getAssetTypeEnum() == AssetType.PHOTO) {
-						bean.getMetadata().setBase64EncodedPhoto(Base64.getEncoder().encodeToString(fileService.readFileBytes(FILE_TYPE.PHOTO,entity.getMetadata().getPath(), entity.getMetadata().getInternalName())));	
+						//bean.getMetadata().setBase64EncodedPhoto(Base64.getEncoder().encodeToString(fileService.readFileBytes(FILE_TYPE.PHOTO,entity.getMetadata().getPath(), entity.getMetadata().getInternalName())));	
 					}
 				}
 				
