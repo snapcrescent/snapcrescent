@@ -29,12 +29,12 @@ public class DaoSQLEntityInterceptor extends EmptyInterceptor {
 			
 			setValue(newValues, properties, "createdById", 1L);
 			
-			if(((BaseEntity) entity).getCreationDatetime() == null) {
-				setValue(newValues, properties, "creationDatetime", now);
+			if(((BaseEntity) entity).getCreationDateTime() == null) {
+				setValue(newValues, properties, "creationDateTime", now);
 			}
 		    
 		    setValue(newValues, properties, "lastModifiedById", 1L);
-		    setValue(newValues, properties, "lastModifiedDatetime", now);
+		    setValue(newValues, properties, "lastModifiedDateTime", now);
 			
 			retChangedState = true;
 		}
@@ -51,7 +51,7 @@ public class DaoSQLEntityInterceptor extends EmptyInterceptor {
     	if (entity instanceof BaseEntity) {
     		
 			setValue(newValues, properties, "lastModifiedById", 1L);
-			setValue(newValues, properties, "lastModifiedDatetime", new Date());
+			setValue(newValues, properties, "lastModifiedDateTime", new Date());
 			
 			retChangedState = true;
 		}

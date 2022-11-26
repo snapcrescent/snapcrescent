@@ -53,17 +53,17 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 			String creationDateString = metaDataMap.get(Constant.METADATA_CREATED_DATE);
 			if (creationDateString != null) {
 				try {
-					metadata.setCreationDatetime(DateUtils.parseCreateDate(creationDateString));	
+					metadata.setCreationDateTime(DateUtils.parseCreateDate(creationDateString));	
 				} catch (ParseException e) {
 					logger.error(e.getLocalizedMessage());
-					metadata.setCreationDatetime(modifiedDate);
+					metadata.setCreationDateTime(modifiedDate);
 				}
 				
 			} else {
-				metadata.setCreationDatetime(modifiedDate);
+				metadata.setCreationDateTime(modifiedDate);
 			}
 			
-			metadata.setPath(DateUtils.getFilePathFromDate(metadata.getCreationDatetime()));
+			metadata.setPath(DateUtils.getFilePathFromDate(metadata.getCreationDateTime()));
 			
 			metadata.setFileTypeName(metaDataMap.get(Constant.METADATA_FILE_TYPE_NAME));
 			metadata.setFileTypeLongName(metaDataMap.get(Constant.METADATA_FILE_TYPE_LONG_NAME));

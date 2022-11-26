@@ -204,7 +204,7 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
 
     this.dataSource.data.forEach((asset:Asset)=> {
 
-      const dataDate = new Date(asset.metadata.creationDatetime!);
+      const dataDate = new Date(asset.metadata.creationDateTime!);
       const dateDateString = formatDate(dataDate, 'EEEE, MMMM d, y' ,this.locale);
       
       let assetsGroup = this.assetsGroups.find(assetsGroup => assetsGroup.date === dateDateString);

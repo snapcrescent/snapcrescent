@@ -54,6 +54,15 @@ public class SyncInfoConverter extends BaseConverter<SyncInfo, UiSyncInfo> {
 		UiSyncInfo bean = new UiSyncInfo();
 
 		try {
+			
+			if (resultType == ResultType.FULL || resultType == ResultType.SEARCH) {
+				bean.setCreationDateTime(entity.getCreationDateTime());
+			}
+
+			if (resultType == ResultType.FULL || resultType == ResultType.SEARCH) {
+				bean.setLastModifiedDateTime(entity.getLastModifiedDateTime());
+			}
+			
 			populateBeanWithAuditValues(bean, entity, resultType);
 
 		} catch (Exception e) {

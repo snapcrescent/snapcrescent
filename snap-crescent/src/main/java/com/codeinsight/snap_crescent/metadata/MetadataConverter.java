@@ -3,18 +3,13 @@ package com.codeinsight.snap_crescent.metadata;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.codeinsight.snap_crescent.common.BaseConverter;
 import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
-import com.codeinsight.snap_crescent.location.LocationConverter;
 
 @Component
 public class MetadataConverter extends BaseConverter<Metadata, UiMetadata> {
-
-	@Autowired
-	private LocationConverter locationConverter;
 
 	@Override
 	public void populateEntityWithBean(Metadata entity, UiMetadata bean) {
@@ -59,21 +54,15 @@ public class MetadataConverter extends BaseConverter<Metadata, UiMetadata> {
 		UiMetadata bean = new UiMetadata();
 
 		try {
-			bean.setName(entity.getName());
-			bean.setSize(entity.getSize());
-			bean.setFileTypeName(entity.getFileTypeName());
-			bean.setFileTypeLongName(entity.getFileTypeLongName());
 			bean.setMimeType(entity.getMimeType());
-			bean.setFileExtension(entity.getFileExtension());
-			bean.setModel(entity.getModel());
-			bean.setHeight(entity.getHeight());
-			bean.setWidth(entity.getWidth());
-			bean.setOrientation(entity.getOrientation());
-			bean.setFstop(entity.getFstop());
+			bean.setInternalName(entity.getInternalName());
+			
+			if (resultType == ResultType.FULL || resultType == ResultType.SEARCH) {
+				bean.setCreationDateTime(entity.getCreationDateTime());
+			}
 
-			if (entity.getLocationId() != null) {
-				bean.setLocationId(entity.getLocationId());
-				bean.setLocation(locationConverter.getBeanFromEntity(entity.getLocation(), resultType));
+			if (resultType == ResultType.FULL || resultType == ResultType.SEARCH) {
+				bean.setLastModifiedDateTime(entity.getLastModifiedDateTime());
 			}
 			
 			populateBeanWithAuditValues(bean, entity, resultType);

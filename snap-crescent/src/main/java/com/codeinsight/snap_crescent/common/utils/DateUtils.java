@@ -7,10 +7,10 @@ import java.util.Date;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
-	public static String getFilePathFromDate(Date creationDatetime) {
+	public static String getFilePathFromDate(Date creationDateTime) {
 		
 		Calendar creationDate = Calendar.getInstance();
-		creationDate.setTime(creationDatetime);
+		creationDate.setTime(creationDateTime);
 		
 		String year = "/" + creationDate.get(Calendar.YEAR);
 		String month = "/" + String.format("%02d",(creationDate.get(Calendar.MONTH) + 1)) + "/";

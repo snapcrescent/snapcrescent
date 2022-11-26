@@ -1,6 +1,6 @@
 export class BaseUiBean {
   id?: number;
   active? : boolean;
-  creationDatetime? : number;
-  lastModifiedDatetime? : number;
+  creationDateTime? : number;
+  lastModifiedDateTime? : number;
   }
