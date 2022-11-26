@@ -52,15 +52,5 @@ public abstract class BaseConverter<E, B> {
 		bean.setId(entity.getId());
 		bean.setActive(entity.getActive());
 		bean.setVersion(entity.getVersion());
-
-
-		if (resultType == ResultType.FULL || resultType == ResultType.SEARCH) {
-			bean.setCreationDatetime(entity.getCreationDatetime());
-		}
-
-		if (resultType == ResultType.FULL || resultType == ResultType.SEARCH) {
-			bean.setLastModifiedDatetime(entity.getLastModifiedDatetime());
-		}
-		
 	}
 }

@@ -120,6 +120,16 @@ public abstract class BaseRepository<T> {
 	public void flush() throws HibernateException {
 		hibernateTemplate.flush();
 	}
+	
+	protected String getJoinFetchType(Boolean isCountQuery) {
+
+		String joinFetchType = " ";
+		if (isCountQuery == false) {
+			joinFetchType = " fetch ";
+		}
+
+		return joinFetchType;
+	}
 
 	protected String getJoinFetchType(Boolean isCountQuery, BaseSearchCriteria criteria, String joinTable) {
 

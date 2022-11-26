@@ -54,14 +54,16 @@ public class AssetRepository extends BaseRepository<Asset>{
 
 		hql.append(" FROM Asset asset");
 		
-		hql.append(" LEFT JOIN asset.metadata metadata");
-		hql.append(" LEFT JOIN metadata.location location");
+		
+		
+		hql.append(" LEFT JOIN " + getJoinFetchType(isCountQuery) + " asset.metadata metadata");
+		hql.append(" LEFT JOIN " + getJoinFetchType(isCountQuery) + " asset.thumbnail thumbnail");
 		
 		hql.append(" where 1=1 ");
 
 		if (searchCriteria != null && StringUtils.isNotBlank(searchCriteria.getSearchKeyword())) {
 			isSearchKeyword = Boolean.TRUE;
-			String[] stringFields = {"metadata.model","location.city","location.state","location.country","location.town"};
+			String[] stringFields = {"metadata.model"};
 			String[] numberFields = {};
 			hql.append(daoHelper.getSearchWhereStatement(stringFields, numberFields, searchCriteria.getSearchKeyword(),
 					true));
@@ -69,13 +71,13 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		if(searchCriteria.getFromDate() != null)
 		{
-			hql.append(" AND metadata.creationDatetime >= :fromDate");
+			hql.append(" AND metadata.creationDatetTime >= :fromDate");
 			paramsMap.put("fromDate", searchCriteria.getFromDate());
 		}
 
 		if(searchCriteria.getToDate() != null)
 		{
-			hql.append(" AND metadata.creationDatetime <= :toDate");
+			hql.append(" AND metadata.creationDateTime <= :toDate");
 			paramsMap.put("toDate", searchCriteria.getToDate());
 		}
 		

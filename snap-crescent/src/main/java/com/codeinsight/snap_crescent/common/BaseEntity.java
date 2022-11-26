@@ -26,9 +26,9 @@ public abstract class BaseEntity implements Serializable{
 	@Version
 	protected Long version;
 
-	private Date creationDatetime;
+	private Date creationDateTime;
 	
-	private Date lastModifiedDatetime;
+	private Date lastModifiedDateTime;
 	
 	private Boolean active = true;
 

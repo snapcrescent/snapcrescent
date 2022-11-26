@@ -12,7 +12,7 @@ import { Option } from '../core/models/option.model';
 export class AssetService extends BaseService {
 
   sortMapping:any = {
-    creationDate: "asset.metadata.creationDatetime"
+    creationDate: "asset.metadata.creationDateTime"
   };
 
   constructor(
