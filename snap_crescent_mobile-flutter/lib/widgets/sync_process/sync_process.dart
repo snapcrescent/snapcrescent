@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
@@ -10,32 +8,31 @@ import 'package:snap_crescent/stores/widget/sync_process_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class SyncProcessWidget extends StatefulWidget {
-
   @override
   SyncProcessWidgetState createState() => SyncProcessWidgetState();
 }
 
 class SyncProcessWidgetState extends State<SyncProcessWidget> {
-
   late SyncProcessStore _syncProcessStore;
-  
+
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      _syncProcessStore.startSyncProcess();    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncProcessStore.startSyncProcess();
     });
   }
 
   _syncProgress(SyncProgress _syncProgressState) {
     String progressLabel = "";
 
-    if (_syncProgressState == SyncProgress.DOWNLOADING_PHOTO_THUMNAILS &&
+    if (_syncProgressState == SyncProgress.DOWNLOADING_PHOTO_THUMBNAILS &&
         _syncProcessStore.totalServerPhotoCount != null) {
       progressLabel =
           '''Downloaded ${_syncProcessStore.downloadedPhotoCount} of ${_syncProcessStore.totalServerPhotoCount} photos from server''';
-    } else if (_syncProgressState == SyncProgress.DOWNLOADING_VIDEO_THUMNAILS &&
+    } else if (_syncProgressState ==
+            SyncProgress.DOWNLOADING_VIDEO_THUMBNAILS &&
         _syncProcessStore.totalServerVideoCount != null) {
       progressLabel =
           '''Downloaded ${_syncProcessStore.downloadedVideoCount} of ${_syncProcessStore.totalServerVideoCount} videos from server''';
@@ -54,14 +51,18 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          child: new Text(progressLabel,
-              style: TextStyle(
-                color: Colors.white,
-              )),
-        ),
+            child: Row(children: <Widget>[
+          Expanded(
+            flex: 1,
+            child: new Text(progressLabel,
+                style: TextStyle(
+                  color: Colors.white,
+                )),
+          ),
+        ])),
         Container(
           height: 5,
           child: const LinearProgressIndicator(),
@@ -79,11 +80,11 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
     _syncProcessStore.videoStore = _videoStore;
 
     return Observer(
-        builder: (context) => _syncProcessStore.syncProgressState != SyncProgress.CONTACTING_SERVER
-                ? OrientationBuilder(builder: (context, orientation) {
-                    return _syncProgress(_syncProcessStore.syncProgressState);
-                  })
-                : LinearProgressIndicator()
-              );
+        builder: (context) => _syncProcessStore.syncProgressState !=
+                SyncProgress.CONTACTING_SERVER
+            ? OrientationBuilder(builder: (context, orientation) {
+                return _syncProgress(_syncProcessStore.syncProgressState);
+              })
+            : LinearProgressIndicator());
   }
 }

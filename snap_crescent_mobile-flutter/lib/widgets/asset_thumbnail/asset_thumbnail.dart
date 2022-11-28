@@ -7,7 +7,7 @@ import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/unified_asset.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/stores/asset/photo_store.dart';
-import 'package:snap_crescent/utils/constants.dart';
+import 'package:snap_crescent/utils/constants.dart' as AppConstants;
 
 class AssetThumbnail extends StatefulWidget {
   final index;
@@ -89,18 +89,18 @@ class _AssetThumbnailState extends State<AssetThumbnail> with SingleTickerProvid
             },
             child: Stack(
               children: [
-                if(unifiedAsset.assetSource == AssetSource.CLOUD && object is Asset) 
+                if(unifiedAsset.assetSource == AppConstants.AssetSource.CLOUD && object is Asset) 
                   Positioned.fill(
                   child: Image.file(object.thumbnail!.thumbnailFile!,
                       fit: BoxFit.cover),
                   )
-                else if(unifiedAsset.assetSource == AssetSource.DEVICE && object is Uint8List) 
+                else if(unifiedAsset.assetSource == AppConstants.AssetSource.DEVICE && object is Uint8List) 
                   Positioned.fill(
                   child: Image.memory(object, fit: BoxFit.cover),
                 ),
 
 
-              if(unifiedAsset.assetSource == AssetSource.DEVICE && object is Uint8List) 
+              if(unifiedAsset.assetSource == AppConstants.AssetSource.DEVICE && object is Uint8List) 
                 Positioned.fill(
                   child: Align(
                       alignment: Alignment.topRight,
@@ -112,8 +112,8 @@ class _AssetThumbnailState extends State<AssetThumbnail> with SingleTickerProvid
                 ),
                 
                 // Display a Play icon if the asset is a video
-                if ((unifiedAsset.assetSource == AssetSource.CLOUD && unifiedAsset.asset!.assetType == ASSET_TYPE.VIDEO.index )
-                     || (unifiedAsset.assetSource == AssetSource.DEVICE && unifiedAsset.assetEntity!.type == AssetType.video))
+                if ((unifiedAsset.assetSource == AppConstants.AssetSource.CLOUD && unifiedAsset.asset!.assetType == AppConstants.AppAssetType.VIDEO.id )
+                     || (unifiedAsset.assetSource == AppConstants.AssetSource.DEVICE && unifiedAsset.assetEntity!.type == AssetType.video))
                   Center(
                       child: ClipRRect(
                     borderRadius: BorderRadius.only(

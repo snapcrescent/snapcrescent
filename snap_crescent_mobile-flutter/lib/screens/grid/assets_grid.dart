@@ -19,7 +19,7 @@ import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_ba
 class AssetsGridScreen extends StatelessWidget {
   static const routeName = '/assets';
 
-  final ASSET_TYPE type;
+  final AppAssetType type;
 
   AssetsGridScreen(this.type);
 
@@ -30,7 +30,7 @@ class AssetsGridScreen extends StatelessWidget {
 }
 
 class _AssetGridView extends StatefulWidget {
-  final ASSET_TYPE type;
+  final AppAssetType type;
 
   _AssetGridView(this.type);
 
@@ -74,6 +74,10 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
         Timer(Duration(seconds: 2), () => setState(() {}));
       }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _assetStore.getAssets(false);
     });
   }
 
@@ -182,7 +186,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
                                   setState(() {});
                                 },
                                 onTap: () {
-                                  //Grid is in selction mode
+                                  //Grid is in selection mode
                                   if (assetStore.isAnyItemSelected()) {
                                     asset.selected = !asset.selected;
                                     setState(() {});
@@ -197,7 +201,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
                                     asset,
                                     asset.assetSource == AssetSource.CLOUD
                                         ? Future.value(asset.asset)
-                                        : asset.assetEntity!.thumbData,
+                                        : asset.assetEntity!.thumbnailData,
                                     asset.selected),
                               );
                             })
@@ -228,7 +232,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
   }
 
   Future<void> _refreshGrid() async {
-    _assetStore.getAssets();
+    _assetStore.getAssets(true);
   }
 
   _getLeadingIcon() {
@@ -249,7 +253,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
       appBar: AppBar(
         leading: _getLeadingIcon(),
         title: Text(!_assetStore.isAnyItemSelected()
-            ? (widget.type == ASSET_TYPE.PHOTO ? "Photos" : "Videos")
+            ? (widget.type == AppAssetType.PHOTO ? "Photos" : "Videos")
             : (_assetStore.getSelectedCount().toString() + " Selected")),
         backgroundColor: Colors.black,
         actions: [
@@ -302,7 +306,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   @override
   Widget build(BuildContext context) {
-    _assetStore = widget.type == ASSET_TYPE.PHOTO
+    _assetStore = widget.type == AppAssetType.PHOTO
         ? Provider.of<PhotoStore>(context)
         : Provider.of<VideoStore>(context);
 

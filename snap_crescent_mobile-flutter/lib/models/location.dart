@@ -21,8 +21,6 @@ class Location extends BaseUiBean {
       : super(
             id: bean.id,
             version: bean.version,
-            creationDatetime: bean.creationDatetime,
-            lastModifiedDatetime: bean.lastModifiedDatetime,
             active: bean.active);
 
   factory Location.fromJson(Map<String, dynamic> json) {

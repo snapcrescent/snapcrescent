@@ -71,7 +71,7 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		if(searchCriteria.getFromDate() != null)
 		{
-			hql.append(" AND metadata.creationDatetTime >= :fromDate");
+			hql.append(" AND metadata.creationDateTime >= :fromDate");
 			paramsMap.put("fromDate", searchCriteria.getFromDate());
 		}
 

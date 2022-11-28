@@ -35,7 +35,7 @@ class _AppBottomNavigationBarState extends State<_AppBottomNavigationBarView> {
       Navigator.pushAndRemoveUntil<dynamic>(
         context,
         MaterialPageRoute<dynamic>(
-          builder: (BuildContext context) => AssetsGridScreen(ASSET_TYPE.PHOTO),
+          builder: (BuildContext context) => AssetsGridScreen(AppAssetType.PHOTO),
         ),
         (route) => false,//if you want to disable back feature set to false
       );
@@ -43,7 +43,7 @@ class _AppBottomNavigationBarState extends State<_AppBottomNavigationBarView> {
       Navigator.pushAndRemoveUntil<dynamic>(
         context,
         MaterialPageRoute<dynamic>(
-          builder: (BuildContext context) => AssetsGridScreen(ASSET_TYPE.VIDEO),
+          builder: (BuildContext context) => AssetsGridScreen(AppAssetType.VIDEO),
         ),
         (route) => false,//if you want to disable back feature set to false
       );

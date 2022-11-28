@@ -16,7 +16,8 @@ public class UiAsset extends BaseUiBean {
 	*/
 	private static final long serialVersionUID = -873185495294499014L;
 	
-	private String assetTypeName;
+	private Boolean active;
+	
 	private int assetType;
 	
 	private UiThumbnail thumbnail;

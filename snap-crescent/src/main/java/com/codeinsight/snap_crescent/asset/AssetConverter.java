@@ -1,7 +1,6 @@
 package com.codeinsight.snap_crescent.asset;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.codeinsight.snap_crescent.common.BaseConverter;
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
-import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
 import com.codeinsight.snap_crescent.metadata.MetadataConverter;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailConverter;
@@ -66,7 +64,7 @@ public class AssetConverter extends BaseConverter<Asset, UiAsset> {
 		UiAsset bean = new UiAsset();
 
 		try {
-			bean.setAssetTypeName(entity.getAssetTypeEnum().getLabel());
+			bean.setActive(entity.getActive());
 			bean.setAssetType(entity.getAssetType());
 			bean.setFavorite(entity.getFavorite());
 

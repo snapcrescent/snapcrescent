@@ -1,36 +1,33 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:quiver/iterables.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
+import 'package:snap_crescent/models/thumbnail.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/repository/metadata_repository.dart';
 import 'package:snap_crescent/repository/asset_repository.dart';
 import 'package:snap_crescent/repository/thumbnail_repository.dart';
 import 'package:snap_crescent/services/base_service.dart';
+import 'package:snap_crescent/utils/common_utils.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class AssetService extends BaseService {
-
-  AssetService._privateConstructor():super();
+  AssetService._privateConstructor() : super();
   static final AssetService instance = AssetService._privateConstructor();
 
   Future<BaseResponseBean<int, Asset>> search(
       AssetSearchCriteria searchCriteria) async {
     try {
-      
-      if (await  super.isUserLoggedIn()) {
+      if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
         Options options = await getHeaders();
-        final response = await dio.get('/asset', queryParameters: searchCriteria.toMap(), options: options);
+        final response = await dio.get('/asset',
+            queryParameters: searchCriteria.toMap(), options: options);
 
         return BaseResponseBean.fromJson(response.data, Asset.fromJsonModel);
       } else {
@@ -44,9 +41,8 @@ class AssetService extends BaseService {
     }
   }
 
-  save(ASSET_TYPE assetType, List<File> files) async {
+  save(AppAssetType assetType, List<File> files) async {
     try {
-      
       if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
         Options options = await getHeaders();
@@ -61,7 +57,7 @@ class AssetService extends BaseService {
           }
 
           FormData formData = FormData.fromMap({
-            "assetType": assetType.index,
+            "assetType": assetType.id,
             "files": multipartFiles,
           });
           await dio.post("/asset/upload", data: formData, options: options);
@@ -77,26 +73,29 @@ class AssetService extends BaseService {
     return Future.value(true);
   }
 
-  Future<List<Asset>> searchAndSync(AssetSearchCriteria searchCriteria) async {
+  Future<List<Asset>> searchAndSync(
+      AssetSearchCriteria searchCriteria, Function progressCallBack) async {
     final data = await search(searchCriteria);
-    await saveAllOnLocal(data.objects!);
+    await saveAllOnLocal(data.objects!, progressCallBack);
     return new List<Asset>.from(data.objects!);
   }
 
   String getAssetByIdUrl(String serverURL, int assetId) {
-    return serverURL + '/asset/$assetId/raw';
+    return 'http://192.168.0.16:8000/asset/$assetId/stream';
+    //return serverURL + '/asset/$assetId/raw';
   }
 
   Future<File> downloadAssetById(int assetId, String assetName) async {
     try {
-      
       if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
         Options options = await getHeaders();
         final url = getAssetByIdUrl(await getServerUrl(), assetId);
-        Directory documentDirectory = await getApplicationDocumentsDirectory();
-        await dio.download(url, join(documentDirectory.path, assetName), options: options);
-        File file = new File(join(documentDirectory.path, assetName));
+
+        String directory = await CommonUtils().getTempDownloadsDirectory();
+        String fullPath = '$directory/$assetName';
+        await download(dio, url, options, fullPath);
+        File file = new File(fullPath);
         return file;
       } else {
         return new File("");
@@ -109,18 +108,17 @@ class AssetService extends BaseService {
     }
   }
 
-  Future<int> saveAllOnLocal(List<Asset> entities) async {
-    for(Asset entity in entities) {
+  Future<int> saveAllOnLocal(
+      List<Asset> entities, Function progressCallBack) async {
+    for (Asset entity in entities) {
       await saveOnLocal(entity);
+      progressCallBack(entities.indexOf(entity));
     }
-
-    
 
     return Future.value(0);
   }
 
   Future<int> saveOnLocal(Asset entity) async {
-
     final assetExistsById =
         await AssetRepository.instance.existsById(entity.id!);
 
@@ -129,7 +127,7 @@ class AssetService extends BaseService {
           await ThumbnailRepository.instance.existsById(entity.thumbnailId!);
 
       if (thumbnailExistsById == false) {
-        await _writeThumbnailFile(entity.thumbnail!.base64EncodedThumbnail!, entity.thumbnail!.name!);
+        await _writeThumbnailFile(entity.thumbnail!);
         ThumbnailRepository.instance.save(entity.thumbnail!);
       }
 
@@ -147,20 +145,38 @@ class AssetService extends BaseService {
   }
 
   Future<File> readThumbnailFile(String name) async {
-    String dir = (await getApplicationDocumentsDirectory()).path;
-    String fullPath = '$dir/$name';
-    return File(fullPath);
+    String directory = await CommonUtils().getThumbnailDirectory();
+    return File('$directory/$name');
   }
 
-  Future<String> _writeThumbnailFile(String base64EncodedThumbnail,String name) async {
-    Uint8List bytes = base64.decode(base64EncodedThumbnail);
-    String dir = (await getApplicationDocumentsDirectory()).path;
-    String fullPath = '$dir/$name';
-    File file = File(fullPath);
-    await file.writeAsBytes(bytes);
+  String getThumbnailByIdUrl(String serverURL, int thumbnailId) {
+    return 'http://192.168.0.16:8000/thumbnail/$thumbnailId';
+  }
 
-    return file.path;
-}
+  Future<void> _writeThumbnailFile(Thumbnail thumbnail) async {
+    try {
+      File thumbnailFile = await readThumbnailFile(thumbnail.name!);
+      if (!thumbnailFile.existsSync()) {
+        Dio dio = await getDio();
+
+        Options options = await getHeaders();
+        final url = getThumbnailByIdUrl(await getServerUrl(), thumbnail.id!);
+
+        String directory = await CommonUtils().getThumbnailDirectory();
+        await download(dio, url, options, '$directory/${thumbnail.name}');
+      }
+    } on DioError catch (ex) {
+      if (ex.type == DioErrorType.connectTimeout) {
+        throw Exception("Connection  Timeout Exception");
+      }
+
+      throw Exception(ex.message);
+    }
+  }
+
+  Future<int> countOnLocal(AssetSearchCriteria assetSearchCriteria) async {
+    return AssetRepository.instance.countOnLocal(assetSearchCriteria);
+  }
 
   Future<List<Asset>> searchOnLocal(
       AssetSearchCriteria assetSearchCriteria) async {
@@ -203,7 +219,7 @@ class AssetService extends BaseService {
           assetFiles.add(assetFile!);
         }
 
-        save(ASSET_TYPE.PHOTO, assetFiles);
+        save(AppAssetType.PHOTO, assetFiles);
       }
     }
   }

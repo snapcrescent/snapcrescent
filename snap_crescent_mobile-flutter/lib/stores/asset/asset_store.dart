@@ -38,15 +38,19 @@ abstract class _AssetStore with Store {
   @action
   Future<void> loadMoreAssets(int pageNumber) async{
     AssetSearchCriteria searchCriteria = getAssetSearchCriteria();
-    searchCriteria.resultPerPage = 100;
     searchCriteria.pageNumber = pageNumber;
     await _processAssetRequest(searchCriteria, false);
   }
+  
+
 
   @action
-  Future<void> getAssets() async {
+  Future<void> getAssets(bool clearPreloadedAssets) async {
+    
     groupedAssets.clear();
     this.assetList = [];
+    
+    
     await _processAssetRequest(getAssetSearchCriteria(), true);
   }
 
@@ -77,25 +81,22 @@ abstract class _AssetStore with Store {
     } 
     
     if (await _getShowDeviceAssetsInfo()) {
-      List<String> selecteDeviceFolders =
-          await _getShowDeviceAssetsFolderInfo();
+      List<String> selectedDeviceFolders = await _getShowDeviceAssetsFolderInfo();
 
       final albums = await PhotoManager.getAssetPathList();
       albums.sort(
           (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
        for(final album in albums) {
-        if (selecteDeviceFolders.indexOf(album.id) != -1) {
+        if (selectedDeviceFolders.indexOf(album.id) != -1) {
            await _addLocalAssetsToList(album);
-           
         }
       }
     }
 
     if (this.assetList.length > 0) {
-       this.assetList.sort((UniFiedAsset a, UniFiedAsset b) =>         b.assetCreationDate.compareTo(a.assetCreationDate));
-
-      
+       this.assetList.sort((UniFiedAsset a, UniFiedAsset b) => b.assetCreationDate.compareTo(a.assetCreationDate));
+     
       this.groupedAssets.keys.forEach((key) {
         this.groupedAssets[key]!.sort((UniFiedAsset a, UniFiedAsset b) =>
             b.assetCreationDate.compareTo(a.assetCreationDate));
@@ -123,7 +124,6 @@ abstract class _AssetStore with Store {
       final assets = getFilteredAssets(allAssets);
 
       for(final asset in assets) {
-        //final asset = assets.elementAt(i);
           Metadata metadata = await MetadataRepository.instance.findByNameEndWith(asset.title!);
 
           if(metadata.id == null) {
@@ -137,13 +137,9 @@ abstract class _AssetStore with Store {
 
   _addCloudAssetsToList(List<Asset> newAssets) async {
     for(final asset in newAssets) {  
-          final assetDate = asset.metadata!.creationDatetime!;
+          final assetDate = asset.metadata!.creationDateTime!;
           _addUnifiedAssetToGroup(assetDate, _getUnifiedAssetFromCloudAsset(asset, assetDate));
           asset.thumbnail!.thumbnailFile = await AssetService.instance.readThumbnailFile(asset.thumbnail!.name!);
-       
-        
-      
-      
     }
   }
 
@@ -151,7 +147,22 @@ abstract class _AssetStore with Store {
     String key = _defaultYearFormatter.format(assetDate);
 
     if (groupedAssets.containsKey(key)) {
-      groupedAssets[key]!.add(asset);
+      List<UniFiedAsset> unifiedAssets = groupedAssets[key]!;
+      if(asset.assetSource == AssetSource.DEVICE) {
+        bool assetAlreadyPresent = false;
+        unifiedAssets.forEach((unifiedAsset) {
+          if(unifiedAsset.assetEntity!.id == asset.assetEntity!.id) {
+                assetAlreadyPresent = true;
+          }
+         });
+
+         if(!assetAlreadyPresent) {
+            unifiedAssets.add(asset);
+         }
+      } else{
+       unifiedAssets.add(asset);
+      }
+      
     } else {
       List<UniFiedAsset> assets = [];
       assets.add(asset);
@@ -208,12 +219,7 @@ abstract class _AssetStore with Store {
         .toList();
     dateTimeKeys.sort((DateTime a, DateTime b) => b.compareTo(a));
     return dateTimeKeys
-        .map((datetime) => _defaultYearFormatter.format(datetime))
+        .map((dateTime) => _defaultYearFormatter.format(dateTime))
         .toList();
-  }
-
-  clearStore() {
-    assetList = new List.empty();
-    groupedAssets = new Map();
   }
 }

@@ -30,11 +30,12 @@ class AssetSearchCriteria extends BaseSearchCriteria {
 
   factory AssetSearchCriteria.defaultCriteria() {
     return AssetSearchCriteria(
-      sortBy : 'metadata.creationDatetime',
+      sortBy : 'metadata.creationDateTime',
       sortOrder : Direction.DESC,
       resultType : ResultType.SEARCH,
       pageNumber : 0,
-      resultPerPage : 1000
+      resultPerPage : 1000,
+      active: true
     );
   }          
 

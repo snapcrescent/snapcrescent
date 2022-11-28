@@ -54,8 +54,8 @@ class SyncInfoService extends BaseService {
 
   Future<void> deleteAllData() async {
     await SyncInfoRepository.instance.deleteAll();
+    await AssetRepository.instance.deleteAll();
     await ThumbnailRepository.instance.deleteAll();
     await MetadataRepository.instance.deleteAll();
-    await AssetRepository.instance.deleteAll();
   }
 }

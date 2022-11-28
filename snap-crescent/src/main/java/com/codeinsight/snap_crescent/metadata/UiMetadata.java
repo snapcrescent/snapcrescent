@@ -17,9 +17,7 @@ public class UiMetadata extends BaseUiBean {
 	@JsonFormat(shape = JsonFormat.Shape.NUMBER)
 	private Date creationDateTime;
 
-	@JsonFormat(shape = JsonFormat.Shape.NUMBER)
-	private Date lastModifiedDateTime;
-
+	private String name;
 	private String internalName;
 	private String mimeType;
 	private int orientation;

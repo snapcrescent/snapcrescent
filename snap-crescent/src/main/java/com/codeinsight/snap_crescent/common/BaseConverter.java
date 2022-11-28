@@ -50,7 +50,6 @@ public abstract class BaseConverter<E, B> {
 		beanXSSCleaner.cleanBean(bean);
 		
 		bean.setId(entity.getId());
-		bean.setActive(entity.getActive());
-		bean.setVersion(entity.getVersion());
+		
 	}
 }

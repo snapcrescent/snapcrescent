@@ -1,4 +1,9 @@
+import 'dart:io';
+
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:snap_crescent/repository/app_config_repository.dart';
+import 'package:snap_crescent/utils/constants.dart';
 
 class CommonUtils {
   
@@ -18,5 +23,21 @@ class CommonUtils {
       woy = 1;
     }
     return woy;
+  }
+
+  Future<String> getTempDownloadsDirectory() async{
+    String dir = (await getApplicationDocumentsDirectory()).path;
+    String temporaryDownloadsFolder = (await AppConfigRepository.instance.findByKey(Constants.appConfigThumbnailsFolder)).configValue!;
+    String finalFolder = '$dir/$temporaryDownloadsFolder';
+    await Directory(finalFolder).create();
+    return finalFolder;
+  }
+
+  Future<String> getThumbnailDirectory() async{
+    String dir = (await getApplicationDocumentsDirectory()).path;
+    String thumbnailsFolder = (await AppConfigRepository.instance.findByKey(Constants.appConfigThumbnailsFolder)).configValue!;
+    String finalFolder = '$dir/$thumbnailsFolder';
+    await Directory(finalFolder).create();
+    return finalFolder;
   }
 }

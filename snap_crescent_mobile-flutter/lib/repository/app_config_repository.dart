@@ -11,7 +11,7 @@ class AppConfigRepository extends BaseRepository {
       AppConfigRepository._privateConstructor();
 
   Future<int> saveOrUpdateConfig(AppConfig entity) async {
-    AppConfig config = await findByKey(entity.configkey!);
+    AppConfig config = await findByKey(entity.configKey!);
 
     if (config.configValue == null) {
       return await DatabaseHelper.instance.save(tableName, entity.toMap());
@@ -24,7 +24,7 @@ class AppConfigRepository extends BaseRepository {
   Future<int> updateConfig(AppConfig entity) async {
     Database database = await DatabaseHelper.instance.database;
     return await database.update(tableName, entity.toMap(),
-        where: 'CONFIG_KEY = ?', whereArgs: [entity.configkey!]);
+        where: 'CONFIG_KEY = ?', whereArgs: [entity.configKey!]);
   }
 
   Future<AppConfig> findByKey(String configKey) async {

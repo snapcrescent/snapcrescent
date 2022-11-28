@@ -11,8 +11,5 @@ public abstract class BaseUiBean implements Serializable {
 
 	protected Long id;
 	
-	protected Long version;
-
-	private Boolean active;
 
 }

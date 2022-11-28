@@ -36,7 +36,7 @@ class App extends StatelessWidget {
     switch (settings.name) {
       case "/":
         return MaterialPageRoute(
-            builder: (_) => AssetsGridScreen(ASSET_TYPE.PHOTO));
+            builder: (_) => AssetsGridScreen(AppAssetType.PHOTO));
       case SplashScreen.routeName:
         return MaterialPageRoute(builder: (_) => SplashScreen());
       case SettingsScreen.routeName:
@@ -46,7 +46,7 @@ class App extends StatelessWidget {
             builder: (_) => FolderSelectionScreen(settings.arguments as AppConfig));
       case AssetsGridScreen.routeName:
         return MaterialPageRoute(
-            builder: (_) => AssetsGridScreen(settings.arguments as ASSET_TYPE));
+            builder: (_) => AssetsGridScreen(settings.arguments as AppAssetType));
       case AssetDetailScreen.routeName:
         return MaterialPageRoute(
             builder: (_) =>
@@ -54,7 +54,7 @@ class App extends StatelessWidget {
 
       default:
         return MaterialPageRoute(
-            builder: (_) => AssetsGridScreen(ASSET_TYPE.PHOTO));
+            builder: (_) => AssetsGridScreen(AppAssetType.PHOTO));
     }
   }
 

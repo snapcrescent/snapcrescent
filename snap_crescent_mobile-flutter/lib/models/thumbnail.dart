@@ -4,28 +4,25 @@ import 'package:snap_crescent/models/base_model.dart';
 
 class Thumbnail extends BaseUiBean {
   String? name;
-  String? base64EncodedThumbnail;
   File? thumbnailFile;  
 
 
   Thumbnail(
       {
       bean,
-      this.name,
-      this.base64EncodedThumbnail})
+      this.name
+      })
       : super(
             id: bean.id,
             version: bean.version,
-            creationDatetime: bean.creationDatetime,
-            lastModifiedDatetime: bean.lastModifiedDatetime,
             active: bean.active);
 
   factory Thumbnail.fromJson(Map<String, dynamic> json) {
 
     return Thumbnail(
         bean: BaseUiBean.fromJson(json),
-        name: json['name'],
-        base64EncodedThumbnail: json['base64EncodedThumbnail']);
+        name: json['name']
+        );
   }
 
   factory Thumbnail.fromMap(Map<String, dynamic> map) {
