@@ -6,5 +6,6 @@ import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 
 public interface MetadataService {
 
-	public Metadata extractMetaData(AssetType assetType, String originalFilename, File file) throws Exception;
+	Metadata computeMetaData(AssetType assetType, String originalFilename, File file) throws Exception;
+	void recomputeMetaData(AssetType assetType, Metadata metadata, File file) throws Exception;
 }

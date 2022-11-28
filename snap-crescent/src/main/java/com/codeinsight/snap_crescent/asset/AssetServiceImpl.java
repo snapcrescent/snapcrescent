@@ -26,6 +26,7 @@ import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
 import com.codeinsight.snap_crescent.common.services.BaseService;
 import com.codeinsight.snap_crescent.common.utils.AppConfigKeys;
 import com.codeinsight.snap_crescent.common.utils.Constant;
+import com.codeinsight.snap_crescent.common.utils.DateUtils;
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
@@ -83,6 +84,64 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			response.setCurrentPageIndex(searchCriteria.getPageNumber());
 
 			response.setObjects(searchResult);
+			
+			for (UiAsset uiAsset : searchResult) {
+				
+				AssetType assetType = AssetType.findById(uiAsset.getAssetType());
+				
+				FILE_TYPE fileType = null;
+
+				if (assetType == AssetType.PHOTO) {
+					fileType = FILE_TYPE.PHOTO;
+				}
+
+				if (assetType == AssetType.VIDEO) {
+					fileType = FILE_TYPE.VIDEO;
+				}
+				
+				/*
+				try {
+					Metadata metadata = metadataRepository.findById(uiAsset.getMetadataId());
+					File beforeRecomputeAssetFile = fileService.getFile(fileType, metadata.getPath(), metadata.getInternalName());
+					metadataService.recomputeMetaData(assetType, metadata,beforeRecomputeAssetFile);
+					
+					String postRecomputePath = DateUtils.getFilePathFromDate(metadata.getCreationDateTime());
+					
+					String assetDirectoryPath = fileService.getBasePath(assetType) + postRecomputePath;
+					fileService.mkdirs(assetDirectoryPath);
+					
+					
+					File finalAssetFile = new File(assetDirectoryPath + "/" + metadata.getInternalName());
+					if(!beforeRecomputeAssetFile.getAbsolutePath().equals(finalAssetFile.getAbsolutePath())) {
+						Files.move(Paths.get(beforeRecomputeAssetFile.getAbsolutePath()), Paths.get(finalAssetFile.getAbsolutePath()));	
+					}
+					
+					Thumbnail thumbnail = thumbnailRepository.findById(uiAsset.getThumbnailId());
+					
+					String thumbnailDirectoryPath = fileService.getBasePath(FILE_TYPE.THUMBNAIL) + postRecomputePath;
+					fileService.mkdirs(thumbnailDirectoryPath);
+					
+					File thumbnailFile = fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(),thumbnail.getName());
+					
+					File finalThumbnailFile = new File(thumbnailDirectoryPath + "/" + thumbnail.getName());
+					
+					if(!thumbnailFile.getAbsolutePath().equals(finalThumbnailFile.getAbsolutePath())) {
+						Files.move(Paths.get(thumbnailFile.getAbsolutePath()), Paths.get(finalThumbnailFile.getAbsolutePath()));	
+					}
+					
+					metadata.setPath(postRecomputePath);
+					thumbnail.setPath(postRecomputePath);
+					
+					metadataRepository.update(metadata);
+					thumbnailRepository.update(thumbnail);
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				*/
+				
+			}
+			
+			
 
 		}
 
@@ -130,7 +189,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		try {
 			String originalFilename = StringUtils.extractFileNameFromTemporary(temporaryFile.getName());
 
-			Metadata metadata = metadataService.extractMetaData(assetType, originalFilename, temporaryFile);
+			Metadata metadata = metadataService.computeMetaData(assetType, originalFilename, temporaryFile);
 			Thumbnail thumbnail = thumbnailService.generateThumbnail(temporaryFile, metadata, assetType);
 
 			long assetHash = getPerceptualHash(
@@ -194,7 +253,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		if (asset.getAssetTypeEnum() == AssetType.VIDEO) {
 			fileType = FILE_TYPE.VIDEO;
 		}
-
+		
 		return fileService.readFileBytes(fileType, asset.getMetadata().getPath(),
 				asset.getMetadata().getInternalName());
 	}

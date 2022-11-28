@@ -18,8 +18,11 @@ public class Constant {
 	public static final String METADATA_IMAGE_HEIGHT = "Image Height";
 	public static final String METADATA_IMAGE_WIDTH = "Image Width";
 	public static final String METADATA_CREATED_DATE = "Date/Time";
+	public static final String METADATA_CREATION_TIME = "Creation Time";
+	
 	public static final String METADATA_MODEL = "Model";
 	public static final String METADATA_FSTOP = "F-Number";
+	public static final String METADATA_DURATION = "Duration";
 	
 	public static final String UNPROCESSED_ASSET_FOLDER = "un-processed/";
 	
@@ -29,11 +32,26 @@ public class Constant {
 
 	public static final String SIMPLE_DATE_FORMAT = "yyyy:MM:dd hh:mm:ss";
 	
-	public static final String METADATA_CREATED_DATE_FORMAT_1 = "yyyy:MM:dd hh:mm:ss";
-	public static final String METADATA_CREATED_DATE_FORMAT_2 = "yyyy:MM:dd HH:mm:ss";
-	public static final String METADATA_CREATED_DATE_FORMAT_3 = "yyyy-MM-dd hh:mm:ss";
-	public static final String METADATA_CREATED_DATE_FORMAT_4 = "yyyy-MM-dd HH:mm:ss";
-	
+	public enum MetadtaCreatedDateFormat {
+		FORMAT_1("yyyy:MM:dd hh:mm:ss"),
+		FORMAT_2("yyyy:MM:dd HH:mm:ss"),
+		FORMAT_3("yyyy-MM-dd hh:mm:ss"),
+		FORMAT_4("yyyy-MM-dd HH:mm:ss"),
+		FORMAT_5("dd-MM-yyyy HH:mm"),
+		FORMAT_6("EEE MMM dd HH:mm:ss XXX yyyy");
+		
+		
+		private String format;
+		
+		private MetadtaCreatedDateFormat(String format) {
+			this.format = format;
+		}
+		
+		public String getFormat() {
+			return format;
+		}
+		
+	}
 	
 	
 	public static final String VIDEO = "/video";

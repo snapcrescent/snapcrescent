@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 
 import com.codeinsight.snap_crescent.common.services.BaseService;
 import com.codeinsight.snap_crescent.common.utils.Constant;
+import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.common.utils.DateUtils;
 import com.codeinsight.snap_crescent.common.utils.StringUtils;
-import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.location.LocationService;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.lang.GeoLocation;
@@ -27,10 +27,26 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 	
 	@Autowired
 	private LocationService locationService;
-
-	public Metadata extractMetaData(AssetType assetType, String originalFilename, File file) throws Exception {
-		
+	
+	@Override
+	public Metadata computeMetaData(AssetType assetType, String originalFilename, File file) throws Exception {
 		Metadata metadata = new Metadata();
+		extractMetaData(assetType, originalFilename, file, metadata);
+		return metadata;
+	}
+	
+	@Override
+	public void recomputeMetaData(AssetType assetType, Metadata metadata, File file) throws Exception {
+		String internalName = metadata.getInternalName();
+		String path = metadata.getPath();
+		extractMetaData(assetType, metadata.getName(), file, metadata);
+		metadata.setInternalName(internalName);
+		metadata.setPath(path);
+	}
+
+	private void extractMetaData(AssetType assetType, String originalFilename, File file, Metadata metadata) throws Exception {
+		
+		
 
 		try {
 			
@@ -49,8 +65,19 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 			
 			metadata.setSize(metaDataMap.get(Constant.METADATA_FILE_SIZE));
 			Date modifiedDate = new Date(file.lastModified());
-
-			String creationDateString = metaDataMap.get(Constant.METADATA_CREATED_DATE);
+			
+			
+			String creationDateString = null;
+			
+			if(assetType == AssetType.VIDEO) {
+				//creationDateString = metaDataMap.get(Constant.METADATA_CREATION_TIME);
+			}
+			
+			if(creationDateString == null) {
+				creationDateString = metaDataMap.get(Constant.METADATA_CREATED_DATE);
+			}
+			
+			
 			if (creationDateString != null) {
 				try {
 					metadata.setCreationDateTime(DateUtils.parseCreateDate(creationDateString));	
@@ -75,7 +102,11 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 			metadata.setFstop(metaDataMap.get(Constant.METADATA_FSTOP));
 			
 			if(assetType == AssetType.VIDEO) {
-				metadata.setDuration(0);
+				String duration = metaDataMap.get(Constant.METADATA_DURATION);
+					if(duration != null) {
+						metadata.setDuration(Long.parseLong(duration)/1000);			
+					}
+				
 			}
 
 		    Directory directory = drewMetadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
@@ -100,7 +131,5 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 		} catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
 		}
-		
-		return metadata;
 	}
 }
