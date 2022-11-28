@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
 
 class DatabaseHelper {
   static final _dbName = 'snap-crescent.db';
@@ -23,8 +20,8 @@ class DatabaseHelper {
   }
 
   _initiateDatabase() async {
-     var directory = await getApplicationDocumentsDirectory();
-    String path = join(directory.path, _dbName);
+     var directory = (await getApplicationDocumentsDirectory()).path;
+    String path = '$directory/$_dbName';
     return await openDatabase(path, version: _dbVersion, onCreate: _onCreate);
   }
 
@@ -40,8 +37,8 @@ class DatabaseHelper {
       CREATE TABLE SYNC_INFO ( 
         ID INTEGER PRIMARY KEY,
         VERSION INTEGER NOT NULL,
-        CREATION_DATETIME INTEGER,
-        LAST_MODIFIED_DATETIME INTEGER,
+        CREATION_DATE_TIME INTEGER,
+        LAST_MODIFIED_DATE_TIME INTEGER,
         ACTIVE INTEGER
         );
       ''');  
@@ -50,8 +47,6 @@ class DatabaseHelper {
       CREATE TABLE ASSET ( 
         ID INTEGER PRIMARY KEY,
         VERSION INTEGER NOT NULL,
-        CREATION_DATETIME INTEGER,
-        LAST_MODIFIED_DATETIME INTEGER,
         ACTIVE INTEGER,
         THUMBNAIL_ID INTEGER,
         METADATA_ID INTEGER,
@@ -63,22 +58,14 @@ class DatabaseHelper {
     database.execute('''
       CREATE TABLE METADATA ( 
         ID INTEGER PRIMARY KEY,
-        NAME TEXT,
-        SIZE TEXT,
-        FILE_TYPE_NAME TEXT,
-        FILE_TYPE_LONG_NAME TEXT,
-        MIME_TYPE TEXT,
-        FILE_EXTENSION TEXT,
-        MODEL TEXT,
-        HEIGHT TEXT,
-        WIDTH TEXT,
-        ORIENTATION INTEGER,
-        FSTOP TEXT,
-        LOCATION_ID INTEGER,
         VERSION INTEGER NOT NULL,
-        CREATION_DATETIME INTEGER,
-        LAST_MODIFIED_DATETIME INTEGER,
-        ACTIVE INTEGER
+        CREATION_DATE_TIME INTEGER,
+        LAST_MODIFIED_DATE_TIME INTEGER,
+        ACTIVE INTEGER,
+        NAME TEXT,
+        INTERNAL_NAME TEXT,
+        MIME_TYPE TEXT,
+        ORIENTATION INTEGER
         );
       ''');
 
@@ -86,8 +73,6 @@ class DatabaseHelper {
       CREATE TABLE THUMBNAIL (
         ID INTEGER PRIMARY KEY,
         VERSION INTEGER NOT NULL,
-        CREATION_DATETIME INTEGER,
-        LAST_MODIFIED_DATETIME INTEGER,
         ACTIVE INTEGER,
         NAME TEXT
         );

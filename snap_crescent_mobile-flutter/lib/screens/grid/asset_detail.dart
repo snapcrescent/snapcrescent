@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:chewie/chewie.dart';
+import 'package:better_player/better_player.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
@@ -14,7 +14,6 @@ import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/stores/asset/photo_store.dart';
 import 'package:snap_crescent/stores/asset/video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
-import 'package:video_player/video_player.dart';
 
 class AssetDetailScreen extends StatelessWidget {
   static const routeName = '/asset_detail';
@@ -29,7 +28,7 @@ class AssetDetailScreen extends StatelessWidget {
 }
 
 class _AssetDetailView extends StatefulWidget {
-  final ASSET_TYPE type;
+  final AppAssetType type;
   final int assetIndex;
 
   _AssetDetailView(this.type, this.assetIndex);
@@ -39,42 +38,67 @@ class _AssetDetailView extends StatefulWidget {
 }
 
 class _AssetDetailViewState extends State<_AssetDetailView> {
-
-  ChewieController? _chewieController;
-  VideoPlayerController? _videoPlayerController;
+  BetterPlayerController? _betterPlayerController;
   PageController? pageController;
   Map<String, String> headers = {};
   String serverUrl = "";
   late AssetStore _assetStore;
 
   _videoPlayer(UniFiedAsset? unifiedAsset) {
-    if (_videoPlayerController == null) {
-      if (_videoPlayerController != null) {
-        _videoPlayerController!.dispose();
+    if (_betterPlayerController == null) {
+      if (_betterPlayerController != null) {
+        _betterPlayerController!.dispose();
       }
+
+      BetterPlayerConfiguration betterPlayerConfiguration =
+          BetterPlayerConfiguration(
+        aspectRatio: 16 / 9,
+        autoPlay: true,
+        looping: true,
+        fit: BoxFit.contain,
+      );
 
       if (unifiedAsset!.assetSource == AssetSource.CLOUD) {
         Asset asset = unifiedAsset.asset!;
         String assetURL = AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!);
+        //String assetURL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
 
-        _videoPlayerController =
-            VideoPlayerController.network(assetURL, httpHeaders: headers)
-              ..setLooping(true)
-              ..initialize().then((_) {
-                setState(() {});
-              });
+        
+        BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+          BetterPlayerDataSourceType.network,
+          assetURL,
+          headers: {
+          "range": "bytes=0-",
+        },  
+          bufferingConfiguration: BetterPlayerBufferingConfiguration(
+            minBufferMs: 50000,
+            maxBufferMs: 13107200,
+            bufferForPlaybackMs: 10000,
+            bufferForPlaybackAfterRebufferMs: 5000,
+          ),
+          placeholder: Container(
+                  child: Image.file(asset.thumbnail!.thumbnailFile!,
+                      fit: BoxFit.none),
+                )
+        );
+        _betterPlayerController = BetterPlayerController(betterPlayerConfiguration);
+        _betterPlayerController!.setupDataSource(dataSource);
+        
       } else {
         AssetEntity asset = unifiedAsset.assetEntity!;
 
+        /*
         asset.file.then(
             (file) => _videoPlayerController = VideoPlayerController.file(file!)
               ..setLooping(true)
               ..initialize().then((_) {
                 setState(() {});
               }));
+        */
       }
     }
 
+/*
     if(_videoPlayerController != null && _videoPlayerController!.value.isInitialized) {
       _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController!,
@@ -82,25 +106,18 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
       looping: true,
     );
     }
-
-    return _videoPlayerController != null &&
-            _videoPlayerController!.value.isInitialized
-        ? Container(
+*/
+    return Container(
             alignment: Alignment.center,
             child: AspectRatio(
-              aspectRatio: _videoPlayerController!.value.aspectRatio,
-              child: Chewie(controller: _chewieController!),
-            ))
-        : Container(
-            height: 200,
-            child: Center(child: CircularProgressIndicator()),
-          );
+              aspectRatio: _betterPlayerController!.getAspectRatio()!,
+              child: BetterPlayer(controller: _betterPlayerController!),
+            ));
   }
 
   _imageBanner(UniFiedAsset unifiedAsset, Object? object) {
     if (unifiedAsset.assetSource == AssetSource.CLOUD && object is Asset) {
       Asset asset = object;
-      
 
       return PhotoView(
           loadingBuilder: (context, progress) => Center(
@@ -109,13 +126,12 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
                       fit: BoxFit.fitWidth),
                 ),
               ),
-          gaplessPlayback:true,
+          gaplessPlayback: true,
           minScale: PhotoViewComputedScale.contained * 0.8,
           maxScale: PhotoViewComputedScale.covered * 1.8,
           imageProvider: NetworkImage(
               AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!),
               headers: headers));
-      
     } else if (unifiedAsset.assetSource == AssetSource.DEVICE &&
         object is File) {
       return Image.file(object);
@@ -136,164 +152,155 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   }
 
   _getAssetFile(int assetIndex) async {
-      final UniFiedAsset unifiedAsset = _assetStore.assetList[assetIndex];
+    final UniFiedAsset unifiedAsset = _assetStore.assetList[assetIndex];
 
-      File? assetFile;
+    File? assetFile;
 
-      if (unifiedAsset.assetSource == AssetSource.CLOUD) {
-        Asset asset = unifiedAsset.asset!;
-        assetFile = await AssetService.instance
-            .downloadAssetById(asset.id!, asset.metadata!.name!);
-      } else {
-        AssetEntity asset = unifiedAsset.assetEntity!;
-        assetFile = await asset.file;
-      }
-
-      return assetFile;
+    if (unifiedAsset.assetSource == AssetSource.CLOUD) {
+      Asset asset = unifiedAsset.asset!;
+      assetFile = await AssetService.instance
+          .downloadAssetById(asset.id!, asset.metadata!.name!);
+    } else {
+      AssetEntity asset = unifiedAsset.assetEntity!;
+      assetFile = await asset.file;
     }
 
-    Future<void> _shareAssetFile(int assetIndex) async {
-      final File? assetFile = await _getAssetFile(assetIndex);
-      String mimeType =
-          widget.type == ASSET_TYPE.PHOTO ? "image/jpg" : "video/mp4";
-      await Share.shareFiles(<String>[assetFile!.path],
-          mimeTypes: <String>[mimeType]);
-    }
+    return assetFile;
+  }
 
-    _assetView(index) {
-      return FutureBuilder<Object?>(
-            future: Future.value(
-                _assetStore.assetList[index].assetSource == AssetSource.CLOUD
-                    ? _assetStore.assetList[index].asset
-                    : _assetStore.assetList[index].assetEntity!.file),
-            builder: (BuildContext context, AsyncSnapshot<Object?> snapshot) {
-              if (snapshot.data == null) {
+  Future<void> _shareAssetFile(int assetIndex) async {
+    final File? assetFile = await _getAssetFile(assetIndex);
+    await Share.shareXFiles([XFile(assetFile!.path)]);
+  }
+
+  _assetView(index) {
+    return FutureBuilder<Object?>(
+        future: Future.value(
+            _assetStore.assetList[index].assetSource == AssetSource.CLOUD
+                ? _assetStore.assetList[index].asset
+                : _assetStore.assetList[index].assetEntity!.file),
+        builder: (BuildContext context, AsyncSnapshot<Object?> snapshot) {
+          if (snapshot.data == null) {
+            return Container();
+          } else {
+            UniFiedAsset asset = _assetStore.assetList[index];
+            return widget.type == AppAssetType.PHOTO
+                ? _imageBanner(asset, snapshot.data)
+                : _videoPlayer(asset);
+          }
+        });
+  }
+
+  _pageView() {
+    return Container(
+      color: Colors.black,
+      child: new Stack(fit: StackFit.expand, children: <Widget>[
+        new Scaffold(
+          backgroundColor: Colors.transparent,
+          body: PageView.builder(
+            controller: pageController,
+            physics: widget.type == AppAssetType.PHOTO
+                ? PageScrollPhysics()
+                : NeverScrollableScrollPhysics(),
+            itemCount: _assetStore.assetList.length,
+            itemBuilder: (BuildContext context, int index) {
+              if (_assetStore.assetList.isEmpty) {
                 return Container();
               } else {
-                UniFiedAsset asset = _assetStore.assetList[index];
-                return widget.type == ASSET_TYPE.PHOTO
-                    ? _imageBanner(asset, snapshot.data)
-                    : _videoPlayer(asset);
+                return _assetView(index);
               }
-            });
-    }
-
-    _pageView() {
-      return Container(
-        color: Colors.black,
-        child: new Stack(fit: StackFit.expand, children: <Widget>[
-          new Scaffold(
-            backgroundColor: Colors.transparent,
-            body: PageView.builder(
-              controller: pageController,
-              physics: widget.type == ASSET_TYPE.PHOTO
-                  ? PageScrollPhysics()
-                  : NeverScrollableScrollPhysics(),
-              itemCount: _assetStore.assetList.length,
-              itemBuilder: (BuildContext context, int index) {
-                if (_assetStore.assetList.isEmpty) {
-                  return Container();
-                } else {
-                  return _assetView(index);
-                }
-              },
-            ),
+            },
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                flex: 1,
-                child: Container(
-                  width: 100.0,
-                  height: 100.0,
-                  child: IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(Icons.arrow_back, color: Colors.white)),
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Container(
-                  width: double.infinity,
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Container(
-                  width: 100.0,
-                  height: 100.0,
-                  child: IconButton(
-                      onPressed: () {
-                        _shareAssetFile(widget.assetIndex);
-                      },
-                      icon: Icon(Icons.share, color: Colors.white)),
-                ),
-              ),
-            ],
-          ),
-        ]),
-      );
-    }
-
-    _getFloatingActionButton() {
-      if (widget.type == ASSET_TYPE.VIDEO) {
-        return FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              if (_videoPlayerController != null &&
-                  _videoPlayerController!.value.isPlaying) {
-                _videoPlayerController!.pause();
-              } else {
-                _videoPlayerController!.play();
-              }
-            });
-          },
-          child: Icon(
-            _videoPlayerController != null &&
-                    _videoPlayerController!.value.isPlaying
-                ? Icons.pause
-                : Icons.play_arrow,
-          ),
-        );
-      } else {
-        new Container();
-      }
-    }
-
-    _body() {
-      return Scaffold(
-        body: Row(
-          children: <Widget>[Expanded(child: _pageView())],
         ),
-        //floatingActionButton: _getFloatingActionButton(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              flex: 1,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.arrow_back, color: Colors.white)),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Container(
+                width: double.infinity,
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                child: IconButton(
+                    onPressed: () {
+                      _shareAssetFile(widget.assetIndex);
+                    },
+                    icon: Icon(Icons.share, color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ]),
+    );
+  }
+
+  _getFloatingActionButton() {
+    if (widget.type == AppAssetType.VIDEO) {
+      return FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            if (_betterPlayerController != null &&
+                _betterPlayerController!.isPlaying()!) {
+              _betterPlayerController!.pause();
+            } else {
+              _betterPlayerController!.play();
+            }
+          });
+        },
+        child: Icon(
+          _betterPlayerController != null && _betterPlayerController!.isPlaying()!
+              ? Icons.pause
+              : Icons.play_arrow,
+        ),
       );
+    } else {
+      new Container();
     }
+  }
+
+  _body() {
+    return Scaffold(
+      body: Row(
+        children: <Widget>[Expanded(child: _pageView())],
+      ),
+      //floatingActionButton: _getFloatingActionButton(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    
-     _assetStore = widget.type == ASSET_TYPE.PHOTO
-        ?  Provider.of<PhotoStore>(context)
+    _assetStore = widget.type == AppAssetType.PHOTO
+        ? Provider.of<PhotoStore>(context)
         : Provider.of<VideoStore>(context);
 
     return _body();
   }
 
   @override
-  void dispose() {
+  void dispose() async {
+    super.dispose();
     pageController!.dispose();
 
-    if (_videoPlayerController != null) {
-      _videoPlayerController!.dispose();
+    if (_betterPlayerController != null) {
+      _betterPlayerController!.dispose();
     }
 
-    if(_chewieController != null) {
-      _chewieController!.dispose();
-    }
-
-    super.dispose();
   }
 }

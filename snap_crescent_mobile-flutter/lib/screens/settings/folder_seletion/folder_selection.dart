@@ -43,10 +43,12 @@ class _FoldersScreenViewState
   Future<List<AssetPathEntity>> _getDeviceFolderList() async {
     await _getFolderInfo();
 
-    if (!await PhotoManager.requestPermission()) {
-      ToastService.showError('Permission to device folders denied!');
-      return Future.value([]);
-    }
+    final PermissionState _ps = await PhotoManager.requestPermissionExtend();
+
+    if (!_ps.isAuth) {
+        ToastService.showError('Permission to device folders denied!');
+        return Future.value([]);
+    } 
 
     final List<AssetPathEntity> folders = await PhotoManager.getAssetPathList();
     folders.sort(
@@ -67,7 +69,7 @@ class _FoldersScreenViewState
 
   Future<void> _getFolderInfo() async {
     AppConfig value = await AppConfigRepository.instance
-        .findByKey(widget.appConfig.configkey!);
+        .findByKey(widget.appConfig.configKey!);
 
     if (value.configValue != null) {
       _folders = value.configValue!;

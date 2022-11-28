@@ -1,10 +1,14 @@
 import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
+import 'package:snap_crescent/models/asset.dart';
+import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
+import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/login_service.dart';
+import 'package:snap_crescent/services/metadata_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -15,7 +19,7 @@ class SettingsService {
 
   updateFlag(String flag, bool value) async {
     AppConfig appConfig = new AppConfig(
-        configkey: flag,
+        configKey: flag,
         configValue: value.toString());
 
     await AppConfigRepository.instance.saveOrUpdateConfig(appConfig);
@@ -83,28 +87,23 @@ class SettingsService {
     return _showDeviceAssetsFolders;
   }
 
-  Future<int> getSyncSpeedInfo() async {
-     AppConfig value = await AppConfigRepository.instance.findByKey(Constants.appConfigSyncSpeed);
 
-    int _syncingSpeed = 100;
-    if (value.configValue != null) {
-      _syncingSpeed = int.parse(value.configValue!);
-    } 
+  Future<String> getLatestAssetDate() async {
+    List<Asset> localAssetsList = await AssetService.instance.searchOnLocal(AssetSearchCriteria.defaultCriteria());
 
-    return _syncingSpeed;
-  }
+    String _latestAssetDate = "Never";
+    if (localAssetsList.isEmpty == false) {
 
-  Future<String> getLastSyncInfo() async {
-    List<SyncInfo> localSyncInfoList = await SyncInfoService.instance.searchOnLocal();
+      Asset latestAsset = localAssetsList.first;
+      final metadata = await MetadataService.instance.findByIdOnLocal(latestAsset.metadataId!);
+      latestAsset.metadata = metadata;
 
-    String _lastSyncDate = "Never";
-    if (localSyncInfoList.isEmpty == false) {
       final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss ');
-      _lastSyncDate =
-          formatter.format(localSyncInfoList.last.lastModifiedDatetime!);
+      _latestAssetDate =
+          formatter.format(latestAsset.metadata!.creationDateTime!);
     } 
 
-    return _lastSyncDate;
+    return _latestAssetDate;
   }
 
   Future<List<String>> getAccountInformation() async {
@@ -144,15 +143,15 @@ class SettingsService {
   Future<UserLoginResponse> saveAccountInformation(String serverUrl, String username, String password) async {
 
       AppConfig serverUrlConfig = new AppConfig(
-          configkey: Constants.appConfigServerURL,
+          configKey: Constants.appConfigServerURL,
           configValue: serverUrl);
 
       AppConfig serverUserNameConfig = new AppConfig(
-          configkey: Constants.appConfigServerUserName,
+          configKey: Constants.appConfigServerUserName,
           configValue: username);
 
       AppConfig serverPasswordConfig = new AppConfig(
-          configkey: Constants.appConfigServerPassword,
+          configKey: Constants.appConfigServerPassword,
           configValue: password);
 
       await AppConfigRepository.instance.saveOrUpdateConfig(serverUrlConfig);

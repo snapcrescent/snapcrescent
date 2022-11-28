@@ -18,12 +18,10 @@ const AssetType = require("./model/asset-type").AssetType;
 
 app.use(cors(corsOptions));
 
-app.get("/asset/:id/thumbnail",async  function (req, res) {
-  var asset = (await query(`Select * from asset where id  = ${req.params.id}`))[0];
-  var thumbnail = (await query(`Select * from thumbnail where id = ${asset.thumbnail_id}`))[0];
+app.get("/thumbnail/:id",async  function (req, res) {
+  var thumbnail = (await query(`Select * from thumbnail where id = ${req.params.id}`))[0];
   
   const headers = {};
-  
   
   var stream;
 

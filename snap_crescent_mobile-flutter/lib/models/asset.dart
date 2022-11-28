@@ -25,8 +25,6 @@ class Asset extends BaseUiBean {
       : super(
             id: bean.id,
             version: bean.version,
-            creationDatetime: bean.creationDatetime,
-            lastModifiedDatetime: bean.lastModifiedDatetime,
             active: bean.active);
 
   static Asset fromJsonModel(Map<String, dynamic> json) => Asset.fromJson(json);

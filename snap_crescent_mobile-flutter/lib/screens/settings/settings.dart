@@ -1,14 +1,19 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:snap_crescent/models/app_config.dart';
+import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
+import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/settings_service.dart';
 import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
+import 'package:snap_crescent/stores/widget/sync_process_store.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_bar.dart';
@@ -34,15 +39,16 @@ class _SettingsScreenView extends StatefulWidget {
 }
 
 class _SettingsScreenViewState extends State<_SettingsScreenView> {
+  late SyncProcessStore _syncProcessStore;
   bool _connectedToServer = false;
   String _loggedInUserName = "";
   String _loggedServerName = "";
   bool _autoBackup = false;
   bool _showDeviceAssets = false;
-  String _lastSyncDate = "Never";
+  String _latestAssetDate = "Never";
+  int _syncedAssetCount = 0;
   String _autoBackupFolders = "None";
   String _showDeviceAssetsFolders = "None";
-  int _syncingSpeed = 0;
 
   final _formKey = GlobalKey<FormState>();
   AutovalidateMode _autovalidateMode = AutovalidateMode.onUserInteraction;
@@ -57,6 +63,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   @override
   Widget build(BuildContext context) {
+    _syncProcessStore = Provider.of<SyncProcessStore>(context);
     
     return FutureBuilder<bool>(
         future: _getSettingsData(),
@@ -91,14 +98,15 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         .getFlag(Constants.appConfigShowDeviceAssetsFlag);
     _showDeviceAssetsFolders =
         await SettingsService.instance.getShowDeviceAssetsFolderInfo();
-    _lastSyncDate = await SettingsService.instance.getLastSyncInfo();
-    _syncingSpeed = await SettingsService.instance.getSyncSpeedInfo();
+     _latestAssetDate = await SettingsService.instance.getLatestAssetDate();
+
+    _syncedAssetCount = await AssetService.instance.countOnLocal(AssetSearchCriteria.defaultCriteria());
     return Future.value(true);
   }
 
   _clearCache() async {
     await SyncInfoService.instance.deleteAllData();
-    _lastSyncDate = await SettingsService.instance.getLastSyncInfo();
+    _latestAssetDate = await SettingsService.instance.getLatestAssetDate();
     ToastService.showSuccess("Successfully deleted locally cached data.");
     setState(() {});
   }
@@ -205,7 +213,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   _onLogoutPressed() async {
     AppConfig appConfigLoggedInFlagConfig = new AppConfig(
-        configkey: Constants.appConfigLoggedInFlag,
+        configKey: Constants.appConfigLoggedInFlag,
         configValue: false.toString());
 
     await AppConfigRepository.instance
@@ -249,7 +257,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         title: Text("Auto Backup", style: TitleTextStyle),
         secondary: const Icon(Icons.cloud_upload),
         subtitle: Text(
-            "Keep your photos and videos by backing them up to your snap-crecent server"),
+            "Keep your photos and videos by backing them up to your snapcrecent server"),
         isThreeLine: false,
         value: _autoBackup,
         onChanged: (bool value) {
@@ -267,7 +275,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           ),
           onTap: () {
             AppConfig appConfigAutoBackupFoldersConfig = new AppConfig(
-                configkey: Constants.appConfigAutoBackupFolders,
+                configKey: Constants.appConfigAutoBackupFolders,
                 configValue: "");
 
             Navigator.push(
@@ -279,23 +287,9 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           },
         ),
       ListTile(
-        title: Text("Syncing Speed", style: TitleTextStyle),
-        subtitle: Text(_connectedToServer == true
-            ? '''$_syncingSpeed'''
-            : "Not Connected"),
-        leading: Container(
-          width: 40,
-          alignment: Alignment.center,
-          child: const Icon(Icons.account_circle),
-        ),
-        onTap: () {
-          _showAccountInfoDialog();
-        },
-      ),
-      ListTile(
         title: Text("Clear Locally Cached Photos and Videos",
             style: TitleTextStyle),
-        subtitle: Text("Last Synced : " + _lastSyncDate),
+        subtitle: Text("Last Synced : " + _latestAssetDate + " - " + "Asset Count : " + _syncedAssetCount.toString()),
         leading: Container(
           width: 40,
           alignment: Alignment.center,
@@ -308,7 +302,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
       SwitchListTile(
         title: Text("Show Device Photos And Videos", style: TitleTextStyle),
         secondary: const Icon(Icons.photo_album),
-        subtitle: Text("Show photos and videos on your device on snap-cresent"),
+        subtitle: Text("Show photos and videos on your device on snapcresent"),
         isThreeLine: false,
         value: _showDeviceAssets,
         onChanged: (bool value) {
@@ -327,7 +321,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           onTap: () {
             AppConfig appConfigShowDeviceAssetsFoldersFlagConfig =
                 new AppConfig(
-                    configkey: Constants.appConfigShowDeviceAssetsFolders,
+                    configKey: Constants.appConfigShowDeviceAssetsFolders,
                     configValue: "");
             Navigator.push(
                     context,

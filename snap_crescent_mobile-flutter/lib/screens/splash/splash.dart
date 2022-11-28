@@ -29,7 +29,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _setDefaultAppConfig();
     });
 
@@ -38,7 +38,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
         () => Navigator.pushAndRemoveUntil<dynamic>(
         context,
         MaterialPageRoute<dynamic>(
-          builder: (BuildContext context) => AssetsGridScreen(ASSET_TYPE.PHOTO),
+          builder: (BuildContext context) => AssetsGridScreen(AppAssetType.PHOTO),
         ),
         (route) => false,//if you want to disable back feature set to false
       ));
@@ -64,22 +64,24 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
 
     // This is first boot of application
     if (firstBootConfig.configValue == null) {
-      firstBootConfig.configkey = Constants.appConfigFirstBootFlag;
+      firstBootConfig.configKey = Constants.appConfigFirstBootFlag;
       firstBootConfig.configValue = "false";
 
       await AppConfigRepository.instance.saveOrUpdateConfig(firstBootConfig);
 
       AppConfig appConfigShowDeviceAssetsFlagConfig = new AppConfig(
-          configkey: Constants.appConfigShowDeviceAssetsFlag,
+          configKey: Constants.appConfigShowDeviceAssetsFlag,
           configValue: "true");
 
       await AppConfigRepository.instance
           .saveOrUpdateConfig(appConfigShowDeviceAssetsFlagConfig);
 
-      if (!await PhotoManager.requestPermission()) {
-        ToastService.showError('Permission to device folders denied!');
+      final PermissionState _ps = await PhotoManager.requestPermissionExtend();
+
+      if (!_ps.isAuth) {
+          ToastService.showError('Permission to device folders denied!');
         return Future.value([]);
-      }
+        } 
 
       final List<AssetPathEntity> folders =
           await PhotoManager.getAssetPathList();
@@ -98,7 +100,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
           .toList();
 
       AppConfig appConfigShowDeviceAssetsFoldersFlagConfig = new AppConfig(
-          configkey: Constants.appConfigShowDeviceAssetsFolders,
+          configKey: Constants.appConfigShowDeviceAssetsFolders,
           configValue: cameraFolders
               .map((assetPathEntity) => assetPathEntity.id)
               .join(","));
@@ -107,19 +109,32 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
           .saveOrUpdateConfig(appConfigShowDeviceAssetsFoldersFlagConfig);
 
       AppConfig appConfigLoggedInFlagConfig = new AppConfig(
-          configkey: Constants.appConfigLoggedInFlag,
+          configKey: Constants.appConfigLoggedInFlag,
           configValue: false.toString());
 
       await AppConfigRepository.instance
           .saveOrUpdateConfig(appConfigLoggedInFlagConfig);
 
-      AppConfig appConfigSyncSpeedConfig = new AppConfig(
-          configkey: Constants.appConfigSyncSpeed,
-          configValue: false.toString());
-
+      AppConfig appConfigThumbnailsFolderConfig = new AppConfig(
+          configKey: Constants.appConfigThumbnailsFolder,
+          configValue: 'thumbnails');
 
       await AppConfigRepository.instance
-          .saveOrUpdateConfig(appConfigSyncSpeedConfig);    
+          .saveOrUpdateConfig(appConfigThumbnailsFolderConfig);
+
+      AppConfig appConfigTempDownloadsFolderConfig = new AppConfig(
+          configKey: Constants.appConfigTempDownloadsFolder,
+          configValue: 'tempDownload');
+
+      await AppConfigRepository.instance
+          .saveOrUpdateConfig(appConfigTempDownloadsFolderConfig);
+
+      AppConfig appConfigPermanentDownloadsFolderConfig = new AppConfig(
+          configKey: Constants.appConfigPermanentDownloadsFolder,
+          configValue: 'SnapCrescent');
+
+      await AppConfigRepository.instance
+          .saveOrUpdateConfig(appConfigPermanentDownloadsFolderConfig);
     }
 
   

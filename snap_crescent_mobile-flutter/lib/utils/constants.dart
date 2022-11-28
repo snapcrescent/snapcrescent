@@ -15,7 +15,9 @@ class Constants {
   static final String appConfigShowDeviceAssetsFlag = 'SHOW_DEVICE_ASSETS';
   static final String appConfigShowDeviceAssetsFolders = 'SHOW_DEVICE_ASSETS_FOLDERS';
 
-  static final String appConfigSyncSpeed = 'SYNC_SPEED';
+  static final String appConfigThumbnailsFolder = 'THUMBNAILS_FOLDER';
+  static final String appConfigTempDownloadsFolder = 'TEMP_DOWNLOADS_FOLDER';
+  static final String appConfigPermanentDownloadsFolder = 'PERMANENT_DOWNLOADS_FOLDER';
   
 }
 
@@ -30,9 +32,12 @@ enum AssetSource {
    DEVICE
 }
 
-enum ASSET_TYPE {  
-   PHOTO,
-   VIDEO
+enum AppAssetType {  
+   PHOTO(1),
+   VIDEO(2);
+
+   final int id;
+   const AppAssetType(this.id);
 }
 
 enum ResultType {  
@@ -49,8 +54,8 @@ enum Direction {
 enum SyncProgress { 
    CONTACTING_SERVER,
    PROCESSING,
-   DOWNLOADING_PHOTO_THUMNAILS,
-   DOWNLOADING_VIDEO_THUMNAILS,
+   DOWNLOADING_PHOTO_THUMBNAILS,
+   DOWNLOADING_VIDEO_THUMBNAILS,
    UPLOADING_PHOTOS,
    UPLOADING_VIDEOS,
    SYNC_COMPLETED

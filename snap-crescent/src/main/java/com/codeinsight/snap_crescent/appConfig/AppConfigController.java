@@ -17,7 +17,7 @@ public class AppConfigController {
 	@Autowired
 	private AppConfigService appConfigService;
 	
-	@GetMapping("/config-jwt")
+	@GetMapping("/app-config/")
 	public ResponseEntity<String> getConfig(HttpServletRequest request) {
 		try {
 			String host = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_HOST_ADDRESS);

@@ -86,12 +86,11 @@ public class SecurityConfig {
     		.antMatchers("/**/*.gif").permitAll()
     		.antMatchers("/login").permitAll()
     		.antMatchers("/logout").permitAll()
-    		.antMatchers("/file/*").permitAll()
-    		.antMatchers("/asset/**").permitAll()
+    		.antMatchers("/logout").permitAll()
     		.antMatchers("/asset/bulk-import").permitAll()
     		.antMatchers("/asset/bulk-import").permitAll()
     		.antMatchers("/websocket/**").permitAll()
-    		.anyRequest().authenticated()
+    		.anyRequest().permitAll()
         );		
 	
 		http.exceptionHandling().authenticationEntryPoint(loginEntryPoint);

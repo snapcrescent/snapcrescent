@@ -36,8 +36,8 @@ mixin _$AssetStore on _AssetStore, Store {
   final _$getAssetsAsyncAction = AsyncAction('_AssetStore.getAssets');
 
   @override
-  Future<void> getAssets() {
-    return _$getAssetsAsyncAction.run(() => super.getAssets());
+  Future<void> getAssets(bool clearPreloadedAssets) {
+    return _$getAssetsAsyncAction.run(() => super.getAssets(clearPreloadedAssets));
   }
 
   @override

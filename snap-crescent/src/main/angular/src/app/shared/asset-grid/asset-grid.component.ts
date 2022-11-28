@@ -334,6 +334,6 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   }
 
   getThumbnailStreamUrl(asset:Asset) {
-    return this.appBaseURL + `:${environment.videoServerUrlPort}/asset/${asset.id}/thumbnail`;
+    return this.appBaseURL + `:${environment.videoServerUrlPort}/thumbnail/${asset.thumbnail.id}`;
   }
 }

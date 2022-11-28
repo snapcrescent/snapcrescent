@@ -54,6 +54,7 @@ public class MetadataConverter extends BaseConverter<Metadata, UiMetadata> {
 		UiMetadata bean = new UiMetadata();
 
 		try {
+			bean.setName(entity.getName());
 			bean.setMimeType(entity.getMimeType());
 			bean.setInternalName(entity.getInternalName());
 			
@@ -61,10 +62,6 @@ public class MetadataConverter extends BaseConverter<Metadata, UiMetadata> {
 				bean.setCreationDateTime(entity.getCreationDateTime());
 			}
 
-			if (resultType == ResultType.FULL || resultType == ResultType.SEARCH) {
-				bean.setLastModifiedDateTime(entity.getLastModifiedDateTime());
-			}
-			
 			populateBeanWithAuditValues(bean, entity, resultType);
 
 		} catch (Exception e) {
