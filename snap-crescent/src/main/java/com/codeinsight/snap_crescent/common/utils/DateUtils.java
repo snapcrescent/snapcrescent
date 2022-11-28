@@ -2,8 +2,12 @@ package com.codeinsight.snap_crescent.common.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+
+import com.codeinsight.snap_crescent.common.utils.Constant.MetadtaCreatedDateFormat;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
@@ -21,36 +25,35 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	
 	public static Date parseCreateDate(String creationDateString) throws ParseException {
 		
+		List<String> formats = new ArrayList<>();
+		
+		for (MetadtaCreatedDateFormat metadtaCreatedDateFormat : MetadtaCreatedDateFormat.values()) {
+			formats.add(metadtaCreatedDateFormat.getFormat());
+		}
+		
+		return tryParse(creationDateString, formats);
+	
+	}
+	
+	private static Date tryParse(String date, List<String> formats) {
+		
 		Date creationDate = null;
 		SimpleDateFormat parser = null;
 		
-		try {
-			parser = new SimpleDateFormat(Constant.METADATA_CREATED_DATE_FORMAT_1);
-			creationDate = parser.parse(creationDateString);
-		} catch (ParseException e1) {
-			
+		for (String format : formats) {
 			try {
-				parser = new SimpleDateFormat(Constant.METADATA_CREATED_DATE_FORMAT_2);
-				creationDate = parser.parse(creationDateString);
-			} catch (ParseException e2) {
-					
-				try {
-					parser = new SimpleDateFormat(Constant.METADATA_CREATED_DATE_FORMAT_3);
-					creationDate = parser.parse(creationDateString);
-				} catch (ParseException e3) {
-					try {
-						parser = new SimpleDateFormat(Constant.METADATA_CREATED_DATE_FORMAT_4);
-						creationDate = parser.parse(creationDateString);
-					} catch (ParseException e4) {
-						throw e4;	
-					}	
-				}
+				parser = new SimpleDateFormat(format);
+				creationDate = parser.parse(date);
+				break;
+			} catch (ParseException e1) {
+				
 			}
-			
 		}
 		
 		return creationDate;
 	}
+	
+	
 	
 	
 }

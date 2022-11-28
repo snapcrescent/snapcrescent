@@ -30,8 +30,13 @@ app.get("/thumbnail/:id",async  function (req, res) {
   headers["Content-Length"] = fs.statSync(thumbnailPath).size;
   headers["Content-Type"] = "image/jpg";
 
-  stream = fs.createReadStream(thumbnailPath);
-  
+  try {
+    stream = fs.createReadStream(thumbnailPath);
+  }
+  catch (e) {
+    console.log(e);
+    res.status(404).send("File not found");
+  }
   stream.pipe(res);
   
 });
@@ -60,7 +65,7 @@ if(asset.asset_type === AssetType.PHOTO.id) {
     const videoPath = `${storageConfig.path}/videos/${metadata.path}${metadata.internal_name}`;
     const videoSize = fs.statSync(videoPath).size;
 
-    const CHUNK_SIZE = 10 ** 6; // 1MB
+    const CHUNK_SIZE = 5 *( 10 ** 6 ); // 5MB
     const start = Number(range.replace(/\D/g, ""));
     const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
 
@@ -71,7 +76,13 @@ if(asset.asset_type === AssetType.PHOTO.id) {
     
     res.writeHead(206, headers);
 
+    try {
     stream = fs.createReadStream(videoPath, { start, end });  
+    }
+    catch (e) {
+      console.log(e);
+      res.status(404).send("File not found");
+    }
   }
 
   headers["Content-Length"] = contentLength;
