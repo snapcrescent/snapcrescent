@@ -3,13 +3,11 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
-import 'package:snap_crescent/models/sync_info.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/login_service.dart';
 import 'package:snap_crescent/services/metadata_service.dart';
-import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class SettingsService {

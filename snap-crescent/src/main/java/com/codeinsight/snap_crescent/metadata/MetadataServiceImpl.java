@@ -70,7 +70,7 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 			String creationDateString = null;
 			
 			if(assetType == AssetType.VIDEO) {
-				//creationDateString = metaDataMap.get(Constant.METADATA_CREATION_TIME);
+				creationDateString = metaDataMap.get(Constant.METADATA_CREATION_TIME);
 			}
 			
 			if(creationDateString == null) {

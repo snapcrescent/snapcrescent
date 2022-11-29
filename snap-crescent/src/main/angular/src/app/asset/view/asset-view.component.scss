@@ -11,13 +11,13 @@
 .asset-controls{
     position: absolute;
     color: white;
-    width: 90vh;
     right: 20px;
     top:20px;
     text-align: right;
 
     .control{
         cursor: pointer;
+        margin: 0px 10px;
     }
 }
 
@@ -25,9 +25,9 @@
 .navigation-controls{
     position: absolute;
     color: white;
-    top:40%;
+    top:50%;
     width: 100%;
-
+    z-index: 1;
     
     .left{
         padding-left: 10px;

@@ -9,7 +9,7 @@
 
     img,video{
         max-height: calc(100vh - 100px);
-        max-width: calc(100vw - 100px);
+        max-width: calc(100vw);
         transform: translate(-50%, -50%);
         position: absolute;
         top: 50%;

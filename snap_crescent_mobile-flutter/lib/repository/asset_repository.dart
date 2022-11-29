@@ -49,7 +49,7 @@ class AssetRepository extends BaseRepository{
     
     if(assetSearchCriteria.active != null) {
       buffer.write(" AND $_tableName.ACTIVE = ? ");
-      arguments.add(assetSearchCriteria.active);
+      arguments.add((assetSearchCriteria.active! ? 1 : 0));
     }
 
 

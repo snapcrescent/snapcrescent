@@ -19,9 +19,7 @@ class Location extends BaseUiBean {
       this.city,
       this.town})
       : super(
-            id: bean.id,
-            version: bean.version,
-            active: bean.active);
+            id: bean.id);
 
   factory Location.fromJson(Map<String, dynamic> json) {
     return Location(

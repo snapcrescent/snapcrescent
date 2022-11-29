@@ -19,7 +19,6 @@ part 'asset_store.g.dart';
 abstract class AssetStore = _AssetStore with _$AssetStore;
 
 abstract class _AssetStore with Store {
-  
   final DateFormat _defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
 
   List<UniFiedAsset> assetList = new List.empty();
@@ -36,82 +35,81 @@ abstract class _AssetStore with Store {
   bool executionInProgress = false;
 
   @action
-  Future<void> loadMoreAssets(int pageNumber) async{
+  Future<void> loadMoreAssets(int pageNumber) async {
     AssetSearchCriteria searchCriteria = getAssetSearchCriteria();
     searchCriteria.pageNumber = pageNumber;
-    await _processAssetRequest(searchCriteria, false);
+    await _processAssetRequest(searchCriteria);
   }
-  
-
 
   @action
   Future<void> getAssets(bool clearPreloadedAssets) async {
-    
-    groupedAssets.clear();
-    this.assetList = [];
-    
-    
-    await _processAssetRequest(getAssetSearchCriteria(), true);
+    if (clearPreloadedAssets) {
+      groupedAssets.clear();
+      this.assetList = [];
+    }
+    await _processAssetRequest(getAssetSearchCriteria());
   }
 
-  Future<void> _processAssetRequest(AssetSearchCriteria searchCriteria, bool changeObservables) async {
-    if(executionInProgress) {
+  Future<void> _processAssetRequest(AssetSearchCriteria searchCriteria) async {
+    if (executionInProgress) {
       return;
     }
 
     executionInProgress = true;
 
-    if(changeObservables) {
-      assetSearchProgress = AssetSearchProgress.PROCESSING;
-    }
-    
-    
-    final newAssets = await AssetService.instance.searchOnLocal(searchCriteria);
+    try {
+      final newAssets =
+          await AssetService.instance.searchOnLocal(searchCriteria);
 
-    if (newAssets.isNotEmpty) {
-      for (Asset asset in newAssets) {
-        final thumbnail = await ThumbnailService.instance.findByIdOnLocal(asset.thumbnailId!);
-        asset.thumbnail = thumbnail;
+      if (newAssets.isNotEmpty) {
+        for (Asset asset in newAssets) {
+          final thumbnail = await ThumbnailService.instance
+              .findByIdOnLocal(asset.thumbnailId!);
+          asset.thumbnail = thumbnail;
 
-        final metadata = await MetadataService.instance.findByIdOnLocal(asset.metadataId!);
-        asset.metadata = metadata;
+          final metadata =
+              await MetadataService.instance.findByIdOnLocal(asset.metadataId!);
+          asset.metadata = metadata;
+        }
+
+        await _addCloudAssetsToList(newAssets);
       }
 
-      await _addCloudAssetsToList(newAssets);
-    } 
-    
-    if (await _getShowDeviceAssetsInfo()) {
-      List<String> selectedDeviceFolders = await _getShowDeviceAssetsFolderInfo();
+      if (await _getShowDeviceAssetsInfo()) {
+        List<String> selectedDeviceFolders =
+            await _getShowDeviceAssetsFolderInfo();
 
-      final albums = await PhotoManager.getAssetPathList();
-      albums.sort(
-          (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
+        final albums = await PhotoManager.getAssetPathList();
+        albums.sort(
+            (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
-       for(final album in albums) {
-        if (selectedDeviceFolders.indexOf(album.id) != -1) {
-           await _addLocalAssetsToList(album);
+        for (final album in albums) {
+          if (selectedDeviceFolders.indexOf(album.id) != -1) {
+            await _addLocalAssetsToList(album);
+          }
         }
       }
+    } catch (ex) {
+      throw Exception(ex.toString());
     }
 
+    assetSearchProgress = AssetSearchProgress.PROCESSING;
+
     if (this.assetList.length > 0) {
-       this.assetList.sort((UniFiedAsset a, UniFiedAsset b) => b.assetCreationDate.compareTo(a.assetCreationDate));
-     
+      this.assetList.sort((UniFiedAsset a, UniFiedAsset b) =>
+          b.assetCreationDate.compareTo(a.assetCreationDate));
+
       this.groupedAssets.keys.forEach((key) {
         this.groupedAssets[key]!.sort((UniFiedAsset a, UniFiedAsset b) =>
             b.assetCreationDate.compareTo(a.assetCreationDate));
       });
-      
-      if(changeObservables) {
-      assetSearchProgress = AssetSearchProgress.ASSETS_FOUND;
-      }
-    } else{
-      if(changeObservables) {
-      assetSearchProgress = AssetSearchProgress.IDLE;
-      }
-    } 
 
-    executionInProgress = false; 
+      assetSearchProgress = AssetSearchProgress.ASSETS_FOUND;
+    } else {
+      assetSearchProgress = AssetSearchProgress.IDLE;
+    }
+
+    executionInProgress = false;
   }
 
   _addLocalAssetsToList(AssetPathEntity? album) async {
@@ -123,23 +121,26 @@ abstract class _AssetStore with Store {
 
       final assets = getFilteredAssets(allAssets);
 
-      for(final asset in assets) {
-          Metadata metadata = await MetadataRepository.instance.findByNameEndWith(asset.title!);
+      for (final asset in assets) {
+        Metadata metadata =
+            await MetadataRepository.instance.findByNameEndWith(asset.title!);
 
-          if(metadata.id == null) {
-            final assetDate = asset.createDateTime;
-              _addUnifiedAssetToGroup(
-                  assetDate, _getUnifiedAssetFromDeviceAsset(asset, assetDate));
-          }   
+        if (metadata.id == null) {
+          final assetDate = asset.createDateTime;
+          _addUnifiedAssetToGroup(
+              assetDate, _getUnifiedAssetFromDeviceAsset(asset, assetDate));
+        }
       }
     }
   }
 
   _addCloudAssetsToList(List<Asset> newAssets) async {
-    for(final asset in newAssets) {  
-          final assetDate = asset.metadata!.creationDateTime!;
-          _addUnifiedAssetToGroup(assetDate, _getUnifiedAssetFromCloudAsset(asset, assetDate));
-          asset.thumbnail!.thumbnailFile = await AssetService.instance.readThumbnailFile(asset.thumbnail!.name!);
+    for (final asset in newAssets) {
+      final assetDate = asset.metadata!.creationDateTime!;
+      _addUnifiedAssetToGroup(
+          assetDate, _getUnifiedAssetFromCloudAsset(asset, assetDate));
+      asset.thumbnail!.thumbnailFile =
+          await AssetService.instance.readThumbnailFile(asset.thumbnail!.name!);
     }
   }
 
@@ -148,27 +149,37 @@ abstract class _AssetStore with Store {
 
     if (groupedAssets.containsKey(key)) {
       List<UniFiedAsset> unifiedAssets = groupedAssets[key]!;
-      if(asset.assetSource == AssetSource.DEVICE) {
-        bool assetAlreadyPresent = false;
-        unifiedAssets.forEach((unifiedAsset) {
-          if(unifiedAsset.assetEntity!.id == asset.assetEntity!.id) {
-                assetAlreadyPresent = true;
-          }
-         });
 
-         if(!assetAlreadyPresent) {
-            unifiedAssets.add(asset);
-         }
-      } else{
-       unifiedAssets.add(asset);
+      bool assetAlreadyPresent = false;
+
+      unifiedAssets.forEach((unifiedAsset) {
+        if (asset.assetSource == AssetSource.DEVICE &&
+            asset.assetSource == unifiedAsset.assetSource) {
+          if (unifiedAsset.assetEntity!.id == asset.assetEntity!.id) {
+            assetAlreadyPresent = true;
+            return;
+          }
+        } else if (asset.assetSource == AssetSource.CLOUD &&
+            asset.assetSource == unifiedAsset.assetSource) {
+          if (unifiedAsset.asset!.id == asset.asset!.id) {
+            assetAlreadyPresent = true;
+            return;
+          }
+        }
+      });
+
+      if (!assetAlreadyPresent) {
+        unifiedAssets.add(asset);
       }
-      
     } else {
       List<UniFiedAsset> assets = [];
       assets.add(asset);
       groupedAssets.putIfAbsent(key, () => assets);
     }
 
+    if (this.assetList.isEmpty) {
+      this.assetList = [];
+    }
     this.assetList.add(asset);
   }
 

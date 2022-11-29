@@ -8,10 +8,9 @@ import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
-import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
+import 'package:snap_crescent/screens/settings/folder_selection/folder_selection.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/settings_service.dart';
-import 'package:snap_crescent/services/sync_info_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/stores/widget/sync_process_store.dart';
 import 'package:snap_crescent/style.dart';
@@ -105,7 +104,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   _clearCache() async {
-    await SyncInfoService.instance.deleteAllData();
+    await AssetService.instance.deleteAllData();
     _latestAssetDate = await SettingsService.instance.getLatestAssetDate();
     ToastService.showSuccess("Successfully deleted locally cached data.");
     setState(() {});

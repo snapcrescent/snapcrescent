@@ -55,6 +55,12 @@ export class AssetViewComponent extends BaseComponent implements OnInit, AfterVi
     this.location.back();
   }
 
+  updateAsset() {
+    this.assetService.updateMetadata(this.currentAssetId).subscribe(response => {
+      this.alertService.showSuccess(`Item updated successfully`);
+    });
+  }
+
   deleteAsset() {
     this.dialog.open(DialogComponent, {
       data: {

@@ -24,26 +24,30 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
     });
   }
 
+  _getPercentage(int? count, int? total) {
+      return (count! * 100/total!).toStringAsFixed(2);
+  }
+
   _syncProgress(SyncProgress _syncProgressState) {
     String progressLabel = "";
 
     if (_syncProgressState == SyncProgress.DOWNLOADING_PHOTO_THUMBNAILS &&
         _syncProcessStore.totalServerPhotoCount != null) {
       progressLabel =
-          '''Downloaded ${_syncProcessStore.downloadedPhotoCount} of ${_syncProcessStore.totalServerPhotoCount} photos from server''';
+          '''Downloaded ${_getPercentage(_syncProcessStore.downloadedPhotoCount, _syncProcessStore.totalServerPhotoCount)}% Photos from server''';
     } else if (_syncProgressState ==
             SyncProgress.DOWNLOADING_VIDEO_THUMBNAILS &&
         _syncProcessStore.totalServerVideoCount != null) {
       progressLabel =
-          '''Downloaded ${_syncProcessStore.downloadedVideoCount} of ${_syncProcessStore.totalServerVideoCount} videos from server''';
+          '''Downloaded ${_getPercentage(_syncProcessStore.downloadedVideoCount, _syncProcessStore.totalServerVideoCount)}% Videos from server''';
     } else if (_syncProgressState == SyncProgress.UPLOADING_PHOTOS &&
         _syncProcessStore.totalLocalPhotoCount != null) {
       progressLabel =
-          '''Uploaded ${_syncProcessStore.uploadedPhotoCount} of ${_syncProcessStore.totalLocalPhotoCount} photos to server''';
+          '''Uploaded ${_getPercentage(_syncProcessStore.uploadedPhotoCount, _syncProcessStore.totalLocalPhotoCount)}% Photos to server''';
     } else if (_syncProgressState == SyncProgress.UPLOADING_VIDEOS &&
         _syncProcessStore.totalLocalVideoCount != null) {
       progressLabel =
-          '''Uploaded ${_syncProcessStore.uploadedVideoCount} of ${_syncProcessStore.totalLocalVideoCount} videos to server''';
+          '''Uploaded ${_getPercentage(_syncProcessStore.uploadedVideoCount, _syncProcessStore.totalLocalVideoCount)}% Videos to server''';
     } else if (_syncProgressState == SyncProgress.SYNC_COMPLETED) {
       progressLabel = "";
       return Container();
@@ -61,6 +65,15 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
                 style: TextStyle(
                   color: Colors.white,
                 )),
+          ),
+          Expanded(
+            flex: 1,
+            child: IconButton(
+                    onPressed: () {
+                      _syncProcessStore.cancelSync();
+                    },
+                    alignment:Alignment.topRight,
+                    icon: Icon(Icons.cancel_rounded, color: Colors.white,)),
           ),
         ])),
         Container(

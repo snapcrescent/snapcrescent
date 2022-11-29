@@ -39,24 +39,41 @@ class _AssetDetailView extends StatefulWidget {
 
 class _AssetDetailViewState extends State<_AssetDetailView> {
   BetterPlayerController? _betterPlayerController;
+  BetterPlayerConfiguration? betterPlayerConfiguration;
+  BetterPlayerBufferingConfiguration? bufferingConfiguration;
   PageController? pageController;
   Map<String, String> headers = {};
   String serverUrl = "";
+
   late AssetStore _assetStore;
 
-  _videoPlayer(UniFiedAsset? unifiedAsset) {
-    if (_betterPlayerController == null) {
+  _videoPlayer(UniFiedAsset? unifiedAsset, Object? object) {
+    
       if (_betterPlayerController != null) {
         _betterPlayerController!.dispose();
       }
 
-      BetterPlayerConfiguration betterPlayerConfiguration =
-          BetterPlayerConfiguration(
-        aspectRatio: 16 / 9,
+
+      if(_betterPlayerController == null) {
+        betterPlayerConfiguration = BetterPlayerConfiguration(
         autoPlay: true,
         looping: true,
+        expandToFill: false,
+        autoDetectFullscreenDeviceOrientation: true,
         fit: BoxFit.contain,
       );
+
+        bufferingConfiguration = BetterPlayerBufferingConfiguration(
+            minBufferMs: 50000,
+            maxBufferMs: 13107200,
+            bufferForPlaybackMs: 10000,
+            bufferForPlaybackAfterRebufferMs: 5000,
+          );  
+
+       _betterPlayerController = BetterPlayerController(betterPlayerConfiguration!);
+      }
+      
+      BetterPlayerDataSource? dataSource;
 
       if (unifiedAsset!.assetSource == AssetSource.CLOUD) {
         Asset asset = unifiedAsset.asset!;
@@ -64,55 +81,39 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
         //String assetURL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
 
         
-        BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+        dataSource = BetterPlayerDataSource(
           BetterPlayerDataSourceType.network,
           assetURL,
           headers: {
           "range": "bytes=0-",
         },  
-          bufferingConfiguration: BetterPlayerBufferingConfiguration(
-            minBufferMs: 50000,
-            maxBufferMs: 13107200,
-            bufferForPlaybackMs: 10000,
-            bufferForPlaybackAfterRebufferMs: 5000,
-          ),
-          placeholder: Container(
-                  child: Image.file(asset.thumbnail!.thumbnailFile!,
-                      fit: BoxFit.none),
-                )
+        bufferingConfiguration:bufferingConfiguration!,
         );
-        _betterPlayerController = BetterPlayerController(betterPlayerConfiguration);
-        _betterPlayerController!.setupDataSource(dataSource);
+
+        
         
       } else {
-        AssetEntity asset = unifiedAsset.assetEntity!;
-
-        /*
-        asset.file.then(
-            (file) => _videoPlayerController = VideoPlayerController.file(file!)
-              ..setLooping(true)
-              ..initialize().then((_) {
-                setState(() {});
-              }));
-        */
+        if(object is File) {
+          dataSource = BetterPlayerDataSource(
+            BetterPlayerDataSourceType.file,
+            object.path,
+            bufferingConfiguration:bufferingConfiguration!,
+            );
+        } 
       }
-    }
 
-/*
-    if(_videoPlayerController != null && _videoPlayerController!.value.isInitialized) {
-      _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController!,
-      autoPlay: true,
-      looping: true,
-    );
-    }
-*/
+      
+
+      if(dataSource != null) {
+        _betterPlayerController!.setupDataSource(dataSource);
+      }
+      
     return Container(
-            alignment: Alignment.center,
             child: AspectRatio(
-              aspectRatio: _betterPlayerController!.getAspectRatio()!,
-              child: BetterPlayer(controller: _betterPlayerController!),
-            ));
+            aspectRatio: 16/9,
+            child: BetterPlayer(controller: _betterPlayerController!),
+            )
+            );
   }
 
   _imageBanner(UniFiedAsset unifiedAsset, Object? object) {
@@ -186,7 +187,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
             UniFiedAsset asset = _assetStore.assetList[index];
             return widget.type == AppAssetType.PHOTO
                 ? _imageBanner(asset, snapshot.data)
-                : _videoPlayer(asset);
+                : _videoPlayer(asset, snapshot.data);
           }
         });
   }
@@ -201,7 +202,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
             controller: pageController,
             physics: widget.type == AppAssetType.PHOTO
                 ? PageScrollPhysics()
-                : NeverScrollableScrollPhysics(),
+                : PageScrollPhysics(),
             itemCount: _assetStore.assetList.length,
             itemBuilder: (BuildContext context, int index) {
               if (_assetStore.assetList.isEmpty) {
@@ -216,7 +217,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
-              flex: 1,
+              flex: 0,
               child: Container(
                 width: 100.0,
                 height: 100.0,
@@ -234,7 +235,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
               ),
             ),
             Expanded(
-              flex: 1,
+              flex: 0,
               child: Container(
                 width: 100.0,
                 height: 100.0,
@@ -251,36 +252,15 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
     );
   }
 
-  _getFloatingActionButton() {
-    if (widget.type == AppAssetType.VIDEO) {
-      return FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            if (_betterPlayerController != null &&
-                _betterPlayerController!.isPlaying()!) {
-              _betterPlayerController!.pause();
-            } else {
-              _betterPlayerController!.play();
-            }
-          });
-        },
-        child: Icon(
-          _betterPlayerController != null && _betterPlayerController!.isPlaying()!
-              ? Icons.pause
-              : Icons.play_arrow,
-        ),
-      );
-    } else {
-      new Container();
-    }
-  }
-
   _body() {
+
+
     return Scaffold(
-      body: Row(
-        children: <Widget>[Expanded(child: _pageView())],
-      ),
-      //floatingActionButton: _getFloatingActionButton(),
+      body: OrientationBuilder(builder: (context, _orientation) {
+                              return Row(
+                                children: <Widget>[Expanded(child: _pageView())],
+                              );
+                            }),
     );
   }
 

@@ -4,6 +4,8 @@ import 'package:snap_crescent/models/thumbnail.dart';
 
 class Asset extends BaseUiBean {
 
+  bool? active;
+
   Thumbnail? thumbnail;
   int? thumbnailId;
 
@@ -16,6 +18,7 @@ class Asset extends BaseUiBean {
   Asset(
       {
       bean,
+      this.active,
       this.thumbnail,
       this.thumbnailId,
       this.metadata,
@@ -23,15 +26,14 @@ class Asset extends BaseUiBean {
       this.favorite,
       this.assetType})
       : super(
-            id: bean.id,
-            version: bean.version,
-            active: bean.active);
+            id: bean.id);
 
   static Asset fromJsonModel(Map<String, dynamic> json) => Asset.fromJson(json);
 
   factory Asset.fromJson(Map<String, dynamic> json) {
     return Asset(
       bean: BaseUiBean.fromJson(json),
+      active: json['active'],
       thumbnail: json['thumbnail'] == null
           ? null
           : Thumbnail.fromJson(json['thumbnail']),
@@ -49,6 +51,7 @@ class Asset extends BaseUiBean {
 
     return Asset(
       bean: BaseUiBean.fromMap(map),
+      active: map['ACTIVE'] == 1 ? true : false,
       thumbnailId: map['THUMBNAIL_ID'],
       metadataId: map['METADATA_ID'],
       favorite: map['FAVORITE'] == 1 ? true : false,
@@ -60,6 +63,7 @@ class Asset extends BaseUiBean {
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = super.toMap();
 
+    map['ACTIVE'] = active == true ? 1 : 0;
     map['THUMBNAIL_ID'] = thumbnailId;
     map['METADATA_ID'] = metadataId;
     map['FAVORITE'] = favorite == true ? 1 : 0;

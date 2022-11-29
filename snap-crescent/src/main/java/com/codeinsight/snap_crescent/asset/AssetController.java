@@ -80,11 +80,21 @@ public class AssetController extends BaseController {
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	@PutMapping(value = "/asset/{id}/metadata")
+	public ResponseEntity<?> updateMetadata(@PathVariable Long id) {
+		try {
+			assetService.updateMetadata(id);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 
 	@PutMapping(value = "/asset/{id}")
 	public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UiAsset asset) {
 		try {
-			// assetService.like(id);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

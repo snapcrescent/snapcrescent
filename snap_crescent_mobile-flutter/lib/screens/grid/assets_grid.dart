@@ -77,7 +77,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _assetStore.getAssets(false);
+      _assetStore.loadMoreAssets(0);
     });
   }
 
