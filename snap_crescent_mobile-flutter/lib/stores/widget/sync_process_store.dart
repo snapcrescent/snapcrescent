@@ -8,7 +8,6 @@ import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/metadata_service.dart';
-import 'package:snap_crescent/services/sync_info_service.dart';
 import 'dart:io';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/services/thumbnail_service.dart';
@@ -49,44 +48,53 @@ abstract class _SyncProcessStore with Store {
       return;
     }
 
-    try {
-
-    
     executionInProgress = true;
-
-    AssetSearchCriteria assetSearchCriteria = AssetSearchCriteria.defaultCriteria();
-    assetSearchCriteria.resultPerPage = 1;
-
-    final assetCount = await AssetService.instance.countOnLocal(assetSearchCriteria);
-    final latestAssetsList = await AssetService.instance.searchOnLocal(assetSearchCriteria);
     
-    if (assetCount == 0) {
-      await _compareLocalSyncInfoWithServer(assetCount, null);
-    } else {
-        Asset latestAsset = latestAssetsList.first;
-        final thumbnail = await ThumbnailService.instance.findByIdOnLocal(latestAsset.thumbnailId!);
-        latestAsset.thumbnail = thumbnail;
-
-        final metadata = await MetadataService.instance.findByIdOnLocal(latestAsset.metadataId!);
-        latestAsset.metadata = metadata;
-
-      await _compareLocalSyncInfoWithServer(assetCount, latestAsset.metadata!.creationDateTime!);
-    }
-
-    syncProgressState = SyncProgress.SYNC_COMPLETED;
-
-    } catch (ex) {
-      throw Exception(ex.toString());
-    }
+    await _startSyncProcessForAsset(AppAssetType.PHOTO);
+    await _startSyncProcessForAsset(AppAssetType.VIDEO);
 
     executionInProgress = false;
   }
 
+  cancelSync() {
+    executionInProgress = false;
+    AssetService.instance.cancelSyncProcess();
+  }
+
+  _startSyncProcessForAsset(AppAssetType assetType) async {
+    try {
+      AssetSearchCriteria assetSearchCriteria = AssetSearchCriteria.defaultCriteria();
+          assetSearchCriteria.assetType = assetType.id;
+          assetSearchCriteria.resultPerPage = 1;
+
+          final assetCount = await AssetService.instance.countOnLocal(assetSearchCriteria);
+          final latestAssetsList = await AssetService.instance.searchOnLocal(assetSearchCriteria);
+          
+          if (assetCount == 0) {
+            await _compareLatestLocalAssetDateWithServer(null, assetType);
+          } else {
+              Asset latestAsset = latestAssetsList.first;
+              final thumbnail = await ThumbnailService.instance.findByIdOnLocal(latestAsset.thumbnailId!);
+              latestAsset.thumbnail = thumbnail;
+
+              final metadata = await MetadataService.instance.findByIdOnLocal(latestAsset.metadataId!);
+              latestAsset.metadata = metadata;
+
+            await _compareLatestLocalAssetDateWithServer(latestAsset.metadata!.creationDateTime!, assetType);
+          }
+
+          syncProgressState = SyncProgress.SYNC_COMPLETED;
+
+        } catch (ex) {
+          throw Exception(ex.toString());
+        }
+  }
+
   
-  _compareLocalSyncInfoWithServer(int localAssetCount, DateTime? latestAssetDate) async {
+  _compareLatestLocalAssetDateWithServer(DateTime? latestAssetDate, AppAssetType assetType) async {
     try {
       bool refreshAssetStores = false;
-      if(await SyncInfoService.instance.isUserLoggedIn()) {
+      if(await AssetService.instance.isUserLoggedIn()) {
         
         AssetSearchCriteria assetSearchCriteria = AssetSearchCriteria.defaultCriteria();
         assetSearchCriteria.resultPerPage = 1 ;
@@ -99,7 +107,7 @@ abstract class _SyncProcessStore with Store {
           // No local sync info is present
           // It is a first boot or app is reset
           // Need to sync everything
-          await _downloadAssetsFromServer(null);
+          await _downloadAssetsFromServer(null, assetType);
           refreshAssetStores = true;
           
         } else {
@@ -107,35 +115,37 @@ abstract class _SyncProcessStore with Store {
           
           if (latestServerAssetDate != latestAssetDate) {
             //Local latest asset date is not matching with server's latest asset
-            await _downloadAssetsFromServer(latestAssetDate);
+            await _downloadAssetsFromServer(latestAssetDate, assetType);
             refreshAssetStores = true;
           } 
           
           final newAssetCount = await AssetService.instance.countOnLocal(assetSearchCriteria);
           if(serverAssetResponse.totalResultsCount! < newAssetCount) {
             //Server has less records than app, means some server items are deleted
-
+            AssetSearchCriteria assetSearchCriteria = AssetSearchCriteria.defaultCriteria();
+            assetSearchCriteria.assetType = assetType.id;
+            await AssetService.instance.searchAndSyncInactiveRecords(assetSearchCriteria);
           }
           
           
         }
 
-      await _uploadAssetsToServer(latestAssetDate);
+      await _uploadAssetsToServer(latestAssetDate, assetType);
 
       } else {
         // No server sync info is present
         // It is first boot of server or server is reset and it has no data
         // Empty the local sync info
-        await SyncInfoService.instance.deleteAllData();
+        await AssetService.instance.deleteAllData();
         refreshAssetStores = true;
-        await _uploadAssetsToServer(null);
+        await _uploadAssetsToServer(null, assetType);
       }
 
       }
       
       if(refreshAssetStores) {
-        photoStore.getAssets(true);     
-        videoStore.getAssets(true);  
+        photoStore.loadMoreAssets(0);     
+        videoStore.loadMoreAssets(0);  
       }
 
     } catch (e) {
@@ -144,14 +154,12 @@ abstract class _SyncProcessStore with Store {
 
   }
 
-  _downloadAssetsFromServer(DateTime? latestAssetDate) async {
-    await _downloadAssetsByTypeFromServer(latestAssetDate, AppAssetType.PHOTO);
-    await _downloadAssetsByTypeFromServer(latestAssetDate, AppAssetType.VIDEO);
+  _downloadAssetsFromServer(DateTime? latestAssetDate, AppAssetType assetType) async {
+    await _downloadAssetsByTypeFromServer(latestAssetDate, assetType);
   }
 
-  _uploadAssetsToServer(DateTime? latestAssetDate) async {
-    await _uploadAssetByTypeToServer(latestAssetDate, AppAssetType.PHOTO);
-    await _uploadAssetByTypeToServer(latestAssetDate, AppAssetType.VIDEO);
+  _uploadAssetsToServer(DateTime? latestAssetDate, AppAssetType assetType) async {
+    await _uploadAssetByTypeToServer(latestAssetDate, assetType);
   }
 
   _downloadAssetsByTypeFromServer(
@@ -171,60 +179,50 @@ abstract class _SyncProcessStore with Store {
     }
     
 
-    final photoCountResponse = await AssetService.instance.search(searchCriteria);
-    final _totalAssetPhotoCount = photoCountResponse.totalResultsCount;
+    final assetCountResponse = await AssetService.instance.search(searchCriteria);
+    final _totalAssetCount = assetCountResponse.totalResultsCount;
     
     if (assetType == AppAssetType.PHOTO) {
-      totalServerPhotoCount = _totalAssetPhotoCount;
+      totalServerPhotoCount = _totalAssetCount;
     } else {
-      totalServerVideoCount = _totalAssetPhotoCount;
+      totalServerVideoCount = _totalAssetCount;
     }
 
-    
-
-    if (_totalAssetPhotoCount! > 0) {
+    if (_totalAssetCount! > 0) {
       syncProgressState = assetType == AppAssetType.PHOTO
           ? SyncProgress.DOWNLOADING_PHOTO_THUMBNAILS
           : SyncProgress.DOWNLOADING_VIDEO_THUMBNAILS;
       
 
-      final itemsPerBatch = 1000000;
-      double numberOfPages = _totalAssetPhotoCount / itemsPerBatch;
-      final itemsInLastBatch = _totalAssetPhotoCount % itemsPerBatch;
-
-      if (itemsInLastBatch > 0) {
-        numberOfPages++;
-      }
-
-      searchCriteria.resultPerPage = itemsPerBatch;
+      searchCriteria.pageNumber = 0;
+      searchCriteria.resultPerPage = _totalAssetCount;
       searchCriteria.resultType = ResultType.SEARCH;
 
       
       final tempSyncProgressState = syncProgressState;
 
-      for (int pageNumber = 0; pageNumber < numberOfPages; pageNumber++) {
-
-      if(!executionInProgress) {
-          return;
-        }
-
-        searchCriteria.pageNumber = pageNumber;
-
-        await AssetService.instance.searchAndSync(searchCriteria,(downloadedAssetCount) {
+       await AssetService.instance.searchAndSync(searchCriteria,(downloadedAssetCount) {
             _updateDownloadedCount(assetType, downloadedAssetCount,tempSyncProgressState);
-        });      
-      }
-
+        }); 
      }
   }
 
   _updateDownloadedCount(AppAssetType assetType, _downloadedAssetCount, tempSyncProgressState) {
      syncProgressState = SyncProgress.PROCESSING;
     if (assetType == AppAssetType.PHOTO) {
+          if(_downloadedAssetCount % 100 == 0) {
+            photoStore.loadMoreAssets(0);     
+          }
+          
           downloadedPhotoCount = _downloadedAssetCount;
         } else {
+          if(_downloadedAssetCount % 100 == 0) {
+            photoStore.loadMoreAssets(0);
+          }
           downloadedVideoCount = _downloadedAssetCount;
         }
+    
+        
     syncProgressState = tempSyncProgressState;
   }
 

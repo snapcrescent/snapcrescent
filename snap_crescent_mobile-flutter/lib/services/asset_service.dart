@@ -20,6 +20,8 @@ class AssetService extends BaseService {
   AssetService._privateConstructor() : super();
   static final AssetService instance = AssetService._privateConstructor();
 
+  bool executionInProgress = false;
+
   Future<BaseResponseBean<int, Asset>> search(
       AssetSearchCriteria searchCriteria) async {
     try {
@@ -74,9 +76,24 @@ class AssetService extends BaseService {
   }
 
   Future<List<Asset>> searchAndSync(
-      AssetSearchCriteria searchCriteria, Function progressCallBack) async {
+      AssetSearchCriteria searchCriteria, 
+      Function progressCallBack) async {
+    searchCriteria.sortOrder = Direction.ASC;
     final data = await search(searchCriteria);
     await saveAllOnLocal(data.objects!, progressCallBack);
+    return new List<Asset>.from(data.objects!);
+  }
+
+  Future<List<Asset>> searchAndSyncInactiveRecords(
+      AssetSearchCriteria searchCriteria) async {
+    searchCriteria.sortOrder = Direction.ASC;
+    searchCriteria.active = false;
+    final data = await search(searchCriteria);
+
+    for (Asset entity in data.objects!) {
+          await saveOnLocal(entity, false);
+    }
+
     return new List<Asset>.from(data.objects!);
   }
 
@@ -108,17 +125,24 @@ class AssetService extends BaseService {
     }
   }
 
+  cancelSyncProcess() {
+    executionInProgress = false;
+  }
+
   Future<int> saveAllOnLocal(
       List<Asset> entities, Function progressCallBack) async {
+    executionInProgress = true;
     for (Asset entity in entities) {
-      await saveOnLocal(entity);
-      progressCallBack(entities.indexOf(entity));
+      if(executionInProgress) {
+          await saveOnLocal(entity, true);
+          progressCallBack(entities.indexOf(entity));
+      }
     }
 
     return Future.value(0);
   }
 
-  Future<int> saveOnLocal(Asset entity) async {
+  Future<int> saveOnLocal(Asset entity, bool createIfNotFound) async {
     final assetExistsById =
         await AssetRepository.instance.existsById(entity.id!);
 
@@ -128,18 +152,32 @@ class AssetService extends BaseService {
 
       if (thumbnailExistsById == false) {
         await _writeThumbnailFile(entity.thumbnail!);
-        ThumbnailRepository.instance.save(entity.thumbnail!);
+
+        if(createIfNotFound) {
+          ThumbnailRepository.instance.save(entity.thumbnail!);
+        }
+      } else{
+        ThumbnailRepository.instance.update(entity.thumbnail!);
       }
 
       final assetMetadataExistsById =
           await MetadataRepository.instance.existsById(entity.metadataId!);
 
       if (assetMetadataExistsById == false) {
-        MetadataRepository.instance.save(entity.metadata!);
+        if(createIfNotFound) {
+          MetadataRepository.instance.save(entity.metadata!);
+        }
+      } else {
+        MetadataRepository.instance.update(entity.metadata!);
       }
 
-      return AssetRepository.instance.save(entity);
+      if(createIfNotFound) {
+        return AssetRepository.instance.save(entity);
+      }
+      
+      return Future.value(0);
     } else {
+      AssetRepository.instance.update(entity);
       return Future.value(0);
     }
   }
@@ -166,10 +204,11 @@ class AssetService extends BaseService {
         await download(dio, url, options, '$directory/${thumbnail.name}');
       }
     } on DioError catch (ex) {
+      print(ex.message);
       if (ex.type == DioErrorType.connectTimeout) {
         throw Exception("Connection  Timeout Exception");
       }
-
+      
       throw Exception(ex.message);
     }
   }
@@ -222,5 +261,11 @@ class AssetService extends BaseService {
         save(AppAssetType.PHOTO, assetFiles);
       }
     }
+  }
+
+    Future<void> deleteAllData() async {
+    await AssetRepository.instance.deleteAll();
+    await ThumbnailRepository.instance.deleteAll();
+    await MetadataRepository.instance.deleteAll();
   }
 }

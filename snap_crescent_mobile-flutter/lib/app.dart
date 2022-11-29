@@ -4,7 +4,7 @@ import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/grid/asset_detail.dart';
 import 'package:snap_crescent/screens/grid/assets_grid.dart';
-import 'package:snap_crescent/screens/settings/folder_seletion/folder_selection.dart';
+import 'package:snap_crescent/screens/settings/folder_selection/folder_selection.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
 import 'package:snap_crescent/stores/asset/photo_store.dart';

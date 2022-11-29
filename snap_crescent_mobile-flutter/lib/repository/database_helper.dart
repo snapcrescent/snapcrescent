@@ -34,19 +34,8 @@ class DatabaseHelper {
       ''');
 
     database.execute('''
-      CREATE TABLE SYNC_INFO ( 
-        ID INTEGER PRIMARY KEY,
-        VERSION INTEGER NOT NULL,
-        CREATION_DATE_TIME INTEGER,
-        LAST_MODIFIED_DATE_TIME INTEGER,
-        ACTIVE INTEGER
-        );
-      ''');  
-
-    database.execute('''
       CREATE TABLE ASSET ( 
         ID INTEGER PRIMARY KEY,
-        VERSION INTEGER NOT NULL,
         ACTIVE INTEGER,
         THUMBNAIL_ID INTEGER,
         METADATA_ID INTEGER,
@@ -58,10 +47,7 @@ class DatabaseHelper {
     database.execute('''
       CREATE TABLE METADATA ( 
         ID INTEGER PRIMARY KEY,
-        VERSION INTEGER NOT NULL,
         CREATION_DATE_TIME INTEGER,
-        LAST_MODIFIED_DATE_TIME INTEGER,
-        ACTIVE INTEGER,
         NAME TEXT,
         INTERNAL_NAME TEXT,
         MIME_TYPE TEXT,
@@ -72,8 +58,6 @@ class DatabaseHelper {
     return database.execute('''
       CREATE TABLE THUMBNAIL (
         ID INTEGER PRIMARY KEY,
-        VERSION INTEGER NOT NULL,
-        ACTIVE INTEGER,
         NAME TEXT
         );
       ''');

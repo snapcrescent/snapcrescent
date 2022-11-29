@@ -84,65 +84,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			response.setCurrentPageIndex(searchCriteria.getPageNumber());
 
 			response.setObjects(searchResult);
-			
-			for (UiAsset uiAsset : searchResult) {
-				
-				AssetType assetType = AssetType.findById(uiAsset.getAssetType());
-				
-				FILE_TYPE fileType = null;
-
-				if (assetType == AssetType.PHOTO) {
-					fileType = FILE_TYPE.PHOTO;
-				}
-
-				if (assetType == AssetType.VIDEO) {
-					fileType = FILE_TYPE.VIDEO;
-				}
-				
-				/*
-				try {
-					Metadata metadata = metadataRepository.findById(uiAsset.getMetadataId());
-					File beforeRecomputeAssetFile = fileService.getFile(fileType, metadata.getPath(), metadata.getInternalName());
-					metadataService.recomputeMetaData(assetType, metadata,beforeRecomputeAssetFile);
-					
-					String postRecomputePath = DateUtils.getFilePathFromDate(metadata.getCreationDateTime());
-					
-					String assetDirectoryPath = fileService.getBasePath(assetType) + postRecomputePath;
-					fileService.mkdirs(assetDirectoryPath);
-					
-					
-					File finalAssetFile = new File(assetDirectoryPath + "/" + metadata.getInternalName());
-					if(!beforeRecomputeAssetFile.getAbsolutePath().equals(finalAssetFile.getAbsolutePath())) {
-						Files.move(Paths.get(beforeRecomputeAssetFile.getAbsolutePath()), Paths.get(finalAssetFile.getAbsolutePath()));	
-					}
-					
-					Thumbnail thumbnail = thumbnailRepository.findById(uiAsset.getThumbnailId());
-					
-					String thumbnailDirectoryPath = fileService.getBasePath(FILE_TYPE.THUMBNAIL) + postRecomputePath;
-					fileService.mkdirs(thumbnailDirectoryPath);
-					
-					File thumbnailFile = fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(),thumbnail.getName());
-					
-					File finalThumbnailFile = new File(thumbnailDirectoryPath + "/" + thumbnail.getName());
-					
-					if(!thumbnailFile.getAbsolutePath().equals(finalThumbnailFile.getAbsolutePath())) {
-						Files.move(Paths.get(thumbnailFile.getAbsolutePath()), Paths.get(finalThumbnailFile.getAbsolutePath()));	
-					}
-					
-					metadata.setPath(postRecomputePath);
-					thumbnail.setPath(postRecomputePath);
-					
-					metadataRepository.update(metadata);
-					thumbnailRepository.update(thumbnail);
-				}catch (Exception e) {
-					e.printStackTrace();
-				}
-				*/
-				
-			}
-			
-			
-
+		
 		}
 
 		return response;
@@ -260,8 +202,58 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 	@Override
 	@Transactional
-	public void update(UiAsset enity) throws Exception {
-		// TODO Auto-generated method stub
+	public void updateMetadata(Long id) throws Exception {
+		Asset asset = assetRepository.findById(id); 
+		AssetType assetType = asset.getAssetTypeEnum();
+		
+		FILE_TYPE fileType = null;
+
+		if (assetType == AssetType.PHOTO) {
+			fileType = FILE_TYPE.PHOTO;
+		}
+
+		if (assetType == AssetType.VIDEO) {
+			fileType = FILE_TYPE.VIDEO;
+		}
+		
+		
+		try {
+			Metadata metadata = metadataRepository.findById(asset.getMetadataId());
+			File beforeRecomputeAssetFile = fileService.getFile(fileType, metadata.getPath(), metadata.getInternalName());
+			metadataService.recomputeMetaData(assetType, metadata,beforeRecomputeAssetFile);
+			
+			String postRecomputePath = DateUtils.getFilePathFromDate(metadata.getCreationDateTime());
+			
+			String assetDirectoryPath = fileService.getBasePath(assetType) + postRecomputePath;
+			fileService.mkdirs(assetDirectoryPath);
+			
+			
+			File finalAssetFile = new File(assetDirectoryPath + "/" + metadata.getInternalName());
+			if(!beforeRecomputeAssetFile.getAbsolutePath().equals(finalAssetFile.getAbsolutePath())) {
+				Files.move(Paths.get(beforeRecomputeAssetFile.getAbsolutePath()), Paths.get(finalAssetFile.getAbsolutePath()));	
+			}
+			
+			Thumbnail thumbnail = thumbnailRepository.findById(asset.getThumbnailId());
+			
+			String thumbnailDirectoryPath = fileService.getBasePath(FILE_TYPE.THUMBNAIL) + postRecomputePath;
+			fileService.mkdirs(thumbnailDirectoryPath);
+			
+			File thumbnailFile = fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(),thumbnail.getName());
+			
+			File finalThumbnailFile = new File(thumbnailDirectoryPath + "/" + thumbnail.getName());
+			
+			if(!thumbnailFile.getAbsolutePath().equals(finalThumbnailFile.getAbsolutePath())) {
+				Files.move(Paths.get(thumbnailFile.getAbsolutePath()), Paths.get(finalThumbnailFile.getAbsolutePath()));	
+			}
+			
+			metadata.setPath(postRecomputePath);
+			thumbnail.setPath(postRecomputePath);
+			
+			metadataRepository.update(metadata);
+			thumbnailRepository.update(thumbnail);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 

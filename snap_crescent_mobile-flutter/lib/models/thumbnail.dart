@@ -13,9 +13,7 @@ class Thumbnail extends BaseUiBean {
       this.name
       })
       : super(
-            id: bean.id,
-            version: bean.version,
-            active: bean.active);
+            id: bean.id);
 
   factory Thumbnail.fromJson(Map<String, dynamic> json) {
 

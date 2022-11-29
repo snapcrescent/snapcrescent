@@ -48,9 +48,15 @@ export class AssetService extends BaseService {
     return this.httpClient.request(request);
   }
 
+  updateMetadata(id: number): Observable<BaseResponseBean<number, Asset>> {
+    return this.httpClient.put(this.entityUrl + '/' + id + "/metadata",{});
+  }
+
   update(id: number,entity: Asset): Observable<BaseResponseBean<number, Asset>> {
     return this.httpClient.put(this.entityUrl + '/' + id,this.preparePayload(entity));
   }
+
+  
 
   restore(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
     return this.httpClient.put(`${this.entityUrl}/restore?ids=${ids.join(',')}`, {});

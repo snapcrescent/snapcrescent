@@ -1,20 +1,24 @@
 
 <div class="page-controls">
-    <div class="material-symbols-outlined" (click)="navigateSearch()">
+    <div class="material-symbols-outlined" (click)="navigateSearch()" matTooltip="Back">
         arrow_back
     </div>
 </div>
 <div class="asset-controls">
-    <div class="control material-symbols-outlined" (click)="deleteAsset()">
+    <div class="control material-symbols-outlined" (click)="deleteAsset()"  matTooltip="delete">
         delete
     </div>
+    <div class="control material-symbols-outlined" (click)="updateAsset()"  matTooltip="Update">
+        update
+    </div>
+    
 </div>
 <div class="navigation-controls">
-    <div #previousAssetButton class="left material-symbols-outlined" (click)="navigateToAssetAtIndex(previousAssetId)">
+    <div matTooltip="Previous" #previousAssetButton class="left material-symbols-outlined" (click)="navigateToAssetAtIndex(previousAssetId)">
         arrow_circle_left
         </div>
 
-    <div #nextAssetButton class="right material-symbols-outlined" (click)="navigateToAssetAtIndex(nextAssetId)">
+    <div matTooltip="Next" #nextAssetButton class="right material-symbols-outlined" (click)="navigateToAssetAtIndex(nextAssetId)">
         arrow_circle_right
         </div>
 </div>
