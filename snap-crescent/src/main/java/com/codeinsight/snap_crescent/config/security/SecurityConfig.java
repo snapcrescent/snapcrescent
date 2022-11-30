@@ -87,10 +87,11 @@ public class SecurityConfig {
     		.antMatchers("/login").permitAll()
     		.antMatchers("/logout").permitAll()
     		.antMatchers("/logout").permitAll()
-    		.antMatchers("/asset/bulk-import").permitAll()
-    		.antMatchers("/asset/bulk-import").permitAll()
     		.antMatchers("/websocket/**").permitAll()
-    		.anyRequest().permitAll()
+    		.antMatchers("/thumbnail/**").permitAll()
+    		.antMatchers("/asset/**/stream").permitAll()
+    		
+    		.anyRequest().authenticated()
         );		
 	
 		http.exceptionHandling().authenticationEntryPoint(loginEntryPoint);

@@ -10,4 +10,5 @@ public interface ThumbnailService {
 	public Thumbnail generateThumbnail(File file, Metadata metadata, AssetType assetType) throws Exception;
 
 	public byte[] getById(Long id);
+	public String getFilePathByThumbnailById(Long id) throws Exception;
 }

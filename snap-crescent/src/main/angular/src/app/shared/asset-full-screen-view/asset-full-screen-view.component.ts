@@ -4,9 +4,11 @@ import { Asset, AssetType } from 'src/app/asset/asset.model';
 import { BaseComponent } from 'src/app/core/components/base.component';
 import { AssetService } from 'src/app/asset/asset.service';
 import { environment } from 'src/environments/environment';
+import { SessionService } from 'src/app/core/services/session.service';
+import { UserLoginResponse } from 'src/app/login/login.model';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 
-
-declare var window: any;
 @Component({
   selector: 'app-asset-full-screen-view',
   templateUrl: './asset-full-screen-view.component.html',
@@ -31,37 +33,73 @@ export class AssetFullScreenViewComponent extends BaseComponent implements OnIni
   @ViewChild("videoPlayer", { static: false })
   videoPlayer: ElementRef;
 
-  appBaseURL:string;
+  mimeCodec = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"'
 
   constructor(
     private assetService: AssetService,
+    private httpClient: HttpClient,
+    private sessionService: SessionService
     
   ) {
       super();
-      const parsedUrl = new URL(window.location.href);
-      const baseUrl = parsedUrl.origin;
-      this.appBaseURL = baseUrl.substring(0, baseUrl.lastIndexOf(":"));
   }
 
   ngOnInit() {
-    this.getAsset();
+    
   }
 
   ngAfterViewInit() {
-  
+    this.getAsset();
   }
+
+  
 
   getAsset() {
     this.assetService.read(this.currentAssetId).subscribe((response:any) => {
       this.currentAsset = response.object;
+
+      if(this.currentAsset.assetType === AssetType.VIDEO.id) {
+        //this.streamVideoAsset();
+      }
     });
   }
 
-  getAssetStreamUrl() {
-    return this.appBaseURL + `:${environment.videoServerUrlPort}/asset/${this.currentAsset.id}/stream`;
+  streamVideoAsset() {
+    if (
+      "MediaSource" in window &&
+      MediaSource.isTypeSupported(this.mimeCodec)
+    ) {
+      const mediaSource = new MediaSource();
+      (this.videoPlayer.nativeElement as HTMLVideoElement).src = URL.createObjectURL(
+        mediaSource
+      );
+      mediaSource.addEventListener("sourceopen", () =>
+        this.sourceOpen(mediaSource)
+      );
+    } else {
+      console.error("Unsupported MIME type or codec: ", this.mimeCodec);
+    }
   }
 
-  toggleVideo() {
-    this.videoPlayer.nativeElement.play();
+  sourceOpen(mediaSource: MediaSource) {
+    const sourceBuffer = mediaSource.addSourceBuffer(this.mimeCodec);
+
+    
+      //const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+      //return this.httpClient.get(`/asset/${this.currentAssetId}/stream`, { responseType: "blob" })
+      return this.assetService.stream( this.currentAssetId)
+        .subscribe((blob:any) => {
+          sourceBuffer.addEventListener("updateend", () => {
+            mediaSource.endOfStream();
+            //this.videoPlayer.nativeElement.play();
+          });
+          
+          blob.arrayBuffer().then((x:any) => sourceBuffer.appendBuffer(x));
+        });
+  }
+
+
+  getAssetStreamUrl() {
+       return `${environment.backendUrl}/asset/${this.currentAsset.id}/stream`;     
   }
 }

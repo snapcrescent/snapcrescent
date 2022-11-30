@@ -31,6 +31,10 @@ export class AssetService extends BaseService {
     return this.httpClient.get(this.entityUrl + '/' + id);
   }
 
+  stream(id: number) {
+    return this.httpClient.get(`${this.entityUrl}/${id}/stream`, {responseType: "blob"});
+  }
+
   readLite(id: number): Observable<BaseResponseBean<number, Asset>> {
     return this.httpClient.get(this.entityUrl + '/' + id + '/lite');
   }
@@ -55,8 +59,6 @@ export class AssetService extends BaseService {
   update(id: number,entity: Asset): Observable<BaseResponseBean<number, Asset>> {
     return this.httpClient.put(this.entityUrl + '/' + id,this.preparePayload(entity));
   }
-
-  
 
   restore(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
     return this.httpClient.put(`${this.entityUrl}/restore?ids=${ids.join(',')}`, {});
