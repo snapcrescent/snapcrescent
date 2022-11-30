@@ -98,8 +98,7 @@ class AssetService extends BaseService {
   }
 
   String getAssetByIdUrl(String serverURL, int assetId) {
-    return 'http://192.168.0.16:8000/asset/$assetId/stream';
-    //return serverURL + '/asset/$assetId/raw';
+    return serverURL + '/asset/$assetId/stream';
   }
 
   Future<File> downloadAssetById(int assetId, String assetName) async {
@@ -188,7 +187,7 @@ class AssetService extends BaseService {
   }
 
   String getThumbnailByIdUrl(String serverURL, int thumbnailId) {
-    return 'http://192.168.0.16:8000/thumbnail/$thumbnailId';
+    return serverURL + '/thumbnail/$thumbnailId';
   }
 
   Future<void> _writeThumbnailFile(Thumbnail thumbnail) async {
