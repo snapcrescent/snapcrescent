@@ -38,7 +38,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
         () => Navigator.pushAndRemoveUntil<dynamic>(
         context,
         MaterialPageRoute<dynamic>(
-          builder: (BuildContext context) => AssetsGridScreen(AppAssetType.PHOTO),
+          builder: (BuildContext context) => AssetsGridScreen(),
         ),
         (route) => false,//if you want to disable back feature set to false
       ));

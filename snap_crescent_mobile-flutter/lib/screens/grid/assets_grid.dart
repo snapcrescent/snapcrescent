@@ -5,10 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/grid/asset_detail.dart';
-import 'package:snap_crescent/stores/asset/photo_store.dart';
-import 'package:snap_crescent/stores/asset/video_store.dart';
 import 'package:snap_crescent/widgets/sync_process/sync_process.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/utils/common_utils.dart';
@@ -18,21 +17,16 @@ import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_ba
 
 class AssetsGridScreen extends StatelessWidget {
   static const routeName = '/assets';
-
-  final AppAssetType type;
-
-  AssetsGridScreen(this.type);
-
+  AssetsGridScreen();
   @override
   Widget build(BuildContext context) {
-    return _AssetGridView(type);
+    return _AssetGridView();
   }
 }
 
 class _AssetGridView extends StatefulWidget {
-  final AppAssetType type;
-
-  _AssetGridView(this.type);
+  
+  _AssetGridView();
 
   @override
   _AssetGridViewState createState() => _AssetGridViewState();
@@ -50,8 +44,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
   int pageNumber = 0;
 
   _onAssetTap(BuildContext context, int assetIndex) {
-    AssetDetailArguments arguments =
-        new AssetDetailArguments(type: widget.type, assetIndex: assetIndex);
+    AssetDetailArguments arguments = new AssetDetailArguments(assetIndex: assetIndex);
 
     Navigator.pushNamed(
       context,
@@ -61,7 +54,8 @@ class _AssetGridViewState extends State<_AssetGridView> {
   }
 
   _shareAsset() async {
-    //await _shareFile();
+    final List<XFile> assetFiles = await _assetStore.getAssetFileForSharing(_assetStore.getSelectedIndexes());
+    await Share.shareXFiles(assetFiles);
   }
 
   @override
@@ -134,7 +128,8 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   _gridView(Orientation orientation, AssetStore assetStore) {
     final keys = assetStore.getGroupedMapKeys();
-    return new ListView.builder(
+
+     return ListView.builder(
         controller: _scrollController,
         itemCount: keys.length + 1,
         itemBuilder: (BuildContext ctxt, int groupIndex) {
@@ -213,7 +208,14 @@ class _AssetGridViewState extends State<_AssetGridView> {
   }
 
   _scrollableView(Orientation orientation, AssetStore assetStore) {
-    return Container(
+
+    return RefreshIndicator(
+        onRefresh: () {
+        return Future.delayed(Duration(seconds: 1),() {
+              _assetStore.getAssets(true);
+          });
+        },
+        child:  Container(
         color: Colors.black,
         child: DraggableScrollbar.semicircle(
             labelTextBuilder: (offset) => getScrollLabel(),
@@ -221,7 +223,8 @@ class _AssetGridViewState extends State<_AssetGridView> {
                 BoxConstraints.tightFor(width: 150.0, height: 30.0),
             heightScrollThumb: 50.0,
             controller: _scrollController,
-            child: _gridView(orientation, assetStore)));
+            child: _gridView(orientation, assetStore)))
+    );
   }
 
   _syncProgress() {
@@ -231,10 +234,6 @@ class _AssetGridViewState extends State<_AssetGridView> {
         child: new SyncProcessWidget());
   }
 
-  Future<void> _refreshGrid() async {
-    _assetStore.getAssets(true);
-  }
-
   _getLeadingIcon() {
     if (_assetStore.isAnyItemSelected()) {
       return IconButton(
@@ -242,6 +241,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
           _assetStore.assetList.forEach((asset) {
             asset.selected = false;
           });
+          setState(() {});
         },
         icon: Icon(Icons.cancel),
       );
@@ -253,16 +253,10 @@ class _AssetGridViewState extends State<_AssetGridView> {
       appBar: AppBar(
         leading: _getLeadingIcon(),
         title: Text(!_assetStore.isAnyItemSelected()
-            ? (widget.type == AppAssetType.PHOTO ? "Photos" : "Videos")
+            ? ""
             : (_assetStore.getSelectedCount().toString() + " Selected")),
         backgroundColor: Colors.black,
         actions: [
-          if (!_assetStore.isAnyItemSelected())
-            IconButton(
-                onPressed: () {
-                  _refreshGrid();
-                },
-                icon: Icon(Icons.refresh, color: Colors.white)),
           if (_assetStore.isAnyItemSelected())
             IconButton(
                 onPressed: () {
@@ -306,9 +300,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   @override
   Widget build(BuildContext context) {
-    _assetStore = widget.type == AppAssetType.PHOTO
-        ? Provider.of<PhotoStore>(context)
-        : Provider.of<VideoStore>(context);
+    _assetStore = Provider.of<AssetStore>(context);
 
     return _body();
   }

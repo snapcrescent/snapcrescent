@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +11,6 @@ import 'package:snap_crescent/screens/settings/folder_selection/folder_selection
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/settings_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
-import 'package:snap_crescent/stores/widget/sync_process_store.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_bar.dart';
@@ -38,7 +36,6 @@ class _SettingsScreenView extends StatefulWidget {
 }
 
 class _SettingsScreenViewState extends State<_SettingsScreenView> {
-  late SyncProcessStore _syncProcessStore;
   bool _connectedToServer = false;
   String _loggedInUserName = "";
   String _loggedServerName = "";
@@ -62,7 +59,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   @override
   Widget build(BuildContext context) {
-    _syncProcessStore = Provider.of<SyncProcessStore>(context);
     
     return FutureBuilder<bool>(
         future: _getSettingsData(),
