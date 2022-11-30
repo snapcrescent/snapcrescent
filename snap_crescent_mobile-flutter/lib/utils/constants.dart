@@ -54,6 +54,7 @@ enum Direction {
 enum SyncProgress { 
    CONTACTING_SERVER,
    DOWNLOADING,
+   PROCESSING,
    UPLOADING,
    SYNC_COMPLETED
 }

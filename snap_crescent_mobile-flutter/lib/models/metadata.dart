@@ -49,8 +49,8 @@ class Metadata extends BaseUiBean {
     Map<String, dynamic> map = super.toMap();
 
     map['CREATION_DATE_TIME'] = creationDateTime!.millisecondsSinceEpoch;
-    map['INTERNAL_NAME'] = name;
-    map['NAME'] = internalName;
+    map['NAME'] = name;
+    map['INTERNAL_NAME'] = internalName;
     map['MIME_TYPE'] = mimeType;
     map['ORIENTATION'] = orientation;
 

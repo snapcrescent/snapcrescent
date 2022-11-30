@@ -5,7 +5,10 @@ import 'package:mobx/mobx.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
+import 'package:snap_crescent/models/base_response_bean.dart';
+import 'package:snap_crescent/models/metadata.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
+import 'package:snap_crescent/repository/metadata_repository.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/metadata_service.dart';
 import 'dart:io';
@@ -90,10 +93,13 @@ abstract class _SyncProcessStore with Store {
         AssetSearchCriteria assetSearchCriteria =
             AssetSearchCriteria.defaultCriteria();
         assetSearchCriteria.resultPerPage = 1;
-        final serverAssetResponse =
+        BaseResponseBean<int, Asset> serverAssetResponse =
             await AssetService.instance.search(assetSearchCriteria);
 
         if (serverAssetResponse.totalResultsCount! > 0) {
+         
+          serverAssetResponse = await AssetService.instance.search(assetSearchCriteria);
+
           DateTime latestServerAssetDate =
               serverAssetResponse.objects!.last.metadata!.creationDateTime!;
 
@@ -121,7 +127,7 @@ abstract class _SyncProcessStore with Store {
             }
           }
 
-          await _uploadAssetsToServer(latestAssetDate, AppAssetType.PHOTO);
+           await _uploadAssetsToServer(latestAssetDate, AppAssetType.PHOTO);
           await _uploadAssetsToServer(latestAssetDate, AppAssetType.VIDEO);
         } else {
           // No server sync info is present
@@ -130,12 +136,12 @@ abstract class _SyncProcessStore with Store {
           await AssetService.instance.deleteAllData();
           refreshAssetStores = true;
           await _uploadAssetsToServer(null, AppAssetType.PHOTO);
-          await _uploadAssetsToServer(null, AppAssetType.VIDEO);
+          await _uploadAssetsToServer(null, AppAssetType.VIDEO); 
         }
       }
 
       if (refreshAssetStores) {
-        assetStore.loadMoreAssets(0);
+        assetStore.getAssets(true);
       }
     } catch (e) {
       print("Network error");
@@ -170,21 +176,35 @@ abstract class _SyncProcessStore with Store {
           (_downloadedAssetCount) {
         downloadedAssetCount = _downloadedAssetCount;
 
-        if (downloadedAssetCount % 100 == 0) {
+        if (downloadedAssetCount % 1000 == 0) {
+          syncProgressState = SyncProgress.PROCESSING;
           assetStore.loadMoreAssets(0);
+          syncProgressState = SyncProgress.DOWNLOADING;
         }
       });
     }
   }
 
   _uploadAssetsToServer(DateTime? latestAssetDate, AppAssetType assetType) async {
+    uploadedAssetCount = 0;
     try {
       final assets = await _getAssetsSetForAutoBackUp(latestAssetDate, assetType);
 
-      totalLocalAssetCount = assets.length;
+      final filteredAssets = [];
+      for (var asset in assets) {
+              Metadata metadata = await MetadataRepository.instance.findByNameEndWith(asset.title!);  
+
+              if (metadata.id == null) {
+                //The asset is not uploaded to server yet;
+                filteredAssets.add(asset);
+              }
+      }
+      
+
+      totalLocalAssetCount = filteredAssets.length;
       syncProgressState = SyncProgress.UPLOADING;
 
-      for (final File asset in assets) {
+      for (final File asset in filteredAssets) {
         await AssetService.instance.save(assetType, [asset]);
         uploadedAssetCount = uploadedAssetCount + 1;
       }
