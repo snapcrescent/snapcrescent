@@ -4,13 +4,12 @@ import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 
 import javax.imageio.ImageIO;
 
-import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.Java2DFrameConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
+import com.codeinsight.snap_crescent.common.utils.Constant;
 import com.codeinsight.snap_crescent.common.utils.FileService;
+import com.codeinsight.snap_crescent.common.utils.OSFinder;
 import com.codeinsight.snap_crescent.metadata.Metadata;
 @Service
 public class ThumbnailServiceImpl implements ThumbnailService {
@@ -32,6 +33,9 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
 	@Value("${thumbnail.output.nameSuffix}")
 	private String THUMBNAIL_OUTPUT_NAME_SUFFIX;
+	
+	@Value("${sc.ffmpeg.pat}")
+	private String FFMPEG_PATH;
 
 	@Autowired
 	private FileService fileService;
@@ -94,22 +98,41 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 			}
 			
 			if(assetType == AssetType.VIDEO) {
-				FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(file);
-				frameGrabber.start();
-
+				File videoThumbnailTempFile =  new File(fileService.getBasePath(assetType) + Constant.UNPROCESSED_ASSET_FOLDER + file.getName() + "_thumbnail.jpg");
 				
-				Frame frame = frameGrabber.grabImage();
-				Java2DFrameConverter java2DFrameConverter = new Java2DFrameConverter();
-				original = java2DFrameConverter.convert(frame);
-			
-				java2DFrameConverter.close();
-				frameGrabber.stop();
-				frameGrabber.close();
+				String ffmpegCommand = "ffmpeg -i " + file.getAbsolutePath() + " -vf thumbnail=25 -vframes 1 -qscale 0 " + videoThumbnailTempFile.getAbsolutePath();
+				
+				ProcessBuilder processBuilder = null;
+				
+				if(OSFinder.isWindows()) {
+					processBuilder = new ProcessBuilder("cmd.exe","/C " + ffmpegCommand);	
+				} else if(OSFinder.isUnix()) {
+					processBuilder =  new ProcessBuilder("/bin/bash","-c", ffmpegCommand);	
+				}
+				
+				processBuilder.directory(new File(FFMPEG_PATH));
+				executeProcess(processBuilder);
+				
+				original = ImageIO.read(videoThumbnailTempFile);
+				videoThumbnailTempFile.delete();
 			}
 			
 		
 
 		return original;
+	}
+	
+	private void executeProcess(ProcessBuilder builder) throws Exception
+	{
+		builder.redirectErrorStream(true);
+        Process p = builder.start();
+        BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String line;
+        while (true) {
+            line = r.readLine();
+            if (line == null) { break; }
+            System.out.println(line);
+        }
 	}
 
 	
@@ -139,6 +162,13 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	private String getThumbnailName(Metadata metadata) {
 		String extension = "jpg";
 		return metadata.getInternalName() + THUMBNAIL_OUTPUT_NAME_SUFFIX + FILE_TYPE_SEPARATOR + extension;
+	}
+	
+	@Override
+	@Transactional
+	public String getFilePathByThumbnailById(Long id) throws Exception {
+		Thumbnail thumbnail = thumbnailRepository.findById(id);
+		return fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName()).getAbsolutePath();
 	}
 
 	@Override

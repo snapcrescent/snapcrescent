@@ -199,6 +199,24 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		return fileService.readFileBytes(fileType, asset.getMetadata().getPath(),
 				asset.getMetadata().getInternalName());
 	}
+	
+	@Override
+	@Transactional
+	public String getFilePathByAssetById(Long id) throws Exception {
+		Asset asset = assetRepository.findById(id);
+		
+		FILE_TYPE fileType = null;
+
+		if (asset.getAssetTypeEnum() == AssetType.PHOTO) {
+			fileType = FILE_TYPE.PHOTO;
+		}
+
+		if (asset.getAssetTypeEnum() == AssetType.VIDEO) {
+			fileType = FILE_TYPE.VIDEO;
+		}
+		
+		return fileService.getFile(fileType, asset.getMetadata().getPath(), asset.getMetadata().getInternalName()).getAbsolutePath();
+	}
 
 	@Override
 	@Transactional
@@ -369,5 +387,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		}
 
 	}
+
+	
 
 }

@@ -9,8 +9,11 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -80,6 +84,24 @@ public class AssetController extends BaseController {
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+    
+	@GetMapping(value = "/asset/{id}/stream")
+	public ResponseEntity<ResourceRegion> streamAssetById(@PathVariable Long id,@RequestHeader(value = "Range", required = false) String httpRangeList ) {
+		try {
+			UiAsset asset = assetService.getById(id);
+			UrlResource assetFile = new UrlResource("file:"+assetService.getFilePathByAssetById(id));
+			
+			ResourceRegion region = resourceRegion(AssetType.findById(asset.getAssetType()), assetFile, httpRangeList);
+			
+			return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+	                .contentType(MediaTypeFactory.getMediaType(assetFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
+	                .body(region);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
 	
 	@PutMapping(value = "/asset/{id}/metadata")
 	public ResponseEntity<?> updateMetadata(@PathVariable Long id) {

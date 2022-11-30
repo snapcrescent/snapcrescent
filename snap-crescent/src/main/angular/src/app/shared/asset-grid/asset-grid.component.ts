@@ -58,19 +58,11 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   @ViewChild('assetGridContainer') 
   private assetGridContainer: ElementRef;
   
-
-  appBaseURL:string;
-  
-
-  constructor(
+constructor(
     @Inject(LOCALE_ID) public locale: string,
     private formBuilder: FormBuilder,
     private pageDataService:PageDataService
   ) {
-
-      const parsedUrl = new URL(window.location.href);
-      const baseUrl = parsedUrl.origin;
-      this.appBaseURL = baseUrl.substring(0, baseUrl.lastIndexOf(":"));
 
   }
 
@@ -334,6 +326,6 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   }
 
   getThumbnailStreamUrl(asset:Asset) {
-    return this.appBaseURL + `:${environment.videoServerUrlPort}/thumbnail/${asset.thumbnail.id}`;
+    return `${environment.backendUrl}/thumbnail/${asset.thumbnail.id}`;
   }
 }
