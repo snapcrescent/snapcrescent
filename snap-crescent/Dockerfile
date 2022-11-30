@@ -22,8 +22,13 @@ RUN cp target/snap-crescent-*.jar /snap-crescent.jar
 #Change working directory to /
 WORKDIR /
 
-FROM node:latest
-RUN apt install openjdk-17-jre-headless
+FROM ubuntu:latest
+# install ffmpeg
+RUN apt update
+RUN apt install -y openjdk-17-jre
+RUN apt-get -y install ffmpeg
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/*
 
 # COPY compiled jar file to new image
 COPY --from=BUILD_STAGE snap-crescent.jar .
