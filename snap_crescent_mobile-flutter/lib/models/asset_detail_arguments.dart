@@ -1,7 +1,5 @@
-import 'package:snap_crescent/utils/constants.dart';
-
 class AssetDetailArguments {
-  AssetDetailArguments({required this.type, required this.assetIndex});
-  final AppAssetType type;
+  AssetDetailArguments({required this.assetIndex});
+  
   final int assetIndex;
 }

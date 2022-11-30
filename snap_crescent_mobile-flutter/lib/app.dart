@@ -7,11 +7,9 @@ import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/settings/folder_selection/folder_selection.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
-import 'package:snap_crescent/stores/asset/photo_store.dart';
-import 'package:snap_crescent/stores/asset/video_store.dart';
+import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/stores/widget/sync_process_store.dart';
 import 'package:snap_crescent/style.dart';
-import 'package:snap_crescent/utils/constants.dart';
 
 class App extends StatelessWidget {
   // This widget is the root of your application.
@@ -19,8 +17,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<PhotoStore>(create: (_) => PhotoStore()),
-        Provider<VideoStore>(create: (_) => VideoStore()),
+        Provider<AssetStore>(create: (_) => AssetStore()),
         Provider<SyncProcessStore>(create: (_) => SyncProcessStore()),
       ],
       child: MaterialApp(
@@ -36,7 +33,7 @@ class App extends StatelessWidget {
     switch (settings.name) {
       case "/":
         return MaterialPageRoute(
-            builder: (_) => AssetsGridScreen(AppAssetType.PHOTO));
+            builder: (_) => AssetsGridScreen());
       case SplashScreen.routeName:
         return MaterialPageRoute(builder: (_) => SplashScreen());
       case SettingsScreen.routeName:
@@ -46,7 +43,7 @@ class App extends StatelessWidget {
             builder: (_) => FolderSelectionScreen(settings.arguments as AppConfig));
       case AssetsGridScreen.routeName:
         return MaterialPageRoute(
-            builder: (_) => AssetsGridScreen(settings.arguments as AppAssetType));
+            builder: (_) => AssetsGridScreen());
       case AssetDetailScreen.routeName:
         return MaterialPageRoute(
             builder: (_) =>
@@ -54,7 +51,7 @@ class App extends StatelessWidget {
 
       default:
         return MaterialPageRoute(
-            builder: (_) => AssetsGridScreen(AppAssetType.PHOTO));
+            builder: (_) => AssetsGridScreen());
     }
   }
 

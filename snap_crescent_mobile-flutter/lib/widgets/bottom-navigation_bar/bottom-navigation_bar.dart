@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
-import 'package:snap_crescent/utils/constants.dart';
 
 class AppBottomNavigationBar extends StatelessWidget {
   
@@ -35,19 +34,11 @@ class _AppBottomNavigationBarState extends State<_AppBottomNavigationBarView> {
       Navigator.pushAndRemoveUntil<dynamic>(
         context,
         MaterialPageRoute<dynamic>(
-          builder: (BuildContext context) => AssetsGridScreen(AppAssetType.PHOTO),
+          builder: (BuildContext context) => AssetsGridScreen(),
         ),
         (route) => false,//if you want to disable back feature set to false
       );
     } else if(_selectedIndex == 1) {
-      Navigator.pushAndRemoveUntil<dynamic>(
-        context,
-        MaterialPageRoute<dynamic>(
-          builder: (BuildContext context) => AssetsGridScreen(AppAssetType.VIDEO),
-        ),
-        (route) => false,//if you want to disable back feature set to false
-      );
-     } else if(_selectedIndex == 2) {
       Navigator.pushAndRemoveUntil<dynamic>(
         context,
         MaterialPageRoute<dynamic>(
@@ -72,11 +63,7 @@ class _AppBottomNavigationBarState extends State<_AppBottomNavigationBarView> {
       items: [
         new BottomNavigationBarItem(
           icon: Icon(Icons.camera),
-          label: "Photos",
-        ),
-        new BottomNavigationBarItem(
-          icon: Icon(Icons.video_camera_back),
-          label: "Videos",
+          label: "Photos & Videos",
         ),
         new BottomNavigationBarItem(
           icon: Icon(Icons.settings),

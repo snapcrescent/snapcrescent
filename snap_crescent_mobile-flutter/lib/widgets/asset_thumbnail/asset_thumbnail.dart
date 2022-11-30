@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/unified_asset.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
-import 'package:snap_crescent/stores/asset/photo_store.dart';
 import 'package:snap_crescent/utils/constants.dart' as AppConstants;
 
 class AssetThumbnail extends StatefulWidget {
@@ -175,7 +174,7 @@ class _AssetThumbnailState extends State<AssetThumbnail> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
 
-    _assetStore = Provider.of<PhotoStore>(context);
+    _assetStore = Provider.of<AssetStore>(context);
 
         
     return FutureBuilder<Object?>(

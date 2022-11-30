@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import 'package:provider/provider.dart';
-import 'package:snap_crescent/stores/asset/photo_store.dart';
-import 'package:snap_crescent/stores/asset/video_store.dart';
+import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/stores/widget/sync_process_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -31,23 +30,13 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
   _syncProgress(SyncProgress _syncProgressState) {
     String progressLabel = "";
 
-    if (_syncProgressState == SyncProgress.DOWNLOADING_PHOTO_THUMBNAILS &&
-        _syncProcessStore.totalServerPhotoCount != null) {
+    if (_syncProgressState == SyncProgress.DOWNLOADING &&
+        _syncProcessStore.totalServerAssetCount != 0) {
+      progressLabel = '''Downloaded ${_getPercentage(_syncProcessStore.downloadedAssetCount, _syncProcessStore.totalServerAssetCount)}% items from server''';
+    } else if (_syncProgressState == SyncProgress.UPLOADING &&
+        _syncProcessStore.totalLocalAssetCount != 0) {
       progressLabel =
-          '''Downloaded ${_getPercentage(_syncProcessStore.downloadedPhotoCount, _syncProcessStore.totalServerPhotoCount)}% Photos from server''';
-    } else if (_syncProgressState ==
-            SyncProgress.DOWNLOADING_VIDEO_THUMBNAILS &&
-        _syncProcessStore.totalServerVideoCount != null) {
-      progressLabel =
-          '''Downloaded ${_getPercentage(_syncProcessStore.downloadedVideoCount, _syncProcessStore.totalServerVideoCount)}% Videos from server''';
-    } else if (_syncProgressState == SyncProgress.UPLOADING_PHOTOS &&
-        _syncProcessStore.totalLocalPhotoCount != null) {
-      progressLabel =
-          '''Uploaded ${_getPercentage(_syncProcessStore.uploadedPhotoCount, _syncProcessStore.totalLocalPhotoCount)}% Photos to server''';
-    } else if (_syncProgressState == SyncProgress.UPLOADING_VIDEOS &&
-        _syncProcessStore.totalLocalVideoCount != null) {
-      progressLabel =
-          '''Uploaded ${_getPercentage(_syncProcessStore.uploadedVideoCount, _syncProcessStore.totalLocalVideoCount)}% Videos to server''';
+          '''Uploaded ${_getPercentage(_syncProcessStore.uploadedAssetCount, _syncProcessStore.totalLocalAssetCount)}% items to server''';
     } else if (_syncProgressState == SyncProgress.SYNC_COMPLETED) {
       progressLabel = "";
       return Container();
@@ -87,10 +76,7 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
   @override
   Widget build(BuildContext context) {
     _syncProcessStore = Provider.of<SyncProcessStore>(context);
-    final PhotoStore _photoStore = Provider.of<PhotoStore>(context);
-    final VideoStore _videoStore = Provider.of<VideoStore>(context);
-    _syncProcessStore.photoStore = _photoStore;
-    _syncProcessStore.videoStore = _videoStore;
+    _syncProcessStore.assetStore =  Provider.of<AssetStore>(context);
 
     return Observer(
         builder: (context) => _syncProcessStore.syncProgressState !=

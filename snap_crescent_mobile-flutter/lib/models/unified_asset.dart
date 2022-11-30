@@ -7,10 +7,12 @@ class UniFiedAsset  {
   AssetSource assetSource;
   DateTime assetCreationDate;
   bool selected = false;
+  AppAssetType assetType;
   Asset? asset;
   AssetEntity? assetEntity;
 
   UniFiedAsset(
+        this.assetType,
         this.assetSource,
         this.assetCreationDate,
         {

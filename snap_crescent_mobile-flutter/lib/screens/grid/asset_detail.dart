@@ -11,8 +11,6 @@ import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/models/unified_asset.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
-import 'package:snap_crescent/stores/asset/photo_store.dart';
-import 'package:snap_crescent/stores/asset/video_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class AssetDetailScreen extends StatelessWidget {
@@ -23,15 +21,14 @@ class AssetDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _AssetDetailView(_arguments.type, _arguments.assetIndex);
+    return _AssetDetailView(_arguments.assetIndex);
   }
 }
 
 class _AssetDetailView extends StatefulWidget {
-  final AppAssetType type;
   final int assetIndex;
 
-  _AssetDetailView(this.type, this.assetIndex);
+  _AssetDetailView(this.assetIndex);
 
   @override
   _AssetDetailViewState createState() => _AssetDetailViewState();
@@ -53,25 +50,23 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
         _betterPlayerController!.dispose();
       }
 
+      betterPlayerConfiguration = BetterPlayerConfiguration(
+      autoPlay: true,
+      looping: true,
+      expandToFill: false,
+      autoDetectFullscreenDeviceOrientation: true,
+      fit: BoxFit.contain,
+    );
 
-      if(_betterPlayerController == null) {
-        betterPlayerConfiguration = BetterPlayerConfiguration(
-        autoPlay: true,
-        looping: true,
-        expandToFill: false,
-        autoDetectFullscreenDeviceOrientation: true,
-        fit: BoxFit.contain,
-      );
+      bufferingConfiguration = BetterPlayerBufferingConfiguration(
+          minBufferMs: 50000,
+          maxBufferMs: 13107200,
+          bufferForPlaybackMs: 10000,
+          bufferForPlaybackAfterRebufferMs: 5000,
+        );  
 
-        bufferingConfiguration = BetterPlayerBufferingConfiguration(
-            minBufferMs: 50000,
-            maxBufferMs: 13107200,
-            bufferForPlaybackMs: 10000,
-            bufferForPlaybackAfterRebufferMs: 5000,
-          );  
-
-       _betterPlayerController = BetterPlayerController(betterPlayerConfiguration!);
-      }
+      _betterPlayerController = BetterPlayerController(betterPlayerConfiguration!);
+      
       
       BetterPlayerDataSource? dataSource;
 
@@ -152,26 +147,9 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
     );
   }
 
-  _getAssetFile(int assetIndex) async {
-    final UniFiedAsset unifiedAsset = _assetStore.assetList[assetIndex];
-
-    File? assetFile;
-
-    if (unifiedAsset.assetSource == AssetSource.CLOUD) {
-      Asset asset = unifiedAsset.asset!;
-      assetFile = await AssetService.instance
-          .downloadAssetById(asset.id!, asset.metadata!.name!);
-    } else {
-      AssetEntity asset = unifiedAsset.assetEntity!;
-      assetFile = await asset.file;
-    }
-
-    return assetFile;
-  }
-
   Future<void> _shareAssetFile(int assetIndex) async {
-    final File? assetFile = await _getAssetFile(assetIndex);
-    await Share.shareXFiles([XFile(assetFile!.path)]);
+    final List<XFile> assetFiles = await _assetStore.getAssetFileForSharing([assetIndex]);
+    await Share.shareXFiles(assetFiles);
   }
 
   _assetView(index) {
@@ -185,9 +163,14 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
             return Container();
           } else {
             UniFiedAsset asset = _assetStore.assetList[index];
-            return widget.type == AppAssetType.PHOTO
+
+            return Container(
+              width: 90,
+              height: 90,
+              child: asset.assetType == AppAssetType.PHOTO
                 ? _imageBanner(asset, snapshot.data)
-                : _videoPlayer(asset, snapshot.data);
+                : _videoPlayer(asset, snapshot.data)
+            );
           }
         });
   }
@@ -200,9 +183,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
           backgroundColor: Colors.transparent,
           body: PageView.builder(
             controller: pageController,
-            physics: widget.type == AppAssetType.PHOTO
-                ? PageScrollPhysics()
-                : PageScrollPhysics(),
+            physics: PageScrollPhysics(),
             itemCount: _assetStore.assetList.length,
             itemBuilder: (BuildContext context, int index) {
               if (_assetStore.assetList.isEmpty) {
@@ -266,9 +247,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    _assetStore = widget.type == AppAssetType.PHOTO
-        ? Provider.of<PhotoStore>(context)
-        : Provider.of<VideoStore>(context);
+    _assetStore = Provider.of<AssetStore>(context);
 
     return _body();
   }
