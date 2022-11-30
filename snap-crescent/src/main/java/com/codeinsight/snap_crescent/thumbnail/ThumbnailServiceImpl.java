@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
+import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 import com.codeinsight.snap_crescent.common.utils.Constant;
 import com.codeinsight.snap_crescent.common.utils.FileService;
 import com.codeinsight.snap_crescent.common.utils.OSFinder;
@@ -34,9 +35,6 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	@Value("${thumbnail.output.nameSuffix}")
 	private String THUMBNAIL_OUTPUT_NAME_SUFFIX;
 	
-	@Value("${sc.ffmpeg.path}")
-	private String FFMPEG_PATH;
-
 	@Autowired
 	private FileService fileService;
 
@@ -110,7 +108,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 					processBuilder =  new ProcessBuilder("/bin/bash","-c", ffmpegCommand);	
 				}
 				
-				processBuilder.directory(new File(FFMPEG_PATH));
+				processBuilder.directory(new File(EnvironmentProperties.FFMPEG_PATH));
 				executeProcess(processBuilder);
 				
 				original = ImageIO.read(videoThumbnailTempFile);

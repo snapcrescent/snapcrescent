@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.hibernate5.HibernateTemplate;
@@ -28,6 +29,18 @@ public class DataSourceConfig {
 	private void init() {
 		
 	}
+	
+	@Bean
+	public DataSource dataSource() {
+		DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
+
+		dataSourceBuilder.url(EnvironmentProperties.SQL_URL);
+		dataSourceBuilder.username(EnvironmentProperties.SQL_USER);
+		dataSourceBuilder.password(EnvironmentProperties.SQL_PASSWORD);
+
+		return dataSourceBuilder.build();
+	}
+	
 
 	@Bean
 	public HibernateTemplate hibernateTemplate(SessionFactory sessionFactory) {
