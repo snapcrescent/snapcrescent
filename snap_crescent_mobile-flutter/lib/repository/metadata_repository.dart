@@ -12,8 +12,8 @@ class MetadataRepository extends BaseRepository {
 
   Future<Metadata> findByNameEndWith(String name) async {
     Database database = await DatabaseHelper.instance.database;
-    final result = await database.rawQuery('''SELECT * from $tableName where NAME LIKE ? ''', ['%$name']);
-
+    final result = await database.rawQuery('''SELECT * from $tableName where NAME = ? ''',[name]);
+   
     if (result.length == 1) {
       return Metadata.fromMap(result.single);
     } else {
