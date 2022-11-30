@@ -34,7 +34,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 	@Value("${thumbnail.output.nameSuffix}")
 	private String THUMBNAIL_OUTPUT_NAME_SUFFIX;
 	
-	@Value("${sc.ffmpeg.pat}")
+	@Value("${sc.ffmpeg.path}")
 	private String FFMPEG_PATH;
 
 	@Autowired
