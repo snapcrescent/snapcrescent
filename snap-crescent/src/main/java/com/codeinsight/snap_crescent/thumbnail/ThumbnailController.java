@@ -29,7 +29,7 @@ public class ThumbnailController extends BaseController{
 			
 			ResourceRegion region = resourceRegion(AssetType.PHOTO,thumnailFile, httpRangeList);
 			
-			return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+			return ResponseEntity.status(HttpStatus.OK)
 	                .contentType(MediaTypeFactory.getMediaType(thumnailFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
 	                .body(region);
 		} catch (Exception e) {
