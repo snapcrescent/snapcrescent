@@ -1,6 +1,8 @@
 package com.codeinsight.snap_crescent.metadata;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,10 +11,12 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.codeinsight.snap_crescent.bulk_import.google.GoogleTakeoutMetadata;
 import com.codeinsight.snap_crescent.common.services.BaseService;
 import com.codeinsight.snap_crescent.common.utils.Constant;
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.common.utils.DateUtils;
+import com.codeinsight.snap_crescent.common.utils.JsonUtils;
 import com.codeinsight.snap_crescent.common.utils.StringUtils;
 import com.codeinsight.snap_crescent.location.LocationService;
 import com.drew.imaging.ImageMetadataReader;
@@ -21,6 +25,7 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.GpsDirectory;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Service
 public class MetadataServiceImpl extends BaseService implements MetadataService {
@@ -46,8 +51,6 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 
 	private void extractMetaData(AssetType assetType, String originalFilename, File file, Metadata metadata) throws Exception {
 		
-		
-
 		try {
 			
 			com.drew.metadata.Metadata drewMetadata = ImageMetadataReader.readMetadata(file);
@@ -131,5 +134,28 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 		} catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
 		}
+	}
+
+	@Override
+	public Metadata extractMetaDataFromGoogleTakeout(AssetType assetType, File assetFile, File assetJsonFile, File temporaryFile) throws Exception {
+			Metadata metadata = new Metadata();
+			
+			try {
+			
+			GoogleTakeoutMetadata googleTakeoutMetadata = JsonUtils.getObjectFromJson(new String(Files.readAllBytes(Paths.get(assetJsonFile.getAbsolutePath()))),  new TypeReference<GoogleTakeoutMetadata>() {});
+			
+			extractMetaData(assetType, googleTakeoutMetadata.getTitle(), temporaryFile, metadata);
+			
+			metadata.setName(googleTakeoutMetadata.getTitle());
+			metadata.setCreationDateTime(googleTakeoutMetadata.getCreationDate());
+			metadata.setPath(DateUtils.getFilePathFromDate(metadata.getCreationDateTime()));
+			Long locationId = locationService.saveLocation(googleTakeoutMetadata.getLongitude(), googleTakeoutMetadata.getLatitude());
+			metadata.setLocationId(locationId);
+			
+		} catch (Exception e) {
+			logger.error(e.getLocalizedMessage());
+		}
+			
+		return metadata;
 	}
 }

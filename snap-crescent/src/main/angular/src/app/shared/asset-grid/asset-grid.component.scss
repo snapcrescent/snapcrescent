@@ -10,6 +10,18 @@
 mat-expansion-panel {
     border-radius: 0px;
 
+    .mat-expansion-panel-header {
+
+      &.mat-expanded:hover {
+          background-color: unset;
+      }
+
+      .mat-expansion-panel-header-description{
+        text-align: right;
+        display: block;
+      }
+    }
+
     &.mat-expanded {
         background-color: #15c57f1b;
         padding: 18px 0px 0px 0px;
@@ -48,12 +60,13 @@ mat-expansion-panel {
 
   .asset-thumbnail-container {
     padding: 0px;
+    
   
     .mat-card{
       padding: 0px;
   
       .thumbnail {
-  
+        
         .asset{
           padding: 1px;
         }
