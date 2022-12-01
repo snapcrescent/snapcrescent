@@ -83,11 +83,20 @@ public class AssetController extends BaseController {
 			UiAsset asset = assetService.getById(id);
 			UrlResource assetFile = new UrlResource("file:"+assetService.getFilePathByAssetById(id));
 			
-			ResourceRegion region = resourceRegion(AssetType.findById(asset.getAssetType()), assetFile, httpRangeList);
+			AssetType assetType = AssetType.findById(asset.getAssetType());
 			
-			return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-	                .contentType(MediaTypeFactory.getMediaType(assetFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
-	                .body(region);
+			ResourceRegion region = resourceRegion(assetType, assetFile, httpRangeList);
+			
+			if(assetType == AssetType.PHOTO) {
+				return ResponseEntity.status(HttpStatus.OK)
+		                .contentType(MediaTypeFactory.getMediaType(assetFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
+		                .body(region);
+			} else {
+				return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+		                .contentType(MediaTypeFactory.getMediaType(assetFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
+		                .body(region);	
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
