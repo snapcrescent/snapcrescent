@@ -38,7 +38,8 @@ public class Constant {
 		FORMAT_3("yyyy-MM-dd hh:mm:ss"),
 		FORMAT_4("yyyy-MM-dd HH:mm:ss"),
 		FORMAT_5("dd-MM-yyyy HH:mm"),
-		FORMAT_6("EEE MMM dd HH:mm:ss XXX yyyy");
+		FORMAT_6("EEE MMM dd HH:mm:ss XXX yyyy"),
+		FORMAT_7("MMM dd, yyyy, HH:mm:ss aaa z");
 		
 		
 		private String format;

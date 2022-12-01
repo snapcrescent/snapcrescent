@@ -131,5 +131,14 @@ public class AssetRepository extends BaseRepository<Asset>{
 		query.setParameter("ids", ids);
 		query.executeUpdate();
 	}
+
+	public Asset findByMetadataId(Long metadataId) {
+		String query = "SELECT asset FROM Asset asset WHERE asset.metadataId = :metadataId";
+		
+		TypedQuery<Asset> typedQuery = getCurrentSession().createQuery(query,Asset.class);
+		typedQuery.setParameter("metadataId", metadataId);
+		List<Asset> results = typedQuery.getResultList();
+		return results.isEmpty() ? null : results.get(0);
+	}
 	
 }

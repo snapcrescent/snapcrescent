@@ -1,13 +1,17 @@
 <div #assetGridContainer class="asset-grid-container">
-    <div class="col-12 m-t-10 text-end">
-        <span matTooltip="Open Advance Search" matSuffix (click)="topAdvancedSearchPanel.toggle()">
+    <mat-expansion-panel class="mat-elevation-z" hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            
+          </mat-panel-title>
+          <mat-panel-description>
             <mat-icon>filter_list</mat-icon>
-        </span>
-    </div>
-    <mat-expansion-panel #topAdvancedSearchPanel class="mat-elevation-z" collapsedHeight="0" hideToggle>
+        </mat-panel-description>
+        </mat-expansion-panel-header>
+        
         <div class="row text-center" [formGroup]="searchFormGroup">
             <ng-container *ngFor="let item of advancedSearchFields" [ngSwitch]="item.type">
-                <div class="col-12">
+                <div class="col-md-3 col-sm-6 col-12">
                     <ng-container *ngSwitchCase="'text'">
                         <app-text [placeholder]="item.label" [formControlName]="item.key" (keyup.enter)="callSearch(true)">
                         </app-text>
@@ -32,17 +36,15 @@
         </div>
         <div class="row">
             <div class="col-lg-12">
-                <div class="row text-center">
-                    <div class="col-6">
+                <div class="row text-end">
+                    <div class="col-12">
                         <button type="button" mat-raised-button (click)="reset()">Reset</button>
-                    </div>
-                    <div class="col-6">
                         <button type="button" mat-raised-button color="primary" (click)="callSearch(true)">Search</button>
                     </div>
                 </div>
             </div>
         </div>
-    </mat-expansion-panel>
+      </mat-expansion-panel>
     <div class="asset-container">
         <div class="col-12" *ngFor="let assetsGroup of assetsGroups">
             <div class="assets-group-title-container">
@@ -52,7 +54,7 @@
                 <span class="title">{{assetsGroup.date}}</span>
             </div>
             <div class="row asset-thumbnail-container">
-                <div class="col-md-2 col-sm-3 col-4 " *ngFor="let asset of assetsGroup.assets">
+                <div class="col-xxl-1 col-md-2 col-sm-3 col-4 " *ngFor="let asset of assetsGroup.assets">
                     <mat-card class="asset-thumbnail">
                         <mat-card-content>
                             <div (click)="onThumbnailClick(assetsGroup,asset)" class="thumbnail"

@@ -5,6 +5,7 @@ import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -130,43 +131,9 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		boolean processed = false;
 		try {
 			String originalFilename = StringUtils.extractFileNameFromTemporary(temporaryFile.getName());
-
 			Metadata metadata = metadataService.computeMetaData(assetType, originalFilename, temporaryFile);
 			Thumbnail thumbnail = thumbnailService.generateThumbnail(temporaryFile, metadata, assetType);
-
-			long assetHash = getPerceptualHash(
-					ImageIO.read(fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName())));
-
-			if (metadataRepository.existsByHash(assetHash) == false) {
-
-				String directoryPath = fileService.getBasePath(assetType) + metadata.getPath();
-				fileService.mkdirs(directoryPath);
-
-				File finalFile = new File(directoryPath + "/" + metadata.getInternalName());
-				Files.move(Paths.get(temporaryFile.getAbsolutePath()), Paths.get(finalFile.getAbsolutePath()));
-
-				Asset asset = new Asset();
-				asset.setAssetType(assetType.getId());
-
-				metadata.setHash(assetHash);
-
-				metadataRepository.save(metadata);
-				thumbnailRepository.save(thumbnail);
-
-				asset.setMetadataId(metadata.getId());
-				asset.setThumbnailId(thumbnail.getId());
-
-				assetRepository.save(asset);
-			} else {
-				if (assetType == AssetType.PHOTO) {
-					fileService.removeFile(FILE_TYPE.PHOTO, Constant.UNPROCESSED_ASSET_FOLDER, temporaryFile.getName());
-				} else if (assetType == AssetType.VIDEO) {
-					fileService.removeFile(FILE_TYPE.VIDEO, Constant.UNPROCESSED_ASSET_FOLDER, temporaryFile.getName());
-				}
-
-				fileService.removeFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName());
-			}
-
+			saveProcessedAsset(assetType, temporaryFile, metadata, thumbnail);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -175,6 +142,72 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 		return new AsyncResult<Boolean>(processed);
 	}
+	
+	@Override
+	@Transactional
+	@Async("threadPoolTaskExecutor")
+	public Future<Boolean> processAsset(AssetType assetType, File temporaryFile, Metadata metadata) throws Exception {
+
+		boolean processed = false;
+		try {
+			Thumbnail thumbnail = thumbnailService.generateThumbnail(temporaryFile, metadata, assetType);
+			saveProcessedAsset(assetType, temporaryFile, metadata, thumbnail);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			processed = true;
+		}
+
+		return new AsyncResult<Boolean>(processed);
+	}
+	
+	public void saveProcessedAsset(AssetType assetType,File temporaryFile, Metadata metadata, Thumbnail thumbnail) throws IOException {
+		
+		long assetHash = getPerceptualHash(ImageIO.read(fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName())));
+		metadata.setHash(assetHash);
+		
+		Metadata existingMetadata =  metadataRepository.findByHash(metadata.getHash());
+		
+		
+		if (existingMetadata == null) {
+
+			String directoryPath = fileService.getBasePath(assetType) + metadata.getPath();
+			fileService.mkdirs(directoryPath);
+
+			File finalFile = new File(directoryPath + "/" + metadata.getInternalName());
+			Files.move(Paths.get(temporaryFile.getAbsolutePath()), Paths.get(finalFile.getAbsolutePath()));
+
+			Asset asset = new Asset();
+			asset.setAssetType(assetType.getId());
+
+			metadataRepository.save(metadata);
+			thumbnailRepository.save(thumbnail);
+
+			asset.setMetadataId(metadata.getId());
+			asset.setThumbnailId(thumbnail.getId());
+
+			assetRepository.save(asset);
+		} else {
+			
+			metadataRepository.detach(existingMetadata);
+			
+			metadata.setId(existingMetadata.getId());
+			metadata.setVersion(existingMetadata.getVersion());
+			metadata.setActive(existingMetadata.getActive());
+			
+			
+			moveAssetAndThumbnailPostRecomputeMetaData(assetRepository.findByMetadataId(existingMetadata.getId()), existingMetadata, metadata);
+			
+			if (assetType == AssetType.PHOTO) {
+				fileService.removeFile(FILE_TYPE.PHOTO, Constant.UNPROCESSED_ASSET_FOLDER, temporaryFile.getName());
+			} else if (assetType == AssetType.VIDEO) {
+				fileService.removeFile(FILE_TYPE.VIDEO, Constant.UNPROCESSED_ASSET_FOLDER, temporaryFile.getName());
+			}
+
+			fileService.removeFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName());
+		}
+	}
+	
 
 	@Override
 	public UiAsset getById(Long id) {
@@ -236,17 +269,46 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		
 		
 		try {
-			Metadata metadata = metadataRepository.findById(asset.getMetadataId());
-			File beforeRecomputeAssetFile = fileService.getFile(fileType, metadata.getPath(), metadata.getInternalName());
-			metadataService.recomputeMetaData(assetType, metadata,beforeRecomputeAssetFile);
+			Metadata preRecomputeMetadata = metadataRepository.findById(asset.getMetadataId());
 			
-			String postRecomputePath = DateUtils.getFilePathFromDate(metadata.getCreationDateTime());
+			metadataRepository.detach(preRecomputeMetadata);
+			
+			Metadata postRecomputeMetadata = metadataRepository.findById(asset.getMetadataId());
+			File beforeRecomputeAssetFile = fileService.getFile(fileType, preRecomputeMetadata.getPath(), preRecomputeMetadata.getInternalName());
+			metadataService.recomputeMetaData(assetType, postRecomputeMetadata,beforeRecomputeAssetFile);
+			
+			moveAssetAndThumbnailPostRecomputeMetaData(asset, preRecomputeMetadata, postRecomputeMetadata);
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	private void moveAssetAndThumbnailPostRecomputeMetaData(Asset asset, Metadata preRecomputeMetadata, Metadata postRecomputeMetadata) {
+		
+			AssetType assetType = asset.getAssetTypeEnum();
+			
+			FILE_TYPE fileType = null;
+	
+			if (assetType == AssetType.PHOTO) {
+				fileType = FILE_TYPE.PHOTO;
+			}
+	
+			if (assetType == AssetType.VIDEO) {
+				fileType = FILE_TYPE.VIDEO;
+			}
+		
+		try {
+			File beforeRecomputeAssetFile = fileService.getFile(fileType, preRecomputeMetadata.getPath(), preRecomputeMetadata.getInternalName());
+			
+			String postRecomputePath = DateUtils.getFilePathFromDate(postRecomputeMetadata.getCreationDateTime());
 			
 			String assetDirectoryPath = fileService.getBasePath(assetType) + postRecomputePath;
 			fileService.mkdirs(assetDirectoryPath);
 			
 			
-			File finalAssetFile = new File(assetDirectoryPath + "/" + metadata.getInternalName());
+			File finalAssetFile = new File(assetDirectoryPath + "/" + postRecomputeMetadata.getInternalName());
 			if(!beforeRecomputeAssetFile.getAbsolutePath().equals(finalAssetFile.getAbsolutePath())) {
 				Files.move(Paths.get(beforeRecomputeAssetFile.getAbsolutePath()), Paths.get(finalAssetFile.getAbsolutePath()));	
 			}
@@ -264,10 +326,10 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 				Files.move(Paths.get(thumbnailFile.getAbsolutePath()), Paths.get(finalThumbnailFile.getAbsolutePath()));	
 			}
 			
-			metadata.setPath(postRecomputePath);
+			postRecomputeMetadata.setPath(postRecomputePath);
 			thumbnail.setPath(postRecomputePath);
 			
-			metadataRepository.update(metadata);
+			metadataRepository.update(postRecomputeMetadata);
 			thumbnailRepository.update(thumbnail);
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -284,7 +346,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		fileService.mkdirs(directoryPath);
 
 		try {
-			String path = directoryPath + StringUtils.generateTemporaryFileName(originalFile.getName());
+			String path = directoryPath + StringUtils.generateTemporaryFileName(originalFile.getName().replace("(", "").replace(")", "").replaceAll("\\s", ""));
 			finalFile = new File(path);
 
 			Files.copy(originalFile.toPath(), finalFile.toPath(), StandardCopyOption.REPLACE_EXISTING);

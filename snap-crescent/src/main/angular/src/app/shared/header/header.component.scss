@@ -2,12 +2,8 @@
 
 .header {
     flex: 0 1 auto;
-    background: $primary-color;
+    border-bottom: 1px solid $primary-color;
     height: 51px;
-
-    box-shadow: 0px 3px 14px 0px rgba(0, 0, 0, 0.75);
-    -webkit-box-shadow: 0px 3px 14px 0px rgba(0, 0, 0, 0.75);
-    -moz-box-shadow: 0px 3px 14px 0px rgba(0, 0, 0, 0.75);
 
     .nav-item{
         padding: 16px 20px;
@@ -22,14 +18,10 @@
         background: $primary-color;
     }
 
-    .navbar-toggler-icon{
-        color: $secondary-color;
-    }
 
     .d-flex {
-        background: $primary-color;
-
         .logout-button {
+            color: black;
             margin: 8px;
         }
     }

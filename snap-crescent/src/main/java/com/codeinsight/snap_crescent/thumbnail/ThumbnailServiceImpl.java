@@ -98,7 +98,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 			if(assetType == AssetType.VIDEO) {
 				File videoThumbnailTempFile =  new File(fileService.getBasePath(assetType) + Constant.UNPROCESSED_ASSET_FOLDER + file.getName() + "_thumbnail.jpg");
 				
-				String ffmpegCommand = "ffmpeg -i " + file.getAbsolutePath() + " -vf thumbnail=25 -vframes 1 -qscale 0 " + videoThumbnailTempFile.getAbsolutePath();
+				String ffmpegCommand = "ffmpeg -i " + file.getAbsolutePath() + " -vf thumbnail=25 -vframes 1 -qscale 0 " + videoThumbnailTempFile.getAbsolutePath() + "";
 				
 				ProcessBuilder processBuilder = null;
 				

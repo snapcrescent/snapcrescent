@@ -7,7 +7,7 @@
           (dateChange)="changeValue($event.value)" attr.aria-label="{{inputValue | date:'DD MMM, Y'}} ' is required '" (click)="picker.open()" (blur)="onTouched()" [required]="isRequired" [attr.aria-required]="isRequired" [ngStyle]="inputStyle">
       <span attr.aria-label="{{inputValue}}" hidden>{{inputValue}}</span>
       <mat-datepicker-toggle *ngIf="!disabled" matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker (opened)="datePickerOpened()"></mat-datepicker>
+      <mat-datepicker #picker touchUi  (opened)="datePickerOpened()"></mat-datepicker>
       <mat-hint class="error">{{ error }}</mat-hint>
   </mat-form-field>
 </ng-container>

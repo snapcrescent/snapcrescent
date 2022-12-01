@@ -31,7 +31,13 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 			formats.add(metadtaCreatedDateFormat.getFormat());
 		}
 		
-		return tryParse(creationDateString, formats);
+		Date parsedDate = tryParse(creationDateString, formats);
+		
+		if(parsedDate == null) {
+			throw new ParseException(creationDateString, 0);
+		}
+		
+		return parsedDate;
 	
 	}
 	

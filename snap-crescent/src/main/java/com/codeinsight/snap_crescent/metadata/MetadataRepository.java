@@ -15,13 +15,13 @@ public class MetadataRepository extends BaseRepository<Metadata>{
 		super(Metadata.class);
 	}
 
-	public boolean existsByHash(long hash) {
+	public Metadata findByHash(long hash) {
 		String query = "SELECT metadata FROM Metadata metadata WHERE metadata.hash = :hash";
 		
 		TypedQuery<Metadata> typedQuery = getCurrentSession().createQuery(query,Metadata.class);
 		typedQuery.setParameter("hash", hash);
 		List<Metadata> results = typedQuery.getResultList();
-		return results.isEmpty() ? false : true;
+		return results.isEmpty() ? null : results.get(0);
 	}
 	
 	public boolean existByName(String name) {

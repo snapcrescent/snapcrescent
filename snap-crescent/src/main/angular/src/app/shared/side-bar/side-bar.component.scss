@@ -3,17 +3,18 @@
 .side-bar-container{
     padding: 20px 20px 20px 0px;
     .item{
-        padding-left: 10px;
-        margin: 15px 0px;
+        padding: 10px;
+        padding-left: 20px;
         cursor: pointer;
         font-weight: 500;
         color: $primary-color;
+        
 
         &.active {
             background-color: $primary-color;
             color: white;
-            border-top-right-radius: 15px;
-            border-bottom-right-radius: 15px;
+            border-top-right-radius: 50px;
+            border-bottom-right-radius: 50px;
         }
         
 
