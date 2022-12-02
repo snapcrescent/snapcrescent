@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:snap_crescent/models/app_config.dart';
@@ -96,6 +97,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
      _latestAssetDate = await SettingsService.instance.getLatestAssetDate();
 
     _syncedAssetCount = await AssetService.instance.countOnLocal(AssetSearchCriteria.defaultCriteria());
+
     return Future.value(true);
   }
 

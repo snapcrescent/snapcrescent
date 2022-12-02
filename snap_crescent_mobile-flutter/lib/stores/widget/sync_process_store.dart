@@ -97,7 +97,7 @@ abstract class _SyncProcessStore with Store {
             await AssetService.instance.search(assetSearchCriteria);
 
         if (serverAssetResponse.totalResultsCount! > 0) {
-         
+
           serverAssetResponse = await AssetService.instance.search(assetSearchCriteria);
 
           DateTime latestServerAssetDate =
@@ -124,19 +124,26 @@ abstract class _SyncProcessStore with Store {
                   AssetSearchCriteria.defaultCriteria();
               await AssetService.instance
                   .searchAndSyncInactiveRecords(assetSearchCriteria);
+              refreshAssetStores = true;
+            } else if (serverAssetResponse.totalResultsCount! > newAssetCount) {
+              await _downloadAssetsFromServer(null);
+              refreshAssetStores = true;
             }
           }
 
-           await _uploadAssetsToServer(latestAssetDate, AppAssetType.PHOTO);
-          await _uploadAssetsToServer(latestAssetDate, AppAssetType.VIDEO);
+           await _uploadAssetsToServer(AppAssetType.PHOTO);
+          await _uploadAssetsToServer(AppAssetType.VIDEO);
         } else {
+          
           // No server sync info is present
           // It is first boot of server or server is reset and it has no data
           // Empty the local sync info
           await AssetService.instance.deleteAllData();
+          await _uploadAssetsToServer(AppAssetType.PHOTO);
+          await _uploadAssetsToServer(AppAssetType.VIDEO); 
           refreshAssetStores = true;
-          await _uploadAssetsToServer(null, AppAssetType.PHOTO);
-          await _uploadAssetsToServer(null, AppAssetType.VIDEO); 
+
+          
         }
       }
 
@@ -185,14 +192,16 @@ abstract class _SyncProcessStore with Store {
     }
   }
 
-  _uploadAssetsToServer(DateTime? latestAssetDate, AppAssetType assetType) async {
+  _uploadAssetsToServer(AppAssetType assetType) async {
     uploadedAssetCount = 0;
     try {
-      final assets = await _getAssetsSetForAutoBackUp(latestAssetDate, assetType);
+       List<File> assets = await _getAssetsSetForAutoBackUp(assetType);
 
-      final filteredAssets = [];
+       List<File> filteredAssets = [];
       for (var asset in assets) {
-              Metadata metadata = await MetadataRepository.instance.findByNameEndWith(asset.title!);  
+              String filePath = asset.path;
+              String fileName = asset.path.substring(filePath.lastIndexOf("/") + 1, filePath.length);
+              Metadata metadata = await MetadataRepository.instance.findByNameEndWith(fileName);  
 
               if (metadata.id == null) {
                 //The asset is not uploaded to server yet;
@@ -205,8 +214,10 @@ abstract class _SyncProcessStore with Store {
       syncProgressState = SyncProgress.UPLOADING;
 
       for (final File asset in filteredAssets) {
+        syncProgressState = SyncProgress.PROCESSING;
         await AssetService.instance.save(assetType, [asset]);
         uploadedAssetCount = uploadedAssetCount + 1;
+        syncProgressState = SyncProgress.UPLOADING;
       }
     } catch (e) {
       print("Network error");
@@ -214,7 +225,6 @@ abstract class _SyncProcessStore with Store {
   }
 
   _getAssetsSetForAutoBackUp(
-      DateTime? latestAssetDate,
       AppAssetType assetType) async {
     List<File> assetFiles = [];
 
@@ -248,17 +258,7 @@ abstract class _SyncProcessStore with Store {
           AssetType photoManagerAssetType = assetType == AppAssetType.PHOTO ? AssetType.image : AssetType.video;
           final assetsByAssetType = allAssets.where((asset) => asset.type == photoManagerAssetType);
 
-          final filteredAssetsByDate = [];
-
-          if (latestAssetDate == null) {
-            filteredAssetsByDate.addAll(assetsByAssetType);
-          } else {
-            filteredAssetsByDate.addAll(assetsByAssetType.where((asset) =>
-                (asset.createDateSecond! * 1000) >
-                latestAssetDate.millisecondsSinceEpoch));
-          }
-
-          for (final AssetEntity asset in filteredAssetsByDate) {
+          for (final AssetEntity asset in assetsByAssetType) {
             final File? assetFile = await asset.file;
             assetFiles.add(assetFile!);
           }

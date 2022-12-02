@@ -250,7 +250,8 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   _body() {
     return Scaffold(
-      appBar: AppBar(
+      appBar: _assetStore.isAnyItemSelected() ? AppBar(
+
         leading: _getLeadingIcon(),
         title: Text(!_assetStore.isAnyItemSelected()
             ? ""
@@ -264,7 +265,10 @@ class _AssetGridViewState extends State<_AssetGridView> {
                 },
                 icon: Icon(Icons.share, color: Colors.white))
         ],
-      ),
+      ) : PreferredSize(
+                preferredSize: Size.zero, // here the desired height
+                child: Container()
+            ),
       bottomNavigationBar: AppBottomNavigationBar(),
       body: Column(
         children: <Widget>[

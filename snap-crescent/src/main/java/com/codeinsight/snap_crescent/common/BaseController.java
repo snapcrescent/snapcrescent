@@ -58,7 +58,7 @@ public class BaseController {
 	
 		protected ResourceRegion resourceRegion(AssetType assetType,  Resource assetFile,String httpRangeList) throws IOException  {
 		
-		long chunkSize = 1 * 1024 * 1024;
+		long chunkSize = 5 * 1024 * 1024;
 		long contentLength = assetFile.contentLength();
 		if (httpRangeList != null) {
 			
