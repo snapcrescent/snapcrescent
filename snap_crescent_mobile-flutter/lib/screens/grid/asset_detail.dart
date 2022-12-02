@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:better_player/better_player.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
@@ -45,12 +44,11 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   late AssetStore _assetStore;
 
   _videoPlayer(UniFiedAsset? unifiedAsset, Object? object) {
-    
-      if (_betterPlayerController != null) {
-        _betterPlayerController!.dispose();
-      }
+    if (_betterPlayerController != null) {
+      _betterPlayerController!.dispose();
+    }
 
-      betterPlayerConfiguration = BetterPlayerConfiguration(
+    betterPlayerConfiguration = BetterPlayerConfiguration(
       autoPlay: true,
       looping: true,
       expandToFill: false,
@@ -58,57 +56,50 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
       fit: BoxFit.contain,
     );
 
-      bufferingConfiguration = BetterPlayerBufferingConfiguration(
-          minBufferMs: 50000,
-          maxBufferMs: 13107200,
-          bufferForPlaybackMs: 10000,
-          bufferForPlaybackAfterRebufferMs: 5000,
-        );  
+    bufferingConfiguration = BetterPlayerBufferingConfiguration(
+      minBufferMs: 50000,
+      maxBufferMs: 13107200,
+      bufferForPlaybackMs: 10000,
+      bufferForPlaybackAfterRebufferMs: 5000,
+    );
 
-      _betterPlayerController = BetterPlayerController(betterPlayerConfiguration!);
+    _betterPlayerController =
+        BetterPlayerController(betterPlayerConfiguration!);
+
+    BetterPlayerDataSource? dataSource;
+
+    if (unifiedAsset!.assetSource == AssetSource.CLOUD) {
+      Asset asset = unifiedAsset.asset!;
+      String assetURL = AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!);
       
-      
-      BetterPlayerDataSource? dataSource;
 
-      if (unifiedAsset!.assetSource == AssetSource.CLOUD) {
-        Asset asset = unifiedAsset.asset!;
-        String assetURL = AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!);
-        //String assetURL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
-
-        
-        dataSource = BetterPlayerDataSource(
-          BetterPlayerDataSourceType.network,
-          assetURL,
-          headers: {
+      dataSource = BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network,
+        assetURL,
+        headers: {
           "range": "bytes=0-",
-        },  
-        bufferingConfiguration:bufferingConfiguration!,
+        },
+        bufferingConfiguration: bufferingConfiguration!,
+      );
+    } else {
+      if (object is File) {
+        dataSource = BetterPlayerDataSource(
+          BetterPlayerDataSourceType.file,
+          object.path,
+          bufferingConfiguration: bufferingConfiguration!,
         );
-
-        
-        
-      } else {
-        if(object is File) {
-          dataSource = BetterPlayerDataSource(
-            BetterPlayerDataSourceType.file,
-            object.path,
-            bufferingConfiguration:bufferingConfiguration!,
-            );
-        } 
       }
+    }
 
-      
+    if (dataSource != null) {
+      _betterPlayerController!.setupDataSource(dataSource);
+    }
 
-      if(dataSource != null) {
-        _betterPlayerController!.setupDataSource(dataSource);
-      }
-      
     return Container(
-            child: AspectRatio(
-            aspectRatio: 16/9,
-            child: BetterPlayer(controller: _betterPlayerController!),
-            )
-            );
+        child: AspectRatio(
+      aspectRatio: 16 / 9,
+      child: BetterPlayer(controller: _betterPlayerController!),
+    ));
   }
 
   _imageBanner(UniFiedAsset unifiedAsset, Object? object) {
@@ -148,7 +139,8 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   }
 
   Future<void> _shareAssetFile(int assetIndex) async {
-    final List<XFile> assetFiles = await _assetStore.getAssetFileForSharing([assetIndex]);
+    final List<XFile> assetFiles =
+        await _assetStore.getAssetFileForSharing([assetIndex]);
     await Share.shareXFiles(assetFiles);
   }
 
@@ -165,12 +157,11 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
             UniFiedAsset asset = _assetStore.assetList[index];
 
             return Container(
-              width: 90,
-              height: 90,
-              child: asset.assetType == AppAssetType.PHOTO
-                ? _imageBanner(asset, snapshot.data)
-                : _videoPlayer(asset, snapshot.data)
-            );
+                width: 90,
+                height: 90,
+                child: asset.assetType == AppAssetType.PHOTO
+                    ? _imageBanner(asset, snapshot.data)
+                    : _videoPlayer(asset, snapshot.data));
           }
         });
   }
@@ -234,15 +225,10 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   }
 
   _body() {
-
-
     return Scaffold(
-      body: OrientationBuilder(builder: (context, _orientation) {
-                              return Row(
-                                children: <Widget>[Expanded(child: _pageView())],
-                              );
-                            }),
-    );
+        body: Row(
+      children: <Widget>[Expanded(child: _pageView())],
+    ));
   }
 
   @override
@@ -260,6 +246,5 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
     if (_betterPlayerController != null) {
       _betterPlayerController!.dispose();
     }
-
   }
 }

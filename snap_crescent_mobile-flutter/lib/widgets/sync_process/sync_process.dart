@@ -24,7 +24,7 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
   }
 
   _getPercentage(int? count, int? total) {
-      return (count! * 100/total!).toStringAsFixed(2);
+      return (count! * 100/total!).toStringAsFixed(0);
   }
 
   _syncProgress(SyncProgress _syncProgressState) {
@@ -32,12 +32,12 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
 
     if (_syncProgressState == SyncProgress.DOWNLOADING &&
         _syncProcessStore.totalServerAssetCount != 0) {
-      progressLabel = '''Downloaded ${_getPercentage(_syncProcessStore.downloadedAssetCount, _syncProcessStore.totalServerAssetCount)}% items from server''';
+      progressLabel = '''Downloading (${_getPercentage(_syncProcessStore.downloadedAssetCount, _syncProcessStore.totalServerAssetCount)}%)''';
     } else if (_syncProgressState == SyncProgress.UPLOADING &&
         _syncProcessStore.totalLocalAssetCount != 0) {
       progressLabel =
-          '''Uploaded ${_getPercentage(_syncProcessStore.uploadedAssetCount, _syncProcessStore.totalLocalAssetCount)}% items to server''';
-    } else if (_syncProgressState == SyncProgress.SYNC_COMPLETED) {
+          '''Uploading (${_getPercentage(_syncProcessStore.uploadedAssetCount, _syncProcessStore.totalLocalAssetCount)}%)''';
+    } else {
       progressLabel = "";
       return Container();
     }
@@ -49,9 +49,10 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
         Container(
             child: Row(children: <Widget>[
           Expanded(
-            flex: 1,
+            flex: 3,
             child: new Text(progressLabel,
                 style: TextStyle(
+                  fontSize: 16,
                   color: Colors.white,
                 )),
           ),
@@ -66,7 +67,7 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
           ),
         ])),
         Container(
-          height: 5,
+          height: 1,
           child: const LinearProgressIndicator(),
         ),
       ],
@@ -78,12 +79,12 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
     _syncProcessStore = Provider.of<SyncProcessStore>(context);
     _syncProcessStore.assetStore =  Provider.of<AssetStore>(context);
 
+   
     return Observer(
         builder: (context) => _syncProcessStore.syncProgressState !=
                 SyncProgress.CONTACTING_SERVER
-            ? OrientationBuilder(builder: (context, orientation) {
-                return _syncProgress(_syncProcessStore.syncProgressState);
-              })
+            ? _syncProgress(_syncProcessStore.syncProgressState)
             : LinearProgressIndicator());
+    
   }
 }
