@@ -22,6 +22,7 @@ class App extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Snap Crescent',
+        debugShowCheckedModeBanner: false,
         initialRoute: SplashScreen.routeName,
         theme: _theme(),
         onGenerateRoute: _generateRoute,

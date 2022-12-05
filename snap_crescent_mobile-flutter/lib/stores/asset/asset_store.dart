@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/app_config.dart';
@@ -32,11 +34,11 @@ class _AssetStore with Store {
   @observable
   AssetSearchProgress assetSearchProgress = AssetSearchProgress.IDLE;
 
-  
   bool executionInProgress = false;
 
   AssetSearchCriteria getAssetSearchCriteria() {
-    AssetSearchCriteria assetSearchCriteria = AssetSearchCriteria.defaultCriteria();
+    AssetSearchCriteria assetSearchCriteria =
+        AssetSearchCriteria.defaultCriteria();
     assetSearchCriteria.resultPerPage = 500;
     return assetSearchCriteria;
   }
@@ -109,15 +111,14 @@ class _AssetStore with Store {
     }
 
     this.assetList.addAll(_assetList);
-    this.assetList.sort((UniFiedAsset a, UniFiedAsset b) => b.assetCreationDate.compareTo(a.assetCreationDate));
+    this.assetList.sort((UniFiedAsset a, UniFiedAsset b) =>
+        b.assetCreationDate.compareTo(a.assetCreationDate));
 
     for (var asset in assetList) {
-       _addUnifiedAssetToGroup(asset.assetCreationDate,asset);
+      _addUnifiedAssetToGroup(asset.assetCreationDate, asset);
     }
 
     if (this.assetList.length > 0) {
-      
-
       this.groupedAssets.keys.forEach((key) {
         this.groupedAssets[key]!.sort((UniFiedAsset a, UniFiedAsset b) =>
             b.assetCreationDate.compareTo(a.assetCreationDate));
@@ -132,7 +133,6 @@ class _AssetStore with Store {
   }
 
   _getUnifiedAssetsFromLocalAssets(AssetPathEntity? album) async {
-
     List<UniFiedAsset> uniFiedAssets = [];
 
     if (album != null) {
@@ -148,9 +148,12 @@ class _AssetStore with Store {
         if (metadata.id == null) {
           final assetDate = asset.createDateTime;
 
-          AppAssetType assetType = asset.type == AssetType.image ? AppAssetType.PHOTO : AppAssetType.VIDEO;
-          uniFiedAssets.add(new UniFiedAsset(assetType, AssetSource.DEVICE, assetDate,assetEntity: asset));
-          
+          AppAssetType assetType = asset.type == AssetType.image
+              ? AppAssetType.PHOTO
+              : AppAssetType.VIDEO;
+          uniFiedAssets.add(new UniFiedAsset(
+              assetType, AssetSource.DEVICE, assetDate,
+              assetEntity: asset));
         }
       }
     }
@@ -158,15 +161,19 @@ class _AssetStore with Store {
     return uniFiedAssets;
   }
 
- _getUnifiedAssetsFromCloudAssets(List<Asset> newAssets) async {
-
+  _getUnifiedAssetsFromCloudAssets(List<Asset> newAssets) async {
     List<UniFiedAsset> uniFiedAssets = [];
     for (final asset in newAssets) {
       final assetDate = asset.metadata!.creationDateTime!;
-      asset.thumbnail!.thumbnailFile = await AssetService.instance.readThumbnailFile(asset.thumbnail!.name!);
+      asset.thumbnail!.thumbnailFile =
+          await AssetService.instance.readThumbnailFile(asset.thumbnail!.name!);
 
-      AppAssetType assetType = asset.assetType == AppAssetType.PHOTO.id ?  AppAssetType.PHOTO : AppAssetType.VIDEO;
-      uniFiedAssets.add(new UniFiedAsset(assetType, AssetSource.CLOUD, assetDate, asset: asset));
+      AppAssetType assetType = asset.assetType == AppAssetType.PHOTO.id
+          ? AppAssetType.PHOTO
+          : AppAssetType.VIDEO;
+      uniFiedAssets.add(new UniFiedAsset(
+          assetType, AssetSource.CLOUD, assetDate,
+          asset: asset));
     }
 
     return uniFiedAssets;
@@ -206,9 +213,6 @@ class _AssetStore with Store {
     }
   }
 
-
- 
-
   Future<bool> _getShowDeviceAssetsInfo() async {
     AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigShowDeviceAssetsFlag);
@@ -241,7 +245,11 @@ class _AssetStore with Store {
   }
 
   List<int> getSelectedIndexes() {
-    return this.assetList.where((asset) => asset.selected == true).map((asset) => this.assetList.indexOf(asset)).toList();
+    return this
+        .assetList
+        .where((asset) => asset.selected == true)
+        .map((asset) => this.assetList.indexOf(asset))
+        .toList();
   }
 
   List<String> getGroupedMapKeys() {
@@ -255,7 +263,7 @@ class _AssetStore with Store {
         .toList();
   }
 
-  getAssetFileForSharing(List<int> assetIndexes) async {
+ Future<List<XFile>> getAssetFilesForSharing(List<int> assetIndexes) async {
     List<XFile> xFiles = [];
     List<File> assetFiles = await _getAssetFile(assetIndexes);
 
@@ -266,8 +274,23 @@ class _AssetStore with Store {
     return xFiles;
   }
 
-  _getAssetFile(List<int> assetIndexes) async {
 
+
+  Future<bool> downloadAssetFilesToDevice(List<int> assetIndexes) async {
+
+    for (var assetIndex in assetIndexes) {
+      final UniFiedAsset unifiedAsset = assetList[assetIndex];
+
+      if (unifiedAsset.assetSource == AssetSource.CLOUD) {
+          Asset asset = unifiedAsset.asset!;
+          await AssetService.instance.permanentDownloadAssetById(asset.id!, asset.metadata!.name!);
+        }
+    }
+
+    return true;
+  }
+
+  _getAssetFile(List<int> assetIndexes) async {
     List<File> assetFiles = [];
 
     for (var assetIndex in assetIndexes) {
@@ -277,16 +300,16 @@ class _AssetStore with Store {
 
       if (unifiedAsset.assetSource == AssetSource.CLOUD) {
         Asset asset = unifiedAsset.asset!;
-        assetFile = await AssetService.instance.downloadAssetById(asset.id!, asset.metadata!.name!);
+        assetFile = await AssetService.instance
+            .tempDownloadAssetById(asset.id!, asset.metadata!.name!);
       } else {
         AssetEntity asset = unifiedAsset.assetEntity!;
         assetFile = await asset.file;
       }
 
-      if(assetFile != null) {
+      if (assetFile != null) {
         assetFiles.add(assetFile);
       }
-      
     }
 
     return assetFiles;

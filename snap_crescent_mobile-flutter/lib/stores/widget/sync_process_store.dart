@@ -125,10 +125,7 @@ abstract class _SyncProcessStore with Store {
               await AssetService.instance
                   .searchAndSyncInactiveRecords(assetSearchCriteria);
               refreshAssetStores = true;
-            } else if (serverAssetResponse.totalResultsCount! > newAssetCount) {
-              await _downloadAssetsFromServer(null);
-              refreshAssetStores = true;
-            }
+            } 
           }
 
            await _uploadAssetsToServer(AppAssetType.PHOTO);

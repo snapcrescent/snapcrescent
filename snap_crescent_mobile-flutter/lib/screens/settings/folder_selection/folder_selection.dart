@@ -24,18 +24,15 @@ class FolderSelectionScreen extends StatelessWidget {
 }
 
 class _FoldersScreenView extends StatefulWidget {
-
   final AppConfig appConfig;
 
   _FoldersScreenView(this.appConfig);
 
   @override
-  _FoldersScreenViewState createState() =>
-      _FoldersScreenViewState();
+  _FoldersScreenViewState createState() => _FoldersScreenViewState();
 }
 
-class _FoldersScreenViewState
-    extends State<_FoldersScreenView> {
+class _FoldersScreenViewState extends State<_FoldersScreenView> {
   List<bool> _folderStatusList = [];
   List<String> _folderList = [];
   String _folders = "None";
@@ -46,9 +43,9 @@ class _FoldersScreenViewState
     final PermissionState _ps = await PhotoManager.requestPermissionExtend();
 
     if (!_ps.isAuth) {
-        ToastService.showError('Permission to device folders denied!');
-        return Future.value([]);
-    } 
+      ToastService.showError('Permission to device folders denied!');
+      return Future.value([]);
+    }
 
     final List<AssetPathEntity> folders = await PhotoManager.getAssetPathList();
     folders.sort(
@@ -57,15 +54,12 @@ class _FoldersScreenViewState
     List<String> folderNameList = _folders.split(",");
 
     _folderStatusList = folders
-        .map((asset) =>
-            folderNameList.indexOf(asset.id) > -1 ? true : false)
+        .map((asset) => folderNameList.indexOf(asset.id) > -1 ? true : false)
         .toList();
     _folderList = folders.map((asset) => asset.id).toList();
 
     return Future.value(folders);
   }
-
-
 
   Future<void> _getFolderInfo() async {
     AppConfig value = await AppConfigRepository.instance
@@ -89,9 +83,8 @@ class _FoldersScreenViewState
     _folders = newAutoBackupFolderList.join(",");
 
     widget.appConfig.configValue = _folders;
-    
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(widget.appConfig);
+
+    await AppConfigRepository.instance.saveOrUpdateConfig(widget.appConfig);
 
     setState(() {});
   }
@@ -101,10 +94,9 @@ class _FoldersScreenViewState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-                    padding: EdgeInsets.all(15),
-                    child:Text("Selected folder from the list below will be backed up to your server")
-        ),
-        
+            padding: EdgeInsets.all(15),
+            child: Text(
+                "Selected folder from the list below will be backed up to your server")),
         Expanded(
             child: new ListView.builder(
                 itemCount: assets.length,

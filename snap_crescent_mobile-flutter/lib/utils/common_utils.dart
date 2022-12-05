@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -23,6 +25,33 @@ class CommonUtils {
       woy = 1;
     }
     return woy;
+  }
+
+   Future<bool> checkPermission() async {
+    if (Platform.isAndroid) {
+      final status = await Permission.photos.status;
+      if (status != PermissionStatus.granted) {
+        final result = await Permission.photos.request();
+        if (result == PermissionStatus.granted) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    } else {
+      return true;
+    }
+    return false;
+  }
+
+  Future<String> getPermanentDownloadsDirectory() async{
+
+    if (Platform.isAndroid) {
+      return "/storage/emulated/0/Download";
+    } else {
+      var directory = await getApplicationDocumentsDirectory();
+      return directory.path + Platform.pathSeparator + 'Download';
+    }
   }
 
   Future<String> getTempDownloadsDirectory() async{
