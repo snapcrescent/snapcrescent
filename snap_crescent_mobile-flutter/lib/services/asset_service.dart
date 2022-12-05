@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:quiver/iterables.dart';
 import 'package:snap_crescent/models/app_config.dart';
@@ -101,7 +102,21 @@ class AssetService extends BaseService {
     return serverURL + '/asset/$assetId/stream';
   }
 
-  Future<File> downloadAssetById(int assetId, String assetName) async {
+ 
+
+  Future<bool> permanentDownloadAssetById(int assetId, String assetName) async {
+      File tempDownloadedFile = await tempDownloadAssetById(assetId, assetName);
+      String downloadPath = await CommonUtils().getPermanentDownloadsDirectory();
+
+      if(tempDownloadedFile != null) {
+          tempDownloadedFile.copySync('$downloadPath/$assetName');
+          tempDownloadedFile.deleteSync();
+      }
+      
+      return true;
+  }
+
+  Future<File> tempDownloadAssetById(int assetId, String assetName) async {
     try {
       if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();

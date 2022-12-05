@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:snap_crescent/models/app_config.dart';
@@ -60,18 +59,17 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   @override
   Widget build(BuildContext context) {
-    
     return FutureBuilder<bool>(
         future: _getSettingsData(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
             return Center(
-                  child: Container(
-                      width: 60,
-                      height: 60,
-                      child: const CircularProgressIndicator(),
-                    ),
-                );
+              child: Container(
+                width: 60,
+                height: 60,
+                child: const CircularProgressIndicator(),
+              ),
+            );
           } else {
             return _settingsList(context);
           }
@@ -87,37 +85,40 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     await _getAccountInfo();
     _connectedToServer =
         await SettingsService.instance.getFlag(Constants.appConfigLoggedInFlag);
-    _autoBackup =
-        await SettingsService.instance.getFlag(Constants.appConfigAutoBackupFlag);
-    _autoBackupFolders = await SettingsService.instance.getAutoBackupFolderInfo();
+    _autoBackup = await SettingsService.instance
+        .getFlag(Constants.appConfigAutoBackupFlag);
+    _autoBackupFolders =
+        await SettingsService.instance.getAutoBackupFolderInfo();
     _showDeviceAssets = await SettingsService.instance
         .getFlag(Constants.appConfigShowDeviceAssetsFlag);
     _showDeviceAssetsFolders =
         await SettingsService.instance.getShowDeviceAssetsFolderInfo();
-     _latestAssetDate = await SettingsService.instance.getLatestAssetDate();
+    _latestAssetDate = await SettingsService.instance.getLatestAssetDate();
 
-    _syncedAssetCount = await AssetService.instance.countOnLocal(AssetSearchCriteria.defaultCriteria());
+    _syncedAssetCount = await AssetService.instance
+        .countOnLocal(AssetSearchCriteria.defaultCriteria());
 
     return Future.value(true);
   }
 
-  _clearCache() async {
-    await AssetService.instance.deleteAllData();
-    _latestAssetDate = await SettingsService.instance.getLatestAssetDate();
-    ToastService.showSuccess("Successfully deleted locally cached data.");
-    setState(() {});
-  }
+
 
   Future<void> _getAccountInfo() async {
-    List<String> result = await SettingsService.instance.getAccountInformation();
+    List<String> result =
+        await SettingsService.instance.getAccountInformation();
 
     this.serverURLController.text = result[0];
-    _loggedServerName = this.serverURLController.text.replaceAll("https://", "").replaceAll("http://", "");
-    _loggedServerName = _loggedServerName.substring(0, _loggedServerName.lastIndexOf(":"));
-    
+    _loggedServerName = this
+        .serverURLController
+        .text
+        .replaceAll("https://", "")
+        .replaceAll("http://", "");
+    _loggedServerName =
+        _loggedServerName.substring(0, _loggedServerName.lastIndexOf(":"));
+
     this.nameController.text = result[1];
     _loggedInUserName = this.nameController.text;
-    
+
     this.passwordController.text = result[2];
   }
 
@@ -140,7 +141,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
                       return 'Please enter a valid url';
                     }
                   },
-                  decoration: InputDecoration(labelText: 'Server'),
+                  decoration: InputDecoration(labelText: 'Server URL'),
                 ),
               ),
               Container(
@@ -183,6 +184,45 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         ]).show();
   }
 
+  _showCacheClearConfirmationDialog() {
+    Alert(
+        context: context,
+        title: "Are you sure?",
+        content: Container(
+                padding: EdgeInsets.all(10),
+                child: Text(
+                  "This action cannot be undone"
+                ),
+              ),
+        buttons: [
+          
+            DialogButton(
+              onPressed: () => Navigator.pop(context),
+              color: Colors.grey,
+              child: Text(
+                "Cancel",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+          
+            DialogButton(
+              onPressed: () => _clearCache(),
+              child: Text(
+                "Ok",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            )
+        ]).show();
+  }
+
+    _clearCache() async {
+    await AssetService.instance.deleteAllData();
+    _latestAssetDate = await SettingsService.instance.getLatestAssetDate();
+    ToastService.showSuccess("Successfully deleted locally cached data.");
+    setState(() {});
+    Navigator.pop(context);
+  }
+
   _onLoginPressed() async {
     if (_formKey.currentState!.validate()) {
       UserLoginResponse userLoginResponse = await SettingsService.instance
@@ -190,7 +230,8 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
               passwordController.text);
 
       if (userLoginResponse.token != null) {
-        SettingsService.instance.updateFlag(Constants.appConfigLoggedInFlag, true);
+        SettingsService.instance
+            .updateFlag(Constants.appConfigLoggedInFlag, true);
         await _getAccountInfo();
         setState(() {});
         Navigator.pop(context);
@@ -244,22 +285,26 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         leading: Container(
           width: 40,
           alignment: Alignment.center,
-          child: const Icon(Icons.account_circle),
+          child: const Icon(Icons.account_circle, color: Colors.teal),
         ),
         onTap: () {
           _showAccountInfoDialog();
         },
       ),
-      SwitchListTile(
+      ListTile(
         title: Text("Auto Backup", style: TitleTextStyle),
-        secondary: const Icon(Icons.cloud_upload),
         subtitle: Text(
-            "Keep your photos and videos by backing them up to your snapcrecent server"),
-        isThreeLine: false,
-        value: _autoBackup,
-        onChanged: (bool value) {
-          _updateAutoBackupFlag(value);
-        },
+            "Keep your photos and videos by backing them up to your snap-crescent server"),
+        leading: Container(
+          width: 40,
+          alignment: Alignment.center,
+          child: const Icon(Icons.cloud_upload, color: Colors.teal),
+        ),
+        trailing: Switch(
+            value:_autoBackup,
+            onChanged: (bool value) {
+              _updateAutoBackupFlag(value);
+            }),
       ),
       if (_autoBackup)
         ListTile(
@@ -268,7 +313,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           leading: Container(
             width: 40,
             alignment: Alignment.center,
-            child: const Icon(Icons.folder),
+            child: const Icon(Icons.folder, color: Colors.teal),
           ),
           onTap: () {
             AppConfig appConfigAutoBackupFoldersConfig = new AppConfig(
@@ -284,27 +329,19 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           },
         ),
       ListTile(
-        title: Text("Clear Locally Cached Photos and Videos",
-            style: TitleTextStyle),
-        subtitle: Text("Last Synced : " + _latestAssetDate + " - " + "Asset Count : " + _syncedAssetCount.toString()),
+        title: Text("Show Device Photos And Videos", style: TitleTextStyle),
+        subtitle: Text(
+            "Show photos and videos on your device on snap crescent"),
         leading: Container(
           width: 40,
           alignment: Alignment.center,
-          child: const Icon(Icons.delete),
+          child: const Icon(Icons.photo_album, color: Colors.teal),
         ),
-        onTap: () {
-          _clearCache();
-        },
-      ),
-      SwitchListTile(
-        title: Text("Show Device Photos And Videos", style: TitleTextStyle),
-        secondary: const Icon(Icons.photo_album),
-        subtitle: Text("Show photos and videos on your device on snapcresent"),
-        isThreeLine: false,
-        value: _showDeviceAssets,
-        onChanged: (bool value) {
-          _updateShowDeviceAssetsFlag(value);
-        },
+        trailing: Switch(
+            value:_showDeviceAssets,
+            onChanged: (bool value) {
+              _updateShowDeviceAssetsFlag(value);
+            })
       ),
       if (_showDeviceAssets)
         ListTile(
@@ -313,7 +350,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           leading: Container(
             width: 40,
             alignment: Alignment.center,
-            child: const Icon(Icons.folder),
+            child: const Icon(Icons.folder, color: Colors.teal),
           ),
           onTap: () {
             AppConfig appConfigShowDeviceAssetsFoldersFlagConfig =
@@ -327,7 +364,24 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
                             appConfigShowDeviceAssetsFoldersFlagConfig)))
                 .then(onBackFromChild);
           },
-        )
+        ),
+      ListTile(
+        title: Text("Clear Locally Cached Photos and Videos",
+            style: TitleTextStyle),
+        subtitle: Text("Latest Synced Record On: " +
+            _latestAssetDate +
+            " - " +
+            "Record Count : " +
+            _syncedAssetCount.toString()),
+        leading: Container(
+          width: 40,
+          alignment: Alignment.center,
+          child: const Icon(Icons.delete, color: Colors.teal),
+        ),
+        onTap: () {
+          _showCacheClearConfirmationDialog();
+        },
+      ),
     ]);
   }
 

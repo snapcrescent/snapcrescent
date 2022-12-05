@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/grid/asset_detail.dart';
+import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/widgets/sync_process/sync_process.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/utils/common_utils.dart';
@@ -25,7 +26,6 @@ class AssetsGridScreen extends StatelessWidget {
 }
 
 class _AssetGridView extends StatefulWidget {
-  
   _AssetGridView();
 
   @override
@@ -41,10 +41,13 @@ class _AssetGridViewState extends State<_AssetGridView> {
   final ScrollController _scrollController = new ScrollController();
   late AssetStore _assetStore;
 
+  bool showProcessing = false;
+
   int pageNumber = 0;
 
   _onAssetTap(BuildContext context, int assetIndex) {
-    AssetDetailArguments arguments = new AssetDetailArguments(assetIndex: assetIndex);
+    AssetDetailArguments arguments =
+        new AssetDetailArguments(assetIndex: assetIndex);
 
     Navigator.pushNamed(
       context,
@@ -53,9 +56,31 @@ class _AssetGridViewState extends State<_AssetGridView> {
     );
   }
 
-  _shareAsset() async {
-    final List<XFile> assetFiles = await _assetStore.getAssetFileForSharing(_assetStore.getSelectedIndexes());
+  _shareAssets() async {
+    _updateProcessingBarVisibility(true);
+    final List<XFile> assetFiles = await _assetStore
+        .getAssetFilesForSharing(_assetStore.getSelectedIndexes());
     await Share.shareXFiles(assetFiles);
+    _updateProcessingBarVisibility(false);
+  }
+
+  _downloadAssets() async {
+    bool _permissionReady = await CommonUtils().checkPermission();
+
+    if (_permissionReady) {
+      _updateProcessingBarVisibility(true);
+      final bool success = await _assetStore
+          .downloadAssetFilesToDevice(_assetStore.getSelectedIndexes());
+      if (success) {
+        ToastService.showSuccess("Successfully downloaded files.");
+      }
+      _updateProcessingBarVisibility(false);
+    }
+  }
+
+  _updateProcessingBarVisibility(bool isVisible) {
+    showProcessing = isVisible;
+    setState(() {});
   }
 
   @override
@@ -129,10 +154,10 @@ class _AssetGridViewState extends State<_AssetGridView> {
   _gridView(Orientation orientation, AssetStore assetStore) {
     final keys = assetStore.getGroupedMapKeys();
 
-     return ListView.builder(
+    return ListView.builder(
         controller: _scrollController,
         itemCount: keys.length + 1,
-        itemBuilder: (BuildContext ctxt, int groupIndex) {
+        itemBuilder: (BuildContext context, int groupIndex) {
           if (groupIndex == keys.length) {
             return Center(
               child: Container(
@@ -171,7 +196,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
                             shrinkWrap: true,
                             itemCount: assetStore
                                 .groupedAssets[keys[groupIndex]]!.length,
-                            itemBuilder: (BuildContext ctx, index) {
+                            itemBuilder: (BuildContext context2, index) {
                               final asset = assetStore
                                   .groupedAssets[keys[groupIndex]]![index];
 
@@ -208,23 +233,21 @@ class _AssetGridViewState extends State<_AssetGridView> {
   }
 
   _scrollableView(Orientation orientation, AssetStore assetStore) {
-
     return RefreshIndicator(
         onRefresh: () {
-        return Future.delayed(Duration(seconds: 1),() {
-              _assetStore.getAssets(true);
+          return Future.delayed(Duration(seconds: 1), () {
+            _assetStore.getAssets(true);
           });
         },
-        child:  Container(
-        color: Colors.black,
-        child: DraggableScrollbar.semicircle(
-            labelTextBuilder: (offset) => getScrollLabel(),
-            labelConstraints:
-                BoxConstraints.tightFor(width: 150.0, height: 30.0),
-            heightScrollThumb: 50.0,
-            controller: _scrollController,
-            child: _gridView(orientation, assetStore)))
-    );
+        child: Container(
+            color: Colors.black,
+            child: DraggableScrollbar.semicircle(
+                labelTextBuilder: (offset) => getScrollLabel(),
+                labelConstraints:
+                    BoxConstraints.tightFor(width: 150.0, height: 30.0),
+                heightScrollThumb: 50.0,
+                controller: _scrollController,
+                child: _gridView(orientation, assetStore))));
   }
 
   _syncProgress() {
@@ -250,29 +273,39 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   _body() {
     return Scaffold(
-      appBar: _assetStore.isAnyItemSelected() ? AppBar(
-
-        leading: _getLeadingIcon(),
-        title: Text(!_assetStore.isAnyItemSelected()
-            ? ""
-            : (_assetStore.getSelectedCount().toString() + " Selected")),
-        backgroundColor: Colors.black,
-        actions: [
-          if (_assetStore.isAnyItemSelected())
-            IconButton(
-                onPressed: () {
-                  _shareAsset();
-                },
-                icon: Icon(Icons.share, color: Colors.white))
-        ],
-      ) : PreferredSize(
-                preferredSize: Size.zero, // here the desired height
-                child: Container()
-            ),
+      appBar: _assetStore.isAnyItemSelected()
+          ? AppBar(
+              leading: _getLeadingIcon(),
+              title: Text(!_assetStore.isAnyItemSelected()
+                  ? ""
+                  : (_assetStore.getSelectedCount().toString() + " Selected")),
+              backgroundColor: Colors.black,
+              actions: [
+                if (_assetStore.isAnyItemSelected())
+                  IconButton(
+                      onPressed: () {
+                        _downloadAssets();
+                      },
+                      icon: Icon(Icons.download, color: Colors.white)),
+                IconButton(
+                    onPressed: () {
+                      _shareAssets();
+                    },
+                    icon: Icon(Icons.share, color: Colors.white))
+              ],
+            )
+          : PreferredSize(
+              preferredSize: Size.zero, // here the desired height
+              child: Container()),
       bottomNavigationBar: AppBottomNavigationBar(),
       body: Column(
         children: <Widget>[
           _syncProgress(),
+          if (showProcessing)
+            Container(
+              height: 1,
+              child: const LinearProgressIndicator(),
+            ),
           Expanded(
               child: Row(
             children: <Widget>[

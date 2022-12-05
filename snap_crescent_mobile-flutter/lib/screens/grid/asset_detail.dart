@@ -9,7 +9,9 @@ import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/models/unified_asset.dart';
 import 'package:snap_crescent/services/asset_service.dart';
+import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
+import 'package:snap_crescent/utils/common_utils.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class AssetDetailScreen extends StatelessWidget {
@@ -40,6 +42,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   PageController? pageController;
   Map<String, String> headers = {};
   String serverUrl = "";
+  bool showProcessing = false;
 
   late AssetStore _assetStore;
 
@@ -70,8 +73,8 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
 
     if (unifiedAsset!.assetSource == AssetSource.CLOUD) {
       Asset asset = unifiedAsset.asset!;
-      String assetURL = AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!);
-      
+      String assetURL =
+          AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!);
 
       dataSource = BetterPlayerDataSource(
         BetterPlayerDataSourceType.network,
@@ -139,9 +142,30 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   }
 
   Future<void> _shareAssetFile(int assetIndex) async {
+    _updateProcessingBarVisibility(true);
     final List<XFile> assetFiles =
-        await _assetStore.getAssetFileForSharing([assetIndex]);
+        await _assetStore.getAssetFilesForSharing([assetIndex]);
     await Share.shareXFiles(assetFiles);
+    _updateProcessingBarVisibility(false);
+  }
+
+  Future<void> _downloadAsset(int assetIndex) async {
+    _updateProcessingBarVisibility(true);
+    bool _permissionReady = await CommonUtils().checkPermission();
+
+    if (_permissionReady) {
+      final bool success =
+          await _assetStore.downloadAssetFilesToDevice([assetIndex]);
+      if (success) {
+        ToastService.showSuccess("Successfully downloaded files.");
+      }
+    }
+    _updateProcessingBarVisibility(false);
+  }
+
+  _updateProcessingBarVisibility(bool isVisible) {
+    showProcessing = isVisible;
+    setState(() {});
   }
 
   _assetView(index) {
@@ -193,11 +217,16 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
               child: Container(
                 width: 100.0,
                 height: 100.0,
-                child: IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(Icons.arrow_back, color: Colors.white)),
+                child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(Icons.arrow_back, color: Colors.white)),
+                    ]),
               ),
             ),
             Expanded(
@@ -207,17 +236,36 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
               ),
             ),
             Expanded(
-              flex: 0,
-              child: Container(
-                width: 100.0,
-                height: 100.0,
-                child: IconButton(
-                    onPressed: () {
-                      _shareAssetFile(widget.assetIndex);
-                    },
-                    icon: Icon(Icons.share, color: Colors.white)),
-              ),
-            ),
+                flex: 0,
+                child: Container(
+                  width: 100.0,
+                  height: 100.0,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                          disabledColor: Colors.grey,
+                          onPressed: () {
+                            if(!showProcessing) {
+                               _downloadAsset(widget.assetIndex);
+                            } else{
+                              return null;
+                            }
+                          },
+                          icon: Icon(Icons.download, color: Colors.white)),
+                      IconButton(
+                          onPressed: () {
+                            if(!showProcessing) {
+                                _shareAssetFile(widget.assetIndex);
+                            } else{
+                              return null;
+                            }
+                          },
+                          icon: Icon(Icons.share, color: Colors.white))
+                    ],
+                  ),
+                )),
           ],
         ),
       ]),
@@ -226,9 +274,14 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
 
   _body() {
     return Scaffold(
-        body: Row(
-      children: <Widget>[Expanded(child: _pageView())],
-    ));
+      body: Column(
+        children: [
+          if(showProcessing) 
+            Expanded(flex:0, child: Container( height: 2,child: const LinearProgressIndicator(),)),
+          Expanded(child : _pageView()),
+        ],
+      ),
+    );
   }
 
   @override

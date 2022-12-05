@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/screens/grid/assets_grid.dart';
-import 'package:snap_crescent/services/toast_service.dart';
+import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -33,15 +32,6 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
       _setDefaultAppConfig();
     });
 
-    Timer(
-        Duration(seconds: 1),
-        () => Navigator.pushAndRemoveUntil<dynamic>(
-        context,
-        MaterialPageRoute<dynamic>(
-          builder: (BuildContext context) => AssetsGridScreen(),
-        ),
-        (route) => false,//if you want to disable back feature set to false
-      ));
   }
 
   @override
@@ -71,42 +61,10 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
 
       AppConfig appConfigShowDeviceAssetsFlagConfig = new AppConfig(
           configKey: Constants.appConfigShowDeviceAssetsFlag,
-          configValue: "true");
+          configValue: "false");
 
       await AppConfigRepository.instance
           .saveOrUpdateConfig(appConfigShowDeviceAssetsFlagConfig);
-
-      final PermissionState _ps = await PhotoManager.requestPermissionExtend();
-
-      if (!_ps.isAuth) {
-          ToastService.showError('Permission to device folders denied!');
-        return Future.value([]);
-        } 
-
-      final List<AssetPathEntity> folders =
-          await PhotoManager.getAssetPathList();
-      folders.sort(
-          (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
-
-      List<AssetPathEntity> cameraFolders = folders
-          .where((folder) =>
-              folder.name.toLowerCase() == "camera" ||
-              folder.name.toLowerCase() == "pictures" ||
-              folder.name.toLowerCase() == "portrait" ||
-              folder.name.toLowerCase() == "selfies" ||
-              folder.name.toLowerCase() == "portrait" ||
-              folder.name.toLowerCase() == "raw" ||
-              folder.name.toLowerCase() == "videos")
-          .toList();
-
-      AppConfig appConfigShowDeviceAssetsFoldersFlagConfig = new AppConfig(
-          configKey: Constants.appConfigShowDeviceAssetsFolders,
-          configValue: cameraFolders
-              .map((assetPathEntity) => assetPathEntity.id)
-              .join(","));
-
-      await AppConfigRepository.instance
-          .saveOrUpdateConfig(appConfigShowDeviceAssetsFoldersFlagConfig);
 
       AppConfig appConfigLoggedInFlagConfig = new AppConfig(
           configKey: Constants.appConfigLoggedInFlag,
@@ -135,7 +93,29 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
 
       await AppConfigRepository.instance
           .saveOrUpdateConfig(appConfigPermanentDownloadsFolderConfig);
+
+      Timer(
+        Duration(seconds: 1),
+        () => Navigator.pushAndRemoveUntil<dynamic>(
+        context,
+        MaterialPageRoute<dynamic>(
+          builder: (BuildContext context) => SettingsScreen(),
+        ),
+        (route) => false,//if you want to disable back feature set to false
+      ));    
+    } else {
+      Timer(
+        Duration(seconds: 1),
+        () => Navigator.pushAndRemoveUntil<dynamic>(
+        context,
+        MaterialPageRoute<dynamic>(
+          builder: (BuildContext context) => AssetsGridScreen(),
+        ),
+        (route) => false,//if you want to disable back feature set to false
+      ));
     }
+
+    
 
   
 
