@@ -10,10 +10,8 @@ import 'package:snap_crescent/models/metadata.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/repository/metadata_repository.dart';
 import 'package:snap_crescent/services/asset_service.dart';
-import 'package:snap_crescent/services/metadata_service.dart';
 import 'dart:io';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:snap_crescent/services/thumbnail_service.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -55,29 +53,16 @@ abstract class _SyncProcessStore with Store {
 
   _startSyncProcessForAsset() async {
     try {
-      AssetSearchCriteria assetSearchCriteria =
-          AssetSearchCriteria.defaultCriteria();
+      AssetSearchCriteria assetSearchCriteria = AssetSearchCriteria.defaultCriteria();
       assetSearchCriteria.resultPerPage = 1;
 
-      final assetCount =
-          await AssetService.instance.countOnLocal(assetSearchCriteria);
-      final latestAssetsList =
-          await AssetService.instance.searchOnLocal(assetSearchCriteria);
+      final assetCount = await AssetService.instance.countOnLocal();
+      final latestAssetDate = await AssetService.instance.getLatestAssetDate();
 
       if (assetCount == 0) {
         await _compareLatestLocalAssetDateWithServer(null);
       } else {
-        Asset latestAsset = latestAssetsList.first;
-        final thumbnail = await ThumbnailService.instance
-            .findByIdOnLocal(latestAsset.thumbnailId!);
-        latestAsset.thumbnail = thumbnail;
-
-        final metadata = await MetadataService.instance
-            .findByIdOnLocal(latestAsset.metadataId!);
-        latestAsset.metadata = metadata;
-
-        await _compareLatestLocalAssetDateWithServer(
-            latestAsset.metadata!.creationDateTime!);
+        await _compareLatestLocalAssetDateWithServer(latestAssetDate);
       }
 
       syncProgressState = SyncProgress.SYNC_COMPLETED;
@@ -117,7 +102,7 @@ abstract class _SyncProcessStore with Store {
             }
 
             final newAssetCount =
-                await AssetService.instance.countOnLocal(assetSearchCriteria);
+                await AssetService.instance.countOnLocal();
             if (serverAssetResponse.totalResultsCount! < newAssetCount) {
               //Server has less records than app, means some server items are deleted
               AssetSearchCriteria assetSearchCriteria =
@@ -128,16 +113,14 @@ abstract class _SyncProcessStore with Store {
             } 
           }
 
-           await _uploadAssetsToServer(AppAssetType.PHOTO);
-          await _uploadAssetsToServer(AppAssetType.VIDEO);
+          await _uploadAssetsToServer();
         } else {
           
           // No server sync info is present
           // It is first boot of server or server is reset and it has no data
           // Empty the local sync info
           await AssetService.instance.deleteAllData();
-          await _uploadAssetsToServer(AppAssetType.PHOTO);
-          await _uploadAssetsToServer(AppAssetType.VIDEO); 
+          await _uploadAssetsToServer();
           refreshAssetStores = true;
 
           
@@ -145,7 +128,7 @@ abstract class _SyncProcessStore with Store {
       }
 
       if (refreshAssetStores) {
-        assetStore.getAssets(true);
+        assetStore.refreshStore();
       }
     } catch (e) {
       print("Network error");
@@ -189,21 +172,21 @@ abstract class _SyncProcessStore with Store {
     }
   }
 
-  _uploadAssetsToServer(AppAssetType assetType) async {
+  _uploadAssetsToServer() async {
     uploadedAssetCount = 0;
     try {
-       List<File> assets = await _getAssetsSetForAutoBackUp(assetType);
+       List<File> assets = await _getAssetsSetForAutoBackUp();
 
        List<File> filteredAssets = [];
       for (var asset in assets) {
-              String filePath = asset.path;
-              String fileName = asset.path.substring(filePath.lastIndexOf("/") + 1, filePath.length);
-              Metadata metadata = await MetadataRepository.instance.findByNameEndWith(fileName);  
+            String filePath = asset.path;
+            String fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length);
+            Metadata metadata = await MetadataRepository.instance.findByNameEndWith(fileName);  
 
-              if (metadata.id == null) {
-                //The asset is not uploaded to server yet;
-                filteredAssets.add(asset);
-              }
+            if (metadata.id == null) {
+              //The asset is not uploaded to server yet;
+              filteredAssets.add(asset);
+            }
       }
       
 
@@ -212,7 +195,7 @@ abstract class _SyncProcessStore with Store {
 
       for (final File asset in filteredAssets) {
         syncProgressState = SyncProgress.PROCESSING;
-        await AssetService.instance.save(assetType, [asset]);
+        await AssetService.instance.save([asset]);
         uploadedAssetCount = uploadedAssetCount + 1;
         syncProgressState = SyncProgress.UPLOADING;
       }
@@ -221,8 +204,7 @@ abstract class _SyncProcessStore with Store {
     }
   }
 
-  _getAssetsSetForAutoBackUp(
-      AppAssetType assetType) async {
+  _getAssetsSetForAutoBackUp() async {
     List<File> assetFiles = [];
 
     try {
@@ -252,10 +234,7 @@ abstract class _SyncProcessStore with Store {
             end: 100000, // end at a very big index (to get all the assets)
           );
 
-          AssetType photoManagerAssetType = assetType == AppAssetType.PHOTO ? AssetType.image : AssetType.video;
-          final assetsByAssetType = allAssets.where((asset) => asset.type == photoManagerAssetType);
-
-          for (final AssetEntity asset in assetsByAssetType) {
+          for (final AssetEntity asset in allAssets) {
             final File? assetFile = await asset.file;
             assetFiles.add(assetFile!);
           }

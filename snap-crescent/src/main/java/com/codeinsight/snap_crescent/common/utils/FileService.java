@@ -17,6 +17,23 @@ import com.codeinsight.snap_crescent.config.EnvironmentProperties;
 @Service
 public class FileService {
 	
+	public static AssetType getAssetType(String assetName)
+    {
+		String extension = assetName.substring(assetName.lastIndexOf(".") + 1, assetName.length());
+		
+		AssetType assetType = null;
+		if (extension.equalsIgnoreCase("gif") || extension.equalsIgnoreCase("jpg")
+				|| extension.equalsIgnoreCase("png") || extension.equalsIgnoreCase("raw")
+				|| extension.equalsIgnoreCase("heif")) {
+			assetType = AssetType.PHOTO;
+		} else if (extension.equalsIgnoreCase("mp4") || extension.equalsIgnoreCase("mov")) {
+			assetType = AssetType.VIDEO;
+		}
+		
+		return assetType;
+		
+    }
+	
 	public byte[] readFileBytes(FILE_TYPE fileType,String path, String fileName) {
 		
 		File file = getFile(fileType, path, fileName);

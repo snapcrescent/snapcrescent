@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:snap_crescent/models/app_config.dart';
-import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/screens/settings/folder_selection/folder_selection.dart';
@@ -13,6 +11,7 @@ import 'package:snap_crescent/services/settings_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
+import 'package:snap_crescent/utils/date_utilities.dart';
 import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_bar.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -93,10 +92,9 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         .getFlag(Constants.appConfigShowDeviceAssetsFlag);
     _showDeviceAssetsFolders =
         await SettingsService.instance.getShowDeviceAssetsFolderInfo();
-    _latestAssetDate = await SettingsService.instance.getLatestAssetDate();
+    _latestAssetDate = DateUtilities().formatDate((await AssetService.instance.getLatestAssetDate())!, DateUtilities.timeStampFormat);
 
-    _syncedAssetCount = await AssetService.instance
-        .countOnLocal(AssetSearchCriteria.defaultCriteria());
+    _syncedAssetCount = await AssetService.instance.countOnLocal();
 
     return Future.value(true);
   }
@@ -217,7 +215,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
     _clearCache() async {
     await AssetService.instance.deleteAllData();
-    _latestAssetDate = await SettingsService.instance.getLatestAssetDate();
+    _latestAssetDate = DateUtilities().formatDate((await AssetService.instance.getLatestAssetDate())!, DateUtilities.timeStampFormat);
     ToastService.showSuccess("Successfully deleted locally cached data.");
     setState(() {});
     Navigator.pop(context);

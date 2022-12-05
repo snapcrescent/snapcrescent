@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import com.codeinsight.snap_crescent.common.utils.FileService;
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 
 public interface BulkImportService {
@@ -27,7 +28,7 @@ public interface BulkImportService {
 				this.bulkImport(bulkImportRecusiveRequest);
 			} else {
 
-				AssetType assetType = getAssetType(asset);
+				AssetType assetType = FileService.getAssetType(asset.getName());
 
 				if (assetType != null) {
 					processAsset(assetType, asset, bulkImportRequest);
@@ -37,23 +38,7 @@ public interface BulkImportService {
 
 	}
 	
-	default AssetType getAssetType(File asset)
-    {
-		String filePath = asset.getName();
-		String extension = filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
-		
-		AssetType assetType = null;
-		if (extension.equalsIgnoreCase("gif") || extension.equalsIgnoreCase("jpg")
-				|| extension.equalsIgnoreCase("png") || extension.equalsIgnoreCase("raw")
-				|| extension.equalsIgnoreCase("heif")) {
-			assetType = AssetType.PHOTO;
-		} else if (extension.equalsIgnoreCase("mp4") || extension.equalsIgnoreCase("mov")) {
-			assetType = AssetType.VIDEO;
-		}
-		
-		return assetType;
-		
-    }
+	
 	
 	default void moveFileAfterProcessing(BulkImportRequest  bulkImportRequest, File asset) throws IOException
     {

@@ -1,13 +1,8 @@
-import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
-import 'package:snap_crescent/models/asset.dart';
-import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
-import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/login_service.dart';
-import 'package:snap_crescent/services/metadata_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class SettingsService {
@@ -85,24 +80,6 @@ class SettingsService {
     return _showDeviceAssetsFolders;
   }
 
-
-  Future<String> getLatestAssetDate() async {
-    List<Asset> localAssetsList = await AssetService.instance.searchOnLocal(AssetSearchCriteria.defaultCriteria());
-
-    String _latestAssetDate = "Never";
-    if (localAssetsList.isEmpty == false) {
-
-      Asset latestAsset = localAssetsList.first;
-      final metadata = await MetadataService.instance.findByIdOnLocal(latestAsset.metadataId!);
-      latestAsset.metadata = metadata;
-
-      final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss ');
-      _latestAssetDate =
-          formatter.format(latestAsset.metadata!.creationDateTime!);
-    } 
-
-    return _latestAssetDate;
-  }
 
   Future<List<String>> getAccountInformation() async {
 

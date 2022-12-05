@@ -26,7 +26,7 @@ public class BulkImportDirectoryServiceImpl implements BulkImportService {
 		if (!metadataRepository.existByName(asset.getName())) {
 			File temporaryFile = assetService.migrateAssets(assetType, asset);
 			moveFileAfterProcessing(bulkImportRequest, asset);
-			assetService.processAsset(assetType, temporaryFile);
+			assetService.processAsset(temporaryFile);
 			}
 		}
 	}

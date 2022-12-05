@@ -39,9 +39,8 @@ export class AssetService extends BaseService {
     return this.httpClient.get(this.entityUrl + '/' + id + '/lite');
   }
 
-  save(assetType:number,  file:File): Observable<HttpEvent<unknown>> {
+  save(file:File): Observable<HttpEvent<unknown>> {
     const formData = new FormData();
-    formData.append('assetType',''+assetType);
     formData.append('files', file);
 
     const request = new HttpRequest('POST', this.entityUrl + '/upload', formData, {

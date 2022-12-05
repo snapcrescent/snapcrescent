@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:quiver/iterables.dart';
 import 'package:snap_crescent/models/app_config.dart';
@@ -14,7 +13,8 @@ import 'package:snap_crescent/repository/metadata_repository.dart';
 import 'package:snap_crescent/repository/asset_repository.dart';
 import 'package:snap_crescent/repository/thumbnail_repository.dart';
 import 'package:snap_crescent/services/base_service.dart';
-import 'package:snap_crescent/utils/common_utils.dart';
+import 'package:snap_crescent/services/metadata_service.dart';
+import 'package:snap_crescent/utils/common_utilities.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class AssetService extends BaseService {
@@ -44,7 +44,7 @@ class AssetService extends BaseService {
     }
   }
 
-  save(AppAssetType assetType, List<File> files) async {
+  save(List<File> files) async {
     try {
       if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
@@ -60,7 +60,6 @@ class AssetService extends BaseService {
           }
 
           FormData formData = FormData.fromMap({
-            "assetType": assetType.id,
             "files": multipartFiles,
           });
           await dio.post("/asset/upload", data: formData, options: options);
@@ -105,9 +104,9 @@ class AssetService extends BaseService {
  
 
   Future<bool> permanentDownloadAssetById(int assetId, String assetName) async {
-      File tempDownloadedFile = await tempDownloadAssetById(assetId, assetName);
-      String downloadPath = await CommonUtils().getPermanentDownloadsDirectory();
-
+      File? tempDownloadedFile = await tempDownloadAssetById(assetId, assetName);
+      String downloadPath = await CommonUtilities().getPermanentDownloadsDirectory();
+      
       if(tempDownloadedFile != null) {
           tempDownloadedFile.copySync('$downloadPath/$assetName');
           tempDownloadedFile.deleteSync();
@@ -116,14 +115,14 @@ class AssetService extends BaseService {
       return true;
   }
 
-  Future<File> tempDownloadAssetById(int assetId, String assetName) async {
+  Future<File?> tempDownloadAssetById(int assetId, String assetName) async {
     try {
       if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
         Options options = await getHeaders();
         final url = getAssetByIdUrl(await getServerUrl(), assetId);
 
-        String directory = await CommonUtils().getTempDownloadsDirectory();
+        String directory = await CommonUtilities().getTempDownloadsDirectory();
         String fullPath = '$directory/$assetName';
         await download(dio, url, options, fullPath);
         File file = new File(fullPath);
@@ -197,7 +196,7 @@ class AssetService extends BaseService {
   }
 
   Future<File> readThumbnailFile(String name) async {
-    String directory = await CommonUtils().getThumbnailDirectory();
+    String directory = await CommonUtilities().getThumbnailDirectory();
     return File('$directory/$name');
   }
 
@@ -214,7 +213,7 @@ class AssetService extends BaseService {
         Options options = await getHeaders();
         final url = getThumbnailByIdUrl(await getServerUrl(), thumbnail.id!);
 
-        String directory = await CommonUtils().getThumbnailDirectory();
+        String directory = await CommonUtilities().getThumbnailDirectory();
         await download(dio, url, options, '$directory/${thumbnail.name}');
       }
     } on DioError catch (ex) {
@@ -227,8 +226,8 @@ class AssetService extends BaseService {
     }
   }
 
-  Future<int> countOnLocal(AssetSearchCriteria assetSearchCriteria) async {
-    return AssetRepository.instance.countOnLocal(assetSearchCriteria);
+  Future<int> countOnLocal() async {
+    return AssetRepository.instance.countOnLocal(AssetSearchCriteria.defaultCriteria());
   }
 
   Future<List<Asset>> searchOnLocal(
@@ -236,46 +235,23 @@ class AssetService extends BaseService {
     return AssetRepository.instance.searchOnLocal(assetSearchCriteria);
   }
 
-  saveOnCloud() async {
-    AppConfig value = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigAutoBackupFolders);
+  Future<DateTime?> getLatestAssetDate() async {
+    List<Asset> localAssetsList = await AssetService.instance.searchOnLocal(AssetSearchCriteria.defaultCriteria());
 
-    if (value.configValue != null) {
-      final List<AssetPathEntity> folders =
-          await PhotoManager.getAssetPathList();
-      folders.sort(
-          (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
+    DateTime? _latestAssetDate;
 
-      List<String> autoBackupFolderNameList = value.configValue!.split(",");
-      List<AssetPathEntity> autoBackupFolders = [];
+    if (localAssetsList.isEmpty == false) {
 
-      for (int i = 0; i < folders.length; i++) {
-        if (autoBackupFolderNameList.indexOf(folders[i].id) > -1) {
-          autoBackupFolders.add(folders[i]);
-        }
-      }
+      Asset latestAsset = localAssetsList.first;
+      final metadata = await MetadataService.instance.findByIdOnLocal(latestAsset.metadataId!);
+      latestAsset.metadata = metadata;
 
-      for (int i = 0; i < autoBackupFolders.length; i++) {
-        AssetPathEntity folder = autoBackupFolders[i];
+      _latestAssetDate = latestAsset.metadata!.creationDateTime!;
+    } 
 
-        final allAssets = await folder.getAssetListRange(
-          start: 0, // start at index 0
-          end: 100000, // end at a very big index (to get all the assets)
-        );
-
-        final photos =
-            allAssets.where((asset) => asset.type == AssetType.image);
-
-        List<File> assetFiles = [];
-        for (final AssetEntity asset in photos) {
-          final File? assetFile = await asset.file;
-          assetFiles.add(assetFile!);
-        }
-
-        save(AppAssetType.PHOTO, assetFiles);
-      }
-    }
+    return _latestAssetDate;
   }
+
 
     Future<void> deleteAllData() async {
     await AssetRepository.instance.deleteAll();

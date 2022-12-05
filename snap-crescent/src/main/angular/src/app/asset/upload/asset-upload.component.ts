@@ -74,15 +74,15 @@ export class AssetUploadComponent extends BaseComponent implements OnInit, After
           }
     }
 
-    onFileDropped(files: any, assetTypeId: number) {
-        this.prepareAndSaveFiles(files, assetTypeId)
+    onFileDropped(files: any) {
+        this.prepareAndSaveFiles(files)
     }
     
-    fileBrowseHandler(event: any, assetTypeId: number) {
-        this.prepareAndSaveFiles(event.target.files, assetTypeId)
+    fileBrowseHandler(event: any) {
+        this.prepareAndSaveFiles(event.target.files)
     }
 
-    prepareAndSaveFiles(files: Array<any>, assetTypeId: number) {
+    prepareAndSaveFiles(files: Array<any>) {
         let fileList:any[] = [];
         for (const item of files) {
             fileList.push(item);
@@ -93,22 +93,22 @@ export class AssetUploadComponent extends BaseComponent implements OnInit, After
             fileBatch.push(item);
 
             if(fileBatch.length === 10 || (fileList.indexOf(item) + 1) === fileList.length) {
-                this.processFiles(assetTypeId, fileBatch, 0);
+                this.processFiles(fileBatch, 0);
             }
         }
       }
     
-    processFiles(assetTypeId: number, allFiles:any[], fileIndex:any):any {
+    processFiles(allFiles:any[], fileIndex:any):any {
         if(fileIndex + 1 <= allFiles.length) {
-            return this.savePhoto(allFiles[fileIndex], assetTypeId, this.processFiles(assetTypeId,allFiles,fileIndex + 1));
+            return this.savePhoto(allFiles[fileIndex], this.processFiles(allFiles,fileIndex + 1));
         } else {
             return true;
         }
         
     }
 
-      savePhoto(file:any, assetTypeId: number, callback?:Function) {
-        this.assetService.save(assetTypeId, file).subscribe((response:any) => {
+      savePhoto(file:any, callback?:Function) {
+        this.assetService.save(file).subscribe((response:any) => {
             if(response.success) {
                 if(callback !== undefined) {
                     callback();

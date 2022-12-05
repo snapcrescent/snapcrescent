@@ -33,11 +33,11 @@ mixin _$AssetStore on _AssetStore, Store {
         .run(() => super.loadMoreAssets(pageNumber));
   }
 
-  final _$getAssetsAsyncAction = AsyncAction('_AssetStore.getAssets');
+  final _$refreshStoreAsyncAction = AsyncAction('_AssetStore.refreshStore');
 
   @override
-  Future<void> getAssets(bool clearPreloadedAssets) {
-    return _$getAssetsAsyncAction.run(() => super.getAssets(clearPreloadedAssets));
+  Future<void> refreshStore() {
+    return _$refreshStoreAsyncAction.run(() => super.refreshStore());
   }
 
   @override

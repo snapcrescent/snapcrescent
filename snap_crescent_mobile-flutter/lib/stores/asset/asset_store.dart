@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/app_config.dart';
@@ -37,10 +35,17 @@ class _AssetStore with Store {
   bool executionInProgress = false;
 
   AssetSearchCriteria getAssetSearchCriteria() {
-    AssetSearchCriteria assetSearchCriteria =
-        AssetSearchCriteria.defaultCriteria();
+    AssetSearchCriteria assetSearchCriteria = AssetSearchCriteria.defaultCriteria();
     assetSearchCriteria.resultPerPage = 500;
     return assetSearchCriteria;
+  }
+
+  @action
+  Future<void> initStore(int pageNumber) async {
+    AssetSearchCriteria searchCriteria = getAssetSearchCriteria();
+    searchCriteria.resultPerPage = 100;
+    searchCriteria.pageNumber = pageNumber;
+    await _processAssetRequest(searchCriteria);
   }
 
   @action
@@ -51,11 +56,9 @@ class _AssetStore with Store {
   }
 
   @action
-  Future<void> getAssets(bool clearPreloadedAssets) async {
-    if (clearPreloadedAssets) {
-      groupedAssets.clear();
-      this.assetList = [];
-    }
+  Future<void> refreshStore() async {
+    groupedAssets.clear();
+    this.assetList = [];
     await _processAssetRequest(getAssetSearchCriteria());
   }
 
@@ -284,6 +287,28 @@ class _AssetStore with Store {
       if (unifiedAsset.assetSource == AssetSource.CLOUD) {
           Asset asset = unifiedAsset.asset!;
           await AssetService.instance.permanentDownloadAssetById(asset.id!, asset.metadata!.name!);
+        }
+    }
+
+    return true;
+  }
+
+  Future<bool> uploadAssetFilesToServer(List<int> assetIndexes) async {
+
+    for (var assetIndex in assetIndexes) {
+      final UniFiedAsset unifiedAsset = assetList[assetIndex];
+
+      if (unifiedAsset.assetSource == AssetSource.DEVICE) {
+          AssetEntity asset = unifiedAsset.assetEntity!;
+          File? assetFile  = await asset.file;
+          String filePath = assetFile!.path;
+          String fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length);
+          Metadata metadata = await MetadataRepository.instance.findByNameEndWith(fileName);  
+
+          if (metadata.id == null) {
+            //The asset is not uploaded to server yet;
+            await AssetService.instance.save([assetFile]);
+          }
         }
     }
 

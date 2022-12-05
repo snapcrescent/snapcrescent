@@ -92,7 +92,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	}
 
 	@Override
-	public List<File> uploadAssets(AssetType assetType, List<MultipartFile> multipartFiles) throws Exception {
+	public List<File> uploadAssets(List<MultipartFile> multipartFiles) throws Exception {
 
 		List<File> files = new LinkedList<>();
 		String x = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_SKIP_UPLOADING);
@@ -100,14 +100,15 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			return files;
 		}
 
-		String directoryPath = fileService.getBasePath(assetType) + Constant.UNPROCESSED_ASSET_FOLDER;
-		fileService.mkdirs(directoryPath);
-
 		for (MultipartFile multipartFile : multipartFiles) {
 			try {
+				
+				AssetType assetType = FileService.getAssetType(multipartFile.getOriginalFilename());
+				
+				String directoryPath = fileService.getBasePath(assetType) + Constant.UNPROCESSED_ASSET_FOLDER;
+				fileService.mkdirs(directoryPath);
 
-				String path = directoryPath
-						+ StringUtils.generateTemporaryFileName(multipartFile.getOriginalFilename());
+				String path = directoryPath + StringUtils.generateTemporaryFileName(multipartFile.getOriginalFilename());
 
 				multipartFile.transferTo(new File(path));
 
@@ -126,10 +127,11 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	@Override
 	@Transactional
 	@Async("threadPoolTaskExecutor")
-	public Future<Boolean> processAsset(AssetType assetType, File temporaryFile) throws Exception {
+	public Future<Boolean> processAsset(File temporaryFile) throws Exception {
 
 		boolean processed = false;
 		try {
+			AssetType assetType = FileService.getAssetType(temporaryFile.getName());
 			String originalFilename = StringUtils.extractFileNameFromTemporary(temporaryFile.getName());
 			Metadata metadata = metadataService.computeMetaData(assetType, originalFilename, temporaryFile);
 			Thumbnail thumbnail = thumbnailService.generateThumbnail(temporaryFile, metadata, assetType);
