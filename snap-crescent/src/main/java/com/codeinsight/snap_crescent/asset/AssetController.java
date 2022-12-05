@@ -126,18 +126,16 @@ public class AssetController extends BaseController {
 	}
 
 	@PostMapping("/asset/upload")
-	public ResponseEntity<?> uploadAssets(@RequestParam("assetType") int assetType,
-			@RequestParam("files") MultipartFile[] files) throws IOException {
+	public ResponseEntity<?> uploadAssets(@RequestParam("files") MultipartFile[] files) throws IOException {
 
 		BaseResponse response = new BaseResponse();
 		try {
 
-			AssetType assetTypeEnum = AssetType.findById(assetType);
-			List<File> temporaryFiles = assetService.uploadAssets(assetTypeEnum, Arrays.asList(files));
+			List<File> temporaryFiles = assetService.uploadAssets(Arrays.asList(files));
 
 			List<Future<Boolean>> processingStatusList = new ArrayList<>(temporaryFiles.size());
 			for (File temporaryFile : temporaryFiles) {
-				processingStatusList.add(assetService.processAsset(assetTypeEnum, temporaryFile));
+				processingStatusList.add(assetService.processAsset(temporaryFile));
 			}
 
 			// wait for all threads

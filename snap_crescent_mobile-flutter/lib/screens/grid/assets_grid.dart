@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/grid/asset_detail.dart';
 import 'package:snap_crescent/services/toast_service.dart';
+import 'package:snap_crescent/utils/date_utilities.dart';
 import 'package:snap_crescent/widgets/sync_process/sync_process.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
-import 'package:snap_crescent/utils/common_utils.dart';
+import 'package:snap_crescent/utils/common_utilities.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:snap_crescent/widgets/asset_thumbnail/asset_thumbnail.dart';
 import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_bar.dart';
@@ -34,16 +34,13 @@ class _AssetGridView extends StatefulWidget {
 
 class _AssetGridViewState extends State<_AssetGridView> {
   DateTime currentDateTime = DateTime.now();
-  final DateFormat currentWeekFormatter = DateFormat('EEEE');
-  final DateFormat currentYearFormatter = DateFormat('E, MMM dd');
-  final DateFormat defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
-
   final ScrollController _scrollController = new ScrollController();
   late AssetStore _assetStore;
-
   bool showProcessing = false;
+  int gridPageNumber = 0;
 
-  int pageNumber = 0;
+  Timer? timer;
+  int periodicInitializerPageNumber = 0;
 
   _onAssetTap(BuildContext context, int assetIndex) {
     AssetDetailArguments arguments =
@@ -65,7 +62,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
   }
 
   _downloadAssets() async {
-    bool _permissionReady = await CommonUtils().checkPermission();
+    bool _permissionReady = await CommonUtilities().checkPermission();
 
     if (_permissionReady) {
       _updateProcessingBarVisibility(true);
@@ -73,6 +70,20 @@ class _AssetGridViewState extends State<_AssetGridView> {
           .downloadAssetFilesToDevice(_assetStore.getSelectedIndexes());
       if (success) {
         ToastService.showSuccess("Successfully downloaded files.");
+      }
+      _updateProcessingBarVisibility(false);
+    }
+  }
+
+  _uploadAssets() async {
+    bool _permissionReady = await CommonUtilities().checkPermission();
+
+    if (_permissionReady) {
+      _updateProcessingBarVisibility(true);
+      final bool success = await _assetStore
+          .uploadAssetFilesToServer(_assetStore.getSelectedIndexes());
+      if (success) {
+        ToastService.showSuccess("Successfully uploaded files.");
       }
       _updateProcessingBarVisibility(false);
     }
@@ -89,38 +100,52 @@ class _AssetGridViewState extends State<_AssetGridView> {
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        _assetStore.loadMoreAssets(++pageNumber);
+        _assetStore.loadMoreAssets(++gridPageNumber);
 
         Timer(Duration(seconds: 2), () => setState(() {}));
       }
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _assetStore.loadMoreAssets(0);
+      _periodicallyLoadAssets();
+     timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) => 
+            _periodicallyLoadAssets()
+       );
     });
   }
 
   @override
   void dispose() {
+    timer?.cancel();
     super.dispose();
+  }
+
+  _periodicallyLoadAssets() {
+      if(periodicInitializerPageNumber <= 5) {
+      _assetStore.initStore(periodicInitializerPageNumber);
+      periodicInitializerPageNumber++;
+      } else{
+        timer?.cancel();
+      }
+      
   }
 
   _getFormattedGroupKey(String key) {
     String formattedKey = "";
-    DateTime groupDateTime = defaultYearFormatter.parse(key);
+    DateTime groupDateTime = DateUtilities().parseDate(key, DateUtilities.defaultYearFormat) ;
     if (currentDateTime.year == groupDateTime.year) {
-      if (CommonUtils().weekNumber(currentDateTime) ==
-          CommonUtils().weekNumber(groupDateTime)) {
+      if (DateUtilities().weekNumber(currentDateTime) ==
+          DateUtilities().weekNumber(groupDateTime)) {
         if (currentDateTime.day == groupDateTime.day) {
           formattedKey = 'Today';
         } else {
-          formattedKey = currentWeekFormatter.format(groupDateTime);
+          formattedKey = DateUtilities().formatDate(groupDateTime, DateUtilities.currentWeekFormat);
         }
       } else {
-        formattedKey = currentYearFormatter.format(groupDateTime);
+        formattedKey = DateUtilities().formatDate(groupDateTime, DateUtilities.currentYearFormat);
       }
     } else {
-      formattedKey = defaultYearFormatter.format(groupDateTime);
+      formattedKey = DateUtilities().formatDate(groupDateTime, DateUtilities.defaultYearFormat);
     }
 
     return formattedKey;
@@ -236,7 +261,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
     return RefreshIndicator(
         onRefresh: () {
           return Future.delayed(Duration(seconds: 1), () {
-            _assetStore.getAssets(true);
+            _assetStore.refreshStore();
           });
         },
         child: Container(
@@ -282,7 +307,12 @@ class _AssetGridViewState extends State<_AssetGridView> {
               backgroundColor: Colors.black,
               actions: [
                 if (_assetStore.isAnyItemSelected())
-                  IconButton(
+                IconButton(
+                      onPressed: () {
+                        _uploadAssets();
+                      },
+                      icon: Icon(Icons.upload, color: Colors.white)),
+                IconButton(
                       onPressed: () {
                         _downloadAssets();
                       },

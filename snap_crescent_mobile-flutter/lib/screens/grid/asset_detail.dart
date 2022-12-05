@@ -11,7 +11,7 @@ import 'package:snap_crescent/models/unified_asset.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
-import 'package:snap_crescent/utils/common_utils.dart';
+import 'package:snap_crescent/utils/common_utilities.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class AssetDetailScreen extends StatelessWidget {
@@ -151,7 +151,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
 
   Future<void> _downloadAsset(int assetIndex) async {
     _updateProcessingBarVisibility(true);
-    bool _permissionReady = await CommonUtils().checkPermission();
+    bool _permissionReady = await CommonUtilities().checkPermission();
 
     if (_permissionReady) {
       final bool success =
@@ -161,6 +161,20 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
       }
     }
     _updateProcessingBarVisibility(false);
+  }
+
+  _uploadAsset(int assetIndex) async {
+    bool _permissionReady = await CommonUtilities().checkPermission();
+
+    if (_permissionReady) {
+      _updateProcessingBarVisibility(true);
+      final bool success = await _assetStore
+          .uploadAssetFilesToServer([assetIndex]);
+      if (success) {
+        ToastService.showSuccess("Successfully uploaded files.");
+      }
+      _updateProcessingBarVisibility(false);
+    }
   }
 
   _updateProcessingBarVisibility(bool isVisible) {
@@ -217,16 +231,11 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
               child: Container(
                 width: 100.0,
                 height: 100.0,
-                child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(Icons.arrow_back, color: Colors.white)),
-                    ]),
+                child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.arrow_back, color: Colors.white)),
               ),
             ),
             Expanded(
@@ -236,14 +245,23 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
               ),
             ),
             Expanded(
-                flex: 0,
-                child: Container(
-                  width: 100.0,
-                  height: 100.0,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              flex: 0,
+              child: Container(
+                width: 200.0,
+                height: 100.0,
+                child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      IconButton(
+                          disabledColor: Colors.grey,
+                          onPressed: () {
+                            if(!showProcessing) {
+                               _uploadAsset(widget.assetIndex);
+                            } else{
+                              return null;
+                            }
+                          },
+                          icon: Icon(Icons.upload, color: Colors.white)),
                       IconButton(
                           disabledColor: Colors.grey,
                           onPressed: () {
@@ -265,9 +283,10 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
                           icon: Icon(Icons.share, color: Colors.white))
                     ],
                   ),
-                )),
+              ),
+            ),
           ],
-        ),
+        )
       ]),
     );
   }
