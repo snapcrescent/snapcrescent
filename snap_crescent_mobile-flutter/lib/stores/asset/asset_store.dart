@@ -57,6 +57,7 @@ class _AssetStore with Store {
 
   @action
   Future<void> refreshStore() async {
+    assetSearchProgress = AssetSearchProgress.PROCESSING;
     groupedAssets.clear();
     this.assetList = [];
     await _processAssetRequest(getAssetSearchCriteria());

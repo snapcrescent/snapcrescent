@@ -151,7 +151,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
     return formattedKey;
   }
 
-  int getPhotoGroupIndexInScrollView() {
+  int getAssetGroupIndexInScrollView() {
     try {
       final double currentAsset = (_assetStore.groupedAssets.length - 1) *
           _scrollController.offset /
@@ -168,7 +168,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   Text getScrollLabel() {
     final keys = List.from(_assetStore.getGroupedMapKeys());
-    final label = keys[getPhotoGroupIndexInScrollView()];
+    final label = keys[getAssetGroupIndexInScrollView()];
 
     if (label == null) {
       return const Text('');
@@ -332,15 +332,21 @@ class _AssetGridViewState extends State<_AssetGridView> {
                        PopupMenuButton<String>(
                         onSelected: (String result) {
                           if (result == "Photos & Videos") {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => AssetsGridScreen()),
-                              );
+                                  Navigator.pushAndRemoveUntil<dynamic>(
+                                      context,
+                                      MaterialPageRoute<dynamic>(
+                                        builder: (BuildContext context) => AssetsGridScreen(),
+                                      ),
+                                      (route) => false,//if you want to disable back feature set to false
+                                    );
                           } else if (result == "Settings") {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => SettingsScreen()),
-                              );
+                              Navigator.pushAndRemoveUntil<dynamic>(
+                                      context,
+                                      MaterialPageRoute<dynamic>(
+                                        builder: (BuildContext context) => SettingsScreen(),
+                                      ),
+                                      (route) => true,//if you want to disable back feature set to false
+                                    );
                           }
                         },
                         itemBuilder: (BuildContext context) {

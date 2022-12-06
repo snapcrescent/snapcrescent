@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
@@ -42,6 +43,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   int _syncedAssetCount = 0;
   String _autoBackupFolders = "None";
   String _showDeviceAssetsFolders = "None";
+  String _appVersion = "";
 
   final _formKey = GlobalKey<FormState>();
   AutovalidateMode _autovalidateMode = AutovalidateMode.onUserInteraction;
@@ -90,9 +92,13 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         .getFlag(Constants.appConfigShowDeviceAssetsFlag);
     _showDeviceAssetsFolders =
         await SettingsService.instance.getShowDeviceAssetsFolderInfo();
-    _latestAssetDate = DateUtilities().formatDate((await AssetService.instance.getLatestAssetDate())!, DateUtilities.timeStampFormat);
+    _latestAssetDate = DateUtilities().formatDate((await AssetService.instance.getLatestAssetDate()), DateUtilities.timeStampFormat);
 
     _syncedAssetCount = await AssetService.instance.countOnLocal();
+
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    _appVersion = '''Version : ${packageInfo.version}+${packageInfo.buildNumber}''' ;
 
     return Future.value(true);
   }
@@ -184,12 +190,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     Alert(
         context: context,
         title: "Are you sure?",
-        content: Container(
-                padding: EdgeInsets.all(10),
-                child: Text(
-                  "This action cannot be undone"
-                ),
-              ),
+        desc: "This action cannot be undone",
         buttons: [
           
             DialogButton(
@@ -365,7 +366,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         title: Text("Clear Locally Cached Photos and Videos",
             style: TitleTextStyle),
         subtitle: Text("Latest Synced Record On: " +
-            _latestAssetDate +
+            (_latestAssetDate.isEmpty ? "Never" : _latestAssetDate) +
             " - " +
             "Record Count : " +
             _syncedAssetCount.toString()),
@@ -376,6 +377,18 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         ),
         onTap: () {
           _showCacheClearConfirmationDialog();
+        },
+      ),
+      ListTile(
+        title: Text("About App",
+            style: TitleTextStyle),
+        subtitle: Text(_appVersion),
+        leading: Container(
+          width: 40,
+          alignment: Alignment.center,
+          child: const Icon(Icons.ac_unit_outlined, color: Colors.teal),
+        ),
+        onTap: () {
         },
       ),
     ]);

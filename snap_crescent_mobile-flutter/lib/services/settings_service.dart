@@ -2,10 +2,11 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
+import 'package:snap_crescent/services/base_service.dart';
 import 'package:snap_crescent/services/login_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
-class SettingsService {
+class SettingsService extends BaseService{
 
   SettingsService._privateConstructor():super();
   static final SettingsService instance = SettingsService._privateConstructor();

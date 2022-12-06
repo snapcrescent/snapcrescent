@@ -24,7 +24,7 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
   }
 
   _getPercentage(int? count, int? total) {
-      return (count! * 100/total!).toStringAsFixed(0);
+      return (count! * 100/total!).toStringAsFixed(2);
   }
 
   _syncProgress(SyncProgress _syncProgressState) {

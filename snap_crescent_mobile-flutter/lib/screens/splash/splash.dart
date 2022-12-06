@@ -5,6 +5,7 @@ import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
+import 'package:snap_crescent/services/settings_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -37,18 +38,13 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
   @override
   Widget build(BuildContext context) {
     return  Container(
-            color: Colors.black,
-            child: Center(
-              child: 
-                Image.asset(
-                  "assets/images/logo.png",
-                  width: 200,
-                  height: 200,
-                )
-            ));
+            color: Colors.black);
   }
 
   _setDefaultAppConfig() async {
+
+    bool startWithSettings = false;
+
     AppConfig firstBootConfig = await AppConfigRepository.instance
         .findByKey(Constants.appConfigFirstBootFlag);
 
@@ -94,26 +90,27 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
       await AppConfigRepository.instance
           .saveOrUpdateConfig(appConfigPermanentDownloadsFolderConfig);
 
-      Timer(
-        Duration(seconds: 1),
-        () => Navigator.pushAndRemoveUntil<dynamic>(
-        context,
-        MaterialPageRoute<dynamic>(
-          builder: (BuildContext context) => SettingsScreen(),
-        ),
-        (route) => false,//if you want to disable back feature set to false
-      ));    
+      startWithSettings = true;
+      
     } else {
-      Timer(
-        Duration(seconds: 1),
-        () => Navigator.pushAndRemoveUntil<dynamic>(
-        context,
-        MaterialPageRoute<dynamic>(
-          builder: (BuildContext context) => AssetsGridScreen(),
-        ),
-        (route) => false,//if you want to disable back feature set to false
-      ));
+      if((await SettingsService.instance.isUserLoggedIn()) == false) {
+        startWithSettings = true;
+      }
     }
+
+      Navigator.pushAndRemoveUntil<dynamic>(
+                                      context,
+                                      MaterialPageRoute<dynamic>(
+                                        builder: (BuildContext context) => AssetsGridScreen(),
+                                      ),
+                                      (route) => false,//if you want to disable back feature set to false
+                                    );
+
+      if(startWithSettings) {
+        Navigator.push(context, MaterialPageRoute<dynamic>(builder: (BuildContext context) => SettingsScreen()));
+      }
+      
+      
 
     
 
