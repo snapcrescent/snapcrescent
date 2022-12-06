@@ -163,10 +163,14 @@ abstract class _SyncProcessStore with Store {
           (_downloadedAssetCount) {
         downloadedAssetCount = _downloadedAssetCount;
 
-        if (downloadedAssetCount % 1000 == 0) {
-          syncProgressState = SyncProgress.PROCESSING;
+        if (downloadedAssetCount % 10 == 0) {
+            syncProgressState = SyncProgress.PROCESSING;
+
+            syncProgressState = SyncProgress.DOWNLOADING;  
+        }
+
+        if (downloadedAssetCount % 500 == 0) {
           assetStore.loadMoreAssets(0);
-          syncProgressState = SyncProgress.DOWNLOADING;
         }
       });
     }

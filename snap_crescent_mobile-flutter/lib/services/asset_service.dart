@@ -1,14 +1,11 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:quiver/iterables.dart';
-import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
 import 'package:snap_crescent/models/thumbnail.dart';
-import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/repository/metadata_repository.dart';
 import 'package:snap_crescent/repository/asset_repository.dart';
 import 'package:snap_crescent/repository/thumbnail_repository.dart';

@@ -35,11 +35,14 @@ class DateUtilities {
     return _date;
   }
 
-  String formatDate(DateTime _date, String format) {
-    String _formattedDate;
+  String formatDate(DateTime? _date, String format) {
+    String _formattedDate = "";
 
-    final DateFormat formatter = DateFormat(format);
+    if(_date != null) {
+      final DateFormat formatter = DateFormat(format);
     _formattedDate = formatter.format(_date);
+    }
+    
     
     return _formattedDate;
   }
