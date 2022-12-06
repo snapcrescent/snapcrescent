@@ -12,7 +12,6 @@ import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/style.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:snap_crescent/utils/date_utilities.dart';
-import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_bar.dart';
 
 class SettingsScreen extends StatelessWidget {
   static const routeName = '/settings';
@@ -24,7 +23,6 @@ class SettingsScreen extends StatelessWidget {
           title: Text('Settings'),
           backgroundColor: Colors.black,
         ),
-        bottomNavigationBar: AppBottomNavigationBar(),
         body: _SettingsScreenView());
   }
 }
