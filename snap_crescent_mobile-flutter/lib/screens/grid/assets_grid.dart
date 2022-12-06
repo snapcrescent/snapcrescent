@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
 import 'package:snap_crescent/screens/grid/asset_detail.dart';
+import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/utils/date_utilities.dart';
 import 'package:snap_crescent/widgets/sync_process/sync_process.dart';
@@ -14,7 +15,6 @@ import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/utils/common_utilities.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:snap_crescent/widgets/asset_thumbnail/asset_thumbnail.dart';
-import 'package:snap_crescent/widgets/bottom-navigation_bar/bottom-navigation_bar.dart';
 
 class AssetsGridScreen extends StatelessWidget {
   static const routeName = '/assets';
@@ -307,27 +307,58 @@ class _AssetGridViewState extends State<_AssetGridView> {
               backgroundColor: Colors.black,
               actions: [
                 if (_assetStore.isAnyItemSelected())
-                IconButton(
+                  IconButton(
+                        onPressed: () {
+                          _uploadAssets();
+                        },
+                        icon: Icon(Icons.upload, color: Colors.white)),
+                  IconButton(
+                        onPressed: () {
+                          _downloadAssets();
+                        },
+                        icon: Icon(Icons.download, color: Colors.white)),
+                  IconButton(
                       onPressed: () {
-                        _uploadAssets();
+                        _shareAssets();
                       },
-                      icon: Icon(Icons.upload, color: Colors.white)),
-                IconButton(
-                      onPressed: () {
-                        _downloadAssets();
-                      },
-                      icon: Icon(Icons.download, color: Colors.white)),
-                IconButton(
-                    onPressed: () {
-                      _shareAssets();
-                    },
-                    icon: Icon(Icons.share, color: Colors.white))
+                      icon: Icon(Icons.share, color: Colors.white))
               ],
             )
-          : PreferredSize(
-              preferredSize: Size.zero, // here the desired height
-              child: Container()),
-      bottomNavigationBar: AppBottomNavigationBar(),
+          : AppBar(
+              leading: _getLeadingIcon(),
+              title: Text(""),
+              backgroundColor: Colors.black,
+              actions: [
+                       PopupMenuButton<String>(
+                        onSelected: (String result) {
+                          if (result == "Photos & Videos") {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => AssetsGridScreen()),
+                              );
+                          } else if (result == "Settings") {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => SettingsScreen()),
+                              );
+                          }
+                        },
+                        itemBuilder: (BuildContext context) {
+                          return [
+                            PopupMenuItem(
+                              child: Text("Photos & Videos",),
+                              value: "Photos & Videos",
+                            ),
+                             
+                            PopupMenuItem(
+                              child: Text("Settings",),
+                              value: "Settings",
+                            ),
+                          ];
+                        },
+                        ),
+              ],
+            ),
       body: Column(
         children: <Widget>[
           _syncProgress(),

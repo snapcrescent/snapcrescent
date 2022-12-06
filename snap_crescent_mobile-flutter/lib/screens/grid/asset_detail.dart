@@ -43,7 +43,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   Map<String, String> headers = {};
   String serverUrl = "";
   bool showProcessing = false;
-
+  UniFiedAsset? currentAsset;
   late AssetStore _assetStore;
 
   _videoPlayer(UniFiedAsset? unifiedAsset, Object? object) {
@@ -53,6 +53,11 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
 
     betterPlayerConfiguration = BetterPlayerConfiguration(
       autoPlay: true,
+      controlsConfiguration: const BetterPlayerControlsConfiguration(
+        showControlsOnInitialize: false,
+        controlBarColor: Colors.transparent,
+        progressBarPlayedColor:Colors.teal
+        ),
       looping: true,
       expandToFill: false,
       autoDetectFullscreenDeviceOrientation: true,
@@ -60,9 +65,9 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
     );
 
     bufferingConfiguration = BetterPlayerBufferingConfiguration(
-      minBufferMs: 50000,
+      minBufferMs: 10000,
       maxBufferMs: 13107200,
-      bufferForPlaybackMs: 10000,
+      bufferForPlaybackMs: 500,
       bufferForPlaybackAfterRebufferMs: 5000,
     );
 
@@ -192,14 +197,13 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
           if (snapshot.data == null) {
             return Container();
           } else {
-            UniFiedAsset asset = _assetStore.assetList[index];
-
+            currentAsset = _assetStore.assetList[index];
             return Container(
                 width: 90,
                 height: 90,
-                child: asset.assetType == AppAssetType.PHOTO
-                    ? _imageBanner(asset, snapshot.data)
-                    : _videoPlayer(asset, snapshot.data));
+                child: currentAsset!.assetType == AppAssetType.PHOTO
+                    ? _imageBanner(currentAsset!, snapshot.data)
+                    : _videoPlayer(currentAsset!, snapshot.data));
           }
         });
   }
@@ -252,26 +256,28 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      IconButton(
-                          disabledColor: Colors.grey,
-                          onPressed: () {
-                            if(!showProcessing) {
-                               _uploadAsset(widget.assetIndex);
-                            } else{
-                              return null;
-                            }
-                          },
-                          icon: Icon(Icons.upload, color: Colors.white)),
-                      IconButton(
-                          disabledColor: Colors.grey,
-                          onPressed: () {
-                            if(!showProcessing) {
-                               _downloadAsset(widget.assetIndex);
-                            } else{
-                              return null;
-                            }
-                          },
-                          icon: Icon(Icons.download, color: Colors.white)),
+                      
+                        IconButton(
+                            disabledColor: Colors.grey,
+                            onPressed: () {
+                              if(!showProcessing) {
+                                _uploadAsset(widget.assetIndex);
+                              } else{
+                                return null;
+                              }
+                            },
+                            icon: Icon(Icons.upload, color: Colors.white)),
+                      
+                        IconButton(
+                            disabledColor: Colors.grey,
+                            onPressed: () {
+                              if(!showProcessing) {
+                                _downloadAsset(widget.assetIndex);
+                              } else{
+                                return null;
+                              }
+                            },
+                            icon: Icon(Icons.download, color: Colors.white)),
                       IconButton(
                           onPressed: () {
                             if(!showProcessing) {
