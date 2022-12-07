@@ -88,7 +88,7 @@ class AssetService extends BaseService {
     final data = await search(searchCriteria);
 
     for (Asset entity in data.objects!) {
-          await saveOnLocal(entity, false);
+          await saveOnLocal(entity, false, () => {}, 0);
     }
 
     return new List<Asset>.from(data.objects!);
@@ -144,15 +144,14 @@ class AssetService extends BaseService {
     executionInProgress = true;
     for (Asset entity in entities) {
       if(executionInProgress) {
-          await saveOnLocal(entity, true);
-          progressCallBack(entities.indexOf(entity));
+          await saveOnLocal(entity, true, progressCallBack, entities.indexOf(entity));
       }
     }
 
     return Future.value(0);
   }
 
-  Future<int> saveOnLocal(Asset entity, bool createIfNotFound) async {
+  Future<int> saveOnLocal(Asset entity, bool createIfNotFound, Function progressCallBack,int assetIndex) async {
     final assetExistsById =
         await AssetRepository.instance.existsById(entity.id!);
 
@@ -182,6 +181,7 @@ class AssetService extends BaseService {
       }
 
       if(createIfNotFound) {
+        progressCallBack(assetIndex);
         return AssetRepository.instance.save(entity);
       }
       

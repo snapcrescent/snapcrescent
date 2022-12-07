@@ -370,7 +370,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
           _syncProgress(),
           if (showProcessing)
             Container(
-              height: 1,
+              height: 2,
               child: const LinearProgressIndicator(),
             ),
           Expanded(
