@@ -57,8 +57,6 @@ abstract class _SyncProcessStore with Store {
 
       bool refreshAssetStoresPostUpload = await _uploadAssetsToServer();
       
-      await _compareLatestLocalAssetDateWithServer(DateUtilities().getStartOfDayDate());
-
       if (refreshAssetStoresPostDownload || refreshAssetStoresPostUpload) {
         assetStore.refreshStore();
       }
@@ -106,6 +104,11 @@ abstract class _SyncProcessStore with Store {
                   AssetSearchCriteria.defaultCriteria();
               await AssetService.instance
                   .searchAndSyncInactiveRecords(assetSearchCriteria);
+              refreshAssetStores = true;
+            } else if (serverAssetResponse.totalResultsCount! > newAssetCount) {
+              //Server has more records than app, means some server items are were not synced due to some error and now not coming up in latest sync call
+              // Need to sync everything
+              await _downloadAssetsFromServer(null);
               refreshAssetStores = true;
             }
           }

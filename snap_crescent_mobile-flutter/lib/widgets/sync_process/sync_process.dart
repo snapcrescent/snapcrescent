@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import 'package:provider/provider.dart';
+import 'package:snap_crescent/services/global_service.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/stores/widget/sync_process_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
+import 'package:workmanager/workmanager.dart';
 
 class SyncProcessWidget extends StatefulWidget {
   @override
@@ -23,9 +25,11 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _syncProcessStore.startSyncProcess();
-      timer = Timer.periodic(Duration(seconds: 30),
+      timer = Timer.periodic(Duration(seconds: 60),
           (Timer t) => _syncProcessStore.startSyncProcess());
     });
+
+    Workmanager().registerPeriodicTask("SnapCrescent-Asset-Sync", "Asset-Sync", frequency: Duration(minutes: 15));
   }
 
   @override
@@ -77,6 +81,8 @@ class SyncProcessWidgetState extends State<SyncProcessWidget> {
   Widget build(BuildContext context) {
     _syncProcessStore = Provider.of<SyncProcessStore>(context);
     _syncProcessStore.assetStore = Provider.of<AssetStore>(context);
+
+    GlobalService.instance.syncProcessStore = _syncProcessStore;
 
     return Observer(
         builder: (context) => _syncProcessStore.syncProgressState !=

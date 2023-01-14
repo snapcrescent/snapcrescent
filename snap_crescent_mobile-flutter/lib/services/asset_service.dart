@@ -188,6 +188,7 @@ class AssetService extends BaseService {
       return Future.value(0);
     } else {
       AssetRepository.instance.update(entity);
+      progressCallBack(assetIndex);
       return Future.value(0);
     }
   }

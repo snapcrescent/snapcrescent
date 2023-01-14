@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
