@@ -14,7 +14,6 @@ import 'dart:io';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/utils/constants.dart';
-import 'package:snap_crescent/utils/date_utilities.dart';
 
 part 'sync_process_store.g.dart';
 

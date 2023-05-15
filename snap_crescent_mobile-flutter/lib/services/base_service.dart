@@ -16,8 +16,8 @@ class BaseService {
           BaseOptions options = new BaseOptions(
               baseUrl: baseURL.configValue!,
               receiveDataWhenStatusError: true,
-              connectTimeout: 60*1000, // 60 seconds
-              receiveTimeout: 300*1000 // 300 seconds
+              connectTimeout: Duration(hours: 0, minutes: 1, seconds: 0),
+              receiveTimeout: Duration(hours: 0, minutes: 5, seconds: 0)
               );
   
           _dio = new Dio(options);
@@ -57,7 +57,7 @@ class BaseService {
     return headers;
   }
 
-  String getQueryString(Map params, {String prefix: '&', bool inRecursion: false}) {
+  String getQueryString(Map params, {String prefix = '&', bool inRecursion = false}) {
 
     String query = '';
 
