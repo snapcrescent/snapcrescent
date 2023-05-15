@@ -34,7 +34,7 @@ class AssetService extends BaseService {
         return new BaseResponseBean.defaultResponse();
       }
     } on DioError catch (ex) {
-      if (ex.type == DioErrorType.connectTimeout) {
+      if (ex.type == DioErrorType.connectionTimeout) {
         throw Exception("Connection  Timeout Exception");
       }
       throw Exception(ex.message);
@@ -63,7 +63,7 @@ class AssetService extends BaseService {
         }
       }
     } on DioError catch (ex) {
-      if (ex.type == DioErrorType.connectTimeout) {
+      if (ex.type == DioErrorType.connectionTimeout) {
         throw Exception("Connection  Timeout Exception");
       }
       throw Exception(ex.message);
@@ -128,7 +128,7 @@ class AssetService extends BaseService {
         return new File("");
       }
     } on DioError catch (ex) {
-      if (ex.type == DioErrorType.connectTimeout) {
+      if (ex.type == DioErrorType.connectionTimeout) {
         throw Exception("Connection  Timeout Exception");
       }
       throw Exception(ex.message);
@@ -216,7 +216,7 @@ class AssetService extends BaseService {
       }
     } on DioError catch (ex) {
       print(ex.message);
-      if (ex.type == DioErrorType.connectTimeout) {
+      if (ex.type == DioErrorType.connectionTimeout) {
         throw Exception("Connection  Timeout Exception");
       }
       

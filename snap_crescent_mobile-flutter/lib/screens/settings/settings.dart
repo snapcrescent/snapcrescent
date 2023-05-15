@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
@@ -125,9 +124,13 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   _showAccountInfoDialog() {
-    Alert(
-        context: context,
-        title: "Account",
+
+    return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Account'),
         content: Form(
             key: _formKey,
             child: Column(children: <Widget>[
@@ -166,50 +169,60 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
                 ),
               )
             ])),
-        buttons: [
+        actions: <Widget>[
           if (_connectedToServer)
-            DialogButton(
-              onPressed: () => _onLogoutPressed(),
-              child: Text(
-                "Logout",
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
+            TextButton(
+              child: const Text('Logout'),
+              onPressed: () {
+                _onLogoutPressed();
+              },
             )
           else
-            DialogButton(
-              onPressed: () => _onLoginPressed(),
-              child: Text(
-                "Login",
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
+            TextButton(
+              child: const Text('Login'),
+              onPressed: () {
+                _onLoginPressed();
+              },
             )
-        ]).show();
-  }
+        ],
+      );
+    },
+  );
+}
 
   _showCacheClearConfirmationDialog() {
-    Alert(
-        context: context,
-        title: "Are you sure?",
-        desc: "This action cannot be undone",
-        buttons: [
-          
-            DialogButton(
-              onPressed: () => Navigator.pop(context),
-              color: Colors.grey,
-              child: Text(
-                "Cancel",
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            ),
-          
-            DialogButton(
-              onPressed: () => _clearCache(),
-              child: Text(
-                "Ok",
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            )
-        ]).show();
+
+    return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('This action cannot be undone')
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+            child: const Text('Ok'),
+            onPressed: () {
+              _clearCache();
+            },
+          )
+        ],
+      );
+    },
+  );
+
   }
 
     _clearCache() async {

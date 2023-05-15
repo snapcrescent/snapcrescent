@@ -37,7 +37,7 @@ class LoginService extends BaseService {
         return new UserLoginResponse();
       }
     } on DioError catch (ex) {
-      if (ex.type == DioErrorType.connectTimeout) {
+      if (ex.type == DioErrorType.connectionTimeout) {
         throw Exception("Connection  Timeout Exception");
       }
       return new UserLoginResponse();
