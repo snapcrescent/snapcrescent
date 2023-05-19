@@ -1,74 +1,60 @@
-import 'dart:async';
+import 'dart:io';
 
-import 'package:mobx/mobx.dart';
-
+import 'package:photo_manager/photo_manager.dart';
 import 'package:snap_crescent/models/app_config.dart';
+import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_search_criteria.dart';
-import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/metadata.dart';
+import 'package:snap_crescent/models/sync_state.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/repository/metadata_repository.dart';
 import 'package:snap_crescent/services/asset_service.dart';
-import 'dart:io';
-import 'package:photo_manager/photo_manager.dart';
-import 'package:snap_crescent/stores/asset/asset_store.dart';
+import 'package:snap_crescent/services/base_service.dart';
+import 'package:snap_crescent/services/notification_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
-part 'sync_process_store.g.dart';
+class SyncService extends BaseService {
+  
+  SyncService._privateConstructor() : super();
 
-class SyncProcessStore = _SyncProcessStore with _$SyncProcessStore;
+  factory SyncService() {
+    return _instance;
+  }
 
-abstract class _SyncProcessStore with Store {
-  @observable
-  SyncProgress syncProgressState = SyncProgress.CONTACTING_SERVER;
+  static final SyncService _instance = SyncService._privateConstructor();
 
-  int downloadedAssetCount = 0;
-  int totalServerAssetCount = 0;
+  static bool executionInProgress = false;
 
-  int uploadedAssetCount = 0;
-  int totalLocalAssetCount = 0;
+  Future<void> syncAssetsInBackground(Function progressCallBack) async {
+    syncAssets(
+        new SyncState(SyncProgress.CONTACTING_SERVER, 0, 0, 0, 0), progressCallBack);
+  }
 
-  bool executionInProgress = false;
-
-  late AssetStore assetStore;
-
-  @action
-  Future<void> startSyncProcess() async {
+  Future<bool> syncAssets(
+      SyncState syncMetadata, Function progressCallBack) async {
     if (executionInProgress) {
-      return;
+      return false;
     }
 
     executionInProgress = true;
-
-    await _startSyncProcessForAsset();
+    bool refreshAssetStoresPostDownload =
+        await _compareLatestLocalAssetDateWithServer(
+            syncMetadata, progressCallBack);
+    bool refreshAssetStoresPostUpload =
+        await _uploadAssetsToServer(syncMetadata, progressCallBack);
 
     executionInProgress = false;
-  }
 
-  _startSyncProcessForAsset() async {
-    syncProgressState = SyncProgress.PROCESSING;
-
-    try {
-      final latestAssetDate = await AssetService.instance.getLatestAssetDate();
-
-      bool refreshAssetStoresPostDownload = await _compareLatestLocalAssetDateWithServer(latestAssetDate);
-
-      bool refreshAssetStoresPostUpload = await _uploadAssetsToServer();
-      
-      if (refreshAssetStoresPostDownload || refreshAssetStoresPostUpload) {
-        assetStore.refreshStore();
-      }
-    } catch (ex) {
-      throw Exception(ex.toString());
-    }
-
-    syncProgressState = SyncProgress.SYNC_COMPLETED;
+    return refreshAssetStoresPostDownload || refreshAssetStoresPostUpload;
   }
 
   Future<bool> _compareLatestLocalAssetDateWithServer(
-      DateTime? latestAssetDate) async {
+      SyncState syncMetadata, Function progressCallBack) async {
     bool refreshAssetStores = false;
+
+    DateTime? latestAssetDate =
+        await AssetService.instance.getLatestAssetDate();
 
     try {
       if (await AssetService.instance.isUserLoggedIn()) {
@@ -87,12 +73,14 @@ abstract class _SyncProcessStore with Store {
             // No local sync info is present
             // It is a first boot or app is reset
             // Need to sync everything
-            await _downloadAssetsFromServer(null);
+            await _downloadAssetsFromServer(
+                null, syncMetadata, progressCallBack);
             refreshAssetStores = true;
           } else {
             if (latestServerAssetDate != latestAssetDate) {
               //Local latest asset date is not matching with server's latest asset
-              await _downloadAssetsFromServer(latestAssetDate);
+              await _downloadAssetsFromServer(
+                  latestAssetDate, syncMetadata, progressCallBack);
               refreshAssetStores = true;
             }
 
@@ -107,7 +95,8 @@ abstract class _SyncProcessStore with Store {
             } else if (serverAssetResponse.totalResultsCount! > newAssetCount) {
               //Server has more records than app, means some server items are were not synced due to some error and now not coming up in latest sync call
               // Need to sync everything
-              await _downloadAssetsFromServer(null);
+              await _downloadAssetsFromServer(
+                  null, syncMetadata, progressCallBack);
               refreshAssetStores = true;
             }
           }
@@ -127,12 +116,13 @@ abstract class _SyncProcessStore with Store {
     return refreshAssetStores;
   }
 
-  _downloadAssetsFromServer(DateTime? latestAssetDate) async {
+  _downloadAssetsFromServer(DateTime? latestAssetDate, SyncState syncMetadata,
+      Function progressCallBack) async {
     if (!executionInProgress) {
       return;
     }
 
-    downloadedAssetCount = 0;
+    syncMetadata.downloadedAssetCount = 0;
 
     AssetSearchCriteria searchCriteria = AssetSearchCriteria.defaultCriteria();
     searchCriteria.resultPerPage = 1;
@@ -144,35 +134,35 @@ abstract class _SyncProcessStore with Store {
 
     final assetCountResponse =
         await AssetService.instance.search(searchCriteria);
-    totalServerAssetCount = assetCountResponse.totalResultsCount!;
+    syncMetadata.totalServerAssetCount = assetCountResponse.totalResultsCount!;
 
-    if (totalServerAssetCount > 0) {
-      syncProgressState = SyncProgress.DOWNLOADING;
+    if (syncMetadata.totalServerAssetCount > 0) {
+      syncMetadata.syncProgressState = SyncProgress.DOWNLOADING;
+      updateCaller(syncMetadata, progressCallBack);
 
       searchCriteria.pageNumber = 0;
-      searchCriteria.resultPerPage = totalServerAssetCount;
+      searchCriteria.resultPerPage = syncMetadata.totalServerAssetCount;
       searchCriteria.resultType = ResultType.SEARCH;
 
       await AssetService.instance.searchAndSync(searchCriteria,
           (_downloadedAssetCount) {
-        downloadedAssetCount = _downloadedAssetCount;
+        syncMetadata.downloadedAssetCount = _downloadedAssetCount;
 
-        if (downloadedAssetCount % 10 == 0) {
-          syncProgressState = SyncProgress.PROCESSING;
+        if (syncMetadata.downloadedAssetCount % 10 == 0) {
+          syncMetadata.syncProgressState = SyncProgress.PROCESSING;
+          updateCaller(syncMetadata, progressCallBack);
 
-          syncProgressState = SyncProgress.DOWNLOADING;
-        }
-
-        if (downloadedAssetCount % 500 == 0) {
-          assetStore.loadMoreAssets(0);
+          syncMetadata.syncProgressState = SyncProgress.DOWNLOADING;
+          updateCaller(syncMetadata, progressCallBack);
         }
       });
     }
   }
 
-  Future<bool> _uploadAssetsToServer() async {
+  Future<bool> _uploadAssetsToServer(
+      SyncState syncMetadata, Function progressCallBack) async {
     bool refreshAssetStores = false;
-    uploadedAssetCount = 0;
+    syncMetadata.uploadedAssetCount = 0;
     try {
       if (await AssetService.instance.isUserLoggedIn()) {
         List<File> assets = await _getAssetsSetForAutoBackUp();
@@ -191,20 +181,24 @@ abstract class _SyncProcessStore with Store {
           }
         }
 
-        filteredAssets.sort((File a,File b)  => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
+        filteredAssets.sort((File a, File b) =>
+            a.lastModifiedSync().compareTo(b.lastModifiedSync()));
 
-        totalLocalAssetCount = filteredAssets.length;
-        
-        if(totalLocalAssetCount > 0) {
-          syncProgressState = SyncProgress.UPLOADING;
+        syncMetadata.totalLocalAssetCount = filteredAssets.length;
+
+        if (syncMetadata.totalLocalAssetCount > 0) {
+          syncMetadata.syncProgressState = SyncProgress.UPLOADING;
+          updateCaller(syncMetadata, progressCallBack);
           refreshAssetStores = true;
         }
 
         for (final File asset in filteredAssets) {
-          syncProgressState = SyncProgress.PROCESSING;
+          syncMetadata.syncProgressState = SyncProgress.PROCESSING;
+          updateCaller(syncMetadata, progressCallBack);
           await AssetService.instance.save([asset]);
-          uploadedAssetCount = uploadedAssetCount + 1;
-          syncProgressState = SyncProgress.UPLOADING;
+          syncMetadata.uploadedAssetCount = syncMetadata.uploadedAssetCount + 1;
+          syncMetadata.syncProgressState = SyncProgress.UPLOADING;
+          updateCaller(syncMetadata, progressCallBack);
         }
       }
     } catch (e) {
@@ -255,5 +249,10 @@ abstract class _SyncProcessStore with Store {
     }
 
     return assetFiles;
+  }
+
+  updateCaller(SyncState syncMetadata, Function progressCallBack) {
+     NotificationService.showNotification("Syncing photos and videos", " Downloaded : " + syncMetadata.downloadedPercentage() + "/ Uploaded : " + syncMetadata.uploadPercentage());
+    progressCallBack(syncMetadata);
   }
 }

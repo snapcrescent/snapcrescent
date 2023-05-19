@@ -98,10 +98,12 @@ class AssetService extends BaseService {
     return serverURL + '/asset/$assetId/stream';
   }
 
- 
+  String downloadAssetByIdUrl(String serverURL, int assetId) {
+    return serverURL + '/asset/$assetId/download';
+  }
 
-  Future<bool> permanentDownloadAssetById(int assetId, String assetName) async {
-      File? tempDownloadedFile = await tempDownloadAssetById(assetId, assetName);
+  Future<bool> permanentDownloadAssetById(int assetId, String assetName, AppAssetType assetType) async {
+      File? tempDownloadedFile = await tempDownloadAssetById(assetId, assetName, assetType);
       String downloadPath = await CommonUtilities().getPermanentDownloadsDirectory();
       
       if(tempDownloadedFile != null) {
@@ -112,16 +114,22 @@ class AssetService extends BaseService {
       return true;
   }
 
-  Future<File?> tempDownloadAssetById(int assetId, String assetName) async {
+  Future<File?> tempDownloadAssetById(int assetId, String assetName, AppAssetType assetType) async {
     try {
       if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
         Options options = await getHeaders();
-        final url = getAssetByIdUrl(await getServerUrl(), assetId);
+        final url = downloadAssetByIdUrl(await getServerUrl(), assetId);
 
         String directory = await CommonUtilities().getTempDownloadsDirectory();
         String fullPath = '$directory/$assetName';
-        await download(dio, url, options, fullPath);
+
+        if(assetType == AppAssetType.PHOTO) {
+          await download(dio, url, options, fullPath);
+        } else{
+          await downloadWithChunks(dio, url, options, fullPath);
+        }
+        
         File file = new File(fullPath);
         return file;
       } else {

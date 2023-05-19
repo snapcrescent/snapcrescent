@@ -39,7 +39,7 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
 
   Future<List<AssetPathEntity>> _getDeviceFolderList() async {
     await _getFolderInfo();
-
+  
     final PermissionState _ps = await PhotoManager.requestPermissionExtend();
 
     if (!_ps.isAuth) {

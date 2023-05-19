@@ -8,7 +8,6 @@ import 'package:snap_crescent/screens/settings/folder_selection/folder_selection
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/screens/splash/splash.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
-import 'package:snap_crescent/stores/widget/sync_process_store.dart';
 import 'package:snap_crescent/style.dart';
 
 class App extends StatelessWidget {
@@ -18,7 +17,6 @@ class App extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<AssetStore>(create: (_) => AssetStore()),
-        Provider<SyncProcessStore>(create: (_) => SyncProcessStore()),
       ],
       child: MaterialApp(
         title: 'Snap Crescent',

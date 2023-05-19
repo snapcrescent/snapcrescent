@@ -3,6 +3,7 @@ import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
 import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
+import 'package:snap_crescent/services/notification_service.dart';
 import 'package:snap_crescent/services/settings_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
@@ -26,7 +27,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
   @override
   void initState() {
     super.initState();
-
+    NotificationService.initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setDefaultAppConfig();
     });

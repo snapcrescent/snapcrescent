@@ -91,7 +91,7 @@ class SettingsService extends BaseService{
     if (appConfigServerURL.configValue != null) {
       result.add(appConfigServerURL.configValue!);
     } else {
-      result.add("http://192.168.0.16:8080");
+      result.add("http://192.168.0.2:8080");
     }
 
     AppConfig appConfigServerUserName = await AppConfigRepository.instance

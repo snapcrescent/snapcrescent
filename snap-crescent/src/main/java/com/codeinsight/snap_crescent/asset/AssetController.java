@@ -31,6 +31,7 @@ import com.codeinsight.snap_crescent.common.BaseController;
 import com.codeinsight.snap_crescent.common.beans.BaseResponse;
 import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
+import com.codeinsight.snap_crescent.common.utils.Constant.ResourceRegionType;
 
 @RestController
 public class AssetController extends BaseController {
@@ -67,7 +68,7 @@ public class AssetController extends BaseController {
 		return response;
 	}
 
-	@GetMapping(value = "/asset/{id}/raw", produces = MediaType.IMAGE_JPEG_VALUE)
+	@GetMapping(value = "/asset/{id}/raw")
 	public ResponseEntity<byte[]> getAssetById(@PathVariable Long id) {
 		try {
 			return new ResponseEntity<>(assetService.getAssetById(id), HttpStatus.OK);
@@ -76,34 +77,46 @@ public class AssetController extends BaseController {
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-    
+
 	@GetMapping(value = "/asset/{id}/stream")
-	public ResponseEntity<ResourceRegion> streamAssetById(@PathVariable Long id,@RequestHeader(value = "Range", required = false) String httpRangeList ) {
+	public ResponseEntity<ResourceRegion> streamAssetById(@PathVariable Long id,
+			@RequestHeader(value = "Range", required = false) String httpRangeList) {
+		return getChunkedResponse(id, httpRangeList, ResourceRegionType.STREAM);
+	}
+
+	@GetMapping(value = "/asset/{id}/download")
+	public ResponseEntity<ResourceRegion> downloadAssetById(@PathVariable Long id,
+			@RequestHeader(value = "Range", required = false) String httpRangeList) {
+		return getChunkedResponse(id, httpRangeList, ResourceRegionType.DOWNLOAD);
+	}
+
+	private ResponseEntity<ResourceRegion> getChunkedResponse(Long id, String httpRangeList, ResourceRegionType resourceRegionType) {
 		try {
 			UiAsset asset = assetService.getById(id);
-			UrlResource assetFile = new UrlResource("file:"+assetService.getFilePathByAssetById(id));
-			
+			UrlResource assetFile = new UrlResource("file:" + assetService.getFilePathByAssetById(id));
+
 			AssetType assetType = AssetType.findById(asset.getAssetType());
-			
-			ResourceRegion region = resourceRegion(assetType, assetFile, httpRangeList);
-			
-			if(assetType == AssetType.PHOTO) {
+
+			ResourceRegion region = resourceRegion(assetType, resourceRegionType, assetFile, httpRangeList);
+
+			if (assetType == AssetType.PHOTO) {
 				return ResponseEntity.status(HttpStatus.OK)
-		                .contentType(MediaTypeFactory.getMediaType(assetFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
-		                .body(region);
+						.contentType(
+								MediaTypeFactory.getMediaType(assetFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
+						.body(region);
 			} else {
 				return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-		                .contentType(MediaTypeFactory.getMediaType(assetFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
-		                .body(region);	
+						.contentType(
+								MediaTypeFactory.getMediaType(assetFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
+						.body(region);
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
-	
+
 	@PutMapping(value = "/asset/{id}/metadata")
 	public ResponseEntity<?> updateMetadata(@PathVariable Long id) {
 		try {

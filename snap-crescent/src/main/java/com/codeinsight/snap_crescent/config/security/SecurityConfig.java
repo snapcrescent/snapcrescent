@@ -90,6 +90,7 @@ public class SecurityConfig {
     		.antMatchers("/websocket/**").permitAll()
     		.antMatchers("/thumbnail/**").permitAll()
     		.antMatchers("/asset/**/stream").permitAll()
+    		.antMatchers("/asset/**/download").permitAll()
     		
     		.anyRequest().authenticated()
         );		

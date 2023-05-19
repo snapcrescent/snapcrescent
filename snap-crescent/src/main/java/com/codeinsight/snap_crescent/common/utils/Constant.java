@@ -113,5 +113,9 @@ public class Constant {
 	public enum ResultType {
 		OPTION, SEARCH, FULL;
 	}
+	
+	public enum ResourceRegionType {
+		STREAM, DOWNLOAD;
+	}
 
 }
