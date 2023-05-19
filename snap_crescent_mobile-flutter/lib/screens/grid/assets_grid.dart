@@ -10,7 +10,6 @@ import 'package:snap_crescent/screens/grid/asset_detail.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/utils/date_utilities.dart';
-import 'package:snap_crescent/widgets/sync_process/sync_process.dart';
 import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/utils/common_utilities.dart';
 import 'package:snap_crescent/utils/constants.dart';
@@ -275,12 +274,6 @@ class _AssetGridViewState extends State<_AssetGridView> {
                 child: _gridView(orientation, assetStore))));
   }
 
-  _syncProgress() {
-    return Container(
-        color: Colors.black,
-        width: double.infinity,
-        child: new SyncProcessWidget());
-  }
 
   _getLeadingIcon() {
     if (_assetStore.isAnyItemSelected()) {
@@ -367,7 +360,6 @@ class _AssetGridViewState extends State<_AssetGridView> {
             ),
       body: Column(
         children: <Widget>[
-          _syncProgress(),
           if (showProcessing)
             Container(
               height: 2,

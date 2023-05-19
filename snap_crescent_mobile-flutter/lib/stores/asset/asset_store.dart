@@ -16,6 +16,7 @@ import 'package:snap_crescent/services/metadata_service.dart';
 import 'package:snap_crescent/services/thumbnail_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:collection/collection.dart';
+import 'package:mime/mime.dart';
 
 part 'asset_store.g.dart';
 
@@ -272,7 +273,7 @@ class _AssetStore with Store {
     List<File> assetFiles = await _getAssetFile(assetIndexes);
 
     for (var assetFile in assetFiles) {
-      xFiles.add(XFile(assetFile.path));
+      xFiles.add(XFile(assetFile.path, mimeType:lookupMimeType(assetFile.path)));
     }
 
     return xFiles;
@@ -287,7 +288,7 @@ class _AssetStore with Store {
 
       if (unifiedAsset.assetSource == AssetSource.CLOUD) {
           Asset asset = unifiedAsset.asset!;
-          await AssetService.instance.permanentDownloadAssetById(asset.id!, asset.metadata!.name!);
+          await AssetService.instance.permanentDownloadAssetById(asset.id!, asset.metadata!.name!, unifiedAsset.assetType);
         }
     }
 
@@ -327,7 +328,7 @@ class _AssetStore with Store {
       if (unifiedAsset.assetSource == AssetSource.CLOUD) {
         Asset asset = unifiedAsset.asset!;
         assetFile = await AssetService.instance
-            .tempDownloadAssetById(asset.id!, asset.metadata!.name!);
+            .tempDownloadAssetById(asset.id!, asset.metadata!.name!, unifiedAsset.assetType);
       } else {
         AssetEntity asset = unifiedAsset.assetEntity!;
         assetFile = await asset.file;
@@ -340,4 +341,6 @@ class _AssetStore with Store {
 
     return assetFiles;
   }
+
+  
 }

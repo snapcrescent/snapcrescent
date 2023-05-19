@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codeinsight.snap_crescent.common.BaseController;
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
+import com.codeinsight.snap_crescent.common.utils.Constant.ResourceRegionType;
 
 @RestController
 public class ThumbnailController extends BaseController{
@@ -27,7 +28,7 @@ public class ThumbnailController extends BaseController{
 			
 			UrlResource thumnailFile = new UrlResource("file:"+thumbnailService.getFilePathByThumbnailById(id));
 			
-			ResourceRegion region = resourceRegion(AssetType.PHOTO,thumnailFile, httpRangeList);
+			ResourceRegion region = resourceRegion(AssetType.PHOTO,ResourceRegionType.STREAM, thumnailFile, httpRangeList);
 			
 			return ResponseEntity.status(HttpStatus.OK)
 	                .contentType(MediaTypeFactory.getMediaType(thumnailFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
