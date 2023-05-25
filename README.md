@@ -40,3 +40,7 @@ MEDIA_STORAGE_PATH - Local folder path for photos (c/Users/John/Documents/Images
 DATA_PATH - Local folder path for SQLITE DB (c/Users/John/Documents/db)
 
 MEDIA_IMPORT_STORAGE_PATH - Local folder path for importing photos (c/Users/John/Documents/Images)
+
+Default Login
+Username : admin
+Password : whatever value is added in <ADMIN_PASSWORD> variable while launching docker.
