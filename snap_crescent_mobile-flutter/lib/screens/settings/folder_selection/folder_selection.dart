@@ -44,6 +44,7 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
 
     if (!_ps.isAuth) {
       ToastService.showError('Permission to device folders denied!');
+      Navigator.pop(context);
       return Future.value([]);
     }
 
@@ -73,14 +74,14 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
   _updateAppConfig(int index, bool value) async {
     _folderStatusList[index] = value;
 
-    List<String> newAutoBackupFolderList = [];
+    List<String> newFolderList = [];
     for (int i = 0; i < _folderStatusList.length; i++) {
       if (_folderStatusList[i] == true) {
-        newAutoBackupFolderList.add(_folderList[i]);
+        newFolderList.add(_folderList[i]);
       }
     }
 
-    _folders = newAutoBackupFolderList.join(",");
+    _folders = newFolderList.join(",");
 
     widget.appConfig.configValue = _folders;
 
@@ -96,7 +97,7 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
         Padding(
             padding: EdgeInsets.all(15),
             child: Text(
-                "Selected folder from the list below will be backed up to your server")),
+                "Selected folder from the list below")),
         Expanded(
             child: new ListView.builder(
                 itemCount: assets.length,

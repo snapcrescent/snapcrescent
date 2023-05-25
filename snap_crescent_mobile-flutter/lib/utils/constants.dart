@@ -11,6 +11,8 @@ class Constants {
 
   static final String appConfigAutoBackupFlag = 'AUTO_BACKUP';
   static final String appConfigAutoBackupFolders = 'AUTO_BACKUP_FOLDERS';
+  static final String appConfigAutoBackupFrequency = 'AUTO_BACKUP_FREQUENCY';
+  static final String appConfigLastSyncTimestamp = 'LAST_SYNC_TIMESTAMP';
 
   static final String appConfigShowDeviceAssetsFlag = 'SHOW_DEVICE_ASSETS';
   static final String appConfigShowDeviceAssetsFolders = 'SHOW_DEVICE_ASSETS_FOLDERS';
@@ -18,6 +20,16 @@ class Constants {
   static final String appConfigThumbnailsFolder = 'THUMBNAILS_FOLDER';
   static final String appConfigTempDownloadsFolder = 'TEMP_DOWNLOADS_FOLDER';
   static final String appConfigPermanentDownloadsFolder = 'PERMANENT_DOWNLOADS_FOLDER';
+
+  static final String appConfigShowLoginPromptFlag = 'SHOW_LOGIN_PROMPT';
+  static final String appConfigShowAutoBackupPromptFlag = 'SHOW_AUTO_BACKUP_PROMPT';
+
+
+  static final String defaultNotificationChannel = 'Snap-Crescent';
+  static final String downloadProgressNotificationChannel = 'Download Progress';
+  static final String uploadProgressNotificationChannel = 'Upload Progress';
+
+  static final int defaultAutoBackupFrequency = 1 * 60;
   
 }
 
@@ -51,10 +63,8 @@ enum Direction {
    DESC
 }
 
-enum SyncProgress { 
-   CONTACTING_SERVER,
-   DOWNLOADING,
-   PROCESSING,
-   UPLOADING,
-   SYNC_COMPLETED
-}
+enum AutoBackupFrequencyType { 
+    MINUTES,
+    HOURS,
+    DAYS
+  }

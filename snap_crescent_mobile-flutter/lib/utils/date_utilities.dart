@@ -24,6 +24,10 @@ class DateUtilities {
     return woy;
   }
 
+  int calculateMinutesBetween(DateTime source, DateTime target) {
+    return (((target.millisecondsSinceEpoch - source.millisecondsSinceEpoch)/1000)/60).floor();
+  }
+
   DateTime getStartOfDayDate() {
     DateTime time = DateTime.now();
     return new DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);

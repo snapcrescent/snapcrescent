@@ -23,7 +23,6 @@ class LoginService extends BaseService {
         UserLoginRequest request = new UserLoginRequest(username : appConfigServerUserNameConfig.configValue , password : appConfigServerPasswordConfig.configValue);
 
         Dio dio = await getDio();
-        print(request.toJson());
         final jsonResponse = await dio.post('/login', data : request.toJson());
 
         UserLoginResponse response = UserLoginResponse.fromJson(json.decode(jsonResponse.data));

@@ -131,7 +131,6 @@ class BaseService {
     }
 
     Future<Response> downloadChunk(url, start, end, savePath, no) async {
-      print('Downloading Part ' + (no).toString() + " File " + savePath + 'temp$no');
       progress.add(0);
       --end;
       return dio.download(
@@ -167,7 +166,6 @@ class BaseService {
       final ioSink = f.openWrite(mode: FileMode.writeOnlyAppend);
       for (int i = 1; i <= chunk; ++i) {
         final file = File(savePath + 'temp$i');
-        print('Merging Part ' + (i).toString() + " File " + savePath + 'temp$i');
         await ioSink.addStream(file.openRead());
         await file.delete();
       }

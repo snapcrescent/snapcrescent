@@ -12,10 +12,11 @@ import 'package:snap_crescent/repository/metadata_repository.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/base_service.dart';
 import 'package:snap_crescent/services/notification_service.dart';
+import 'package:snap_crescent/services/settings_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
+import 'package:snap_crescent/utils/date_utilities.dart';
 
 class SyncService extends BaseService {
-  
   SyncService._privateConstructor() : super();
 
   factory SyncService() {
@@ -26,38 +27,43 @@ class SyncService extends BaseService {
 
   static bool executionInProgress = false;
 
-  Future<void> syncAssetsInBackground(Function progressCallBack) async {
-    syncAssets(
-        new SyncState(SyncProgress.CONTACTING_SERVER, 0, 0, 0, 0), progressCallBack);
-  }
+  Future<void> syncAssets(Function progressCallBack) async {
+    
+    SyncState syncMetadata = new SyncState(0, 0, 0, 0);
 
-  Future<bool> syncAssets(
-      SyncState syncMetadata, Function progressCallBack) async {
-    if (executionInProgress) {
-      return false;
+    if (!executionInProgress) {
+      bool _loggedInToServer = await SettingsService.instance.getFlag(Constants.appConfigLoggedInFlag);
+
+      if(_loggedInToServer) {
+        executionInProgress = true;
+
+        AppConfig appConfigLastSyncTimestampConfig = new AppConfig(
+            configKey: Constants.appConfigLastSyncTimestamp,
+            configValue: DateUtilities().formatDate(DateTime.now(), DateUtilities.timeStampFormat));
+          await AppConfigRepository.instance.saveOrUpdateConfig(appConfigLastSyncTimestampConfig);
+
+        await _downloadAssetsFromServer(syncMetadata, progressCallBack);
+
+        bool _autoBackupEnabled = await SettingsService.instance.getFlag(Constants.appConfigAutoBackupFlag);
+        
+        if(_autoBackupEnabled) {
+          await _uploadAssetsToServer(syncMetadata, progressCallBack);
+        }
+        
+        executionInProgress = false;
+      }
     }
-
-    executionInProgress = true;
-    bool refreshAssetStoresPostDownload =
-        await _compareLatestLocalAssetDateWithServer(
-            syncMetadata, progressCallBack);
-    bool refreshAssetStoresPostUpload =
-        await _uploadAssetsToServer(syncMetadata, progressCallBack);
-
-    executionInProgress = false;
-
-    return refreshAssetStoresPostDownload || refreshAssetStoresPostUpload;
   }
 
-  Future<bool> _compareLatestLocalAssetDateWithServer(
+  Future<bool> _downloadAssetsFromServer(
       SyncState syncMetadata, Function progressCallBack) async {
+    
     bool refreshAssetStores = false;
 
     DateTime? latestAssetDate =
         await AssetService.instance.getLatestAssetDate();
 
     try {
-      if (await AssetService.instance.isUserLoggedIn()) {
         AssetSearchCriteria assetSearchCriteria =
             AssetSearchCriteria.defaultCriteria();
         assetSearchCriteria.resultPerPage = 1;
@@ -73,13 +79,13 @@ class SyncService extends BaseService {
             // No local sync info is present
             // It is a first boot or app is reset
             // Need to sync everything
-            await _downloadAssetsFromServer(
+            await _downloadAssets(
                 null, syncMetadata, progressCallBack);
             refreshAssetStores = true;
           } else {
             if (latestServerAssetDate != latestAssetDate) {
               //Local latest asset date is not matching with server's latest asset
-              await _downloadAssetsFromServer(
+              await _downloadAssets(
                   latestAssetDate, syncMetadata, progressCallBack);
               refreshAssetStores = true;
             }
@@ -93,10 +99,9 @@ class SyncService extends BaseService {
                   .searchAndSyncInactiveRecords(assetSearchCriteria);
               refreshAssetStores = true;
             } else if (serverAssetResponse.totalResultsCount! > newAssetCount) {
-              //Server has more records than app, means some server items are were not synced due to some error and now not coming up in latest sync call
+              //Server has more records than app, means some server items were not synced due to error and coming up in latest sync call
               // Need to sync everything
-              await _downloadAssetsFromServer(
-                  null, syncMetadata, progressCallBack);
+              await _downloadAssets(null, syncMetadata, progressCallBack);
               refreshAssetStores = true;
             }
           }
@@ -108,7 +113,6 @@ class SyncService extends BaseService {
 
           refreshAssetStores = true;
         }
-      }
     } catch (e) {
       print("Network error");
     }
@@ -116,7 +120,7 @@ class SyncService extends BaseService {
     return refreshAssetStores;
   }
 
-  _downloadAssetsFromServer(DateTime? latestAssetDate, SyncState syncMetadata,
+  _downloadAssets(DateTime? latestAssetDate, SyncState syncMetadata,
       Function progressCallBack) async {
     if (!executionInProgress) {
       return;
@@ -137,8 +141,7 @@ class SyncService extends BaseService {
     syncMetadata.totalServerAssetCount = assetCountResponse.totalResultsCount!;
 
     if (syncMetadata.totalServerAssetCount > 0) {
-      syncMetadata.syncProgressState = SyncProgress.DOWNLOADING;
-      updateCaller(syncMetadata, progressCallBack);
+      postDownloadNotification(syncMetadata, progressCallBack);
 
       searchCriteria.pageNumber = 0;
       searchCriteria.resultPerPage = syncMetadata.totalServerAssetCount;
@@ -149,11 +152,8 @@ class SyncService extends BaseService {
         syncMetadata.downloadedAssetCount = _downloadedAssetCount;
 
         if (syncMetadata.downloadedAssetCount % 10 == 0) {
-          syncMetadata.syncProgressState = SyncProgress.PROCESSING;
-          updateCaller(syncMetadata, progressCallBack);
-
-          syncMetadata.syncProgressState = SyncProgress.DOWNLOADING;
-          updateCaller(syncMetadata, progressCallBack);
+          postDownloadNotification(syncMetadata, progressCallBack);
+          postDownloadNotification(syncMetadata, progressCallBack);
         }
       });
     }
@@ -164,7 +164,6 @@ class SyncService extends BaseService {
     bool refreshAssetStores = false;
     syncMetadata.uploadedAssetCount = 0;
     try {
-      if (await AssetService.instance.isUserLoggedIn()) {
         List<File> assets = await _getAssetsSetForAutoBackUp();
 
         List<File> filteredAssets = [];
@@ -187,20 +186,16 @@ class SyncService extends BaseService {
         syncMetadata.totalLocalAssetCount = filteredAssets.length;
 
         if (syncMetadata.totalLocalAssetCount > 0) {
-          syncMetadata.syncProgressState = SyncProgress.UPLOADING;
-          updateCaller(syncMetadata, progressCallBack);
+          postUploadNotification(syncMetadata, progressCallBack);
           refreshAssetStores = true;
         }
 
         for (final File asset in filteredAssets) {
-          syncMetadata.syncProgressState = SyncProgress.PROCESSING;
-          updateCaller(syncMetadata, progressCallBack);
+          postUploadNotification(syncMetadata, progressCallBack);
           await AssetService.instance.save([asset]);
           syncMetadata.uploadedAssetCount = syncMetadata.uploadedAssetCount + 1;
-          syncMetadata.syncProgressState = SyncProgress.UPLOADING;
-          updateCaller(syncMetadata, progressCallBack);
+          postUploadNotification(syncMetadata, progressCallBack);
         }
-      }
     } catch (e) {
       print("Network error");
     }
@@ -251,8 +246,19 @@ class SyncService extends BaseService {
     return assetFiles;
   }
 
-  updateCaller(SyncState syncMetadata, Function progressCallBack) {
-     NotificationService.showNotification("Syncing photos and videos", " Downloaded : " + syncMetadata.downloadedPercentage() + "/ Uploaded : " + syncMetadata.uploadPercentage());
+  postDownloadNotification(SyncState syncMetadata, Function progressCallBack) {
+    NotificationService.instance.showNotification(
+        "Downloading photos and videos",
+        "Downloaded : " + syncMetadata.downloadedPercentage(),
+        Constants.downloadProgressNotificationChannel);
+    progressCallBack(syncMetadata);
+  }
+
+  postUploadNotification(SyncState syncMetadata, Function progressCallBack) {
+    NotificationService.instance.showNotification(
+        "Uploading photos and videos",
+        "Uploaded : " + syncMetadata.uploadPercentage(),
+        Constants.uploadProgressNotificationChannel);
     progressCallBack(syncMetadata);
   }
 }
