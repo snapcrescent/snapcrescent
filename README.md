@@ -1,3 +1,10 @@
+<p align="center"> 
+  <br/>  
+  <a href="https://opensource.org/license/agpl-v3/"><img src="https://img.shields.io/badge/License-AGPLv3-blue?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ece2ec" alt="License: GNU Affero General Public License version 3"></a>
+  <br/>  
+  <br/>   
+</p>
+
 # snap-crescent
 
 ## Docker Run Commands
