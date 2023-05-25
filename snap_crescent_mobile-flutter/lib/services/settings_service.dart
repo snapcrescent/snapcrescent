@@ -6,35 +6,35 @@ import 'package:snap_crescent/services/base_service.dart';
 import 'package:snap_crescent/services/login_service.dart';
 import 'package:snap_crescent/utils/constants.dart';
 
-class SettingsService extends BaseService{
-
-  SettingsService._privateConstructor():super();
+class SettingsService extends BaseService {
+  SettingsService._privateConstructor() : super();
   static final SettingsService instance = SettingsService._privateConstructor();
 
   updateFlag(String flag, bool value) async {
-    AppConfig appConfig = new AppConfig(
-        configKey: flag,
-        configValue: value.toString());
+    AppConfig appConfig =
+        new AppConfig(configKey: flag, configValue: value.toString());
 
     await AppConfigRepository.instance.saveOrUpdateConfig(appConfig);
   }
 
-  getFlag(String flag ) async {
-    AppConfig value = await AppConfigRepository.instance
-        .findByKey(flag);
+  getFlag(String flag, [bool? defaultValue]) async {
+    AppConfig value = await AppConfigRepository.instance.findByKey(flag);
 
     bool _flag = false;
     if (value.configValue != null) {
       _flag = value.configValue == 'true' ? true : false;
+    } else if (defaultValue != null) {
+      _flag = defaultValue;
     }
 
     return _flag;
   }
 
   Future<String> getAutoBackupFolderInfo() async {
-    AppConfig value = await AppConfigRepository.instance.findByKey(Constants.appConfigAutoBackupFolders);
+    AppConfig value = await AppConfigRepository.instance
+        .findByKey(Constants.appConfigAutoBackupFolders);
 
-    String _autoBackupFolders = "None"; 
+    String _autoBackupFolders = "";
     if (value.configValue != null) {
       List<String> autoBackupFolderIdList = value.configValue!.split(",");
 
@@ -47,9 +47,9 @@ class SettingsService extends BaseService{
 
       if (autoBackupFolderNameList.length == assets.length) {
         _autoBackupFolders = "All";
-      } else {
+      } else if (autoBackupFolderNameList.length < assets.length) {
         _autoBackupFolders = autoBackupFolderNameList.join(", ");
-      }
+      } 
     }
 
     return _autoBackupFolders;
@@ -59,7 +59,7 @@ class SettingsService extends BaseService{
     AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigShowDeviceAssetsFolders);
 
-    String _showDeviceAssetsFolders = "None";     
+    String _showDeviceAssetsFolders = "";
 
     if (value.configValue != null) {
       List<String> showDeviceAssetsFolderIdList = value.configValue!.split(",");
@@ -81,10 +81,40 @@ class SettingsService extends BaseService{
     return _showDeviceAssetsFolders;
   }
 
+  Future<String> getAutoBackupFrequencyInfo() async {
+    AppConfig value = await AppConfigRepository.instance
+        .findByKey(Constants.appConfigAutoBackupFrequency);
+
+    String _autoBackupFrequency = "";
+
+    if (value.configValue != null) {
+      _autoBackupFrequency = value.configValue!;
+    }
+
+    return _autoBackupFrequency;
+  }
+
+  AutoBackupFrequencyType getReadableOfAutoBackupFrequency(String autoBackupFrequencyString) {
+    AutoBackupFrequencyType autoBackupFrequencyType = AutoBackupFrequencyType.MINUTES;
+
+    if (autoBackupFrequencyString.isNotEmpty) {
+      int autoBackupFrequency = int.parse(autoBackupFrequencyString);
+
+      if (autoBackupFrequency < 60) {
+        autoBackupFrequencyType = AutoBackupFrequencyType.MINUTES;
+      } else if (autoBackupFrequency < 60 * 24) {
+        autoBackupFrequencyType = AutoBackupFrequencyType.HOURS;
+      } else {
+        autoBackupFrequencyType = AutoBackupFrequencyType.DAYS;
+      }
+    }
+
+    return autoBackupFrequencyType;
+  }
 
   Future<List<String>> getAccountInformation() async {
-
-    AppConfig appConfigServerURL = await AppConfigRepository.instance.findByKey(Constants.appConfigServerURL);
+    AppConfig appConfigServerURL = await AppConfigRepository.instance
+        .findByKey(Constants.appConfigServerURL);
 
     List<String> result = [];
 
@@ -113,32 +143,25 @@ class SettingsService extends BaseService{
     }
 
     return result;
-    
   }
 
-  Future<UserLoginResponse> saveAccountInformation(String serverUrl, String username, String password) async {
+  Future<UserLoginResponse> saveAccountInformation(
+      String serverUrl, String username, String password) async {
+    AppConfig serverUrlConfig = new AppConfig(
+        configKey: Constants.appConfigServerURL, configValue: serverUrl);
 
-      AppConfig serverUrlConfig = new AppConfig(
-          configKey: Constants.appConfigServerURL,
-          configValue: serverUrl);
+    AppConfig serverUserNameConfig = new AppConfig(
+        configKey: Constants.appConfigServerUserName, configValue: username);
 
-      AppConfig serverUserNameConfig = new AppConfig(
-          configKey: Constants.appConfigServerUserName,
-          configValue: username);
+    AppConfig serverPasswordConfig = new AppConfig(
+        configKey: Constants.appConfigServerPassword, configValue: password);
 
-      AppConfig serverPasswordConfig = new AppConfig(
-          configKey: Constants.appConfigServerPassword,
-          configValue: password);
+    await AppConfigRepository.instance.saveOrUpdateConfig(serverUrlConfig);
+    await AppConfigRepository.instance.saveOrUpdateConfig(serverUserNameConfig);
+    await AppConfigRepository.instance.saveOrUpdateConfig(serverPasswordConfig);
 
-      await AppConfigRepository.instance.saveOrUpdateConfig(serverUrlConfig);
-      await AppConfigRepository.instance.saveOrUpdateConfig(serverUserNameConfig);
-      await AppConfigRepository.instance.saveOrUpdateConfig(serverPasswordConfig);
+    UserLoginResponse userLoginResponse = await LoginService.instance.login();
 
-      UserLoginResponse userLoginResponse = await LoginService.instance.login();
-
-      return userLoginResponse;
-
-
+    return userLoginResponse;
   }
-
 }

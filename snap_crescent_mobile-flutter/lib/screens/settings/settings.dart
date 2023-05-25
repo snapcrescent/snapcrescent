@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:snap_crescent/models/app_config.dart';
 import 'package:snap_crescent/models/user_login_response.dart';
 import 'package:snap_crescent/repository/app_config_repository.dart';
+import 'package:snap_crescent/screens/grid/assets_grid.dart';
 import 'package:snap_crescent/screens/settings/folder_selection/folder_selection.dart';
 import 'package:snap_crescent/services/asset_service.dart';
+import 'package:snap_crescent/services/notification_service.dart';
 import 'package:snap_crescent/services/settings_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
 import 'package:snap_crescent/style.dart';
@@ -18,12 +21,26 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Settings'),
-          backgroundColor: Colors.black,
-        ),
-        body: _SettingsScreenView());
+    return WillPopScope(
+      onWillPop: () {
+        Navigator.pushAndRemoveUntil<dynamic>(
+          context,
+          MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) => AssetsGridScreen(),
+          ),
+          (route) => false, //if you want to disable back feature set to false
+        );
+
+        //we need to return a future
+        return Future.value(false);
+      },
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text('Settings'),
+            backgroundColor: Colors.black,
+          ),
+          body: _SettingsScreenView()),
+    );
   }
 }
 
@@ -42,9 +59,13 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   int _syncedAssetCount = 0;
   String _autoBackupFolders = "None";
   String _showDeviceAssetsFolders = "None";
+  String _autoBackupFrequency = "";
+  String _autoBackupFrequencyString = "";
   String _appVersion = "";
-
+  AutoBackupFrequencyType _autoBackupFrequencyType = AutoBackupFrequencyType.MINUTES;
+  
   final _formKey = GlobalKey<FormState>();
+
   AutovalidateMode _autovalidateMode = AutovalidateMode.onUserInteraction;
 
   final RegExp _urlRegex = RegExp(
@@ -54,6 +75,8 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   TextEditingController serverURLController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  TextEditingController autoBackUpFrequencyController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +104,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   Future<bool> _getSettingsData() async {
     await _getAccountInfo();
+    await _getAutoBackupFrequency();
     _connectedToServer =
         await SettingsService.instance.getFlag(Constants.appConfigLoggedInFlag);
     _autoBackup = await SettingsService.instance
@@ -91,18 +115,56 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         .getFlag(Constants.appConfigShowDeviceAssetsFlag);
     _showDeviceAssetsFolders =
         await SettingsService.instance.getShowDeviceAssetsFolderInfo();
-    _latestAssetDate = DateUtilities().formatDate((await AssetService.instance.getLatestAssetDate()), DateUtilities.timeStampFormat);
+    _latestAssetDate = DateUtilities().formatDate(
+        (await AssetService.instance.getLatestAssetDate()),
+        DateUtilities.timeStampFormat);
 
     _syncedAssetCount = await AssetService.instance.countOnLocal();
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
-    _appVersion = '''Version : ${packageInfo.version}+${packageInfo.buildNumber}''' ;
+    _appVersion =
+        '''Version : ${packageInfo.version}+${packageInfo.buildNumber}''';
 
     return Future.value(true);
   }
 
+  Future<void> _getAutoBackupFrequency() async {
+    _autoBackupFrequency =
+        await SettingsService.instance.getAutoBackupFrequencyInfo();
+    _autoBackupFrequencyType = SettingsService.instance
+        .getReadableOfAutoBackupFrequency(_autoBackupFrequency);
 
+    double _autoBackupFrequencyNumber = double.parse(_autoBackupFrequency);
+
+    switch (_autoBackupFrequencyType) {
+      case AutoBackupFrequencyType.MINUTES:
+        _autoBackupFrequencyNumber = _autoBackupFrequencyNumber;
+        _autoBackupFrequencyString =
+            _autoBackupFrequencyNumber.toStringAsFixed(0) +
+                " Minute" +
+                (_autoBackupFrequencyNumber > 1 ? "s" : "");
+        break;
+      case AutoBackupFrequencyType.HOURS:
+        _autoBackupFrequencyNumber = (_autoBackupFrequencyNumber / 60);
+        _autoBackupFrequencyString =
+            _autoBackupFrequencyNumber.toStringAsFixed(0) +
+                " Hour" +
+                (_autoBackupFrequencyNumber > 1 ? "s" : "");
+        break;
+      case AutoBackupFrequencyType.DAYS:
+        _autoBackupFrequencyNumber = ((_autoBackupFrequencyNumber / 60) / 24);
+        _autoBackupFrequencyString =
+            _autoBackupFrequencyNumber.toStringAsFixed(0) +
+                " Day" +
+                (_autoBackupFrequencyNumber > 1 ? "s" : "");
+        break;
+      default:
+    }
+
+    this.autoBackUpFrequencyController.text =
+        _autoBackupFrequencyNumber.toStringAsFixed(0);
+  }
 
   Future<void> _getAccountInfo() async {
     List<String> result =
@@ -124,110 +186,235 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   _showAccountInfoDialog() {
-
     return showDialog<void>(
-    context: context,
-    barrierDismissible: false, // user must tap button!
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Account'),
-        content: Form(
-            key: _formKey,
-            child: Column(children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(10),
-                child: TextFormField(
-                  autovalidateMode: _autovalidateMode,
-                  controller: serverURLController,
-                  validator: (v) {
-                    if (v!.length > 0 && _urlRegex.hasMatch(v)) {
-                      return null;
-                    } else {
-                      return 'Please enter a valid url';
-                    }
-                  },
-                  decoration: InputDecoration(labelText: 'Server URL'),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.all(10),
-                child: TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                child: TextField(
-                  obscureText: true,
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                  ),
-                ),
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Account'),
+          content: Container(
+              height: 300,
+              child: Form(
+                  key: _formKey,
+                  child: Column(children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: TextFormField(
+                          autovalidateMode: _autovalidateMode,
+                          controller: serverURLController,
+                          validator: (v) {
+                            if (v!.length > 0 && _urlRegex.hasMatch(v)) {
+                              return null;
+                            } else {
+                              return 'Please enter a valid url';
+                            }
+                          },
+                          decoration: InputDecoration(labelText: 'Server URL')),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Username',
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      child: TextField(
+                        obscureText: true,
+                        controller: passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                        ),
+                      ),
+                    )
+                  ]))),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            if (_connectedToServer)
+              TextButton(
+                child: const Text('Logout'),
+                onPressed: () {
+                  _onLogoutPressed();
+                },
               )
-            ])),
-        actions: <Widget>[
-          if (_connectedToServer)
-            TextButton(
-              child: const Text('Logout'),
-              onPressed: () {
-                _onLogoutPressed();
-              },
-            )
-          else
-            TextButton(
-              child: const Text('Login'),
-              onPressed: () {
-                _onLoginPressed();
-              },
-            )
-        ],
-      );
-    },
-  );
-}
-
-  _showCacheClearConfirmationDialog() {
-
-    return showDialog<void>(
-    context: context,
-    barrierDismissible: false, // user must tap button!
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Are you sure?'),
-        content: const SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text('This action cannot be undone')
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          TextButton(
-            child: const Text('Ok'),
-            onPressed: () {
-              _clearCache();
-            },
-          )
-        ],
-      );
-    },
-  );
-
+            else
+              TextButton(
+                child: const Text('Login'),
+                onPressed: () {
+                  _onLoginPressed();
+                },
+              )
+          ],
+        );
+      },
+    );
   }
 
-    _clearCache() async {
+  _showAutoBackupFrequencyInfoDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Auto Backup Frequency'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                  height: 280,
+                  child: Form(
+                      key: _formKey,
+                      child: Column(children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          child: TextFormField(
+                              autovalidateMode: _autovalidateMode,
+                              controller: autoBackUpFrequencyController,
+                              validator: (v) {
+                                if (v!.length > 0) {
+                                  return null;
+                                } else {
+                                  return 'Please enter a valid value';
+                                }
+                              },
+                              decoration: InputDecoration(labelText: ''),
+                              keyboardType: TextInputType.number,
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.digitsOnly,
+                              ]),
+                        ),
+                        Container(
+                            child: Column(
+                          children: <Widget>[
+                            ListTile(
+                              title: const Text('Minutes'),
+                              leading: Radio<AutoBackupFrequencyType>(
+                                value: AutoBackupFrequencyType.MINUTES,
+                                groupValue: _autoBackupFrequencyType,
+                                onChanged: (AutoBackupFrequencyType? value) {
+                                  setState(() {
+                                    _autoBackupFrequencyType = value!;
+                                  });
+                                },
+                              ),
+                            ),
+                            ListTile(
+                              title: const Text('Hours'),
+                              leading: Radio<AutoBackupFrequencyType>(
+                                value: AutoBackupFrequencyType.HOURS,
+                                groupValue: _autoBackupFrequencyType,
+                                onChanged: (AutoBackupFrequencyType? value) {
+                                  setState(() {
+                                    _autoBackupFrequencyType = value!;
+                                  });
+                                },
+                              ),
+                            ),
+                            ListTile(
+                              title: const Text('Days'),
+                              leading: Radio<AutoBackupFrequencyType>(
+                                value: AutoBackupFrequencyType.DAYS,
+                                groupValue: _autoBackupFrequencyType,
+                                onChanged: (AutoBackupFrequencyType? value) {
+                                  setState(() {
+                                    _autoBackupFrequencyType = value!;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ))
+                      ])));
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () {
+                _saveAutoBackupFrequency();
+                 Navigator.pop(context);
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  _saveAutoBackupFrequency() async {
+    int selectedValue = int.parse(autoBackUpFrequencyController.text);
+    int minutes = 0;
+    switch (_autoBackupFrequencyType) {
+      case AutoBackupFrequencyType.MINUTES:
+        minutes = selectedValue;
+        break;
+      case AutoBackupFrequencyType.HOURS:
+        minutes = selectedValue * 60;
+        break;
+      case AutoBackupFrequencyType.DAYS:
+        minutes = selectedValue * 60 * 24;
+        break;
+      default:
+    }
+    _autoBackupFrequency = minutes.toStringAsFixed(0);
+
+    AppConfig appConfigAutoBackupFrequencyConfig = new AppConfig(
+        configKey: Constants.appConfigAutoBackupFrequency,
+        configValue: _autoBackupFrequency);
+    AppConfigRepository.instance
+        .saveOrUpdateConfig(appConfigAutoBackupFrequencyConfig);
+    await _getAutoBackupFrequency();
+    setState(() {});
+  }
+
+  _showCacheClearConfirmationDialog() {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Are you sure?'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[Text('This action cannot be undone')],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                _clearCache();
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  _clearCache() async {
     await AssetService.instance.deleteAllData();
-    _latestAssetDate = DateUtilities().formatDate((await AssetService.instance.getLatestAssetDate())!, DateUtilities.timeStampFormat);
+    _latestAssetDate = DateUtilities().formatDate(
+        (await AssetService.instance.getLatestAssetDate())!,
+        DateUtilities.timeStampFormat);
     ToastService.showSuccess("Successfully deleted locally cached data.");
     setState(() {});
     Navigator.pop(context);
@@ -243,6 +430,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         SettingsService.instance
             .updateFlag(Constants.appConfigLoggedInFlag, true);
         await _getAccountInfo();
+        await NotificationService.instance.initialize();
         setState(() {});
         Navigator.pop(context);
       } else {
@@ -276,6 +464,21 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     await SettingsService.instance
         .updateFlag(Constants.appConfigAutoBackupFlag, value);
     setState(() {});
+    if (_autoBackup) {
+      _autoBackupFolders =
+          await SettingsService.instance.getAutoBackupFolderInfo();
+
+      if (_autoBackupFolders.isEmpty) {
+        AppConfig appConfigAutoBackupFoldersConfig = new AppConfig(
+            configKey: Constants.appConfigAutoBackupFolders, configValue: "");
+
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => FolderSelectionScreen(
+                    appConfigAutoBackupFoldersConfig))).then(onBackFromChild);
+      }
+    }
   }
 
   _updateShowDeviceAssetsFlag(bool value) async {
@@ -283,6 +486,24 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     await SettingsService.instance
         .updateFlag(Constants.appConfigShowDeviceAssetsFlag, value);
     setState(() {});
+
+    if (_showDeviceAssets) {
+      _showDeviceAssetsFolders =
+          await SettingsService.instance.getShowDeviceAssetsFolderInfo();
+
+      if (_showDeviceAssetsFolders.isEmpty) {
+        AppConfig appConfigShowDeviceAssetsFoldersConfig = new AppConfig(
+            configKey: Constants.appConfigShowDeviceAssetsFolders,
+            configValue: "");
+
+        Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => FolderSelectionScreen(
+                        appConfigShowDeviceAssetsFoldersConfig)))
+            .then(onBackFromChild);
+      }
+    }
   }
 
   _settingsList(BuildContext context) {
@@ -301,25 +522,40 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           _showAccountInfoDialog();
         },
       ),
-      ListTile(
-        title: Text("Auto Backup", style: TitleTextStyle),
-        subtitle: Text(
-            "Keep your photos and videos by backing them up to your snap-crescent server"),
-        leading: Container(
-          width: 40,
-          alignment: Alignment.center,
-          child: const Icon(Icons.cloud_upload, color: Colors.teal),
+      if (_connectedToServer)
+        ListTile(
+          title: Text("Auto Backup", style: TitleTextStyle),
+          subtitle: Text(
+              "Automatically backup your photos and videos to your snap-crescent server"),
+          leading: Container(
+            width: 40,
+            alignment: Alignment.center,
+            child: const Icon(Icons.cloud_upload, color: Colors.teal),
+          ),
+          trailing: Switch(
+              value: _autoBackup,
+              onChanged: (bool value) {
+                _updateAutoBackupFlag(value);
+              }),
         ),
-        trailing: Switch(
-            value:_autoBackup,
-            onChanged: (bool value) {
-              _updateAutoBackupFlag(value);
-            }),
-      ),
+      if (_autoBackup)
+        ListTile(
+          title: Text("Auto Backup Frequency ", style: TitleTextStyle),
+          subtitle: Text(_autoBackupFrequencyString),
+          leading: Container(
+            width: 40,
+            alignment: Alignment.center,
+            child: const Icon(Icons.sync, color: Colors.teal),
+          ),
+          onTap: () {
+            _showAutoBackupFrequencyInfoDialog();
+          },
+        ),
       if (_autoBackup)
         ListTile(
           title: Text("Backup Folders", style: TitleTextStyle),
-          subtitle: Text(_autoBackupFolders),
+          subtitle:
+              Text(_autoBackupFolders.isNotEmpty ? _autoBackupFolders : "None"),
           leading: Container(
             width: 40,
             alignment: Alignment.center,
@@ -339,24 +575,25 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           },
         ),
       ListTile(
-        title: Text("Show Device Photos And Videos", style: TitleTextStyle),
-        subtitle: Text(
-            "Show photos and videos on your device on snap crescent"),
-        leading: Container(
-          width: 40,
-          alignment: Alignment.center,
-          child: const Icon(Icons.photo_album, color: Colors.teal),
-        ),
-        trailing: Switch(
-            value:_showDeviceAssets,
-            onChanged: (bool value) {
-              _updateShowDeviceAssetsFlag(value);
-            })
-      ),
+          title: Text("Show Device Photos And Videos", style: TitleTextStyle),
+          subtitle:
+              Text("Show photos and videos on your device on snap crescent"),
+          leading: Container(
+            width: 40,
+            alignment: Alignment.center,
+            child: const Icon(Icons.photo_album, color: Colors.teal),
+          ),
+          trailing: Switch(
+              value: _showDeviceAssets,
+              onChanged: (bool value) {
+                _updateShowDeviceAssetsFlag(value);
+              })),
       if (_showDeviceAssets)
         ListTile(
           title: Text("Device Folders", style: TitleTextStyle),
-          subtitle: Text(_showDeviceAssetsFolders),
+          subtitle: Text(_showDeviceAssetsFolders.isNotEmpty
+              ? _showDeviceAssetsFolders
+              : "None"),
           leading: Container(
             width: 40,
             alignment: Alignment.center,
@@ -376,12 +613,11 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           },
         ),
       ListTile(
-        title: Text("Clear Locally Cached Photos and Videos",
-            style: TitleTextStyle),
-        subtitle: Text("Latest Synced Record On: " +
+        title: Text("Delete Synced Photos and Videos", style: TitleTextStyle),
+        subtitle: Text("Last Sync: " +
             (_latestAssetDate.isEmpty ? "Never" : _latestAssetDate) +
-            " - " +
-            "Record Count : " +
+            "\n" +
+            "Synced Pictures and Videos Count : " +
             _syncedAssetCount.toString()),
         leading: Container(
           width: 40,
@@ -393,16 +629,14 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         },
       ),
       ListTile(
-        title: Text("About App",
-            style: TitleTextStyle),
+        title: Text("About App", style: TitleTextStyle),
         subtitle: Text(_appVersion),
         leading: Container(
           width: 40,
           alignment: Alignment.center,
           child: const Icon(Icons.ac_unit_outlined, color: Colors.teal),
         ),
-        onTap: () {
-        },
+        onTap: () {},
       ),
     ]);
   }

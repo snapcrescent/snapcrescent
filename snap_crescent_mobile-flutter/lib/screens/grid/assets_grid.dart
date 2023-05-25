@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
+import 'package:snap_crescent/models/sync_state.dart';
 import 'package:snap_crescent/screens/grid/asset_detail.dart';
 import 'package:snap_crescent/screens/settings/settings.dart';
 import 'package:snap_crescent/services/toast_service.dart';
@@ -14,6 +16,7 @@ import 'package:snap_crescent/stores/asset/asset_store.dart';
 import 'package:snap_crescent/utils/common_utilities.dart';
 import 'package:snap_crescent/utils/constants.dart';
 import 'package:snap_crescent/widgets/asset_thumbnail/asset_thumbnail.dart';
+import 'package:snap_crescent/widgets/config_server_prompt/config_server_prompt.dart';
 
 class AssetsGridScreen extends StatelessWidget {
   static const routeName = '/assets';
@@ -40,6 +43,8 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   Timer? timer;
   int periodicInitializerPageNumber = 0;
+
+  
 
   _onAssetTap(BuildContext context, int assetIndex) {
     AssetDetailArguments arguments =
@@ -96,6 +101,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
   @override
   void initState() {
     super.initState();
+    _listenForNotificationData();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
@@ -117,6 +123,20 @@ class _AssetGridViewState extends State<_AssetGridView> {
   void dispose() {
     timer?.cancel();
     super.dispose();
+  }
+
+  void _listenForNotificationData() {
+    final backgroundService = FlutterBackgroundService();
+    backgroundService.on('update').listen((Map<String, dynamic>? $event)  {
+       SyncState syncMetadata =  SyncState.fromJson($event!["syncMetadata"]);
+       if(syncMetadata.downloadedAssetCount % 500 == 0) {
+          _assetStore.refreshStore();
+       }
+    }, onError: (e, s) {
+      print('error listening for updates: $e, $s');
+    }, onDone: () {
+      print('background listen closed');
+    });
   }
 
   _periodicallyLoadAssets() {
@@ -274,8 +294,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
                 child: _gridView(orientation, assetStore))));
   }
 
-
-  _getLeadingIcon() {
+   _getLeadingIcon() {
     if (_assetStore.isAnyItemSelected()) {
       return IconButton(
         onPressed: () {
@@ -324,31 +343,15 @@ class _AssetGridViewState extends State<_AssetGridView> {
               actions: [
                        PopupMenuButton<String>(
                         onSelected: (String result) {
-                          if (result == "Photos & Videos") {
-                                  Navigator.pushAndRemoveUntil<dynamic>(
-                                      context,
-                                      MaterialPageRoute<dynamic>(
-                                        builder: (BuildContext context) => AssetsGridScreen(),
-                                      ),
-                                      (route) => false,//if you want to disable back feature set to false
-                                    );
-                          } else if (result == "Settings") {
-                              Navigator.pushAndRemoveUntil<dynamic>(
-                                      context,
-                                      MaterialPageRoute<dynamic>(
-                                        builder: (BuildContext context) => SettingsScreen(),
-                                      ),
-                                      (route) => true,//if you want to disable back feature set to false
-                                    );
+                          if (result == "Settings") {
+                              Navigator.push(
+                              context,
+                              MaterialPageRoute<dynamic>(
+                                  builder: (BuildContext context) => SettingsScreen()));
                           }
                         },
                         itemBuilder: (BuildContext context) {
                           return [
-                            PopupMenuItem(
-                              child: Text("Photos & Videos",),
-                              value: "Photos & Videos",
-                            ),
-                             
                             PopupMenuItem(
                               child: Text("Settings",),
                               value: "Settings",
@@ -388,7 +391,8 @@ class _AssetGridViewState extends State<_AssetGridView> {
                                   ))
                               : Container(color: Colors.black)))
             ],
-          ))
+          )),
+          ConfigServerPromptWidget(),
         ],
       ),
     );
