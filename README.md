@@ -5,7 +5,9 @@
   <br/>   
 </p>
 
-# snap-crescent
+<h3 align="center">Snapcrescent</h3>
+<h4 align="center">Self-hosted photo and video backup solution</h4>
+
 
 ## Docker Run Commands
 
