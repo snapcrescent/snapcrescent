@@ -10,7 +10,6 @@ import { Asset, AssetType } from 'src/app/asset/asset.model';
 import { formatDate } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { PageDataService } from 'src/app/core/services/stores/page-data.service';
-import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-asset-grid',
@@ -206,6 +205,8 @@ constructor(
         this.assetsGroups.push(assetsGroup);
       }
 
+      asset.thumbnail.url =  `/thumbnail/${asset.thumbnail.id}`;
+
       assetsGroup.assets.push(asset)
 
     });
@@ -323,9 +324,5 @@ constructor(
 
   resetPaginatorPageSize() {
     this.paginator._changePageSize(this.pageSizeOptions[0]);
-  }
-
-  getThumbnailStreamUrl(asset:Asset) {
-    return `${environment.backendUrl}/thumbnail/${asset.thumbnail.id}`;
   }
 }

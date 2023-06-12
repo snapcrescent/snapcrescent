@@ -77,10 +77,10 @@ export class AssetService extends BaseService {
 
 
   getAssetTypesAsOptions(): Observable<Option[]> {
-    const questionTypeOptions: Option[] = [];
+    const assetTypeOptions: Option[] = [];
 
     for (const [key, value] of Object.entries(AssetType)) {
-      questionTypeOptions.push({
+      assetTypeOptions.push({
         value:value.id,
         label:value.label,
         rawValue:value
@@ -88,7 +88,7 @@ export class AssetService extends BaseService {
 
   }
 
-    return of(questionTypeOptions);
+    return of(assetTypeOptions);
 }
 
  

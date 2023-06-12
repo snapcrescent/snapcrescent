@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.codeinsight.snap_crescent.common.BaseConverter;
-import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
 import com.codeinsight.snap_crescent.metadata.MetadataConverter;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailConverter;
@@ -71,13 +70,6 @@ public class AssetConverter extends BaseConverter<Asset, UiAsset> {
 			if (entity.getMetadataId() != null) {
 				bean.setMetadataId(entity.getMetadataId());
 				bean.setMetadata(metadataConverter.getBeanFromEntity(entity.getMetadata(), resultType));
-				
-				if(resultType == ResultType.FULL) {
-					if(entity.getAssetTypeEnum() == AssetType.PHOTO) {
-						//bean.getMetadata().setBase64EncodedPhoto(Base64.getEncoder().encodeToString(fileService.readFileBytes(FILE_TYPE.PHOTO,entity.getMetadata().getPath(), entity.getMetadata().getInternalName())));	
-					}
-				}
-				
 			}
 
 			if (entity.getThumbnailId() != null) {

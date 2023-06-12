@@ -8,8 +8,8 @@ export class Asset extends BaseUiBean{
 }
 
 export class Thumbnail extends BaseUiBean{
-  name:string
-  base64EncodedThumbnail:string;
+  name:string;
+  url:string;
 }
 
 export class Metadata extends BaseUiBean{

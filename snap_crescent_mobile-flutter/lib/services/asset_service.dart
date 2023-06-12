@@ -118,16 +118,16 @@ class AssetService extends BaseService {
     try {
       if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
-        Options options = await getHeaders();
+        
         final url = downloadAssetByIdUrl(await getServerUrl(), assetId);
 
         String directory = await CommonUtilities().getTempDownloadsDirectory();
         String fullPath = '$directory/$assetName';
 
         if(assetType == AppAssetType.PHOTO) {
-          await download(dio, url, options, fullPath);
+          await download(dio, url, fullPath);
         } else{
-          await downloadWithChunks(dio, url, options, fullPath);
+          await downloadWithChunks(dio, url, fullPath);
         }
         
         File file = new File(fullPath);
@@ -216,11 +216,10 @@ class AssetService extends BaseService {
       if (!thumbnailFile.existsSync()) {
         Dio dio = await getDio();
 
-        Options options = await getHeaders();
         final url = getThumbnailByIdUrl(await getServerUrl(), thumbnail.id!);
 
         String directory = await CommonUtilities().getThumbnailDirectory();
-        await download(dio, url, options, '$directory/${thumbnail.name}');
+        await download(dio, url, '$directory/${thumbnail.name}');
       }
     } on DioError catch (ex) {
       print(ex.message);

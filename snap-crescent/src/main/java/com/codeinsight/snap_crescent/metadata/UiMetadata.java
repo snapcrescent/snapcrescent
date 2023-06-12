@@ -21,5 +21,6 @@ public class UiMetadata extends BaseUiBean {
 	private String internalName;
 	private String mimeType;
 	private int orientation;
+	private long size;
 
 }

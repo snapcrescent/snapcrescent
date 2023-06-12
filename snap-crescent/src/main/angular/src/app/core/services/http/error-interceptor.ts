@@ -43,7 +43,6 @@ export class ErrorInterceptor implements HttpInterceptor {
             } else {
                 this.alertService.showError("Unable to connect to server");
             }
-
             return throwError(() => new Error(res))
           }
         }

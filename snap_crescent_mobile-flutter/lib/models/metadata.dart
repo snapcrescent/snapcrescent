@@ -6,6 +6,7 @@ class Metadata extends BaseUiBean {
   String? internalName;
   String? mimeType;
   int? orientation;
+  int? size;
 
   Metadata(
       {
@@ -14,7 +15,8 @@ class Metadata extends BaseUiBean {
       this.name,
       this.internalName,
       this.mimeType,
-      this.orientation
+      this.orientation,
+      this.size
       })
       : super(
             id: bean.id);
@@ -29,6 +31,7 @@ class Metadata extends BaseUiBean {
         internalName: json['internalName'],
         mimeType: json['mimeType'],
         orientation: json['orientation'],
+        size : json['size']
         );
   }
 
@@ -42,6 +45,7 @@ class Metadata extends BaseUiBean {
         internalName: map['INTERNAL_NAME'],
         mimeType: map['MIME_TYPE'],
         orientation: map['ORIENTATION'],
+        size : map['SIZE']
         );
   }
 
@@ -53,6 +57,7 @@ class Metadata extends BaseUiBean {
     map['INTERNAL_NAME'] = internalName;
     map['MIME_TYPE'] = mimeType;
     map['ORIENTATION'] = orientation;
+    map['SIZE'] = size;
 
     return map;
   }

@@ -47,10 +47,10 @@ public class SecurityConfig {
 	@Bean
 	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
-			@Override
-			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**").allowedOrigins("*");
-			}
+			
+			  @Override public void addCorsMappings(CorsRegistry registry) {
+			  registry.addMapping("/**").allowedOrigins("*"); }
+			 
 		};
 	}
 	
@@ -88,7 +88,6 @@ public class SecurityConfig {
     		.antMatchers("/logout").permitAll()
     		.antMatchers("/logout").permitAll()
     		.antMatchers("/websocket/**").permitAll()
-    		.antMatchers("/thumbnail/**").permitAll()
     		.antMatchers("/asset/**/stream").permitAll()
     		.antMatchers("/asset/**/download").permitAll()
     		
