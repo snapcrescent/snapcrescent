@@ -10,6 +10,7 @@ public class Constant {
 
 	public static final String METADATA_FILE_NAME = "File Name";
 	public static final String METADATA_FILE_SIZE = "File Size";
+	public static final String METADATA_FILE_SIZE_VALUE_SUFFIX = "bytes";
 	public static final String METADATA_FILE_MODIFIED_DATE = "File Modified Date";
 	public static final String METADATA_FILE_TYPE_NAME = "Detected File Type Name";
 	public static final String METADATA_FILE_TYPE_LONG_NAME = "Detected File Type Long Name";

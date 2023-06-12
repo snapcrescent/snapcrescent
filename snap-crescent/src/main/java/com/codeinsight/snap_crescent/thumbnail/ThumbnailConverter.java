@@ -53,16 +53,8 @@ public class ThumbnailConverter extends BaseConverter<Thumbnail, UiThumbnail>{
 
 		UiThumbnail bean = new UiThumbnail();
 
-		
-		
 		try {
 			bean.setName(entity.getName());
-			
-			if(resultType == ResultType.SEARCH) {
-				//bean.setBase64EncodedThumbnail(Base64.getEncoder().encodeToString(fileService.readFileBytes(FILE_TYPE.THUMBNAIL,entity.getPath(), entity.getName())));	
-			}
-			
-			
 			populateBeanWithAuditValues(bean, entity, resultType);
 
 		} catch (Exception e) {

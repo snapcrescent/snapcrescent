@@ -4,10 +4,6 @@ import { Asset, AssetType } from 'src/app/asset/asset.model';
 import { BaseComponent } from 'src/app/core/components/base.component';
 import { AssetService } from 'src/app/asset/asset.service';
 import { environment } from 'src/environments/environment';
-import { SessionService } from 'src/app/core/services/session.service';
-import { UserLoginResponse } from 'src/app/login/login.model';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-asset-full-screen-view',
@@ -37,8 +33,6 @@ export class AssetFullScreenViewComponent extends BaseComponent implements OnIni
 
   constructor(
     private assetService: AssetService,
-    private httpClient: HttpClient,
-    private sessionService: SessionService
     
   ) {
       super();
@@ -83,10 +77,6 @@ export class AssetFullScreenViewComponent extends BaseComponent implements OnIni
 
   sourceOpen(mediaSource: MediaSource) {
     const sourceBuffer = mediaSource.addSourceBuffer(this.mimeCodec);
-
-    
-      //const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-      //return this.httpClient.get(`/asset/${this.currentAssetId}/stream`, { responseType: "blob" })
       return this.assetService.stream( this.currentAssetId)
         .subscribe((blob:any) => {
           sourceBuffer.addEventListener("updateend", () => {

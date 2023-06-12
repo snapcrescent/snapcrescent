@@ -4,7 +4,6 @@
 
 export const environment = {
   backendUrl: "http://localhost:8080",
-  videoServerUrlPort:"8000",
   production: false
 };
 
