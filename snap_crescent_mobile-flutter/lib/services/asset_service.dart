@@ -94,12 +94,32 @@ class AssetService extends BaseService {
     return new List<Asset>.from(data.objects!);
   }
 
-  String getAssetByIdUrl(String serverURL, int assetId) {
-    return serverURL + '/asset/$assetId/stream';
+  Future<BaseResponseBean<int, Asset>> getAssetById(int assetId) async  {
+
+  try {
+      if (await super.isUserLoggedIn()) {
+        Dio dio = await getDio();
+        Options options = await getHeaders();
+        final response = await dio.get('/asset/$assetId', options: options);
+
+        return BaseResponseBean.fromJson(response.data, Asset.fromJsonModel);
+      } else {
+        return new BaseResponseBean.defaultResponse();
+      }
+    } on DioError catch (ex) {
+      if (ex.type == DioErrorType.connectionTimeout) {
+        throw Exception("Connection  Timeout Exception");
+      }
+      throw Exception(ex.message);
+    }
   }
 
-  String downloadAssetByIdUrl(String serverURL, int assetId) {
-    return serverURL + '/asset/$assetId/download';
+  String streamAssetByIdUrl(String serverURL, String token) {
+    return serverURL + '/asset/$token/stream';
+  }
+
+  String downloadAssetByIdUrl(String serverURL, String token) {
+    return serverURL + '/asset/$token/download';
   }
 
   Future<bool> permanentDownloadAssetById(int assetId, String assetName, AppAssetType assetType) async {
@@ -118,8 +138,9 @@ class AssetService extends BaseService {
     try {
       if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
-        
-        final url = downloadAssetByIdUrl(await getServerUrl(), assetId);
+
+        BaseResponseBean<int, Asset> response = await getAssetById(assetId);
+        final url = downloadAssetByIdUrl(await getServerUrl(), response.object!.token!);
 
         String directory = await CommonUtilities().getTempDownloadsDirectory();
         String fullPath = '$directory/$assetName';

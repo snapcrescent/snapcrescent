@@ -55,7 +55,6 @@ import { ScreenSizeDetectorComponent } from './screen-size-detector/screen-size-
 import { AssetFullScreenViewComponent } from './asset-full-screen-view/asset-full-screen-view.component';
 import { SideBarComponent } from './side-bar/side-bar.component';
 import { SecurePipe } from '../core/pipes/secure.pipe';
-import { SecuredImageComponent } from './secure-image/secured-image.component';
 
 
 const modules = [
@@ -110,7 +109,7 @@ const components = [
   DialogComponent,
   BreadcrumbComponent,
   DragAndDropDirective,
-  SecuredImageComponent
+  SecurePipe
 ];
 
 

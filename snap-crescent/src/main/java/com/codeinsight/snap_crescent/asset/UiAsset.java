@@ -27,5 +27,7 @@ public class UiAsset extends BaseUiBean {
 	private Long metadataId;
 	
 	private Boolean favorite = false;
+	
+	private String token;
 
 }

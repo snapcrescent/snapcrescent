@@ -69,7 +69,7 @@
                                 <span *ngIf="asset.assetType === AssetType.VIDEO.id" class="video material-symbols-outlined">
                                     play_circle
                                 </span>
-                                <secured-image  [src]="asset.thumbnail.url"></secured-image>
+                                <img  class="asset img-fluid" alt="Asset"  [src]="asset.thumbnail.url | secure |async"/>
                             </div>
                         </mat-card-content>
                     </mat-card>
