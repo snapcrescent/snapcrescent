@@ -31,10 +31,6 @@ export class AssetService extends BaseService {
     return this.httpClient.get(this.entityUrl + '/' + id);
   }
 
-  stream(id: number) {
-    return this.httpClient.get(`${this.entityUrl}/${id}/stream`, {responseType: "blob"});
-  }
-
   readLite(id: number): Observable<BaseResponseBean<number, Asset>> {
     return this.httpClient.get(this.entityUrl + '/' + id + '/lite');
   }

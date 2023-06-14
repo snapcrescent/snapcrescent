@@ -118,7 +118,7 @@ class BaseService {
     Options options = await getHeaders();
 
     const firstChunkSize = 1 * 1024 * 1024;
-    const chunkSize = 50 * 1024 * 1024;
+    const chunkSize = 5 * 1024 * 1024;
     const maxParallelChunk = 5;
 
     int total = 0;
@@ -186,7 +186,7 @@ class BaseService {
       int chunk = totalChunks;
       var chunkBatch = <int>{};
 
-      if (totalChunks > 1) {
+      if (totalChunks > 0) {
         if (totalChunks > maxParallelChunk) {
           int numberOfBatches = (totalChunks / maxParallelChunk).floor();
           int lastBatchSize = totalChunks % maxParallelChunk;

@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snap_crescent/models/asset.dart';
 import 'package:snap_crescent/models/asset_detail_arguments.dart';
+import 'package:snap_crescent/models/base_response_bean.dart';
 import 'package:snap_crescent/models/unified_asset.dart';
 import 'package:snap_crescent/services/asset_service.dart';
 import 'package:snap_crescent/services/toast_service.dart';
@@ -79,7 +80,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
     if (unifiedAsset!.assetSource == AssetSource.CLOUD) {
       Asset asset = unifiedAsset.asset!;
       String assetURL =
-          AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!);
+          AssetService.instance.streamAssetByIdUrl(serverUrl, asset.token!);
 
       dataSource = BetterPlayerDataSource(
         BetterPlayerDataSourceType.network,
@@ -125,7 +126,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
           minScale: PhotoViewComputedScale.contained * 0.8,
           maxScale: PhotoViewComputedScale.covered * 1.8,
           imageProvider: NetworkImage(
-              AssetService.instance.getAssetByIdUrl(serverUrl, asset.id!),
+              AssetService.instance.streamAssetByIdUrl(serverUrl, asset.token!),
               headers: headers));
     } else if (unifiedAsset.assetSource == AssetSource.DEVICE &&
         object is File) {
@@ -194,18 +195,46 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
                 ? _assetStore.assetList[index].asset
                 : _assetStore.assetList[index].assetEntity!.file),
         builder: (BuildContext context, AsyncSnapshot<Object?> snapshot) {
+          
           if (snapshot.data == null) {
             return Container();
           } else {
             currentAsset = _assetStore.assetList[index];
-            return Container(
+
+            if(currentAsset!.assetSource == AssetSource.DEVICE) {
+                return Container(
                 width: 90,
                 height: 90,
                 child: currentAsset!.assetType == AppAssetType.PHOTO
                     ? _imageBanner(currentAsset!, snapshot.data)
                     : _videoPlayer(currentAsset!, snapshot.data));
+            } else {
+              return FutureBuilder<Object?>(
+                future: Future.value(_getAssetById(index)),
+                builder: (BuildContext context, AsyncSnapshot<Object?> snapshot) {
+
+                  if (snapshot.data == null) {
+                    return Container();
+                  } else {
+
+                  return Container(
+                    width: 90,
+                    height: 90,
+                    child: currentAsset!.assetType == AppAssetType.PHOTO
+                        ? _imageBanner(currentAsset!, snapshot.data)
+                        : _videoPlayer(currentAsset!, snapshot.data));
+                  }
+                }
+              );
+            }            
           }
         });
+  }
+
+  _getAssetById (int index) async {
+      BaseResponseBean<int, Asset> response = await AssetService.instance.getAssetById(_assetStore.assetList[index].asset!.id!);
+      _assetStore.assetList[index].asset!.token = response.object!.token!;
+      return _assetStore.assetList[index].asset;
   }
 
   _pageView() {
