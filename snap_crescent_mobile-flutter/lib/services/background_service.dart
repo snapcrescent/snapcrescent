@@ -130,6 +130,4 @@ class BackgroundService extends BaseService {
       service.startService();
     
   }
-
-  static _progressCallBack(SyncState syncMetadata) {}
 }

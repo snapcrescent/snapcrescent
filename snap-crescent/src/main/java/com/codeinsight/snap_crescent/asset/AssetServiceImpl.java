@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -18,6 +19,7 @@ import javax.imageio.ImageIO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,11 +29,13 @@ import com.codeinsight.snap_crescent.common.beans.BaseResponseBean;
 import com.codeinsight.snap_crescent.common.services.BaseService;
 import com.codeinsight.snap_crescent.common.utils.AppConfigKeys;
 import com.codeinsight.snap_crescent.common.utils.Constant;
-import com.codeinsight.snap_crescent.common.utils.DateUtils;
 import com.codeinsight.snap_crescent.common.utils.Constant.AssetType;
 import com.codeinsight.snap_crescent.common.utils.Constant.FILE_TYPE;
 import com.codeinsight.snap_crescent.common.utils.Constant.ResultType;
+import com.codeinsight.snap_crescent.common.utils.DateUtils;
 import com.codeinsight.snap_crescent.common.utils.FileService;
+import com.codeinsight.snap_crescent.common.utils.JsonUtils;
+import com.codeinsight.snap_crescent.common.utils.StringEncrypter;
 import com.codeinsight.snap_crescent.common.utils.StringUtils;
 import com.codeinsight.snap_crescent.metadata.Metadata;
 import com.codeinsight.snap_crescent.metadata.MetadataRepository;
@@ -39,6 +43,7 @@ import com.codeinsight.snap_crescent.metadata.MetadataService;
 import com.codeinsight.snap_crescent.thumbnail.Thumbnail;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailRepository;
 import com.codeinsight.snap_crescent.thumbnail.ThumbnailService;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Service
 public class AssetServiceImpl extends BaseService implements AssetService {
@@ -213,7 +218,18 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 	@Override
 	public UiAsset getById(Long id) {
-		return assetConverter.getBeanFromEntity(assetRepository.findById(id), ResultType.FULL);
+		
+		UiAsset bean = null;
+		
+		try {
+			Asset entity = assetRepository.findById(id);
+			bean = assetConverter.getBeanFromEntity(entity, ResultType.FULL);
+			bean.setToken(getSignedAssetStreamToken(entity));	
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return bean;
 	}
 
 	@Override
@@ -235,24 +251,6 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 				asset.getMetadata().getInternalName());
 	}
 	
-	@Override
-	@Transactional
-	public String getFilePathByAssetById(Long id) throws Exception {
-		Asset asset = assetRepository.findById(id);
-		
-		FILE_TYPE fileType = null;
-
-		if (asset.getAssetTypeEnum() == AssetType.PHOTO) {
-			fileType = FILE_TYPE.PHOTO;
-		}
-
-		if (asset.getAssetTypeEnum() == AssetType.VIDEO) {
-			fileType = FILE_TYPE.VIDEO;
-		}
-		
-		return fileService.getFile(fileType, asset.getMetadata().getPath(), asset.getMetadata().getInternalName()).getAbsolutePath();
-	}
-
 	@Override
 	@Transactional
 	public void updateMetadata(Long id) throws Exception {
@@ -452,6 +450,57 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 	}
 
-	
+	private String getSignedAssetStreamToken(Asset asset) throws Exception {
+		
+		FILE_TYPE fileType = null;
+		
+		//Default 10 seconds
+		int tokenAge = 0;
+		
+		if (asset.getAssetType() == AssetType.PHOTO.getId()) {
+			fileType = FILE_TYPE.PHOTO;
+		}
 
+		if (asset.getAssetType() == AssetType.VIDEO.getId()) {
+			
+			tokenAge = ((int)asset.getMetadata().getDuration()) * 2;
+			fileType = FILE_TYPE.VIDEO;
+		}
+		
+		if(tokenAge < 10) {
+			tokenAge = 30 * 60; // 30 Minutes
+		}
+		
+		String filePath = fileService.getFile(fileType, asset.getMetadata().getPath(), asset.getMetadata().getInternalName()).getAbsolutePath();
+		
+		SecuredAssetStreamDTO payload = new SecuredAssetStreamDTO();
+		
+		Calendar validTill = Calendar.getInstance();
+		validTill.add(Calendar.SECOND, tokenAge);
+		
+		payload.setFilePath(filePath);
+		payload.setAssetType(asset.getAssetType());
+		payload.setValidTill(validTill.getTimeInMillis());
+		
+		String payloadJson = JsonUtils.writeJsonString(payload);
+		String encryptedPayload = StringEncrypter.encrypt(payloadJson);
+		
+		return encryptedPayload;
+	}
+	
+	@Override
+	@Transactional
+	public SecuredAssetStreamDTO getAssetDetailsFromToken(String encryptedPayload) throws Exception {
+		
+		String payloadJson = StringEncrypter.decrypt(encryptedPayload);
+		SecuredAssetStreamDTO payload = JsonUtils.getObjectFromJson(payloadJson, new TypeReference<SecuredAssetStreamDTO>() {});
+		
+		Calendar currentTime = Calendar.getInstance();
+		
+		if(payload.getValidTill() > currentTime.getTimeInMillis()) {
+			return payload;
+		} else {
+			throw new AuthenticationServiceException("Invalid URL");
+		}
+	}
 }

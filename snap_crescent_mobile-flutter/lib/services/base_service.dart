@@ -81,7 +81,8 @@ class BaseService {
     return query;
   }
 
-  Future download(Dio dio, String url, Options options, String savePath) async {
+  Future download(Dio dio, String url, String savePath) async {
+    Options options = await getHeaders();
     options.responseType = ResponseType.bytes;
     options.followRedirects = false;
     options.validateStatus = (status) {
@@ -110,12 +111,14 @@ class BaseService {
   Future downloadWithChunks(
     Dio dio,
     url,
-    Options options,
     savePath, {
     ProgressCallback? onReceiveProgress,
   }) async {
+
+    Options options = await getHeaders();
+
     const firstChunkSize = 1 * 1024 * 1024;
-    const chunkSize = 50 * 1024 * 1024;
+    const chunkSize = 5 * 1024 * 1024;
     const maxParallelChunk = 5;
 
     int total = 0;
@@ -131,15 +134,14 @@ class BaseService {
     }
 
     Future<Response> downloadChunk(url, start, end, savePath, no) async {
+      options.headers!["range"] = 'bytes=$start-$end';
       progress.add(0);
       --end;
       return dio.download(
         url,
         savePath + 'temp$no',
         onReceiveProgress: createCallback(no),
-        options: Options(
-          headers: {'range': 'bytes=$start-$end'},
-        ),
+        options: options,
       );
     }
 
@@ -184,7 +186,7 @@ class BaseService {
       int chunk = totalChunks;
       var chunkBatch = <int>{};
 
-      if (totalChunks > 1) {
+      if (totalChunks > 0) {
         if (totalChunks > maxParallelChunk) {
           int numberOfBatches = (totalChunks / maxParallelChunk).floor();
           int lastBatchSize = totalChunks % maxParallelChunk;

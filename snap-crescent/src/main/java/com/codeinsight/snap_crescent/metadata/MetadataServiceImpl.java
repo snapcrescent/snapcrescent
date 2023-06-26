@@ -66,7 +66,10 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 			metadata.setName(originalFilename);
 			metadata.setInternalName(StringUtils.generateFinalFileName(file.getName()));
 			
-			metadata.setSize(metaDataMap.get(Constant.METADATA_FILE_SIZE));
+			String sizeString = metaDataMap.get(Constant.METADATA_FILE_SIZE);
+			sizeString = sizeString.replace(Constant.METADATA_FILE_SIZE_VALUE_SUFFIX, "").trim();
+			
+			metadata.setSize(Long.parseLong(sizeString));
 			Date modifiedDate = new Date(file.lastModified());
 			
 			

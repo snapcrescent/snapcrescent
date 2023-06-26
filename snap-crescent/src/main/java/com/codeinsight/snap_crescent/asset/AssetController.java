@@ -68,35 +68,27 @@ public class AssetController extends BaseController {
 		return response;
 	}
 
-	@GetMapping(value = "/asset/{id}/raw")
-	public ResponseEntity<byte[]> getAssetById(@PathVariable Long id) {
-		try {
-			return new ResponseEntity<>(assetService.getAssetById(id), HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	@GetMapping(value = "/asset/{token}/stream")
+	public ResponseEntity<ResourceRegion> streamVideoById(@PathVariable String token,
+			@RequestHeader(value = "Range", required = false) String httpRangeList) throws Exception {
+		return getChunkedResponse(token, httpRangeList, ResourceRegionType.STREAM);
+	}
+	
+	@GetMapping(value = "/asset/{token}/download")
+	public ResponseEntity<ResourceRegion> downloadPhotoById(@PathVariable String token,
+			@RequestHeader(value = "Range", required = false) String httpRangeList) throws Exception {
+		return getChunkedResponse(token, httpRangeList, ResourceRegionType.DOWNLOAD);
 	}
 
-	@GetMapping(value = "/asset/{id}/stream")
-	public ResponseEntity<ResourceRegion> streamAssetById(@PathVariable Long id,
-			@RequestHeader(value = "Range", required = false) String httpRangeList) {
-		return getChunkedResponse(id, httpRangeList, ResourceRegionType.STREAM);
-	}
-
-	@GetMapping(value = "/asset/{id}/download")
-	public ResponseEntity<ResourceRegion> downloadAssetById(@PathVariable Long id,
-			@RequestHeader(value = "Range", required = false) String httpRangeList) {
-		return getChunkedResponse(id, httpRangeList, ResourceRegionType.DOWNLOAD);
-	}
-
-	private ResponseEntity<ResourceRegion> getChunkedResponse(Long id, String httpRangeList, ResourceRegionType resourceRegionType) {
-		try {
-			UiAsset asset = assetService.getById(id);
-			UrlResource assetFile = new UrlResource("file:" + assetService.getFilePathByAssetById(id));
-
-			AssetType assetType = AssetType.findById(asset.getAssetType());
-
+	private ResponseEntity<ResourceRegion> getChunkedResponse(String token, String httpRangeList, ResourceRegionType resourceRegionType) throws Exception {
+		
+			SecuredAssetStreamDTO assetDetails = assetService.getAssetDetailsFromToken(token);
+			
+			UrlResource assetFile = new UrlResource("file:" + assetDetails.getFilePath());	
+			
+			
+			AssetType assetType = AssetType.findById(assetDetails.getAssetType());
+			
 			ResourceRegion region = resourceRegion(assetType, resourceRegionType, assetFile, httpRangeList);
 
 			if (assetType == AssetType.PHOTO) {
@@ -110,11 +102,6 @@ public class AssetController extends BaseController {
 								MediaTypeFactory.getMediaType(assetFile).orElse(MediaType.APPLICATION_OCTET_STREAM))
 						.body(region);
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@PutMapping(value = "/asset/{id}/metadata")

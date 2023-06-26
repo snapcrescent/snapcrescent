@@ -57,6 +57,7 @@ public class MetadataConverter extends BaseConverter<Metadata, UiMetadata> {
 			bean.setName(entity.getName());
 			bean.setMimeType(entity.getMimeType());
 			bean.setInternalName(entity.getInternalName());
+			bean.setSize(entity.getSize());
 			
 			if (resultType == ResultType.FULL || resultType == ResultType.SEARCH) {
 				bean.setCreationDateTime(entity.getCreationDateTime());

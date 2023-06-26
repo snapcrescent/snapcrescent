@@ -54,6 +54,7 @@ import { MonthYearComponent } from './input/month-year/month-year.component';
 import { ScreenSizeDetectorComponent } from './screen-size-detector/screen-size-detector.component';
 import { AssetFullScreenViewComponent } from './asset-full-screen-view/asset-full-screen-view.component';
 import { SideBarComponent } from './side-bar/side-bar.component';
+import { SecurePipe } from '../core/pipes/secure.pipe';
 
 
 const modules = [
@@ -107,7 +108,8 @@ const components = [
   ActionComponent,
   DialogComponent,
   BreadcrumbComponent,
-  DragAndDropDirective
+  DragAndDropDirective,
+  SecurePipe
 ];
 
 

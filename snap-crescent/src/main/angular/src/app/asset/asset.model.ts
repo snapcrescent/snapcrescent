@@ -5,11 +5,15 @@ export class Asset extends BaseUiBean{
   favorite:boolean;
   thumbnail: Thumbnail;
   metadata:Metadata
+  token:string;
+
+  //Transient
+  url:string;
 }
 
 export class Thumbnail extends BaseUiBean{
-  name:string
-  base64EncodedThumbnail:string;
+  name:string;
+  url:string;
 }
 
 export class Metadata extends BaseUiBean{

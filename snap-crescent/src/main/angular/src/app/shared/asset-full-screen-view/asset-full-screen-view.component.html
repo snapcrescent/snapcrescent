@@ -1,22 +1,13 @@
 <div class="col-12 asset-container">
     <ng-container *ngIf="currentAsset && currentAsset.assetType === AssetType.PHOTO.id">
-        <img class="img-fluid" [src]="getAssetStreamUrl()" alt="Asset">
+        <img class="img-fluid" [src]="currentAsset.url | secure |async"/>
     </ng-container>
-    
+
     <ng-container *ngIf="currentAsset && currentAsset.assetType === AssetType.VIDEO.id">   
         <video class="img-fluid"  controls #videoPlayer >
-            <source [src]="getAssetStreamUrl()" type="video/mp4" />
+            <source [src]="currentAsset.url" type="video/mp4" />
             Browser not supported
         </video>
         
     </ng-container>
-
-    <!--
-    <ng-container >   
-        <video [ngClass]="{'hidden' : currentAsset && currentAsset.assetType === AssetType.PHOTO.id}" class="img-fluid"  controls #videoPlayer >
-           
-        </video>
-        
-    </ng-container>
-    -->
 </div>

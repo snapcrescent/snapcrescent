@@ -22,7 +22,7 @@ public class Metadata extends BaseEntity {
 	private String name;
 	private String internalName;
 	private String path;
-	private String size;
+	private long size;
 	private String fileTypeName;
 	private String fileTypeLongName;
 	private String mimeType;

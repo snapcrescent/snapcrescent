@@ -94,12 +94,32 @@ class AssetService extends BaseService {
     return new List<Asset>.from(data.objects!);
   }
 
-  String getAssetByIdUrl(String serverURL, int assetId) {
-    return serverURL + '/asset/$assetId/stream';
+  Future<BaseResponseBean<int, Asset>> getAssetById(int assetId) async  {
+
+  try {
+      if (await super.isUserLoggedIn()) {
+        Dio dio = await getDio();
+        Options options = await getHeaders();
+        final response = await dio.get('/asset/$assetId', options: options);
+
+        return BaseResponseBean.fromJson(response.data, Asset.fromJsonModel);
+      } else {
+        return new BaseResponseBean.defaultResponse();
+      }
+    } on DioError catch (ex) {
+      if (ex.type == DioErrorType.connectionTimeout) {
+        throw Exception("Connection  Timeout Exception");
+      }
+      throw Exception(ex.message);
+    }
   }
 
-  String downloadAssetByIdUrl(String serverURL, int assetId) {
-    return serverURL + '/asset/$assetId/download';
+  String streamAssetByIdUrl(String serverURL, String token) {
+    return serverURL + '/asset/$token/stream';
+  }
+
+  String downloadAssetByIdUrl(String serverURL, String token) {
+    return serverURL + '/asset/$token/download';
   }
 
   Future<bool> permanentDownloadAssetById(int assetId, String assetName, AppAssetType assetType) async {
@@ -118,16 +138,17 @@ class AssetService extends BaseService {
     try {
       if (await super.isUserLoggedIn()) {
         Dio dio = await getDio();
-        Options options = await getHeaders();
-        final url = downloadAssetByIdUrl(await getServerUrl(), assetId);
+
+        BaseResponseBean<int, Asset> response = await getAssetById(assetId);
+        final url = downloadAssetByIdUrl(await getServerUrl(), response.object!.token!);
 
         String directory = await CommonUtilities().getTempDownloadsDirectory();
         String fullPath = '$directory/$assetName';
 
         if(assetType == AppAssetType.PHOTO) {
-          await download(dio, url, options, fullPath);
+          await download(dio, url, fullPath);
         } else{
-          await downloadWithChunks(dio, url, options, fullPath);
+          await downloadWithChunks(dio, url, fullPath);
         }
         
         File file = new File(fullPath);
@@ -216,11 +237,10 @@ class AssetService extends BaseService {
       if (!thumbnailFile.existsSync()) {
         Dio dio = await getDio();
 
-        Options options = await getHeaders();
         final url = getThumbnailByIdUrl(await getServerUrl(), thumbnail.id!);
 
         String directory = await CommonUtilities().getThumbnailDirectory();
-        await download(dio, url, options, '$directory/${thumbnail.name}');
+        await download(dio, url, '$directory/${thumbnail.name}');
       }
     } on DioError catch (ex) {
       print(ex.message);

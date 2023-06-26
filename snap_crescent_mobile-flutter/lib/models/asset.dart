@@ -15,6 +15,8 @@ class Asset extends BaseUiBean {
   int? assetType;
   bool? favorite;
 
+  String? token;
+
   Asset(
       {
       bean,
@@ -24,7 +26,9 @@ class Asset extends BaseUiBean {
       this.metadata,
       this.metadataId,
       this.favorite,
-      this.assetType})
+      this.assetType,
+      this.token
+      })
       : super(
             id: bean.id);
 
@@ -44,6 +48,7 @@ class Asset extends BaseUiBean {
       metadataId: json['metadataId'],
       favorite: json['favorite'],
       assetType: json['assetType'],
+      token: json['token'],
     );
   }
 

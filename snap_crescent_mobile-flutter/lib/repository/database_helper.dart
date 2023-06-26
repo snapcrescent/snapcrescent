@@ -51,7 +51,8 @@ class DatabaseHelper {
         NAME TEXT,
         INTERNAL_NAME TEXT,
         MIME_TYPE TEXT,
-        ORIENTATION INTEGER
+        ORIENTATION INTEGER,
+        SIZE INTEGER
         );
       ''');
 
