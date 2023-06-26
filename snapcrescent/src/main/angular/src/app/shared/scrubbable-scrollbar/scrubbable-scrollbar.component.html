@@ -1,0 +1,7 @@
+<div class="scrubbable-scrollbar-container">
+    <ng-container *ngFor="let timelineItem of timelineItems">
+        <div class="item"(click)="navigate(timelineItem)" [ngClass]="{'active': activeTimelineItem === timelineItem}">
+            <span class="text">{{timelineItem.label | date:'yyyy'}}</span>
+        </div>
+    </ng-container>    
+</div>

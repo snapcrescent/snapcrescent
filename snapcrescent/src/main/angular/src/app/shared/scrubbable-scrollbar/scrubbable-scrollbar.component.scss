@@ -1,0 +1,27 @@
+@import "/src/assets/styles/variables.scss";
+
+.scrubbable-scrollbar-container{
+    height: calc(100vh - 100px);
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    
+    .item{
+        cursor: pointer;
+        font-weight: 500;
+        color: $primary-color;
+        
+
+        &.active {
+            background-color: $primary-color;
+            color: white;
+            border-radius: 50px;
+            
+        }
+        
+        .text {
+            vertical-align: super;
+            font-size: 16px;
+        }
+    }
+}

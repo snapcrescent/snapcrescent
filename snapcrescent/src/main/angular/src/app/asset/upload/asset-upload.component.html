@@ -1,0 +1,46 @@
+<div class="create-edit-page">
+    <div class="row title-bar">
+      <div class="col-md-10  offset-md-1 col-12">
+        <h2>Upload Assets</h2>
+      </div>
+      <div class="col-md-10  offset-md-1 col-12">
+       
+        <app-breadcrumb
+        [breadCrumbs]="breadCrumbs"
+        ></app-breadcrumb>
+      </div>
+      
+    </div>
+  
+    <form class="row m-t-30">
+      <div class="col-md-10  offset-md-1 col-12">
+        <mat-card class="mat-elevation-z8">
+          <mat-progress-bar
+            *ngIf="fileUploadProgress"  
+            [value]="fileUploadProgress">
+            </mat-progress-bar>
+          <div app-dnd (fileDropped)="onFileDropped($event)" class="row input-row text-center">
+            <div class="input-column col-12">
+              <div>
+                <span class="f-100 material-symbols-outlined">
+                  cloud_upload
+                  </span>
+              </div>
+              <h2>Drag and drop File here</h2>
+            </div>
+            <div class="input-column col-12">
+              OR
+            </div>
+            <div class="input-column col-12 m-t-20">
+              <input id="fileUploadButton" type="file" multiple class="invisible" (change)="fileBrowseHandler($event)" accept="image/png,image/jpeg,video/mp4,video/mov ">
+            </div>
+            <div class="input-column col-12 m-t-20">
+              <button (click)="openFileSelectionWindow()" mat-raised-button color="primary">Browse</button>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+    </form>
+  
+    <app-action-bar position="page" [actions]="actions"></app-action-bar>
+  </div>

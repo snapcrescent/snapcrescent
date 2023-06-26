@@ -1,0 +1,34 @@
+<div class="login-background col-12">
+  <div class="login-box col-lg-4 offset-lg-4 col-10 offset-1 animate__animated animate__bounceInUp"
+    [ngClass]="{'animate__bounceOutDown' : redirectingToHome, 'animate__bounceInUp': !browserRefreshed}">
+    <mat-card>
+      <mat-card-content>
+        <div class="row">
+          <div class="col-6 offset-3 text-center">
+            <img src="assets/images/logo.png" class="img-fluid" alt="Logo">
+          </div>
+        </div>
+
+        <form [formGroup]="form">
+          <div class="col-12">
+            <app-text placeholder="Email" formControlName="username" [isRequired]="true"
+              [error]="getErrorMessage('username')">
+            </app-text>
+          </div>
+
+          <div class="col-12">
+            <app-text placeholder="Password" formControlName="password" [isRequired]="true"
+              [error]="getErrorMessage('password')" type="password" (keyup.enter)="login()">
+            </app-text>
+          </div>
+        </form>
+
+      </mat-card-content>
+      <mat-card-actions class="text-center">
+        <div class="col-4 offset-4">
+          <button class="col-12" mat-raised-button color="primary" (click)="login()">Login</button>
+        </div>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

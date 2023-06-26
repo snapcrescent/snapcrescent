@@ -1,0 +1,141 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "material-theme.scss";
+@import "material-override.scss";
+@import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
+@import "../../../node_modules/animate.css/animate.css";
+@import "../../../node_modules/font-awesome/css/font-awesome.css";
+@import "helper.css";
+@import "variables.scss";
+
+
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 48
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+main {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+}
+
+.container {
+    flex: 1 1 auto;
+    height: 100vh;
+    max-width: 100%;
+    padding: 0px;
+    overflow: hidden;
+}
+
+.cursor-hand {
+    cursor: pointer;
+}
+
+.invisible {
+    opacity: 0;
+}
+
+.hidden{
+    display: none;
+}
+
+.d-block{
+    display: block!important;
+}
+
+
+.create-edit-page {
+    padding: 20px 20px 0px 20px;
+
+    .input-row {
+        margin-bottom: 20px;
+    }
+}
+
+
+@media only screen and (min-device-width: 320px) and (max-device-width: 576px) {
+    .create-edit-page {
+        .input-row {
+            .input-column:nth-child(2) {
+                margin-top: 20px;
+            }
+        }
+    }
+
+    table {
+        th.mat-header-cell:first-of-type,
+        td.mat-cell:first-of-type,
+        td.mat-footer-cell:first-of-type {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+    }
+
+    .mat-dialog-container {
+        padding: 24px 10px !important;
+    }
+    
+}
+
+table {
+    width: 100%;
+
+    thead {
+        border-bottom: solid 2px $primary-color;
+        .mat-header-cell {
+            font-size: 14px;
+            font-weight: bold;
+
+            .mat-sort-header-container {
+                &.mat-sort-header-sorted {
+                    color: $primary-color;
+                    .mat-sort-header-arrow {
+                        color: $primary-color;
+                    }
+                }
+            }
+        }
+    }
+}
+
+app-action-bar {
+    width: 100%;
+}
+
+.form-label {
+    color: #999;
+    font-size: 14px;
+    font-weight: normal;
+    margin-bottom: 0px;
+
+    &.error {
+        color: $error-color;
+    }
+}
+
+.require-field:after {
+    content: "*";
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
