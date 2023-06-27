@@ -9,6 +9,15 @@
           </div>
         </div>
 
+        <div *ngIf="isDemoApp" class="row demo-app-container m-t-30">
+          <div class="col-8 offset-2">
+            <b>Username: </b>{{demoUsername}}
+          </div>
+          <div class="col-8 offset-2">
+            <b>Password: </b>{{demoPassword}}
+          </div>
+        </div>
+
         <form [formGroup]="form">
           <div class="col-12">
             <app-text placeholder="Email" formControlName="username" [isRequired]="true"

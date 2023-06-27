@@ -88,10 +88,11 @@ public class SecurityConfig {
     		.antMatchers("/logout").permitAll()
     		.antMatchers("/logout").permitAll()
     		.antMatchers("/websocket/**").permitAll()
+    		.antMatchers("/app-config/**").permitAll()
     		.antMatchers("/thumbnail/**/stream").permitAll()
     		.antMatchers("/asset/**/stream").permitAll()
     		.antMatchers("/asset/**/download").permitAll()
-    		.antMatchers("/asset/thumbnail/regenerate").permitAll()
+    		
     		
     		
     		.anyRequest().authenticated()

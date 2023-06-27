@@ -8,6 +8,8 @@ import { AlertService } from '../shared/alert/alert.service';
 import { Observable, of } from 'rxjs';
 import { BaseComponent } from '../core/components/base.component';
 import { browserRefresh } from '../app.component';
+import { AppConfigService } from '../app-config/app-config.service';
+import { AppConfig } from '../app-config/app-config.model';
 
 @Component({
   selector: 'app-login',
@@ -17,8 +19,11 @@ import { browserRefresh } from '../app.component';
 export class LoginComponent extends BaseComponent implements OnInit {
 
   redirectingToHome: boolean = false;
-
   browserRefreshed: boolean;
+
+  isDemoApp : boolean = false;
+  demoUsername : string = '';
+  demoPassword : string = '';
 
   form = this.formBuilder.group(new UserLoginRequest());
 
@@ -26,19 +31,44 @@ export class LoginComponent extends BaseComponent implements OnInit {
     private formBuilder: FormBuilder,
     private sessionService: SessionService,
     private loginService: LoginService,
+    private alertService: AlertService,
+    private appConfigService: AppConfigService,
     private router: Router,
-    private alertService: AlertService
   ) {
     super();
   }
 
   ngOnInit() {
+    this.getAppConfig();
     this.browserRefreshed = browserRefresh;
     this.sessionService.logout();
   }
 
   get userLoginRequest() {
     return this.form.getRawValue() as UserLoginRequest;
+  }
+
+  getAppConfig() {
+    this.appConfigService.search().subscribe((response:any) => {
+      let appConfigs: AppConfig[] = response.objects;
+
+      appConfigs.forEach((appConfig:AppConfig) => {
+
+        if(appConfig.configKey === 'DEMO_APP') {
+          this.isDemoApp = appConfig.configValue === 'true';
+        }
+
+        if(appConfig.configKey === 'DEMO_USERNAME') {
+          this.demoUsername = appConfig.configValue;
+        }
+
+        if(appConfig.configKey === 'DEMO_PASSWORD') {
+          this.demoPassword = appConfig.configValue;
+        }
+
+      });
+
+    });
   }
 
   login() {

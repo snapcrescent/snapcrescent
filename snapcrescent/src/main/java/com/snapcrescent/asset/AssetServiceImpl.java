@@ -106,7 +106,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	public List<File> uploadAssets(List<MultipartFile> multipartFiles) throws Exception {
 
 		List<File> files = new LinkedList<>();
-		String x = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_SKIP_UPLOADING);
+		String x = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_DEMO_APP);
 		if (x != null & Boolean.parseBoolean(x) == true) {
 			return files;
 		}
