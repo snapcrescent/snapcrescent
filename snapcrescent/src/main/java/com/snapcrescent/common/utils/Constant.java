@@ -17,15 +17,19 @@ public class Constant {
 	public static final String METADATA_MIME_TYPE = "Detected MIME Type";
 	public static final String METADATA_FILE_EXTENSION = "Expected File Name Extension";
 	public static final String METADATA_IMAGE_HEIGHT = "Image Height";
-	public static final String METADATA_IMAGE_HEIGHT_VALUE_SUFFIX = " pixels";
+	public static final String METADATA_VIDEO_HEIGHT = "Height";
+	public static final String METADATA_HEIGHT_VALUE_SUFFIX = " pixels";
 	public static final String METADATA_IMAGE_WIDTH = "Image Width";
-	public static final String METADATA_IMAGE_WIDTH_VALUE_SUFFIX = " pixels";
+	public static final String METADATA_VIDEO_WIDTH = "Width";
+	public static final String METADATA_WIDTH_VALUE_SUFFIX = " pixels";
 	public static final String METADATA_CREATED_DATE = "Date/Time";
 	public static final String METADATA_CREATION_TIME = "Creation Time";
 	
 	public static final String METADATA_MODEL = "Model";
 	public static final String METADATA_FSTOP = "F-Number";
 	public static final String METADATA_DURATION = "Duration";
+	
+	public static final String METADATA_ROTATION = "Rotation";
 	
 	public static final String UNPROCESSED_ASSET_FOLDER = "un-processed/";
 	

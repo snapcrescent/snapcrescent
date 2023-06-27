@@ -17,7 +17,7 @@ WORKDIR /tmp/
 RUN mvn clean install package
 
 #Copy build from TEMP to /
-RUN cp target/snap-crescent-*.jar /snap-crescent.jar
+RUN cp target/snapcrescent-*.jar /snapcrescent.jar
 
 #Change working directory to /
 WORKDIR /
@@ -31,8 +31,8 @@ RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
 # COPY compiled jar file to new image
-COPY --from=BUILD_STAGE snap-crescent.jar .
+COPY --from=BUILD_STAGE snapcrescent.jar .
 
 # Deploy Build
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "snap-crescent.jar"]
+ENTRYPOINT ["java", "-jar", "snapcrescent.jar"]

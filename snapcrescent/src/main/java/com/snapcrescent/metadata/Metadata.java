@@ -28,12 +28,12 @@ public class Metadata extends BaseEntity {
 	private String mimeType;
 	private String fileExtension;
 	private String model;
-	private long height;
-	private long width;
+	private Long height;
+	private Long width;
 	private int orientation;
 	private String fstop;
 	private long hash;
-	private long duration;
+	private Long duration;
 	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "LOCATION_ID", insertable = false, updatable = false)

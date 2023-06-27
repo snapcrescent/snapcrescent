@@ -457,6 +457,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	}
 	
 	@Override
+	@Transactional
 	public void regenerateThumbnails(String assetIdRange) {
 		
 		long startingId = Long.parseLong(assetIdRange.split("-")[0]);
@@ -466,6 +467,22 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			
 			try {
 				Asset asset = assetRepository.findById(assetId);
+				
+				FILE_TYPE fileType = null;
+				
+				if (asset.getAssetType() == AssetType.PHOTO.getId()) {
+					fileType = FILE_TYPE.PHOTO;
+				}
+
+				if (asset.getAssetType() == AssetType.VIDEO.getId()) {
+					fileType = FILE_TYPE.VIDEO;
+				}
+				
+				File file = fileService.getFile(fileType, asset.getMetadata().getPath(), asset.getMetadata().getInternalName());
+				
+				
+				metadataService.recomputeMetaData(asset.getAssetTypeEnum(), asset.getMetadata(), file);
+				
 				thumbnailService.regenerateThumbnails(asset);
 			} catch (Exception e) {
 				e.printStackTrace();
