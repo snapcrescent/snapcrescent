@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable} from '@angular/core';
 import { Observable } from 'rxjs';
-import { ResetPasswordRequest, UserLoginRequest } from './login.model';
+import { UserLoginRequest } from './login.model';
 
 @Injectable({
     providedIn: "root"
