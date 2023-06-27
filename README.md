@@ -24,7 +24,7 @@ docker run
   -v 'MEDIA_STORAGE_PATH':'/media':'rw'
   -v 'DATA_PATH':'/db':'rw'
   -v 'MEDIA_IMPORT_STORAGE_PATH':'/mnt':'rw'
-  'thecodeinsight/snapcrescent':1.0
+  'snapcrescent/snapcrescent':1.0
 
 #### Variables :
 SQL_URL - URL of mysql (jdbc:mysql://IP_ADDRESS:3306/snap-crescent)
