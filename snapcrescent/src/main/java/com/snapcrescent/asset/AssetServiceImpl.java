@@ -482,6 +482,8 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 				
 				
 				metadataService.recomputeMetaData(asset.getAssetTypeEnum(), asset.getMetadata(), file);
+				metadataRepository.update(asset.getMetadata());
+				metadataRepository.flush();
 				
 				thumbnailService.regenerateThumbnails(asset);
 			} catch (Exception e) {

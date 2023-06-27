@@ -1,14 +1,15 @@
 @import "/src/assets/styles/variables.scss";
 
 .asset-grid-container {
-  max-height: calc(100vh - 50px);
-  width: calc(100% - 50px);
-  overflow-x: hidden;
-  overflow-y: auto;
-
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 150px);
+    
+  
   .section-container {
+    width: calc(100% - 50px);
+
     .section-scroll-viewport {
-      width: 100%;
       height: calc(100vh - 200px);
 
       &::-webkit-scrollbar {
@@ -99,10 +100,10 @@
       }
     }
   }
+
+  .scrubbable-scrollbar{
+    width: 50px;
+  }
 }
 
-.scrubbable-scrollbar{
-  position: absolute;
-  top: 50px;
-  right: 10px;
-}
+

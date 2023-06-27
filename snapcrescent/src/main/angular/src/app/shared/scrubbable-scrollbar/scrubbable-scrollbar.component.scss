@@ -1,7 +1,7 @@
 @import "/src/assets/styles/variables.scss";
 
 .scrubbable-scrollbar-container{
-    height: calc(100vh - 150px);
+    max-height: calc(100vh - 150px);
     display: flex;
     justify-content: space-between;
     flex-direction: column;
@@ -20,6 +20,7 @@
         vertical-align: super;
         color: $primary-color;
         text-align: right;
+        height: 10px;
         
         
         &.active {
@@ -44,8 +45,7 @@
         }
 
         .dot {
-            margin: 10px 0px 9px 0px;
-            font-size: 5px;
+            font-size: 2px;
             line-height: 1px;
         }
     }

@@ -52,8 +52,8 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   @Output()
   onOpenAssetView: EventEmitter<any> = new EventEmitter<any>();
 
-  @ViewChild("assetGridContainer", { static: false })
-  assetGridContainer: ElementRef;
+  @ViewChild("sectionContainer", { static: false })
+  sectionContainer: ElementRef;
 
   @ViewChild("virtualScrollViewport", { static: false })
   virtualScrollViewport: CdkVirtualScrollViewport;
@@ -61,7 +61,7 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   @ViewChild("scrubbableScrollbarComponent", { static: false })
   scrubbableScrollbarComponent: ScrubbableScrollbarComponent;
 
-  assetGridContainerWidth = 0;
+  sectionContainerWidth = 0;
   sections:Section[] = []
   activeSection:Section;
   sectionHeights : number[] = [];
@@ -87,7 +87,7 @@ constructor(
 
   ngAfterViewInit() {
     this.getStoredSearchParams();
-    this.assetGridContainerWidth = this.assetGridContainer.nativeElement.offsetWidth;
+    this.sectionContainerWidth = this.sectionContainer.nativeElement.offsetWidth;
     this.callGetTimeline();
   }
 
@@ -163,7 +163,7 @@ constructor(
         for(const object of objects) {
           const dataDate = new Date(object.creationDateTime!);
           const unwrappedWidth = (3 / 2) * object.count * 150 * (7 / 10);
-          const rows = Math.ceil(unwrappedWidth / this.assetGridContainerWidth);
+          const rows = Math.ceil(unwrappedWidth / this.sectionContainerWidth);
           const height = rows * 150;
 
           this.sectionHeights.push(height);
@@ -264,7 +264,7 @@ constructor(
       });
 
       const geometry: any = createJustifiedLayout(aspectRatios, {
-        containerWidth: this.assetGridContainerWidth,
+        containerWidth: this.sectionContainerWidth,
         targetRowHeight: 150,
         boxSpacing : 5
       });
