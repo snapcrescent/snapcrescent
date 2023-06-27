@@ -1,6 +1,8 @@
 <div #assetGridContainer class="asset-grid-container">
     <div class="section-container" *ngIf="sections">
-        <cdk-virtual-scroll-viewport class="section-scroll-viewport" customVirtualScrollStrategy [itemHeights]='sectionHeights' (visibleSectionChange)="onVisibleSectionChange($event)">
+        <cdk-virtual-scroll-viewport
+            #virtualScrollViewport
+            class="section-scroll-viewport" customVirtualScrollStrategy [itemHeights]='sectionHeights' (visibleSectionChange)="onVisibleSectionChange($event)">
             <div
             [id]="section.id"
             class="section" 
@@ -44,5 +46,8 @@
 </div>
 
 <div class="scrubbable-scrollbar">
-    <app-scrubbable-scrollbar [sections]="sections"></app-scrubbable-scrollbar>
+    <app-scrubbable-scrollbar #scrubbableScrollbarComponent 
+    [activeSection]="activeSection"
+    (activeSectionChange)="onActiveSectionChange($event)"
+    ></app-scrubbable-scrollbar>
 </div>

@@ -52,6 +52,14 @@ export class Section {
       this.height = height;
       this.segments = [];
   }
+
+  clone(monthYear:Date) {
+    return new Section(
+      monthYear,
+      this.assetCount,
+      this.height
+    )
+  }
 }
 
 export class Segment {

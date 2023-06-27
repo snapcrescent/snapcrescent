@@ -12,6 +12,8 @@ import * as moment from 'moment';
 import { environment } from 'src/environments/environment';
 import { LoaderService } from '../loader/loader.service';
 import createJustifiedLayout from 'justified-layout';
+import { ScrubbableScrollbarComponent } from '../scrubbable-scrollbar/scrubbable-scrollbar.component';
+import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'app-asset-grid',
@@ -50,12 +52,18 @@ export class AssetGridComponent implements OnInit,OnChanges, AfterViewInit {
   @Output()
   onOpenAssetView: EventEmitter<any> = new EventEmitter<any>();
 
-  
   @ViewChild("assetGridContainer", { static: false })
   assetGridContainer: ElementRef;
 
+  @ViewChild("virtualScrollViewport", { static: false })
+  virtualScrollViewport: CdkVirtualScrollViewport;
+
+  @ViewChild("scrubbableScrollbarComponent", { static: false })
+  scrubbableScrollbarComponent: ScrubbableScrollbarComponent;
+
   assetGridContainerWidth = 0;
   sections:Section[] = []
+  activeSection:Section;
   sectionHeights : number[] = [];
   
   pageSizeOptions:number[] = [250,500,1000,2000];
@@ -164,6 +172,7 @@ constructor(
         }
 
         this.sections = transientSections;
+        this.scrubbableScrollbarComponent.populateTimeline(this.sections);
       });
     }
   }
@@ -171,15 +180,34 @@ constructor(
   onVisibleSectionChange(indexes:number[]) {
 
     if(indexes && indexes[0] > -1) {
-      for(let i = indexes[0]; i <= indexes[1]; i++) {
-        if(this.sections[i] && (!this.sections[i].segments || (this.sections[i].segments && this.sections[i].segments.length === 0))) {
+     const startIndex = indexes[0];
+     const endIndex = indexes[1];
+
+     const mid = Math.round((endIndex + startIndex) /2);
+
+     this.activeSection = this.sections[mid];
+      for(let i = startIndex; i <= endIndex; i++) {
+        if(this.sections[i]) {
           this.callSearch(this.sections[i]);
         }
       }
     }
   }
 
+  onActiveSectionChange(activeSection:Section) {
+    if(activeSection) {
+      const section = this.sections.find(sectionItem => sectionItem.monthYear.getFullYear() == activeSection.monthYear.getFullYear() && sectionItem.monthYear.getMonth() == activeSection.monthYear.getMonth());
+    
+      if(section) {
+        this.virtualScrollViewport.scrollToIndex(this.sections.indexOf(section));
+        this.callSearch(section);
+      }
+    }
+    
+  }
+
   callSearch(section:Section) {
+    if(!section.segments || (section.segments && section.segments.length === 0)) {
       let params:any = this.getSearchParams(section);
  
       this.pageDataService.setSearchPageData(this.searchStoreName, params);
@@ -195,6 +223,7 @@ constructor(
           this.loaderService.setOverrideSpinner(false);
         });
       }
+    }
   }
   
  

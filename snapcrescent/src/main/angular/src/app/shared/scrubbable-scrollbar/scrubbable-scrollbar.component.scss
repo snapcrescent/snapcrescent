@@ -1,27 +1,52 @@
 @import "/src/assets/styles/variables.scss";
 
 .scrubbable-scrollbar-container{
-    height: calc(100vh - 100px);
+    height: calc(100vh - 150px);
     display: flex;
     justify-content: space-between;
     flex-direction: column;
+    margin-top: 10px;
+
+    -webkit-user-select: none;  
+    -moz-user-select: none;    
+    -ms-user-select: none;      
+    user-select: none;
+        
     
     .item{
-        cursor: pointer;
+        cursor: row-resize;
         font-weight: 500;
+        font-size: 16px;
+        vertical-align: super;
         color: $primary-color;
+        text-align: right;
         
-
+        
         &.active {
-            background-color: $primary-color;
-            color: white;
-            border-radius: 50px;
             
+            .active-text {
+                display: block!important;
+            }
+
+            .text, .dot {
+                display: none;
+            }
         }
-        
-        .text {
-            vertical-align: super;
-            font-size: 16px;
+
+        .active-text {
+            position: relative;
+            right: 15px;
+            width: 80px;
+            display: none;
+            background-color: aliceblue;
+            text-align: center;
+            border-radius: 2px;
+        }
+
+        .dot {
+            margin: 10px 0px 9px 0px;
+            font-size: 5px;
+            line-height: 1px;
         }
     }
 }
