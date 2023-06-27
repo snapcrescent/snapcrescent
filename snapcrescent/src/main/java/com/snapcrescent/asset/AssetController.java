@@ -190,5 +190,16 @@ public class AssetController extends BaseController {
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	@PutMapping(value = "/asset/thumbnail/regenerate")
+	public ResponseEntity<?> regenerateThumbnails(@RequestParam String assetIdRange) {
+		try {
+			assetService.regenerateThumbnails(assetIdRange);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 
 }

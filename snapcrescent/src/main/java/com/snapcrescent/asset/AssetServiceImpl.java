@@ -455,6 +455,28 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	public SecuredAssetStreamDTO getAssetDetailsFromToken(String token) throws Exception {
 		return securedStreamTokenUtil.getAssetDetailsFromToken(token);
 	}
+	
+	@Override
+	public void regenerateThumbnails(String assetIdRange) {
+		
+		long startingId = Long.parseLong(assetIdRange.split("-")[0]);
+		long  endingId = Long.parseLong(assetIdRange.split("-")[1]);
+		
+		for (long assetId = startingId; assetId <= endingId; assetId++) {
+			
+			try {
+				Asset asset = assetRepository.findById(assetId);
+				thumbnailService.regenerateThumbnails(asset);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			 
+			
+		}
+		
+		
+		
+	}
 
 	
 }

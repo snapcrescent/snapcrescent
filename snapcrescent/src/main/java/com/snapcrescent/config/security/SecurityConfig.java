@@ -91,6 +91,8 @@ public class SecurityConfig {
     		.antMatchers("/thumbnail/**/stream").permitAll()
     		.antMatchers("/asset/**/stream").permitAll()
     		.antMatchers("/asset/**/download").permitAll()
+    		.antMatchers("/asset/thumbnail/regenerate").permitAll()
+    		
     		
     		.anyRequest().authenticated()
         );		

@@ -24,5 +24,6 @@ public interface AssetService {
 	public void markInactive(List<Long> ids);
 	public void deletePermanently(List<Long> ids);
 	SecuredAssetStreamDTO getAssetDetailsFromToken(String token) throws Exception;
+	void regenerateThumbnails(String indexRange);
 		
 }

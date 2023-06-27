@@ -13,16 +13,18 @@ import java.math.RoundingMode;
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.snapcrescent.asset.Asset;
 import com.snapcrescent.asset.SecuredAssetStreamDTO;
 import com.snapcrescent.common.utils.Constant;
+import com.snapcrescent.common.utils.Constant.AssetType;
+import com.snapcrescent.common.utils.Constant.FILE_TYPE;
 import com.snapcrescent.common.utils.FileService;
 import com.snapcrescent.common.utils.OSFinder;
 import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
-import com.snapcrescent.common.utils.Constant.AssetType;
-import com.snapcrescent.common.utils.Constant.FILE_TYPE;
 import com.snapcrescent.config.EnvironmentProperties;
 import com.snapcrescent.metadata.Metadata;
 @Service
@@ -50,6 +52,34 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 		return thumbnail;
 		
 	}
+	
+	
+	@Override
+	@Transactional
+	@Async("threadPoolTaskExecutor")
+	public void regenerateThumbnails(Asset asset) {
+		
+		try {
+			FILE_TYPE fileType = null;
+			
+			if (asset.getAssetType() == AssetType.PHOTO.getId()) {
+				fileType = FILE_TYPE.PHOTO;
+			}
+
+			if (asset.getAssetType() == AssetType.VIDEO.getId()) {
+				fileType = FILE_TYPE.VIDEO;
+			}
+			
+			File file = fileService .getFile(fileType, asset.getMetadata().getPath(), asset.getMetadata().getInternalName());
+			
+			createThumbnail(asset.getAssetTypeEnum(), file, asset.getMetadata());
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+	}
+
 
 	private File createThumbnail(AssetType assetType , File file, Metadata metadata) throws Exception {
 		
@@ -231,5 +261,6 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 		return securedStreamTokenUtil.getAssetDetailsFromToken(token);
 	}
 
+	
 
 }
