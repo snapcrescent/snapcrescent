@@ -1,0 +1,13 @@
+<div class="scrubbable-scrollbar-container">
+    <ng-container *ngFor="let timelineItem of timelineItems">
+        <div class="item" 
+        (click)="navigate(timelineItem, true)" 
+        [ngClass]="{'active' : timelineItem.isActive === true}"
+        [matTooltip]="timelineItem.hoverText"
+        >
+            <div *ngIf="timelineItem.month == 0" class="text">{{timelineItem.year}}</div>
+            <div *ngIf="timelineItem.month > 0" class="dot" ><i class="fa fa-circle" aria-hidden="true"></i></div>
+            <div class="active-text">{{timelineItem.hoverText}}</div>
+        </div>
+    </ng-container>    
+</div>

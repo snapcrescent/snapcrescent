@@ -1,0 +1,22 @@
+.login-background {
+    min-height: 100vh;
+    max-height: 100%;
+    padding-top: 10%;
+    background: linear-gradient(180deg, rgba(21,197,126,1) 0%, rgba(49,78,94,1) 100%);
+}
+
+.login-box{
+    border-radius: 10px;
+    box-shadow: 0px 0px 20px 5px rgba(0,0,0,0.75);
+    -webkit-box-shadow: 0px 0px 20px 5px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 0px 20px 5px rgba(0,0,0,0.75);
+
+    .mat-mdc-card {
+        padding: 10% 10%;
+
+        .forgot-password{
+            padding: 10px 0px;
+            cursor: pointer;
+        }
+    }
+}

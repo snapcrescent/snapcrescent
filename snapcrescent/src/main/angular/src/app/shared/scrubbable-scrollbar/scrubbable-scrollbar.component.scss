@@ -1,0 +1,52 @@
+@import "/src/assets/styles/variables.scss";
+
+.scrubbable-scrollbar-container{
+    max-height: calc(100vh - 150px);
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin-top: 10px;
+
+    -webkit-user-select: none;  
+    -moz-user-select: none;    
+    -ms-user-select: none;      
+    user-select: none;
+        
+    
+    .item{
+        cursor: row-resize;
+        font-weight: 500;
+        font-size: 16px;
+        vertical-align: super;
+        color: $primary-color;
+        text-align: right;
+        height: 10px;
+        
+        
+        &.active {
+            
+            .active-text {
+                display: block!important;
+            }
+
+            .text, .dot {
+                display: none;
+            }
+        }
+
+        .active-text {
+            position: relative;
+            right: 15px;
+            width: 80px;
+            display: none;
+            background-color: aliceblue;
+            text-align: center;
+            border-radius: 2px;
+        }
+
+        .dot {
+            font-size: 2px;
+            line-height: 1px;
+        }
+    }
+}

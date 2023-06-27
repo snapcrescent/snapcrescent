@@ -1,0 +1,109 @@
+@import "/src/assets/styles/variables.scss";
+
+.asset-grid-container {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 150px);
+    
+  
+  .section-container {
+    width: calc(100% - 50px);
+
+    .section-scroll-viewport {
+      height: calc(100vh - 200px);
+
+      &::-webkit-scrollbar {
+        width: 0; /* Remove scrollbar space */
+        background: transparent; /* Optional: just make scrollbar invisible */
+      }
+
+      .section {
+        position: relative;
+
+        &.with-segments {
+          height: 100%;
+        }
+
+        .segment {
+          margin-bottom: 35px;
+
+          .segment-title-container {
+            margin-top: 10px;
+            margin-bottom: 5px;
+
+            .select {
+              margin-right: 5px;
+              height: 24px;
+              width: 24px;
+
+              &.active {
+                color: $accent-color;
+              }
+
+              &:hover {
+                cursor: pointer;
+              }
+            }
+
+            .title {
+              font-weight: 500;
+              vertical-align: super;
+            }
+          }
+
+          .tile {
+            position: absolute;
+
+            .asset {
+              padding: 0px;
+            }
+
+            .select {
+              display: none;
+              position: absolute;
+              cursor: pointer;
+              width: 100%;
+              color: gray;
+              background: rgb(64, 70, 68);
+              background: linear-gradient(180deg, rgba(64, 70, 68, 0.7674779384410014) 0%, rgba(49, 78, 94, 0) 100%);
+
+              &:hover {
+                color: white;
+              }
+            }
+
+            .video {
+              position: absolute;
+              right: 0px;
+              color: white;
+            }
+
+            &:hover {
+              .select {
+                display: block;
+              }
+            }
+
+            &.selected {
+              .asset {
+                padding: 5px;
+              }
+
+              .select {
+                display: block;
+                color: $accent-color;
+                background: none;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .scrubbable-scrollbar{
+    width: 50px;
+  }
+}
+
+
