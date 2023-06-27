@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 public class SecuredAssetStreamDTO {
 	
 	private String filePath;
-	private int assetType; 
+	private Integer assetType; 
 	private Long validTill;
 
 }
