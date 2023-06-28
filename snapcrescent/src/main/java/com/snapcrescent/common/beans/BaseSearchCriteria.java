@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.data.domain.Sort.Direction;
-
+import com.snapcrescent.common.utils.Constant.Direction;
 import com.snapcrescent.common.utils.Constant.ResultType;
 
 import lombok.Data;

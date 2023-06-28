@@ -2,18 +2,16 @@ package com.snapcrescent.common;
 
 import java.util.List;
 
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.HibernateException;
-import org.hibernate.LockMode;
-import org.hibernate.Session;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import com.snapcrescent.common.beans.BaseSearchCriteria;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 public abstract class BaseRepository<T> {
 	
@@ -23,23 +21,20 @@ public abstract class BaseRepository<T> {
 		this.type = type;
 	}
 
-	@Autowired
-	protected HibernateTemplate hibernateTemplate;
+	@PersistenceContext
+    protected EntityManager entityManager;
 
-	public Session getCurrentSession() {
-		return hibernateTemplate.getSessionFactory().getCurrentSession();
-	}
-
-	public HibernateTemplate getHibernateTemplate() {
-		return hibernateTemplate;
-	}
 	
 	public List<T> findAll() {
-		return hibernateTemplate.loadAll(type);
+		
+		String query = "SELECT entity FROM "+ type.getName() +  " entity";
+		
+		TypedQuery<T> typedQuery = entityManager.createQuery(query,type);
+		return typedQuery.getResultList();
 	}
 
 	public void save(T entity) {
-		hibernateTemplate.saveOrUpdate(entity);
+		entityManager.persist(entity);
 	}
 
 	/**
@@ -47,65 +42,57 @@ public abstract class BaseRepository<T> {
 	 * 
 	 * @param entity
 	 */
-	public void merge(Object entity) {
-		hibernateTemplate.merge(entity);
-	}
-
 	public void update(Object entity) {
-		hibernateTemplate.update(entity);
+		entityManager.merge(entity);
 	}
 
 	public void refresh(Object entity) {
-		hibernateTemplate.refresh(entity);
+		entityManager.refresh(entity);
 	}
 
 	public void detach(Object entity) {
-		hibernateTemplate.evict(entity);
+		entityManager.detach(entity);
 	}
 	
 	public T findById(Long id) {
-		return hibernateTemplate.get(type, id);
+		return entityManager.find(type, id);
 	}
 
 	public List<T> findByIds(List<Long> ids) {
-		CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(type);
 		Root<T> root = criteriaQuery.from(type);
 
 		criteriaQuery.select(root).where(root.get("id").in(ids));
 
-		TypedQuery<T> query = getCurrentSession().createQuery(criteriaQuery);
+		TypedQuery<T> query = entityManager.createQuery(criteriaQuery);
 		return query.getResultList();
 	}
 
 	public T loadById(Long id) {
-		return hibernateTemplate.load(type, id);
-	}
-
-	public T findByIdLocked(Long id) {
-		return hibernateTemplate.get(type, id, LockMode.UPGRADE_NOWAIT);
+		return entityManager.getReference(type, id);
 	}
 
 	public void delete(T entityToDelete) {
-		hibernateTemplate.delete(entityToDelete);
+		entityManager.remove(entityToDelete);
 	}
 
 	public void delete(Long id) {
-		T entityToDelete = hibernateTemplate.load(type, id);
+		T entityToDelete = entityManager.getReference(type, id);
 		if (entityToDelete == null)
 			throw new IllegalArgumentException("No " + type.getName() + " with id " + id);
-		hibernateTemplate.delete(entityToDelete);
+		entityManager.remove(entityToDelete);
 	}
 
 	public void deleteByEntity(T entityToDelete) {
-		hibernateTemplate.delete(entityToDelete);
+		entityManager.remove(entityToDelete);
 	}
 
 	public void delete(List<Long> ids) {
 		if (ids != null) {
 			for (Long id : ids) {
-				T entityToDelete = hibernateTemplate.load(type, id);
-				hibernateTemplate.delete(entityToDelete);
+				T entityToDelete = entityManager.getReference(type, id);
+				entityManager.remove(entityToDelete);
 			}
 		}
 
@@ -118,7 +105,7 @@ public abstract class BaseRepository<T> {
 	 * @see {@link org.hibernate.Session#flush()}
 	 */
 	public void flush() throws HibernateException {
-		hibernateTemplate.flush();
+		entityManager.flush();
 	}
 	
 	protected String getJoinFetchType(Boolean isCountQuery) {

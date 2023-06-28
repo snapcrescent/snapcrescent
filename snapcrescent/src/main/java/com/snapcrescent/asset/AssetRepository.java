@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 import org.springframework.stereotype.Repository;
 
@@ -103,7 +103,7 @@ public class AssetRepository extends BaseRepository<Asset>{
 			hql.append(" ORDER BY " + searchCriteria.getSortBy() + " " + searchCriteria.getSortOrder());
 		}
 
-		TypedQuery<T> q = this.getCurrentSession().createQuery(hql.toString(), type);
+		TypedQuery<T> q = entityManager.createQuery(hql.toString(), type);
 
 		if (isSearchKeyword) {
 			daoHelper.setSearchStringValue(q);
@@ -119,7 +119,7 @@ public class AssetRepository extends BaseRepository<Asset>{
 	public void markActive(List<Long> ids) {
 		String queryString = "UPDATE Asset asset set asset.active = true WHERE asset.id IN (:ids)";
 		
-		Query query = this.getCurrentSession().createQuery(queryString);
+		Query query = entityManager.createQuery(queryString);
 		query.setParameter("ids", ids);
 		query.executeUpdate();
 	}
@@ -127,7 +127,7 @@ public class AssetRepository extends BaseRepository<Asset>{
 	public void markInactive(List<Long> ids) {
 		String queryString = "UPDATE Asset asset set asset.active = false WHERE asset.id IN (:ids)";
 		
-		Query query = this.getCurrentSession().createQuery(queryString);
+		Query query = entityManager.createQuery(queryString);
 		query.setParameter("ids", ids);
 		query.executeUpdate();
 	}
@@ -135,7 +135,7 @@ public class AssetRepository extends BaseRepository<Asset>{
 	public Asset findByMetadataId(Long metadataId) {
 		String query = "SELECT asset FROM Asset asset WHERE asset.metadataId = :metadataId";
 		
-		TypedQuery<Asset> typedQuery = getCurrentSession().createQuery(query,Asset.class);
+		TypedQuery<Asset> typedQuery = entityManager.createQuery(query,Asset.class);
 		typedQuery.setParameter("metadataId", metadataId);
 		List<Asset> results = typedQuery.getResultList();
 		return results.isEmpty() ? null : results.get(0);

@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -49,7 +50,12 @@ public class SecurityConfig {
 		return new WebMvcConfigurer() {
 			
 			  @Override public void addCorsMappings(CorsRegistry registry) {
-			  registry.addMapping("/**").allowedOrigins("*"); }
+				  
+				  
+				  registry.addMapping("/**")
+				  .allowedOrigins("*")
+				  .allowedMethods(CorsConfiguration.ALL); 
+			  }
 			 
 		};
 	}
@@ -69,40 +75,36 @@ public class SecurityConfig {
 		
 		http.authenticationManager(authenticationManager);
 		
-		http.cors();
-		http.csrf().disable();
-		
 		http
-        .authorizeHttpRequests((authz) -> 
-        	authz
-        	.antMatchers(HttpMethod.OPTIONS).permitAll()
-        	.antMatchers("/").permitAll()
-    		.antMatchers("/public/**").permitAll()
-    		.antMatchers("/**/*.html").permitAll()
-    		.antMatchers("/**/*.css").permitAll()
-    		.antMatchers("/**/*.js").permitAll()
-    		.antMatchers("/**/*.js.map").permitAll()
-    		.antMatchers("/**/*.png").permitAll()
-    		.antMatchers("/**/*.gif").permitAll()
-    		.antMatchers("/login").permitAll()
-    		.antMatchers("/logout").permitAll()
-    		.antMatchers("/logout").permitAll()
-    		.antMatchers("/websocket/**").permitAll()
-    		.antMatchers("/app-config/**").permitAll()
-    		.antMatchers("/thumbnail/**/stream").permitAll()
-    		.antMatchers("/asset/**/stream").permitAll()
-    		.antMatchers("/asset/**/download").permitAll()
-    		
-    		
-    		
+        .authorizeHttpRequests((authorize ) -> 
+        	authorize 
+        	.requestMatchers(HttpMethod.OPTIONS).permitAll()
+        	.requestMatchers(new AntPathRequestMatcher("/")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/public/**")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/**/*.html")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/**/*.css")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/**/*.js")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/**/*.js.map")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/**/*.png")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/**/*.gif")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/logout")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/logout")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/websocket/**")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/app-config/**")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/thumbnail/**/stream")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/asset/**/stream")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/asset/**/download")).permitAll()
     		.anyRequest().authenticated()
-        );		
+        )
+        .csrf(csrfConfigurer -> csrfConfigurer.disable())
+        .exceptionHandling(httpSecurityExceptionHandlingConfigurer -> httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(loginEntryPoint))
+        .sessionManagement(sessionManagementCustomizer -> sessionManagementCustomizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .formLogin(formLoginCustomizer -> formLoginCustomizer.authenticationDetailsSource(authenticationDetailsSource).loginPage("/login").permitAll())
+        .logout(logoutCustomizer -> logoutCustomizer.logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler))
+        ;		
 	
-		http.exceptionHandling().authenticationEntryPoint(loginEntryPoint);
-		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		
-        http.formLogin().authenticationDetailsSource(authenticationDetailsSource).loginPage("/login").permitAll();
-		http.logout().logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler);
 		
 		http.addFilterAfter(jwtAuthorizationFilter,UsernamePasswordAuthenticationFilter.class);
 		http.addFilterBefore(authenticationFilter(authenticationManager),UsernamePasswordAuthenticationFilter.class);

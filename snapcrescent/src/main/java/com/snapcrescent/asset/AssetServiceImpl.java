@@ -12,13 +12,12 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,13 +27,13 @@ import com.snapcrescent.common.beans.BaseResponseBean;
 import com.snapcrescent.common.services.BaseService;
 import com.snapcrescent.common.utils.AppConfigKeys;
 import com.snapcrescent.common.utils.Constant;
+import com.snapcrescent.common.utils.Constant.AssetType;
+import com.snapcrescent.common.utils.Constant.FILE_TYPE;
+import com.snapcrescent.common.utils.Constant.ResultType;
 import com.snapcrescent.common.utils.DateUtils;
 import com.snapcrescent.common.utils.FileService;
 import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
 import com.snapcrescent.common.utils.StringUtils;
-import com.snapcrescent.common.utils.Constant.AssetType;
-import com.snapcrescent.common.utils.Constant.FILE_TYPE;
-import com.snapcrescent.common.utils.Constant.ResultType;
 import com.snapcrescent.metadata.Metadata;
 import com.snapcrescent.metadata.MetadataRepository;
 import com.snapcrescent.metadata.MetadataService;
@@ -138,7 +137,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	@Override
 	@Transactional
 	@Async("threadPoolTaskExecutor")
-	public Future<Boolean> processAsset(File temporaryFile) throws Exception {
+	public CompletableFuture<Boolean> processAsset(File temporaryFile) throws Exception {
 
 		boolean processed = false;
 		try {
@@ -153,13 +152,13 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			processed = true;
 		}
 
-		return new AsyncResult<Boolean>(processed);
+		return CompletableFuture.completedFuture(processed);
 	}
 	
 	@Override
 	@Transactional
 	@Async("threadPoolTaskExecutor")
-	public Future<Boolean> processAsset(AssetType assetType, File temporaryFile, Metadata metadata) throws Exception {
+	public CompletableFuture<Boolean> processAsset(AssetType assetType, File temporaryFile, Metadata metadata) throws Exception {
 
 		boolean processed = false;
 		try {
@@ -171,7 +170,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			processed = true;
 		}
 
-		return new AsyncResult<Boolean>(processed);
+		return CompletableFuture.completedFuture(processed);
 	}
 	
 	public void saveProcessedAsset(AssetType assetType,File temporaryFile, Metadata metadata, Thumbnail thumbnail) throws IOException {

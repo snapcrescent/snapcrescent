@@ -33,7 +33,7 @@ export class ErrorInterceptor implements HttpInterceptor {
               let message = "Error occurred, please try again later.";
               if (res.error) {
                 if (typeof res.error === "string") {
-                  res.message = res.error.replace("[RPM Exception]", "");
+                  res.message = res.error.replace("[Exception]", "");
                 } else if (res.error.message) {
                   res.message = res.error.message;
                 }

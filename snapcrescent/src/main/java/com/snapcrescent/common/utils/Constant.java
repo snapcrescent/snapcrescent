@@ -121,6 +121,11 @@ public class Constant {
 		PHOTO, VIDEO, THUMBNAIL
 	}
 	
+	public enum Direction {
+		ASC,
+		DESC;
+	}
+	
 	public enum ResultType {
 		OPTION, SEARCH, FULL;
 	}

@@ -2,75 +2,76 @@ package com.snapcrescent.config;
 
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.hibernate5.HibernateTemplate;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import jakarta.annotation.PostConstruct;
 
 @Configuration
+@EnableTransactionManagement
 public class DataSourceConfig {
 
-	
-	private static final String HIBERNATE_SHOW_SQL = "false";
-	private static final  String HIBERNATE_HBM2DDL_AUTO = "update";
-	
-	
-	@Autowired
-	private DaoSQLEntityInterceptor daoSQLEntityInterceptor;
-	
 	@PostConstruct
 	private void init() {
+
+	}
+	
+	@Bean
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
+		entityManagerFactoryBean.setDataSource(dataSource());
+		entityManagerFactoryBean.setPackagesToScan("com.snapcrescent");
 		
-	}
-	
-	@Bean
-	public DataSource dataSource() {
-		DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
-
-		dataSourceBuilder.url(EnvironmentProperties.SQL_URL);
-		dataSourceBuilder.username(EnvironmentProperties.SQL_USER);
-		dataSourceBuilder.password(EnvironmentProperties.SQL_PASSWORD);
-
-		return dataSourceBuilder.build();
-	}
-	
-
-	@Bean
-	public HibernateTemplate hibernateTemplate(SessionFactory sessionFactory) {
-		HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
-		hibernateTemplate.setCheckWriteOperations(false);
-		return hibernateTemplate;
-	}
-	
-	@Bean
-	public LocalSessionFactoryBean getSessionFactory(DataSource dataSource) {
-		LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
-		sessionFactoryBean.setDataSource(dataSource);
-		sessionFactoryBean.setHibernateProperties(getHibernateProperties());
-		sessionFactoryBean.setPhysicalNamingStrategy(new CamelCaseToUnderscoresNamingStrategy());
-		sessionFactoryBean.setPackagesToScan(new String[] { "com.snapcrescent" });
-		sessionFactoryBean.setEntityInterceptor(daoSQLEntityInterceptor);
-		return sessionFactoryBean;
-	}
-
-	@Bean
-	public Properties getHibernateProperties() {
-		Properties properties = new Properties();
-		properties.put("hibernate.default_schema", "dbo");
-		properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect");
-		properties.put("hibernate.show_sql", HIBERNATE_SHOW_SQL);
-		properties.put("hibernate.hbm2ddl.auto", HIBERNATE_HBM2DDL_AUTO);
-		properties.put("hibernate.physical_naming_strategy", CamelCaseToUnderscoresNamingStrategy.class.getPackage().getName() + "." + CamelCaseToUnderscoresNamingStrategy.class.getSimpleName());
-		properties.put("hibernate.enable_lazy_load_no_trans", "true");
 		
+		JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+		entityManagerFactoryBean.setJpaVendorAdapter(vendorAdapter);
+		entityManagerFactoryBean.setJpaProperties(hibernateProperties());
 
-		return properties;
+		return entityManagerFactoryBean;
 	}
+	
+	@Bean
+	public DataSource dataSource(){
+	    DriverManagerDataSource dataSource = new DriverManagerDataSource();
+	    dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+	    dataSource.setUrl(EnvironmentProperties.SQL_URL);
+	    dataSource.setUsername(EnvironmentProperties.SQL_USER);
+	    dataSource.setPassword(EnvironmentProperties.SQL_PASSWORD);
+	    return dataSource;
+	}
+	
+	@Bean
+	public PlatformTransactionManager transactionManager() {
+	    JpaTransactionManager transactionManager = new JpaTransactionManager();
+	    transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
+
+	    return transactionManager;
+	}
+
+	@Bean
+	public PersistenceExceptionTranslationPostProcessor exceptionTranslation(){
+	    return new PersistenceExceptionTranslationPostProcessor();
+	}
+
+	Properties hibernateProperties() {
+	    Properties properties = new Properties();
+	    properties.setProperty("hibernate.hbm2ddl.auto", "validate");
+	    properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
+	    properties.setProperty("hibernate.ejb.interceptor", DaoSQLEntityInterceptor.class.getPackage().getName() + "." + DaoSQLEntityInterceptor.class.getSimpleName());
+        properties.put("hibernate.physical_naming_strategy", CamelCaseToUnderscoresNamingStrategy.class.getPackage().getName() + "." + CamelCaseToUnderscoresNamingStrategy.class.getSimpleName());
+	       
+	    return properties;
+	}
+
 }
