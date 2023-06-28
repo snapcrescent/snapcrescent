@@ -12,7 +12,7 @@ public class StringEncrypter {
 	
 	 public static String decrypt(final String hash) {
 	    try {
-	      return new String(xor(Base64.decodeBase64(hash.getBytes())), "UTF-8");
+	      return new String(xor(Base64.decodeBase64(hash)), "UTF-8");
 	    } catch (java.io.UnsupportedEncodingException ex) {
 	      throw new IllegalStateException(ex);
 	    }

@@ -1,6 +1,6 @@
 package com.snapcrescent.location;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import com.snapcrescent.common.BaseEntity;
 

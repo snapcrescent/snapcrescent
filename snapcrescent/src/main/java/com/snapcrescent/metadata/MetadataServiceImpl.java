@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -111,6 +111,9 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 						metaDataMap.get(Constant.METADATA_IMAGE_HEIGHT), Constant.METADATA_HEIGHT_VALUE_SUFFIX, "")));
 				metadata.setWidth(Long.parseLong(StringUtils.replaceString(
 						metaDataMap.get(Constant.METADATA_IMAGE_WIDTH), Constant.METADATA_WIDTH_VALUE_SUFFIX, "")));
+				
+				
+				
 			} else if (assetType == AssetType.VIDEO) {
 				metadata.setHeight(Long.parseLong(StringUtils.replaceString(
 						metaDataMap.get(Constant.METADATA_VIDEO_HEIGHT), Constant.METADATA_HEIGHT_VALUE_SUFFIX, "")));
@@ -121,30 +124,33 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 			metadata.setModel(metaDataMap.get(Constant.METADATA_MODEL));
 			metadata.setFstop(metaDataMap.get(Constant.METADATA_FSTOP));
 
-			if (assetType == AssetType.VIDEO) {
-				String duration = metaDataMap.get(Constant.METADATA_DURATION);
-				if (duration != null) {
-					metadata.setDuration(Long.parseLong(duration) / 1000);
-				}
-
-				String rotationString = metaDataMap.get(Constant.METADATA_ROTATION);
-
-				if (rotationString != null) {
-					Long rotation = Long.parseLong(rotationString);
-
-					if (rotation < 0) {
-						rotation = rotation * -1;
-					}
-
-					if (rotation % 180 > 0) {
-						Long height = metadata.getHeight();
-
-						metadata.setHeight(metadata.getWidth());
-						metadata.setWidth(height);
-					}
-				}
-
+			String duration = metaDataMap.get(Constant.METADATA_DURATION);
+			if (duration != null) {
+				metadata.setDuration(Long.parseLong(duration) / 1000);
+			} else {
+				metadata.setDuration(0L);
 			}
+			
+				
+
+			String rotationString = metaDataMap.get(Constant.METADATA_ROTATION);
+
+			if (rotationString != null) {
+				Long rotation = Long.parseLong(rotationString);
+
+				if (rotation < 0) {
+					rotation = rotation * -1;
+				}
+
+				if (rotation % 180 > 0) {
+					Long height = metadata.getHeight();
+
+					metadata.setHeight(metadata.getWidth());
+					metadata.setWidth(height);
+				}
+			}
+
+			
 
 			Directory directory = drewMetadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 			int orientation = 1;

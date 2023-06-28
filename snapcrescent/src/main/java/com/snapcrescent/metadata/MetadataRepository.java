@@ -2,7 +2,7 @@ package com.snapcrescent.metadata;
 
 import java.util.List;
 
-import javax.persistence.TypedQuery;
+import jakarta.persistence.TypedQuery;
 
 import org.springframework.stereotype.Repository;
 
@@ -18,7 +18,7 @@ public class MetadataRepository extends BaseRepository<Metadata>{
 	public Metadata findByHash(long hash) {
 		String query = "SELECT metadata FROM Metadata metadata WHERE metadata.hash = :hash";
 		
-		TypedQuery<Metadata> typedQuery = getCurrentSession().createQuery(query,Metadata.class);
+		TypedQuery<Metadata> typedQuery = entityManager.createQuery(query,Metadata.class);
 		typedQuery.setParameter("hash", hash);
 		List<Metadata> results = typedQuery.getResultList();
 		return results.isEmpty() ? null : results.get(0);
@@ -27,7 +27,7 @@ public class MetadataRepository extends BaseRepository<Metadata>{
 	public boolean existByName(String name) {
 		String query = "SELECT metadata FROM Metadata metadata WHERE metadata.name = :name";
 		
-		TypedQuery<Metadata> typedQuery = getCurrentSession().createQuery(query,Metadata.class);
+		TypedQuery<Metadata> typedQuery = entityManager.createQuery(query,Metadata.class);
 		typedQuery.setParameter("name", name);
 		List<Metadata> results = typedQuery.getResultList();
 		return results.isEmpty() ? false : true;
@@ -39,7 +39,7 @@ public class MetadataRepository extends BaseRepository<Metadata>{
 						+ " GROUP BY YEAR(metadata.creationDateTime), MONTH(metadata.creationDateTime), DATE(metadata.creationDateTime) "
 						+ " ORDER BY metadata.creationDateTime DESC";
 		
-		TypedQuery<UiMetadataTimeline> typedQuery = getCurrentSession().createQuery(query,UiMetadataTimeline.class);
+		TypedQuery<UiMetadataTimeline> typedQuery = entityManager.createQuery(query,UiMetadataTimeline.class);
 		List<UiMetadataTimeline> results = typedQuery.getResultList();
 		return results;
 	}

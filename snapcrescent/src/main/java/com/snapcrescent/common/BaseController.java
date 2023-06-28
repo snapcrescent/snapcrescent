@@ -6,10 +6,10 @@ import java.util.Map;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
-import org.springframework.data.domain.Sort.Direction;
 
 import com.snapcrescent.common.beans.BaseSearchCriteria;
 import com.snapcrescent.common.utils.Constant.AssetType;
+import com.snapcrescent.common.utils.Constant.Direction;
 import com.snapcrescent.common.utils.Constant.ResourceRegionType;
 import com.snapcrescent.common.utils.Constant.ResultType;
 

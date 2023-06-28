@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-import javax.persistence.TypedQuery;
+import jakarta.persistence.TypedQuery;
 
 
 public class SearchDAOHelper<T> {

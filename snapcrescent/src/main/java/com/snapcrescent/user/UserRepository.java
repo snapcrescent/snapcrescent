@@ -2,7 +2,7 @@ package com.snapcrescent.user;
 
 import java.util.List;
 
-import javax.persistence.TypedQuery;
+import jakarta.persistence.TypedQuery;
 
 import org.springframework.stereotype.Repository;
 
@@ -18,7 +18,7 @@ public class UserRepository extends BaseRepository<User> {
 	public User findByUsername(String username) {
 		String query = "SELECT user FROM User user WHERE user.username = :username";
 		
-		TypedQuery<User> typedQuery = getCurrentSession().createQuery(query,User.class);
+		TypedQuery<User> typedQuery = entityManager.createQuery(query,User.class);
 		typedQuery.setParameter("username", username);
 		List<User> results = typedQuery.getResultList();
 		return results.isEmpty() ? null : results.get(0);

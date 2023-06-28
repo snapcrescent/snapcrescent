@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import org.hibernate.CallbackException;
-import org.hibernate.EmptyInterceptor;
+import org.hibernate.Interceptor;
 import org.hibernate.type.Type;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +13,7 @@ import com.snapcrescent.common.BaseEntity;
 
 
 @Component
-public class DaoSQLEntityInterceptor extends EmptyInterceptor {
-	
-	private static final long serialVersionUID = 2874782982927327631L;
+public class DaoSQLEntityInterceptor implements Interceptor {
 	
 	/**
      * Called when new objects are saved.
