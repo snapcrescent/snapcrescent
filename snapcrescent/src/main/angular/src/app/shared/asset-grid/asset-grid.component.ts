@@ -2,11 +2,11 @@ import { Component,Input, SimpleChanges, OnInit, OnChanges, AfterViewInit, Injec
 import { MatTableDataSource } from '@angular/material/table';
 import { AssetGroup, AssetSearchField, Section, Segment, Tile } from './asset-grid.model';
 import { Action } from 'src/app/core/models/action.model'
-import { Asset, AssetType } from 'src/app/asset/asset.model';
+import { Asset, AssetTimeline, AssetType } from 'src/app/asset/asset.model';
 import { formatDate } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { PageDataService } from 'src/app/core/services/stores/page-data.service';
-import { Metadata, MetadataTimeline } from 'src/app/metadata/metadata.model';
+import { Metadata } from 'src/app/metadata/metadata.model';
 import { Observable } from 'rxjs';
 import * as moment from 'moment';
 import { environment } from 'src/environments/environment';
@@ -86,7 +86,6 @@ constructor(
   }
 
   ngAfterViewInit() {
-    this.getStoredSearchParams();
     this.sectionContainerWidth = this.sectionContainer.nativeElement.offsetWidth;
     this.callGetTimeline();
   }
@@ -122,27 +121,6 @@ constructor(
     }
   }
 
-  getStoredSearchParams() {
-    const params = this.pageDataService.getSearchPageData(this.searchStoreName);
-
-    if(params) {
-      Object.keys(params).forEach(key => {
-        if(key === 'sortBy') {
-          this.defaultSortColumn = params[key];
-        } else if(key === 'sortOrder') {
-         this.defaultSortDirection = params[key];
-        } else {
-          const control = this.searchFormGroup.get(key)
-  
-          if(control) {
-            control.patchValue(params[key]);
-          }
-        }
-      });
-    }
-    
-  }
-
   reset() {
     this.advancedSearchFields.forEach((item:AssetSearchField) => {
       this.searchFormGroup.get(item.key)?.reset();
@@ -151,13 +129,13 @@ constructor(
   }
 
   callGetTimeline() {
-    let params:any = {};
+    let params:any = this.getSearchParams();
     this.pageDataService.setSearchPageData(this.searchStoreName, params);
       
     if(!!this.getTimeline) {
       this.getTimeline(params).subscribe((response:any) => {
         this.sections = [];
-        let objects:MetadataTimeline[] = response.objects;
+        let objects:AssetTimeline[] = response.objects;
         
         let transientSections:Section[] = [];
         for(const object of objects) {
@@ -203,6 +181,10 @@ constructor(
         this.callSearch(section);
       }
     }
+    
+  }
+
+  refresh() {
     
   }
 
@@ -296,7 +278,7 @@ constructor(
     },2000);
   }
 
-  getSearchParams(section:Section) {
+  getSearchParams(section?:Section) {
     let params:any = {};
 
     this.advancedSearchFields.forEach((item:AssetSearchField) => {
@@ -383,7 +365,15 @@ constructor(
 
     const data = {
       currentAssetId: asset.id,
-      assetIds: this.dataSource.data.map(asset=> { return asset.id })
+      assetIds: this.sections.map((section:Section) => { 
+              return section.segments.map(
+                      (segment:Segment) => {
+                        return segment.tiles.map((tile:Tile) => 
+                          {
+                            return tile.asset.id
+                          }).flat();
+                      }).flat();
+                }).flat()        
     }
 
     this.onOpenAssetView.emit(data);

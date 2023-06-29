@@ -1,8 +1,17 @@
 <div class="side-bar-container">
-    <div class="row" *ngFor="let menuItem of menuItems">
-        <div class="col-12 item"(click)="navigate(menuItem)" [ngClass]="{'active': activeMenu === menuItem}">
-            <span class="icon material-symbols-outlined">{{menuItem.icon}}</span>
-            <span class="text">{{menuItem.label}}</span>
+    <div class="row" *ngFor="let menuGroup of menuGroups">
+        <div class="row" *ngIf="menuGroup.label">
+            <div class="col-12 item">
+                <span class="group-label">{{menuGroup.label}}</span>
+            </div>
         </div>
+        <div class="row" *ngFor="let menuItem of menuGroup.menuItems">
+            <div class="col-12 item"(click)="navigate(menuItem)" [ngClass]="{'active': activeMenu === menuItem}">
+                <span class="icon material-symbols-outlined">{{menuItem.icon}}</span>
+                <span class="text">{{menuItem.label}}</span>
+            </div>
+        </div>    
+
+        
     </div>    
 </div>

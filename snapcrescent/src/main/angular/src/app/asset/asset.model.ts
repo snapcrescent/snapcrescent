@@ -12,6 +12,11 @@ export class Asset extends BaseUiBean{
   url:string;
 }
 
+export class AssetTimeline {
+  count:number
+  creationDateTime : number;
+}
+
 export class Thumbnail extends BaseUiBean{
   name:string;
   token: string;

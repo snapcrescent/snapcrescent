@@ -7,8 +7,3 @@ export class Metadata extends BaseUiBean{
   width : number
 }
 
-export class MetadataTimeline {
-  count:number
-  creationDateTime : number;
-}
-

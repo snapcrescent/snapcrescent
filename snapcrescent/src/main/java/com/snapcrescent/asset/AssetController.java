@@ -124,6 +124,28 @@ public class AssetController extends BaseController {
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	@PutMapping(value = "/asset/push/favorite")
+	public ResponseEntity<?> pushToFavorite(@RequestParam List<Long> ids) {
+		try {
+			assetService.updateFavoriteFlag(true,ids);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@PutMapping(value = "/asset/pop/favorite")
+	public ResponseEntity<?> popFromFavorite(@RequestParam List<Long> ids) {
+		try {
+			assetService.updateFavoriteFlag(false,ids);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 
 	@PostMapping("/asset/upload")
 	public ResponseEntity<?> uploadAssets(@RequestParam("files") MultipartFile[] files) throws IOException {
@@ -139,7 +161,7 @@ public class AssetController extends BaseController {
 			}
 
 			// wait for all threads
-			
+			/*
 			processingStatusList.forEach(result -> {
 				try {
 					result.get();
@@ -147,6 +169,7 @@ public class AssetController extends BaseController {
 
 				}
 			});
+			*/
 			
 
 			response.setMessage("Asset uploaded successfully.");
@@ -158,10 +181,10 @@ public class AssetController extends BaseController {
 		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@PutMapping(value = "/asset/restore")
-	public ResponseEntity<?> restore(@RequestParam List<Long> ids) {
+	@PutMapping(value = "/asset/pop/trash")
+	public ResponseEntity<?> popFromInactive(@RequestParam List<Long> ids) {
 		try {
-			assetService.markActive(ids);
+			assetService.updateActiveFlag(true,ids);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -169,10 +192,10 @@ public class AssetController extends BaseController {
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@DeleteMapping(value = "/asset")
-	public ResponseEntity<?> delete(@RequestParam List<Long> ids) {
+	@DeleteMapping(value = "/asset/trash")
+	public ResponseEntity<?> pushToInactive(@RequestParam List<Long> ids) {
 		try {
-			assetService.markInactive(ids);
+			assetService.updateActiveFlag(false,ids);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -200,6 +223,18 @@ public class AssetController extends BaseController {
 			e.printStackTrace();
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	
+	@GetMapping("/asset/timeline")
+	public @ResponseBody BaseResponseBean<Long, UiAssetTimeline> getAssetTimeline(@RequestParam Map<String, String> searchParams) {
+		BaseResponseBean<Long, UiAssetTimeline> response = new BaseResponseBean<>();
+		
+		AssetSearchCriteria searchCriteria = new AssetSearchCriteria();
+		parseSearchParams(searchParams, searchCriteria);
+		
+		response.setObjects(assetService.getAssetTimeline(searchCriteria));
+		return response;
 	}
 
 }

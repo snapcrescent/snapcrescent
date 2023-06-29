@@ -399,17 +399,16 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 	@Override
 	@Transactional
-	public void markActive(List<Long> ids) {
-		assetRepository.markActive(ids);
-
+	public void updateActiveFlag(Boolean active, List<Long> ids) {
+		assetRepository.updateActiveFlag(active, ids);
 	}
-
+	
 	@Override
 	@Transactional
-	public void markInactive(List<Long> ids) {
-		assetRepository.markInactive(ids);
-
+	public void updateFavoriteFlag(Boolean favorite, List<Long> ids) {
+		assetRepository.updateFavoriteFlag(favorite, ids);
 	}
+
 
 	@Override
 	@Transactional
@@ -494,6 +493,12 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		
 		
 		
+	}
+
+	@Override
+	@Transactional
+	public List<UiAssetTimeline> getAssetTimeline(AssetSearchCriteria searchCriteria) {
+		return assetRepository.getAssetTimeline(searchCriteria);
 	}
 
 	
