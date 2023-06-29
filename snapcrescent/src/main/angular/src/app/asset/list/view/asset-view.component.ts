@@ -72,7 +72,7 @@ export class AssetViewComponent extends BaseComponent implements OnInit, AfterVi
             label: "OK",
             type: "flat",
             onClick: () => {
-              this.assetService.delete([this.currentAssetId]).subscribe(response => {
+              this.assetService.pushToInactive([this.currentAssetId]).subscribe(response => {
                 this.alertService.showSuccess(`Item deleted successfully`);
                 this.assetIds.splice(this.assetIds.indexOf(+this.currentAssetId),1);
                 this.changeCurrentAssetAsset(true);

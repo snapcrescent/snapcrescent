@@ -4,6 +4,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { AssetModule } from './asset/asset.module';
 import { AuthenticationGuard } from './core/services/auth.guard';
 import { TrashAssetModule } from './trash/trash-asset.module';
+import { FavoriteAssetModule } from './favorite/favorite-asset.module';
 
 const routes: Routes = [
   {
@@ -18,6 +19,12 @@ const routes: Routes = [
   {
     path: "asset",
     loadChildren: () => import('./asset/asset.module').then(m => AssetModule),
+    canActivate: [AuthenticationGuard]
+  },
+
+  {
+    path: "favorite",
+    loadChildren: () => import('./favorite/favorite-asset.module').then(m => FavoriteAssetModule),
     canActivate: [AuthenticationGuard]
   },
 

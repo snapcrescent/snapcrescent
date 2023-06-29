@@ -20,10 +20,11 @@ public interface AssetService {
 	public byte[] getAssetById(Long id) throws Exception;
 	public void updateMetadata(Long id) throws Exception;
 	File migrateAssets(AssetType assetType, File originalFile) throws Exception;
-	public void markActive(List<Long> ids);
-	public void markInactive(List<Long> ids);
+	public void updateActiveFlag(Boolean active, List<Long> ids);
+	public void updateFavoriteFlag(Boolean favorite, List<Long> ids);
 	public void deletePermanently(List<Long> ids);
 	SecuredAssetStreamDTO getAssetDetailsFromToken(String token) throws Exception;
 	void regenerateThumbnails(String indexRange);
+	List<UiAssetTimeline> getAssetTimeline(AssetSearchCriteria searchCriteria);
 		
 }

@@ -10,7 +10,7 @@ import { AssetSearchField } from 'src/app/shared/asset-grid/asset-grid.model';
 import { Action } from 'src/app/core/models/action.model';
 import { PageType } from 'src/app/core/models/page-type.model';
 import { AssetViewComponent } from './view/asset-view.component';
-import { MetadataService } from 'src/app/metadata/metadata.service';
+import { Asset } from '../asset.model';
 
 @Component({
   selector: 'app-asset-list',
@@ -37,7 +37,6 @@ export class AssetListComponent extends BaseListComponent implements AfterViewIn
   constructor(
     private router: Router,
     private assetService: AssetService,
-    private metadataService: MetadataService,
     private dialog: MatDialog,
     private alertService: AlertService
   ) {
@@ -76,13 +75,6 @@ export class AssetListComponent extends BaseListComponent implements AfterViewIn
       options : this.assetService.getAssetTypesAsOptions()
     });
 
-    this.advancedSearchFields.push({
-      key: "favorite",
-      label: "Favorite",
-      type : "dropdown",
-      options : this.assetService.getYesAndNoOptions()
-    });
-
     this.extraSearchFields.push({
       key: "resultType",
       label: "Result Type",
@@ -98,9 +90,38 @@ export class AssetListComponent extends BaseListComponent implements AfterViewIn
       this.actions.push({
         id: "upload",
         icon: "upload",
-        tooltip: "Upload Asset(s)",
+        tooltip: "Upload Photos and Videos",
         onClick: () => {
           this.router.navigate(['/asset/upload']);
+        }
+      });
+
+      this.actions.push({
+        id: "favorite",
+        icon: "star",
+        styleClass : "orange",
+        tooltip: "Favorite",
+        hidden: () =>  { 
+          let hidden = true;
+          if(this.assetGridComponent && this.assetGridComponent.isAnyAssetSelected) {
+              hidden = false
+          }
+          return hidden;
+        },
+        onClick: () => {
+
+                    const assetIds = this.assetGridComponent.selectedAssets.filter((asset:Asset) => (asset.id && !asset.favorite)).map((asset:any) => 
+                    {
+                      return asset.id
+                    });
+  
+                    if(assetIds && assetIds.length) {
+                      this.assetService.pushToFavorite(assetIds).subscribe(response => {
+                        this.alertService.showSuccess(`${assetIds.length} Item${assetIds.length > 1 ? 's':''} added to favorite`);
+                      });
+                    } else {
+                      this.alertService.showSuccess(`0 added to favorite`);
+                    }
         }
       });
   
@@ -132,9 +153,9 @@ export class AssetListComponent extends BaseListComponent implements AfterViewIn
                       return asset.id
                     });
   
-                    this.assetService.delete(assetIds).subscribe(response => {
-                      this.alertService.showSuccess(`Item${this.assetGridComponent.selectedAssets.length > 1 ? 's':''} deleted successfully`);
-                      //this.assetGridComponent.callSearch();
+                    this.assetService.pushToInactive(assetIds).subscribe(response => {
+                      this.alertService.showSuccess(`${assetIds.length} Item${assetIds.length > 1 ? 's':''} deleted successfully`);
+                      this.assetGridComponent.refresh();
                     });
                   }
                 }
@@ -152,7 +173,7 @@ export class AssetListComponent extends BaseListComponent implements AfterViewIn
   }
 
   getTimeline(params:any) {
-    return this.metadataService.getMetadataTimeline();
+    return this.assetService.getAssetTimeline(params);
   }
   openAssetView(event:any) {
     const currentAssetId = event.currentAssetId;

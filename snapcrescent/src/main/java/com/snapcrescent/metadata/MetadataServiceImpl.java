@@ -6,10 +6,7 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,10 +21,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.snapcrescent.bulk_import.google.GoogleTakeoutMetadata;
 import com.snapcrescent.common.services.BaseService;
 import com.snapcrescent.common.utils.Constant;
+import com.snapcrescent.common.utils.Constant.AssetType;
 import com.snapcrescent.common.utils.DateUtils;
 import com.snapcrescent.common.utils.JsonUtils;
 import com.snapcrescent.common.utils.StringUtils;
-import com.snapcrescent.common.utils.Constant.AssetType;
 import com.snapcrescent.location.LocationService;
 
 @Service
@@ -35,9 +32,6 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 
 	@Autowired
 	private LocationService locationService;
-
-	@Autowired
-	private MetadataRepository metadataRepository;
 
 	@Override
 	public Metadata computeMetaData(AssetType assetType, String originalFilename, File file) throws Exception {
@@ -203,11 +197,5 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 		}
 
 		return metadata;
-	}
-
-	@Override
-	@Transactional
-	public List<UiMetadataTimeline> getMetadataTimeline() {
-		return metadataRepository.getMetadataTimeline();
 	}
 }

@@ -1,4 +1,4 @@
-package com.snapcrescent.metadata;
+package com.snapcrescent.asset;
 
 import java.util.Date;
 
@@ -9,13 +9,13 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UiMetadataTimeline {
+public class UiAssetTimeline {
 	
 	@JsonFormat(shape = JsonFormat.Shape.NUMBER)
 	private Date creationDateTime;
 	private long count;
 	
-	public UiMetadataTimeline(long count, Date creationDateTime) {
+	public UiAssetTimeline(long count, Date creationDateTime) {
 		super();
 		this.creationDateTime = creationDateTime;
 		this.count = count;

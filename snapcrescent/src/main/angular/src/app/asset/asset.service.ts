@@ -3,7 +3,7 @@ import { Injectable} from '@angular/core';
 import { BaseService } from '../core/services/base.service';
 import { of, Observable } from "rxjs";
 import { BaseResponseBean } from '../core/models/base-response-bean';
-import { Asset, AssetType } from './asset.model';
+import { Asset, AssetTimeline, AssetType } from './asset.model';
 import { Option } from '../core/models/option.model';
 
 @Injectable({
@@ -58,16 +58,28 @@ export class AssetService extends BaseService {
     return this.httpClient.put(this.entityUrl + '/' + id,this.preparePayload(entity));
   }
 
-  restore(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
-    return this.httpClient.put(`${this.entityUrl}/restore?ids=${ids.join(',')}`, {});
+  popFromInactive(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
+    return this.httpClient.put(`${this.entityUrl}/pop/trash?ids=${ids.join(',')}`, {});
   }
 
-  delete(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
-    return this.httpClient.delete(`${this.entityUrl}?ids=${ids.join(',')}`);
+  pushToInactive(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
+    return this.httpClient.delete(`${this.entityUrl}/trash?ids=${ids.join(',')}`);
   }
 
   deletePermanently(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
     return this.httpClient.delete(`${this.entityUrl}/permanent?ids=${ids.join(',')}`);
+  }
+
+  pushToFavorite(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
+    return this.httpClient.put(`${this.entityUrl}/push/favorite?ids=${ids.join(',')}`, {});
+  }
+
+  popFromFavorite(ids: number[]): Observable<BaseResponseBean<number, Asset>> {
+    return this.httpClient.put(`${this.entityUrl}/pop/favorite?ids=${ids.join(',')}`, {});
+  }
+
+  getAssetTimeline(params:any): Observable<BaseResponseBean<number, AssetTimeline>> {
+    return this.httpClient.get(this.entityUrl + '/timeline', super.getSearchParameters(params));
   }
 
   preparePayload(entity: Asset) {
