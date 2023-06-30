@@ -39,35 +39,13 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
     super.dispose();
   }
 
-  _getAppConfigs() {
-    AppConfigService.instance
-        .getFlag(Constants.appConfigLoggedInFlag)
-        .then((value) => {
-          _loggedInToServer = value,
-          setState(() {})
-          });
+  Future<bool> _getAppConfigs() async {
+    _loggedInToServer = await AppConfigService.instance.getFlag(Constants.appConfigAutoBackupFlag);
+    _showLoginPrompt = await AppConfigService.instance.getFlag(Constants.appConfigShowLoginPromptFlag, true);
+    _autoBackupConfigured = await AppConfigService.instance.getFlag(Constants.appConfigAutoBackupFlag);
+    _showAutoBackupPrompt = await AppConfigService.instance.getFlag(Constants.appConfigShowAutoBackupPromptFlag, true);
 
-    AppConfigService.instance
-        .getFlag(Constants.appConfigShowLoginPromptFlag, true)
-        .then((value) => {
-          _showLoginPrompt = value,
-          setState(() {})
-          });
-
-    AppConfigService.instance
-        .getFlag(Constants.appConfigAutoBackupFlag)
-        .then((value) => {
-          _autoBackupConfigured = value,
-          setState(() {})
-          });
-    
-    AppConfigService.instance
-        .getFlag(Constants.appConfigShowAutoBackupPromptFlag, true)
-        .then((value) => {
-          _showAutoBackupPrompt = value,
-          setState(() {})
-          });
-          
+    return Future.value(true);
   }
 
   _body() {
@@ -163,6 +141,20 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _body();
+    return FutureBuilder<bool>(
+        future: _getAppConfigs(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.data == null) {
+            return Center(
+              child: Container(
+                width: 60,
+                height: 60,
+                child: const CircularProgressIndicator(),
+              ),
+            );
+          } else {
+            return _body();
+          }
+        });
   }
 }

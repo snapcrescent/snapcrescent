@@ -123,7 +123,7 @@ class SettingsService extends BaseService {
     return result;
   }
 
-  Future<UserLoginResponse> saveAccountInformation(
+  Future<UserLoginResponse?> saveAccountInformation(
       String serverUrl, String username, String password) async {
     AppConfig serverUrlConfig = new AppConfig(
         configKey: Constants.appConfigServerURL, configValue: serverUrl);
@@ -138,7 +138,7 @@ class SettingsService extends BaseService {
     await AppConfigRepository.instance.saveOrUpdateConfig(serverUserNameConfig);
     await AppConfigRepository.instance.saveOrUpdateConfig(serverPasswordConfig);
 
-    UserLoginResponse userLoginResponse = await LoginService.instance.login();
+    UserLoginResponse? userLoginResponse = await LoginService.instance.login();
 
     return userLoginResponse;
   }

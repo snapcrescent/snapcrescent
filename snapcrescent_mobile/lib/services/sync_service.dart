@@ -187,12 +187,11 @@ class SyncService extends BaseService {
         List<File> filteredAssets = [];
         for (var asset in assets) {
           String filePath = asset.path;
-          String fileName = filePath.substring(
-              filePath.lastIndexOf("/") + 1, filePath.length);
-          Metadata metadata =
-              await MetadataRepository.instance.findByNameEndWith(fileName);
+          String fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length);
+          int size = asset.lengthSync();
+          Metadata? metadata = await MetadataRepository.instance.findByNameAndSize(fileName, size);
 
-          if (metadata.id == null) {
+          if (metadata == null) {
             //The asset is not uploaded to server yet;
             filteredAssets.add(asset);
           }

@@ -147,7 +147,8 @@ class _AssetStore with Store {
       );
 
       for (final asset in allAssets) {
-        Metadata metadata = await MetadataRepository.instance.findByNameEndWith(asset.title!);
+        File? assetFile = await asset.file;
+        Metadata? metadata = await MetadataRepository.instance.findByNameAndSize(asset.title!, assetFile!.lengthSync());
         
         bool alreadyAdded = false;
         _assetList.forEach((unifiedAsset) {
@@ -161,7 +162,7 @@ class _AssetStore with Store {
             }
         });
 
-        if (metadata.id == null && alreadyAdded == false) {
+        if (metadata == null && alreadyAdded == false) {
           final assetDate = asset.createDateTime;
 
           AppAssetType assetType = asset.type == AssetType.image
@@ -305,9 +306,9 @@ class _AssetStore with Store {
           File? assetFile  = await asset.file;
           String filePath = assetFile!.path;
           String fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length);
-          Metadata metadata = await MetadataRepository.instance.findByNameEndWith(fileName);  
-
-          if (metadata.id == null) {
+          Metadata? metadata = await MetadataRepository.instance.findByNameAndSize(fileName, assetFile.lengthSync());
+        
+          if (metadata == null) {
             //The asset is not uploaded to server yet;
             await AssetService.instance.save([assetFile]);
           }
