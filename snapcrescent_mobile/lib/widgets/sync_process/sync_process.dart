@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 
 import 'package:snapcrescent_mobile/models/sync_state.dart';
@@ -16,27 +15,30 @@ class SyncProcessWidget extends StatefulWidget {
 class SyncProcessWidgetState extends State<SyncProcessWidget> {
   
   late AssetStore _assetStore;
-  Timer? timer;
+  
 
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      timer = Timer.periodic(Duration(seconds: 60),
-          (Timer t) => _runSync());
+      _runSync();
     });
   }
 
   void _runSync() async{
     await SyncService().syncAssets((SyncState syncMetadata) => {
+      if(
+        (syncMetadata.downloadedPercentage() > 0 && syncMetadata.downloadedPercentage() % 25 == 0)
+        ||
+        (syncMetadata.uploadPercentage() > 0 && syncMetadata.uploadPercentage() % 25 == 0)
+      )
       _assetStore.refreshStore()
     });
   }
 
   @override
   void dispose() {
-    timer?.cancel();
     super.dispose();
   }
 

@@ -210,14 +210,14 @@ class AssetService extends BaseService {
       }
 
       if(createIfNotFound) {
-        progressCallBack(assetIndex);
+        progressCallBack(assetIndex + 1);
         return AssetRepository.instance.save(entity);
       }
       
       return Future.value(0);
     } else {
       AssetRepository.instance.update(entity);
-      progressCallBack(assetIndex);
+      progressCallBack(assetIndex + 1);
       return Future.value(0);
     }
   }
