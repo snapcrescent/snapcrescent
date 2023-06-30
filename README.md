@@ -10,7 +10,7 @@
 
 ## Demo
 
-Web demo available at [https://demo.immich.app](https://demo.snapcrescent.app/#/login)
+Web demo available at [https://demo.snapcrescent.app](https://demo.snapcrescent.app/#/login)
 
 Mobile app can be downloaded from https://github.com/snapcrescent/snapcrescent/releases
 
