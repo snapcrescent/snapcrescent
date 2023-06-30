@@ -10,26 +10,6 @@ class SettingsService extends BaseService {
   SettingsService._privateConstructor() : super();
   static final SettingsService instance = SettingsService._privateConstructor();
 
-  updateFlag(String flag, bool value) async {
-    AppConfig appConfig =
-        new AppConfig(configKey: flag, configValue: value.toString());
-
-    await AppConfigRepository.instance.saveOrUpdateConfig(appConfig);
-  }
-
-  getFlag(String flag, [bool? defaultValue]) async {
-    AppConfig value = await AppConfigRepository.instance.findByKey(flag);
-
-    bool _flag = false;
-    if (value.configValue != null) {
-      _flag = value.configValue == 'true' ? true : false;
-    } else if (defaultValue != null) {
-      _flag = defaultValue;
-    }
-
-    return _flag;
-  }
-
   Future<String> getAutoBackupFolderInfo() async {
     AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigAutoBackupFolders);

@@ -3,11 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:snapcrescent_mobile/models/app_config.dart';
 import 'package:snapcrescent_mobile/models/user_login_response.dart';
-import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
 import 'package:snapcrescent_mobile/screens/grid/assets_grid.dart';
 import 'package:snapcrescent_mobile/screens/settings/folder_selection/folder_selection.dart';
+import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/asset_service.dart';
 import 'package:snapcrescent_mobile/services/notification_service.dart';
 import 'package:snapcrescent_mobile/services/settings_service.dart';
@@ -114,14 +113,14 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     await _getAccountInfo();
     await _getAutoBackupFrequency();
     _connectedToServer =
-        await SettingsService.instance.getFlag(Constants.appConfigLoggedInFlag);
-    _autoBackup = await SettingsService.instance
+        await AppConfigService.instance.getFlag(Constants.appConfigLoggedInFlag);
+    _autoBackup = await AppConfigService.instance
         .getFlag(Constants.appConfigAutoBackupFlag);
     _autoBackupFolders =
         await SettingsService.instance.getAutoBackupFolderInfo();
-    _cacheLocally = await SettingsService.instance
+    _cacheLocally = await AppConfigService.instance
         .getFlag(Constants.appConfigCacheLocallyFlag);
-    _showDeviceAssets = await SettingsService.instance
+    _showDeviceAssets = await AppConfigService.instance
         .getFlag(Constants.appConfigShowDeviceAssetsFlag);
     _showDeviceAssetsFolders =
         await SettingsService.instance.getShowDeviceAssetsFolderInfo();
@@ -361,11 +360,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     }
     _autoBackupFrequency = minutes.toStringAsFixed(0);
 
-    AppConfig appConfigAutoBackupFrequencyConfig = new AppConfig(
-        configKey: Constants.appConfigAutoBackupFrequency,
-        configValue: _autoBackupFrequency);
-    AppConfigRepository.instance
-        .saveOrUpdateConfig(appConfigAutoBackupFrequencyConfig);
+    await AppConfigService.instance.updateConfig(Constants.appConfigAutoBackupFrequency, _autoBackupFrequency);
     await _getAutoBackupFrequency();
     setState(() {});
   }
@@ -419,7 +414,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
               passwordController.text);
 
       if (userLoginResponse.token != null) {
-        SettingsService.instance
+        await AppConfigService.instance
             .updateFlag(Constants.appConfigLoggedInFlag, true);
         await _getAccountInfo();
         await NotificationService.instance.initialize();
@@ -440,12 +435,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   _onLogoutPressed() async {
-    AppConfig appConfigLoggedInFlagConfig = new AppConfig(
-        configKey: Constants.appConfigLoggedInFlag,
-        configValue: false.toString());
-
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(appConfigLoggedInFlagConfig);
+    await AppConfigService.instance.updateFlag(Constants.appConfigLoggedInFlag, false);
     await _getAccountInfo();
     setState(() {});
     Navigator.pop(context);
@@ -453,7 +443,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   _updateAutoBackupFlag(bool value) async {
     _autoBackup = value;
-    await SettingsService.instance
+    await AppConfigService.instance
         .updateFlag(Constants.appConfigAutoBackupFlag, value);
     setState(() {});
     if (_autoBackup) {
@@ -461,28 +451,26 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           await SettingsService.instance.getAutoBackupFolderInfo();
 
       if (_autoBackupFolders.isEmpty) {
-        AppConfig appConfigAutoBackupFoldersConfig = new AppConfig(
-            configKey: Constants.appConfigAutoBackupFolders, configValue: "");
-
+        
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => FolderSelectionScreen(
-                    appConfigAutoBackupFoldersConfig))).then(onBackFromChild);
+                    Constants.appConfigAutoBackupFolders))).then(onBackFromChild);
       }
     }
   }
 
   _updateCacheLocallyFlag(bool value) async {
     _cacheLocally = value;
-    await SettingsService.instance
+    await AppConfigService.instance
         .updateFlag(Constants.appConfigCacheLocallyFlag, value);
     setState(() {});
   }
 
   _updateShowDeviceAssetsFlag(bool value) async {
     _showDeviceAssets = value;
-    await SettingsService.instance
+    await AppConfigService.instance
         .updateFlag(Constants.appConfigShowDeviceAssetsFlag, value);
     setState(() {});
 
@@ -491,15 +479,11 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           await SettingsService.instance.getShowDeviceAssetsFolderInfo();
 
       if (_showDeviceAssetsFolders.isEmpty) {
-        AppConfig appConfigShowDeviceAssetsFoldersConfig = new AppConfig(
-            configKey: Constants.appConfigShowDeviceAssetsFolders,
-            configValue: "");
-
         Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => FolderSelectionScreen(
-                        appConfigShowDeviceAssetsFoldersConfig)))
+                        Constants.appConfigShowDeviceAssetsFolders)))
             .then(onBackFromChild);
       }
     }
@@ -561,15 +545,11 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
             child: const Icon(Icons.folder, color: Colors.teal),
           ),
           onTap: () {
-            AppConfig appConfigAutoBackupFoldersConfig = new AppConfig(
-                configKey: Constants.appConfigAutoBackupFolders,
-                configValue: "");
-
             Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => FolderSelectionScreen(
-                            appConfigAutoBackupFoldersConfig)))
+                            Constants.appConfigAutoBackupFolders)))
                 .then(onBackFromChild);
           },
         ),
@@ -599,15 +579,11 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
             child: const Icon(Icons.folder, color: Colors.teal),
           ),
           onTap: () {
-            AppConfig appConfigShowDeviceAssetsFoldersFlagConfig =
-                new AppConfig(
-                    configKey: Constants.appConfigShowDeviceAssetsFolders,
-                    configValue: "");
             Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => FolderSelectionScreen(
-                            appConfigShowDeviceAssetsFoldersFlagConfig)))
+                            Constants.appConfigShowDeviceAssetsFolders)))
                 .then(onBackFromChild);
           },
         ),

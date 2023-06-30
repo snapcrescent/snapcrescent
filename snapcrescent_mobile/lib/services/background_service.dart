@@ -12,14 +12,14 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
 import 'package:snapcrescent_mobile/services/notification_service.dart';
 import 'package:snapcrescent_mobile/services/sync_service.dart';
-import 'package:snapcrescent_mobile/services/base_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 
-class BackgroundService extends BaseService {
+class BackgroundService {
   BackgroundService._privateConstructor() : super();
-  static final BackgroundService instance =
-      BackgroundService._privateConstructor();
+  static final BackgroundService instance = BackgroundService._privateConstructor();
+
+  FlutterBackgroundService? service;
 
   @pragma('vm:entry-point')
   static void onStart(ServiceInstance service) async {
@@ -42,10 +42,7 @@ class BackgroundService extends BaseService {
     // bring to foreground
     Timer.periodic(const Duration(hours: 1), (timer) async {
 
-      
-      
-
-      // test using external plugin
+       // test using external plugin
       final deviceInfo = DeviceInfoPlugin();
       String? device;
       if (Platform.isAndroid) {
@@ -62,7 +59,7 @@ class BackgroundService extends BaseService {
         if (await service.isForegroundService()) {
 
           DateTime lastSyncTime = DateTime.now();
-          AppConfig lastSyncTimeValue = await AppConfigRepository.instance.findByKey(Constants.appConfigLastSyncTimestamp);
+          AppConfig lastSyncTimeValue = await AppConfigRepository.instance.findByKey(Constants.appConfigLastSyncActivityTimestamp);
           if(lastSyncTimeValue.configValue != null) {
               lastSyncTime  = DateUtilities().parseDate(lastSyncTimeValue.configValue!, DateUtilities.timeStampFormat) ;
           }
@@ -84,7 +81,6 @@ class BackgroundService extends BaseService {
               },
             )
             });
-            await NotificationService.instance.clearNotifications();
             } 
           }
         }
@@ -101,12 +97,13 @@ class BackgroundService extends BaseService {
   }
 
   Future<void> initializeService() async {
-    
-    
-      final service = FlutterBackgroundService();
+  
+      service = FlutterBackgroundService();
 
-      await service.configure(
-        androidConfiguration: AndroidConfiguration(
+      AndroidConfiguration androidConfiguration;
+
+      if(await NotificationService.instance.isAndroidPermissionGranted()) {
+        androidConfiguration = AndroidConfiguration(
           // this will be executed when app is in foreground or background in separated isolate
           onStart: onStart,
 
@@ -114,8 +111,25 @@ class BackgroundService extends BaseService {
           autoStart: true,
           autoStartOnBoot: true,
           isForegroundMode: true,
-        ),
-        iosConfiguration: IosConfiguration(
+
+          notificationChannelId: Constants.notificationChannelId.toString(), // this must match with notification channel you created above.
+          initialNotificationTitle: 'Snap-Crescent',
+          initialNotificationContent: 'Initializing Server Sync',
+          foregroundServiceNotificationId: Constants.notificationChannelId,
+        );
+      } else {
+        androidConfiguration = AndroidConfiguration(
+          // this will be executed when app is in foreground or background in separated isolate
+          onStart: onStart,
+
+          // auto start service
+          autoStart: true,
+          autoStartOnBoot: true,
+          isForegroundMode: true,  
+        );
+      }
+
+      IosConfiguration iosConfiguration = IosConfiguration(
           // auto start service
           autoStart: true,
 
@@ -124,10 +138,20 @@ class BackgroundService extends BaseService {
 
           // you have to enable background fetch capability on xcode project
           onBackground: onIosBackground,
-        ),
+        );
+      
+      await service!.configure(
+        androidConfiguration: androidConfiguration,
+        iosConfiguration: iosConfiguration,
       );
 
-      service.startService();
-    
+      service!.startService();
   }
+
+   Future<void> stopService() async {
+        if(service != null) {
+            service!.invoke("stopService");
+        }
+        
+   }
 }

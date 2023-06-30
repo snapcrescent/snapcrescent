@@ -19,6 +19,15 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.initialize(initializationsSettings);
   }
 
+  getAppNotificationConfig() {
+     AndroidNotificationChannel channel = AndroidNotificationChannel(
+        Constants.notificationChannelId.toString(), // id
+        'Snap-Crescent',
+      );
+
+  return channel;
+  }
+
   showNotification(String title,String message, [String? channelName]) async {
     if(await isAndroidPermissionGranted()) {
 
@@ -26,7 +35,7 @@ class NotificationService {
       channelName = Constants.defaultNotificationChannel;
     }
     await _flutterLocalNotificationsPlugin.show(
-          888,
+          Constants.notificationChannelId,
           title,
           message,
           new NotificationDetails(

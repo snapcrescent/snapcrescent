@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snapcrescent_mobile/models/app_config.dart';
 import 'package:snapcrescent_mobile/models/asset_detail_arguments.dart';
 import 'package:snapcrescent_mobile/screens/grid/asset_detail.dart';
 import 'package:snapcrescent_mobile/screens/grid/assets_grid.dart';
@@ -39,7 +38,7 @@ class App extends StatelessWidget {
         return MaterialPageRoute(builder: (_) => SettingsScreen());
       case FolderSelectionScreen.routeName:
         return MaterialPageRoute(
-            builder: (_) => FolderSelectionScreen(settings.arguments as AppConfig));
+            builder: (_) => FolderSelectionScreen(settings.arguments as String));
       case AssetsGridScreen.routeName:
         return MaterialPageRoute(
             builder: (_) => AssetsGridScreen());

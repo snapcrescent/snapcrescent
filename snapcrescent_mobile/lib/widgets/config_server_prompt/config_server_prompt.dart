@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:snapcrescent_mobile/models/app_config.dart';
-import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
 import 'package:snapcrescent_mobile/screens/settings/settings.dart';
+import 'package:snapcrescent_mobile/services/app_config_service.dart';
 
-import 'package:snapcrescent_mobile/services/settings_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class ConfigServerPromptWidget extends StatefulWidget {
@@ -42,28 +40,28 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
   }
 
   _getAppConfigs() {
-    SettingsService.instance
+    AppConfigService.instance
         .getFlag(Constants.appConfigLoggedInFlag)
         .then((value) => {
           _loggedInToServer = value,
           setState(() {})
           });
 
-    SettingsService.instance
+    AppConfigService.instance
         .getFlag(Constants.appConfigShowLoginPromptFlag, true)
         .then((value) => {
           _showLoginPrompt = value,
           setState(() {})
           });
 
-    SettingsService.instance
+    AppConfigService.instance
         .getFlag(Constants.appConfigAutoBackupFlag)
         .then((value) => {
           _autoBackupConfigured = value,
           setState(() {})
           });
     
-    SettingsService.instance
+    AppConfigService.instance
         .getFlag(Constants.appConfigShowAutoBackupPromptFlag, true)
         .then((value) => {
           _showAutoBackupPrompt = value,
@@ -78,13 +76,12 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
         return Container(
           color: Colors.grey.shade800,
           width: double.infinity,
-          height: 150,
+          height: 100,
           alignment: Alignment.center,
           child: Column(
             children: [
-              Icon(Icons.cloud_off_sharp, color: Colors.teal, size: 50),
               Text("Auto Backup is disabled",
-                  style: TextStyle(color: Colors.white, fontSize: 16)),
+                  style: TextStyle(color: Colors.white, fontSize: 16,height: 2)),
               ButtonBar(
                 alignment: MainAxisAlignment.center,
                 children: [
@@ -116,13 +113,12 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
       return Container(
           color: Colors.grey.shade800,
           width: double.infinity,
-          height: 150,
+          height: 100,
           alignment: Alignment.center,
           child: Column(
             children: [
-              Icon(Icons.cloud_off_sharp, color: Colors.teal, size: 50),
               Text("Not logged in your Snapcrescent Server",
-                  style: TextStyle(color: Colors.white, fontSize: 16)),
+                  style: TextStyle(color: Colors.white, fontSize: 16,height: 2)),
               ButtonBar(
                 alignment: MainAxisAlignment.center,
                 children: [
@@ -151,27 +147,16 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
       return Container();
     }
   }
+  
 
   _onDoNotShowLoginPromptAgain() async{
-
-    AppConfig appConfigShowLoginPromptFlagConfig = new AppConfig(
-                        configKey: Constants.appConfigShowLoginPromptFlag,
-                        configValue: false.toString());
-
-    await AppConfigRepository.instance.saveOrUpdateConfig(appConfigShowLoginPromptFlagConfig);
-
+    await AppConfigService.instance.updateFlag(Constants.appConfigShowLoginPromptFlag, false); 
     _getAppConfigs();
 
   }
 
   _onDoNotShowAutoBackUpPromptAgain() async{
-
-    AppConfig appConfigShowAutoBackupPromptFlagConfig = new AppConfig(
-                        configKey: Constants.appConfigShowAutoBackupPromptFlag,
-                        configValue: false.toString());
-
-    await AppConfigRepository.instance.saveOrUpdateConfig(appConfigShowAutoBackupPromptFlagConfig);
-
+    await AppConfigService.instance.updateFlag(Constants.appConfigShowAutoBackupPromptFlag, false); 
     _getAppConfigs();
 
   }

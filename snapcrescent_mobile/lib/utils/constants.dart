@@ -12,7 +12,9 @@ class Constants {
   static final String appConfigAutoBackupFlag = 'AUTO_BACKUP';
   static final String appConfigAutoBackupFolders = 'AUTO_BACKUP_FOLDERS';
   static final String appConfigAutoBackupFrequency = 'AUTO_BACKUP_FREQUENCY';
-  static final String appConfigLastSyncTimestamp = 'LAST_SYNC_TIMESTAMP';
+  
+  static final String appConfigSyncInProgress = 'SYNC_IN_PROGRESS';
+  static final String appConfigLastSyncActivityTimestamp = 'LAST_SYNC_ACTIVITY_TIMESTAMP';
 
   static final String appConfigCacheLocallyFlag = 'CACHE_LOCALLY';
   static final String appConfigLocalCacheAge = 'LOCAL_CACHE_AGE';
@@ -33,6 +35,10 @@ class Constants {
   static final String uploadProgressNotificationChannel = 'Upload Progress';
 
   static final int defaultAutoBackupFrequency = 1 * 60;
+
+
+  static final int notificationChannelId = 0213;
+  static final int notificationChannelName = 0213;
   
 }
 
