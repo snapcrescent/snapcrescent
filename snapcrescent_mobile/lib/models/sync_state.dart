@@ -13,7 +13,23 @@ class SyncState  {
     return _getPercentage(uploadedAssetCount, totalLocalAssetCount);
   }
 
+  downloadedPercentageString() {
+    return _getPercentageString(downloadedAssetCount, totalServerAssetCount);
+  }
+
+  uploadPercentageString() {
+    return _getPercentageString(uploadedAssetCount, totalLocalAssetCount);
+  }
+
   _getPercentage(int? count, int? total) {
+    if(total == 0) {
+      return 0;
+    }
+    
+    return (count! * 100 / total!).ceil();
+  }
+
+  _getPercentageString(int? count, int? total) {
     if(total == 0) {
       return 0.toStringAsFixed(2) + "%";
     }

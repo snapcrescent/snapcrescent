@@ -24,12 +24,11 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
-        Navigator.pushAndRemoveUntil<dynamic>(
+
+        Navigator.popAndPushNamed(
           context,
-          MaterialPageRoute<dynamic>(
-            builder: (BuildContext context) => AssetsGridScreen(),
-          ),
-          (route) => false, //if you want to disable back feature set to false
+          AssetsGridScreen.routeName,
+           //if you want to disable back feature set to false
         );
 
         //we need to return a future
@@ -402,6 +401,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     _latestAssetDate = DateUtilities().formatDate(
         (await AssetService.instance.getLatestAssetDate()),
         DateUtilities.timeStampFormat);
+    await AppConfigService.instance.updateDateConfig(Constants.appConfigLastSyncActivityTimestamp, DateTime(2000, 1, 1, 0, 0, 0, 0, 0), DateUtilities.timeStampFormat);
     ToastService.showSuccess("Successfully deleted locally cached data.");
     setState(() {});
     Navigator.pop(context);

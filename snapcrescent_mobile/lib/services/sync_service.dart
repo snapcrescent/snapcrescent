@@ -165,7 +165,10 @@ class SyncService extends BaseService {
           (_downloadedAssetCount) {
         syncMetadata.downloadedAssetCount = _downloadedAssetCount;
 
-        if (syncMetadata.downloadedAssetCount % 10 == 0) {
+        if (
+          syncMetadata.downloadedAssetCount % 10 == 0
+          || syncMetadata.downloadedAssetCount == syncMetadata.totalServerAssetCount
+          ) {
           postDownloadUpdates(syncMetadata, progressCallBack);
         } else if(syncMetadata.downloadedAssetCount < 10) {
           postDownloadUpdates(syncMetadata, progressCallBack);
@@ -264,7 +267,7 @@ class SyncService extends BaseService {
   postDownloadUpdates(SyncState syncMetadata, Function progressCallBack) {
     NotificationService.instance.showNotification(
         "Downloading photos and videos",
-        "Downloaded : " + syncMetadata.downloadedPercentage(),
+        "Downloaded : " + syncMetadata.downloadedPercentageString(),
         Constants.downloadProgressNotificationChannel);
     updateLastSyncActivityTimestamp();
     progressCallBack(syncMetadata);
@@ -273,7 +276,7 @@ class SyncService extends BaseService {
   postUploadUpdates(SyncState syncMetadata, Function progressCallBack) {
     NotificationService.instance.showNotification(
         "Uploading photos and videos",
-        "Uploaded : " + syncMetadata.uploadPercentage(),
+        "Uploaded : " + syncMetadata.uploadPercentageString(),
         Constants.uploadProgressNotificationChannel);
     updateLastSyncActivityTimestamp();
     progressCallBack(syncMetadata);

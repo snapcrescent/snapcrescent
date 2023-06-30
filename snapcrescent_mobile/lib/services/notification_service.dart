@@ -19,13 +19,17 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.initialize(initializationsSettings);
   }
 
-  getAppNotificationConfig() {
-     AndroidNotificationChannel channel = AndroidNotificationChannel(
+  Future registerBackgroundServiceNotification() async{
+
+    AndroidNotificationChannel channel = AndroidNotificationChannel(
         Constants.notificationChannelId.toString(), // id
-        'Snap-Crescent',
+        'Snap-Crescent', // title
+        description:
+            'Snap-Crescent sync process notifications', // description
+        importance: Importance.low, // importance must be at low or higher level
       );
 
-  return channel;
+    await _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
   }
 
   showNotification(String title,String message, [String? channelName]) async {

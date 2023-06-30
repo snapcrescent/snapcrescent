@@ -103,6 +103,9 @@ class BackgroundService {
       AndroidConfiguration androidConfiguration;
 
       if(await NotificationService.instance.isAndroidPermissionGranted()) {
+
+        await NotificationService.instance.registerBackgroundServiceNotification();
+
         androidConfiguration = AndroidConfiguration(
           // this will be executed when app is in foreground or background in separated isolate
           onStart: onStart,

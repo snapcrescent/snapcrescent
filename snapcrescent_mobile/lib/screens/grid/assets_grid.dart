@@ -323,6 +323,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
     return Scaffold(
       appBar: _assetStore.isAnyItemSelected()
           ? AppBar(
+              automaticallyImplyLeading: false,
               leading: _getLeadingIcon(),
               title: Text(!_assetStore.isAnyItemSelected()
                   ? ""
@@ -348,6 +349,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
               ],
             )
           : AppBar(
+              automaticallyImplyLeading: false,
               leading: _getLeadingIcon(),
               title: Text(""),
               backgroundColor: Colors.black,
