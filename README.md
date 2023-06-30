@@ -8,9 +8,35 @@
 <h3 align="center">Snapcrescent</h3>
 <h4 align="center">Self-hosted photo and video backup solution</h4>
 
+## Demo
+
+Web demo available at [https://demo.immich.app](https://demo.snapcrescent.app/#/login)
+
+Mobile app can be downloaded from https://github.com/snapcrescent/snapcrescent/releases
+
+```bash title="Credential"
+Credential
+email: demo-account
+password: demo-password
+```
+
+# Features
+
+| Features                                     | Mobile | Web |
+| -------------------------------------------- | ------ | --- |
+| Upload and view videos and photos            | Yes    | Yes |
+| Auto backup from app in backgroud            | Yes    | N/A |
+| User-defined backup schedule                 | Yes    | N/A |
+| Selective folder(s) for backup               | Yes    | N/A |
+| Download photos and videos to local device   | Yes    | Yes |
+| Multi-user support                           | No     | No  |
+| Scrubbable/draggable scrollbar               | Yes    | Yes |
+| Archive and Favorites                        | Yes    | Yes |
+| Offline support                              | No     | No  |
 
 ## Docker Run Commands
-
+Command
+```bash title="docker"
 docker run
   -d
   --name='SnapCrescent'
@@ -22,11 +48,12 @@ docker run
   -e 'ADMIN_PASSWORD'='ADMIN_PASSWORD'
   -p '8080:8080/tcp'
   -v 'MEDIA_STORAGE_PATH':'/media':'rw'
-  -v 'DATA_PATH':'/db':'rw'
   -v 'MEDIA_IMPORT_STORAGE_PATH':'/mnt':'rw'
   'snapcrescent/snapcrescent'
+```
 
-#### Variables :
+Variables
+```bash title="variables"
 SQL_URL - URL of mysql (jdbc:mysql://IP_ADDRESS:3306/snap-crescent)
 
 SQL_USER - mysql user (root)
@@ -37,10 +64,11 @@ ADMIN_PASSWORD - admin password for login to app
 
 MEDIA_STORAGE_PATH - Local folder path for photos (c/Users/John/Documents/Images)
 
-DATA_PATH - Local folder path for SQLITE DB (c/Users/John/Documents/db)
-
 MEDIA_IMPORT_STORAGE_PATH - Local folder path for importing photos (c/Users/John/Documents/Images)
+```
 
-## Default Login
-    Username : admin
-    Password : whatever value is added in <ADMIN_PASSWORD> variable while launching docker.
+Default Login
+```bash title="login"
+Username : admin
+Password : whatever value is added in <ADMIN_PASSWORD> variable while launching docker.
+```
