@@ -17,6 +17,7 @@ import 'package:snapcrescent_mobile/utils/common_utilities.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/widgets/asset_thumbnail/asset_thumbnail.dart';
 import 'package:snapcrescent_mobile/widgets/config_server_prompt/config_server_prompt.dart';
+import 'package:snapcrescent_mobile/widgets/sync_process/sync_process.dart';
 
 class AssetsGridScreen extends StatelessWidget {
   static const routeName = '/assets';
@@ -43,8 +44,6 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   Timer? timer;
   int periodicInitializerPageNumber = 0;
-
-  
 
   _onAssetTap(BuildContext context, int assetIndex) {
     AssetDetailArguments arguments =
@@ -113,9 +112,8 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _periodicallyLoadAssets();
-     timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) => 
-            _periodicallyLoadAssets()
-       );
+      timer = Timer.periodic(
+          Duration(milliseconds: 500), (Timer t) => _periodicallyLoadAssets());
     });
   }
 
@@ -127,11 +125,11 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   void _listenForNotificationData() {
     final backgroundService = FlutterBackgroundService();
-    backgroundService.on('update').listen((Map<String, dynamic>? $event)  {
-       SyncState syncMetadata =  SyncState.fromJson($event!["syncMetadata"]);
-       if(syncMetadata.downloadedAssetCount % 500 == 0) {
-          _assetStore.refreshStore();
-       }
+    backgroundService.on('update').listen((Map<String, dynamic>? $event) {
+      SyncState syncMetadata = SyncState.fromJson($event!["syncMetadata"]);
+      if (syncMetadata.downloadedAssetCount % 500 == 0) {
+        _assetStore.refreshStore();
+      }
     }, onError: (e, s) {
       print('error listening for updates: $e, $s');
     }, onDone: () {
@@ -140,31 +138,34 @@ class _AssetGridViewState extends State<_AssetGridView> {
   }
 
   _periodicallyLoadAssets() {
-      if(periodicInitializerPageNumber <= 5) {
+    if (periodicInitializerPageNumber <= 5) {
       _assetStore.initStore(periodicInitializerPageNumber);
       periodicInitializerPageNumber++;
-      } else{
-        timer?.cancel();
-      }
-      
+    } else {
+      timer?.cancel();
+    }
   }
 
   _getFormattedGroupKey(String key) {
     String formattedKey = "";
-    DateTime groupDateTime = DateUtilities().parseDate(key, DateUtilities.defaultYearFormat) ;
+    DateTime groupDateTime =
+        DateUtilities().parseDate(key, DateUtilities.defaultYearFormat);
     if (currentDateTime.year == groupDateTime.year) {
       if (DateUtilities().weekNumber(currentDateTime) ==
           DateUtilities().weekNumber(groupDateTime)) {
         if (currentDateTime.day == groupDateTime.day) {
           formattedKey = 'Today';
         } else {
-          formattedKey = DateUtilities().formatDate(groupDateTime, DateUtilities.currentWeekFormat);
+          formattedKey = DateUtilities()
+              .formatDate(groupDateTime, DateUtilities.currentWeekFormat);
         }
       } else {
-        formattedKey = DateUtilities().formatDate(groupDateTime, DateUtilities.currentYearFormat);
+        formattedKey = DateUtilities()
+            .formatDate(groupDateTime, DateUtilities.currentYearFormat);
       }
     } else {
-      formattedKey = DateUtilities().formatDate(groupDateTime, DateUtilities.defaultYearFormat);
+      formattedKey = DateUtilities()
+          .formatDate(groupDateTime, DateUtilities.defaultYearFormat);
     }
 
     return formattedKey;
@@ -204,11 +205,14 @@ class _AssetGridViewState extends State<_AssetGridView> {
         itemBuilder: (BuildContext context, int groupIndex) {
           if (groupIndex == keys.length) {
             return Center(
-              child: Container(
-                width: 60,
-                height: 60,
-                child: const CircularProgressIndicator(),
-              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 100,
+                  )],
+              )
             );
           } else {
             return Column(
@@ -278,7 +282,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   _scrollableView(Orientation orientation, AssetStore assetStore) {
     return RefreshIndicator(
-        onRefresh: () {
+        onRefresh: () async {
           return Future.delayed(Duration(seconds: 1), () {
             _assetStore.refreshStore();
           });
@@ -294,7 +298,14 @@ class _AssetGridViewState extends State<_AssetGridView> {
                 child: _gridView(orientation, assetStore))));
   }
 
-   _getLeadingIcon() {
+  _syncProgress() {
+    return Container(
+        color: Colors.black,
+        width: double.infinity,
+        child: new SyncProcessWidget());
+  }
+
+  _getLeadingIcon() {
     if (_assetStore.isAnyItemSelected()) {
       return IconButton(
         onPressed: () {
@@ -320,20 +331,20 @@ class _AssetGridViewState extends State<_AssetGridView> {
               actions: [
                 if (_assetStore.isAnyItemSelected())
                   IconButton(
-                        onPressed: () {
-                          _uploadAssets();
-                        },
-                        icon: Icon(Icons.upload, color: Colors.white)),
-                  IconButton(
-                        onPressed: () {
-                          _downloadAssets();
-                        },
-                        icon: Icon(Icons.download, color: Colors.white)),
-                  IconButton(
                       onPressed: () {
-                        _shareAssets();
+                        _uploadAssets();
                       },
-                      icon: Icon(Icons.share, color: Colors.white))
+                      icon: Icon(Icons.upload, color: Colors.white)),
+                IconButton(
+                    onPressed: () {
+                      _downloadAssets();
+                    },
+                    icon: Icon(Icons.download, color: Colors.white)),
+                IconButton(
+                    onPressed: () {
+                      _shareAssets();
+                    },
+                    icon: Icon(Icons.share, color: Colors.white))
               ],
             )
           : AppBar(
@@ -341,28 +352,32 @@ class _AssetGridViewState extends State<_AssetGridView> {
               title: Text(""),
               backgroundColor: Colors.black,
               actions: [
-                       PopupMenuButton<String>(
-                        onSelected: (String result) {
-                          if (result == "Settings") {
-                              Navigator.push(
-                              context,
-                              MaterialPageRoute<dynamic>(
-                                  builder: (BuildContext context) => SettingsScreen()));
-                          }
-                        },
-                        itemBuilder: (BuildContext context) {
-                          return [
-                            PopupMenuItem(
-                              child: Text("Settings",),
-                              value: "Settings",
-                            ),
-                          ];
-                        },
+                PopupMenuButton<String>(
+                  onSelected: (String result) {
+                    if (result == "Settings") {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute<dynamic>(
+                              builder: (BuildContext context) =>
+                                  SettingsScreen()));
+                    }
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return [
+                      PopupMenuItem(
+                        child: Text(
+                          "Settings",
                         ),
+                        value: "Settings",
+                      ),
+                    ];
+                  },
+                ),
               ],
             ),
       body: Column(
         children: <Widget>[
+          _syncProgress(),
           if (showProcessing)
             Container(
               height: 2,

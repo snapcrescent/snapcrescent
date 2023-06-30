@@ -11,6 +11,7 @@ import 'package:snapcrescent_mobile/models/metadata.dart';
 import 'package:snapcrescent_mobile/models/unified_asset.dart';
 import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
 import 'package:snapcrescent_mobile/repository/metadata_repository.dart';
+import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/asset_service.dart';
 import 'package:snapcrescent_mobile/services/metadata_service.dart';
 import 'package:snapcrescent_mobile/services/thumbnail_service.dart';
@@ -88,7 +89,7 @@ class _AssetStore with Store {
           asset.metadata = metadata;
         }
 
-        _assetList.addAll(await _getUnifiedAssetsFromCloudAssets(newAssets));
+        await _getUnifiedAssetsFromCloudAssets(_assetList, newAssets);
       }
 
       if (await _getShowDeviceAssetsInfo()) {
@@ -101,7 +102,7 @@ class _AssetStore with Store {
 
         for (final album in albums) {
           if (selectedDeviceFolders.indexOf(album.id) != -1) {
-            _assetList.addAll(await _getUnifiedAssetsFromLocalAssets(album));
+            await _getUnifiedAssetsFromLocalAssets(_assetList, album);
           }
         }
       }
@@ -137,9 +138,8 @@ class _AssetStore with Store {
     executionInProgress = false;
   }
 
-  _getUnifiedAssetsFromLocalAssets(AssetPathEntity? album) async {
-    List<UniFiedAsset> uniFiedAssets = [];
-
+  _getUnifiedAssetsFromLocalAssets(List<UniFiedAsset> _assetList, AssetPathEntity? album) async {
+    
     if (album != null) {
       final allAssets = await album.getAssetListRange(
         start: 0, // start at index 0
@@ -147,27 +147,36 @@ class _AssetStore with Store {
       );
 
       for (final asset in allAssets) {
-        Metadata metadata =
-            await MetadataRepository.instance.findByNameEndWith(asset.title!);
+        Metadata metadata = await MetadataRepository.instance.findByNameEndWith(asset.title!);
+        
+        bool alreadyAdded = false;
+        _assetList.forEach((unifiedAsset) {
 
-        if (metadata.id == null) {
+          if(
+            unifiedAsset.assetSource == AssetSource.DEVICE
+            && unifiedAsset.assetEntity!.id == asset.id
+          ) {
+                alreadyAdded = true;
+                return;
+            }
+        });
+
+        if (metadata.id == null && alreadyAdded == false) {
           final assetDate = asset.createDateTime;
 
           AppAssetType assetType = asset.type == AssetType.image
               ? AppAssetType.PHOTO
               : AppAssetType.VIDEO;
-          uniFiedAssets.add(new UniFiedAsset(
+          _assetList.add(new UniFiedAsset(
               assetType, AssetSource.DEVICE, assetDate,
               assetEntity: asset));
         }
       }
     }
-
-    return uniFiedAssets;
   }
 
-  _getUnifiedAssetsFromCloudAssets(List<Asset> newAssets) async {
-    List<UniFiedAsset> uniFiedAssets = [];
+  _getUnifiedAssetsFromCloudAssets(List<UniFiedAsset> _assetList, List<Asset> newAssets) async {
+    
     for (final asset in newAssets) {
       final assetDate = asset.metadata!.creationDateTime!;
       asset.thumbnail!.thumbnailFile =
@@ -176,12 +185,10 @@ class _AssetStore with Store {
       AppAssetType assetType = asset.assetType == AppAssetType.PHOTO.id
           ? AppAssetType.PHOTO
           : AppAssetType.VIDEO;
-      uniFiedAssets.add(new UniFiedAsset(
+      _assetList.add(new UniFiedAsset(
           assetType, AssetSource.CLOUD, assetDate,
           asset: asset));
     }
-
-    return uniFiedAssets;
   }
 
   _addUnifiedAssetToGroup(DateTime assetDate, UniFiedAsset asset) {
@@ -219,14 +226,7 @@ class _AssetStore with Store {
   }
 
   Future<bool> _getShowDeviceAssetsInfo() async {
-    AppConfig value = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigShowDeviceAssetsFlag);
-
-    if (value.configValue != null) {
-      return value.configValue == 'true' ? true : false;
-    } else {
-      return false;
-    }
+    return await AppConfigService.instance.getFlag(Constants.appConfigShowDeviceAssetsFlag);
   }
 
   Future<List<String>> _getShowDeviceAssetsFolderInfo() async {

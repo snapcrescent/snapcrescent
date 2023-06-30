@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:snapcrescent_mobile/models/app_config.dart';
-import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
+import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
 import 'package:snapcrescent_mobile/style.dart';
 
 class FolderSelectionScreen extends StatelessWidget {
   static const routeName = '/folder_selection';
 
-  final AppConfig appConfig;
+  final String appConfigKey;
 
-  FolderSelectionScreen(this.appConfig);
+  FolderSelectionScreen(this.appConfigKey);
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +18,14 @@ class FolderSelectionScreen extends StatelessWidget {
           title: Text('Device Folders'),
           backgroundColor: Colors.black,
         ),
-        body: _FoldersScreenView(this.appConfig));
+        body: _FoldersScreenView(this.appConfigKey));
   }
 }
 
 class _FoldersScreenView extends StatefulWidget {
-  final AppConfig appConfig;
+  final String appConfigKey;
 
-  _FoldersScreenView(this.appConfig);
+  _FoldersScreenView(this.appConfigKey);
 
   @override
   _FoldersScreenViewState createState() => _FoldersScreenViewState();
@@ -63,11 +62,10 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
   }
 
   Future<void> _getFolderInfo() async {
-    AppConfig value = await AppConfigRepository.instance
-        .findByKey(widget.appConfig.configKey!);
-
-    if (value.configValue != null) {
-      _folders = value.configValue!;
+    String? value = await AppConfigService.instance.getConfig(widget.appConfigKey);
+    
+    if (value != null) {
+      _folders = value;
     }
   }
 
@@ -82,10 +80,8 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
     }
 
     _folders = newFolderList.join(",");
-
-    widget.appConfig.configValue = _folders;
-
-    await AppConfigRepository.instance.saveOrUpdateConfig(widget.appConfig);
+    
+    await AppConfigService.instance.updateConfig(widget.appConfigKey, _folders);
 
     setState(() {});
   }

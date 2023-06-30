@@ -102,7 +102,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
 
 
     AppConfig appConfigLastSyncTimestampConfig = new AppConfig(
-        configKey: Constants.appConfigLastSyncTimestamp,
+        configKey: Constants.appConfigLastSyncActivityTimestamp,
         configValue: DateUtilities().formatDate(DateTime(2000, 1, 1, 0, 0, 0, 0, 0), DateUtilities.timeStampFormat));
 
     await AppConfigRepository.instance
