@@ -1,3 +1,4 @@
+-- liquibase formatted sql
 -- changeset navalgandhi1989:create_app_config logicalFilePath:path-independent
 CREATE TABLE IF NOT EXISTS `app_config` (
   `id` bigint NOT NULL,

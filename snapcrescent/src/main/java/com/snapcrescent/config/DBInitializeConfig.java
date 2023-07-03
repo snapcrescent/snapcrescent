@@ -10,17 +10,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import liquibase.integration.spring.SpringLiquibase;
-
 @Configuration
 public class DBInitializeConfig implements CommandLineRunner {
 
 	@Autowired
 	private DataSource dataSource;
 	
-	@Autowired
-	private SpringLiquibase springLiquibase;
-
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
@@ -32,12 +27,6 @@ public class DBInitializeConfig implements CommandLineRunner {
 	public void initialize() {
 
 		try {
-			springLiquibase.setContexts("snapcrescent");
-			springLiquibase.afterPropertiesSet();
-			
-			springLiquibase.setContexts("snapcrescent-seed");
-			springLiquibase.afterPropertiesSet();
-
 			Resource adminPasswordResource = new ByteArrayResource(("UPDATE user SET password='"
 					+ passwordEncoder.encode(EnvironmentProperties.ADMIN_PASSWORD) + "' WHERE id = 1").getBytes());
 			ResourceDatabasePopulator adminPasswordPopulator = new ResourceDatabasePopulator(adminPasswordResource);

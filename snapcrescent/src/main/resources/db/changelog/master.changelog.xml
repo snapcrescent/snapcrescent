@@ -5,24 +5,28 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd"
                    logicalFilePath="path-independent">
 
+    <!-- SP -->
+    <include relativeToChangelogFile="true" file="./stored_procedures/create_stored_procedures.changelog.xml" context="snapcrescent"></include>
     
-    <!-- tables -->
-    <include relativeToChangelogFile="true" file="./tables/create_table.changelog.xml"  context="snapcrescent"></include>
-
     <!-- functions -->
     <include relativeToChangelogFile="true" file="./functions/create_function.changelog.xml" context="snapcrescent"></include>
     
-    <!-- views -->
-    <include relativeToChangelogFile="true" file="./views/create_view.changelog.xml" context="snapcrescent"></include>
-
+    <!-- tables -->
+    <include relativeToChangelogFile="true" file="./tables/create_table.changelog.xml"  context="snapcrescent"></include>
+    
     <!-- trigger -->
     <include relativeToChangelogFile="true" file="./triggers/create_trigger.changelog.xml" context="snapcrescent"></include>
-
-    <!-- SP -->
-    <include relativeToChangelogFile="true" file="./storedProcedures/create_sp.changelog.xml" context="snapcrescent"></include>
+    
+    <!-- views -->
+    <include relativeToChangelogFile="true" file="./views/create_view.changelog.xml" context="snapcrescent"></include>
+    
+     <!-- views -->
+    <include relativeToChangelogFile="true" file="./views/create_view.changelog.xml" context="snapcrescent"></include>
+    
+    <!-- versioned scripts -->
+    <include relativeToChangelogFile="true" file="./versioned_scripts/versioned_scripts.changelog.xml" context="snapcrescent_versioned_scripts"></include>
     
     <!-- seeded data -->
-    <include relativeToChangelogFile="true" file="./seededData/Insert_Seeded_Data.sql" context="snapcrescent-seed"></include>
-        
-    
+    <include relativeToChangelogFile="true" file="./seed_data/insert_seeded_data.sql" context="snapcrescent-seed"></include>
+     
 </databaseChangeLog>

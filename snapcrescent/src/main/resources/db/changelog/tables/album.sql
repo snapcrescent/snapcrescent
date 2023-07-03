@@ -1,3 +1,4 @@
+-- liquibase formatted sql
 -- changeset navalgandhi1989:create_album logicalFilePath:path-independent
 CREATE TABLE IF NOT EXISTS `album` (
   `id` bigint NOT NULL AUTO_INCREMENT,

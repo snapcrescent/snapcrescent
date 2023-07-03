@@ -1,3 +1,4 @@
+-- liquibase formatted sql
 -- changeset navalgandhi1989:create_location logicalFilePath:path-independent
 CREATE TABLE IF NOT EXISTS `location` (
   `id` bigint NOT NULL AUTO_INCREMENT,

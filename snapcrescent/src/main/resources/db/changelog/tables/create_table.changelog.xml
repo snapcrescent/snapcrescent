@@ -13,6 +13,9 @@
       <include relativeToChangelogFile="true" file="./metadata.sql"/>
       <include relativeToChangelogFile="true" file="./thumbnail.sql"/>
       <include relativeToChangelogFile="true" file="./asset.sql"/>
+	  <include relativeToChangelogFile="true" file="./album_asset_assn.sql"/>
+	  <include relativeToChangelogFile="true" file="./album_user_assn.sql"/>
+	  
                    
 
 </databaseChangeLog>
