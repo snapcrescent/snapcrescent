@@ -1,6 +1,7 @@
-package com.snapcrescent.config;
+package com.snapcrescent.config.dao;
 
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -24,6 +25,9 @@ public class HibernateConfig {
 	
 	@Autowired
 	private DataSource dataSource;
+	
+	@Autowired
+	private DaoSQLEntityInterceptor daoSQLEntityInterceptor;
 
 	@PostConstruct
 	private void init() {
@@ -32,6 +36,7 @@ public class HibernateConfig {
 	
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+		
 		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
 		entityManagerFactoryBean.setDataSource(dataSource);
 		entityManagerFactoryBean.setPackagesToScan("com.snapcrescent");
@@ -39,7 +44,7 @@ public class HibernateConfig {
 		
 		JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		entityManagerFactoryBean.setJpaVendorAdapter(vendorAdapter);
-		entityManagerFactoryBean.setJpaProperties(hibernateProperties());
+		entityManagerFactoryBean.setJpaPropertyMap(hibernateProperties());
 
 		return entityManagerFactoryBean;
 	}
@@ -49,6 +54,7 @@ public class HibernateConfig {
 	    JpaTransactionManager transactionManager = new JpaTransactionManager();
 	    transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
 
+	    
 	    return transactionManager;
 	}
 
@@ -57,11 +63,11 @@ public class HibernateConfig {
 	    return new PersistenceExceptionTranslationPostProcessor();
 	}
 
-	Properties hibernateProperties() {
-	    Properties properties = new Properties();
-	    properties.setProperty("hibernate.hbm2ddl.auto", "validate");
-	    properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
-	    properties.setProperty("hibernate.ejb.interceptor", DaoSQLEntityInterceptor.class.getPackage().getName() + "." + DaoSQLEntityInterceptor.class.getSimpleName());
+	Map<String, Object> hibernateProperties() {
+		Map<String, Object> properties = new HashMap<String, Object>();
+	    properties.put("hibernate.hbm2ddl.auto", "validate");
+	    properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
+	    properties.put("hibernate.session_factory.interceptor", daoSQLEntityInterceptor);
         properties.put("hibernate.physical_naming_strategy", CamelCaseToUnderscoresNamingStrategy.class.getPackage().getName() + "." + CamelCaseToUnderscoresNamingStrategy.class.getSimpleName());
 	       
 	    return properties;

@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.snapcrescent.album.Album;
+import com.snapcrescent.album.AlbumRepository;
 import com.snapcrescent.appConfig.AppConfigService;
 import com.snapcrescent.common.beans.BaseResponseBean;
 import com.snapcrescent.common.services.BaseService;
@@ -67,6 +69,9 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 	@Autowired
 	private AssetConverter assetConverter;
+	
+	@Autowired
+	private AlbumRepository albumRepository;
 	
 	@Autowired
 	private SecuredStreamTokenUtil securedStreamTokenUtil;
@@ -198,6 +203,22 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			asset.setThumbnailId(thumbnail.getId());
 
 			assetRepository.save(asset);
+			
+			Album defaultAlbum =  albumRepository.findDefaultAlbumByUserId(coreService.getAppUser().getId());
+			
+			if(defaultAlbum != null) {
+				List<Asset> albumAssets = defaultAlbum.getAssets();
+				
+				if(albumAssets == null) {
+					albumAssets = new ArrayList<Asset>();
+				}
+				
+				albumAssets.add(asset);
+				
+				defaultAlbum.setAssets(albumAssets);
+				
+				albumRepository.update(defaultAlbum);
+			}
 		} else {
 			
 			metadataRepository.detach(existingMetadata);

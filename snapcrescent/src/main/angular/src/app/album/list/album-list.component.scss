@@ -1,0 +1,25 @@
+@import "/src/assets/styles/variables.scss";
+
+.albums-container{
+    margin-top: 10px;
+
+
+    .title{
+        font-weight: 500;
+        font-size: 20px;
+    }
+
+    .album{
+        border: 1px solid  $accent-color;
+        border-radius: 15px;
+        max-width: 200px;
+        height: 200px;
+        cursor: pointer;
+
+        .title{
+            font-weight: 400;
+            font-size: 16px;
+        }
+
+    }
+}

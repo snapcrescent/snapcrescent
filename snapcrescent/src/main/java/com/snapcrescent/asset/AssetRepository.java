@@ -69,6 +69,9 @@ public class AssetRepository extends BaseRepository<Asset>{
 					true));
 		}
 		
+		hql.append(" AND asset.createdByUserId = :ownerId ");
+		paramsMap.put("ownerId", searchCriteria.getOwnerId());
+		
 		if(searchCriteria.getFromDate() != null)
 		{
 			hql.append(" AND metadata.creationDateTime >= :fromDate");
@@ -158,6 +161,8 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		hql.append(" where 1=1 ");
 		
+		hql.append(" AND asset.createdByUserId = :ownerId ");
+		paramsMap.put("ownerId", searchCriteria.getOwnerId());
 		
 		if(searchCriteria.getActive() != null)
 		{

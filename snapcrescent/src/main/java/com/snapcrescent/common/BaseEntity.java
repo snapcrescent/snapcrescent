@@ -28,7 +28,7 @@ public abstract class BaseEntity implements Serializable{
 	@Column(unique = true, nullable = false)
 	protected Long id;
 	
-	@Version
+	@Version()
 	protected Long version;
 
 	private Date creationDateTime;
@@ -36,12 +36,11 @@ public abstract class BaseEntity implements Serializable{
 	private Date lastModifiedDateTime;
 	
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinColumn(name = "CREATED_BY_USER_ID", nullable = false, insertable = false, updatable = false)
+	@JoinColumn(name = "CREATED_BY_USER_ID", nullable = true, insertable = false, updatable = false)
 	private User createdByUser;
 
-	@Column(name = "CREATED_BY_USER_ID", nullable = false, insertable = true, updatable = true)
+	@Column(name = "CREATED_BY_USER_ID", nullable = true, insertable = true, updatable = true)
 	private Long createdByUserId;
 	
 	private Boolean active = true;
-
 }

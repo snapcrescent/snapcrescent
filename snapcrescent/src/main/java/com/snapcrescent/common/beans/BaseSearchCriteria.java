@@ -12,6 +12,8 @@ import lombok.Data;
 @Data
 public class BaseSearchCriteria{
 
+	private Long ownerId;
+	
 	private List<String> selectedIds = new ArrayList<>();
 	
 	private String searchKeyword;

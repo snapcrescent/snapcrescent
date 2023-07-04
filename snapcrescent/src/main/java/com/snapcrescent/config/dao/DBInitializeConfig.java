@@ -1,4 +1,4 @@
-package com.snapcrescent.config;
+package com.snapcrescent.config.dao;
 
 import javax.sql.DataSource;
 
@@ -8,16 +8,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.snapcrescent.common.utils.Constant;
 
 @Configuration
 public class DBInitializeConfig implements CommandLineRunner {
 
 	@Autowired
 	private DataSource dataSource;
-	
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	@Override
 	public void run(String... args) throws Exception {
@@ -25,11 +23,11 @@ public class DBInitializeConfig implements CommandLineRunner {
 	}
 
 	public void initialize() {
-
+	
 		try {
-			Resource adminPasswordResource = new ByteArrayResource(("UPDATE user SET password='"
-					+ passwordEncoder.encode(EnvironmentProperties.ADMIN_PASSWORD) + "' WHERE id = 1").getBytes());
-			ResourceDatabasePopulator adminPasswordPopulator = new ResourceDatabasePopulator(adminPasswordResource);
+			Resource adminCreatedByUserIdResource = new ByteArrayResource(("UPDATE user SET created_by_user_id='"
+					+ Constant.DEFAULT_ADMIN_USER_ID + "' WHERE id = 1").getBytes());
+			ResourceDatabasePopulator adminPasswordPopulator = new ResourceDatabasePopulator(adminCreatedByUserIdResource);
 			adminPasswordPopulator.execute(dataSource);
 
 		} catch (Exception e) {
@@ -37,7 +35,4 @@ public class DBInitializeConfig implements CommandLineRunner {
 		}
 
 	}
-
-
-	
 }

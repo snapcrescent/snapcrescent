@@ -1,10 +1,12 @@
-package com.snapcrescent.config;
+package com.snapcrescent.config.dao;
 
 import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
+import com.snapcrescent.config.EnvironmentProperties;
 
 import jakarta.annotation.PostConstruct;
 

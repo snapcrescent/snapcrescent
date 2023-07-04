@@ -1,4 +1,4 @@
-package com.snapcrescent.config;
+package com.snapcrescent.config.dao;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -7,9 +7,12 @@ import java.util.Date;
 import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;
 import org.hibernate.type.Type;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.snapcrescent.common.BaseEntity;
+import com.snapcrescent.common.security.AppUser;
+import com.snapcrescent.common.security.CoreService;
 
 
 @Component
@@ -18,21 +21,33 @@ public class DaoSQLEntityInterceptor implements Interceptor {
 	/**
      * Called when new objects are saved.
      */
-    public boolean onSave(Object entity, Serializable id, Object[] newValues, String[] properties, Type[] types) throws CallbackException {
+	@Autowired
+	private CoreService coreService;
+	
+	
+	@Override
+    public boolean onSave(Object object, Serializable id, Object[] newValues, String[] properties, Type[] types) throws CallbackException {
 		boolean retChangedState = false;
 		
-    	if (entity instanceof BaseEntity) {
-			
+    	if (object instanceof BaseEntity) {
+    		
+    		BaseEntity entity = ((BaseEntity) object);
+    		
+    		AppUser appUser = coreService.getAppUser();
 			Date now = new Date();
 			
-			setValue(newValues, properties, "createdById", 1L);
+			if(entity.getCreatedByUserId() == null) {
+				
+				if(appUser != null) {
+					setValue(newValues, properties, "createdByUserId", appUser.getId());	
+				} 
+			}
 			
-			if(((BaseEntity) entity).getCreationDateTime() == null) {
+			if(entity.getCreationDateTime() == null) {
 				setValue(newValues, properties, "creationDateTime", now);
 			}
-		    
-		    setValue(newValues, properties, "lastModifiedById", 1L);
-		    setValue(newValues, properties, "lastModifiedDateTime", now);
+			
+			setValue(newValues, properties, "lastModifiedDateTime", now);
 			
 			retChangedState = true;
 		}
@@ -43,12 +58,12 @@ public class DaoSQLEntityInterceptor implements Interceptor {
 	/**
 	 * Called when existing objects are modified.
 	 */
+	@Override
     public boolean onFlushDirty(Object entity, Serializable id, Object[] newValues, Object[] oldValues, String[] properties, Type[] types) throws CallbackException {
     	boolean retChangedState = false;
     	
     	if (entity instanceof BaseEntity) {
     		
-			setValue(newValues, properties, "lastModifiedById", 1L);
 			setValue(newValues, properties, "lastModifiedDateTime", new Date());
 			
 			retChangedState = true;

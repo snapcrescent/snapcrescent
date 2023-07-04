@@ -19,6 +19,7 @@ public class UiAsset extends BaseUiBean {
 	private Boolean active;
 	
 	private int assetType;
+	private String assetTypeName;
 	
 	private UiThumbnail thumbnail;
 	private Long thumbnailId;

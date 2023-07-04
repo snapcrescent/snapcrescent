@@ -1,4 +1,4 @@
-package com.snapcrescent.config;
+package com.snapcrescent.config.dao;
 
 import javax.sql.DataSource;
 

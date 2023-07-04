@@ -1,11 +1,9 @@
 package com.snapcrescent.common.utils;
 
 public class Constant {
-
-	public static final String DEMO_ADDRESS = "demo.snapcrescent.com";
-	public static final String DB_MYSQL = "MYSQL";
-	public static final String DB_SQLITE = "SQLITE";
 	
+	public static final Long DEFAULT_ADMIN_USER_ID = 1L;
+
 	public static final String UPLOAD_FILE_NAME_TEMPORARY_SEPARATOR = "FILE_NAME_SEPARATOR";
 
 	public static final String METADATA_FILE_NAME = "File Name";
@@ -107,6 +105,40 @@ public class Constant {
 		public static AssetType findById(int id) {
 			
 			for (AssetType item : AssetType.values()) {
+				if(item.getId() == id) {
+					return item;
+				}
+			}
+			
+			return null;
+		}
+	}
+    
+    public enum AlbumType implements DbEnum {
+    	DEFAULT(1,"Default"),
+    	CUSTOM(2, "Custom");
+		
+		private int id;
+		private String label;
+		
+		private AlbumType(int id, String label) {
+			this.id = id;
+			this.label = label;
+		}
+		
+		@Override
+		public int getId() {
+			return this.id;
+		}
+		
+		@Override
+		public String getLabel() {
+			return this.label;
+		}
+		
+		public static AlbumType findById(int id) {
+			
+			for (AlbumType item : AlbumType.values()) {
 				if(item.getId() == id) {
 					return item;
 				}

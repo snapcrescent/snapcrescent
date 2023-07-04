@@ -1,4 +1,4 @@
-package com.snapcrescent.album;
+package com.snapcrescent.user;
 
 import com.snapcrescent.common.beans.BaseSearchCriteria;
 
@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class AlbumSearchCriteria extends BaseSearchCriteria{
-	
+public class UserSearchCriteria extends BaseSearchCriteria{
+
 	
 }

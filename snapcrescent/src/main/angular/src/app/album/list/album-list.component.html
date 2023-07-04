@@ -1,0 +1,27 @@
+<app-header></app-header>
+<div class="row m-0">
+    <div class="col-xl-2 col-lg-3 d-none d-xl-block d-lg-block">
+        <app-side-bar></app-side-bar>
+    </div>
+    <div class="col-xl-10 col-lg-9 col-12">
+        <div class="row">
+            <div class="col-12 albums-container">
+                <div class="row">
+                    <div class="col-12 title">My Albums</div>
+                    <ng-container *ngFor="let album of myAlbums">
+                        <div class="col-2 album">
+                            <div class="title">{{album.name}}</div>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+
+            <div class="col-12 albums-container" *ngIf="sharedWithMeAlbums && sharedWithMeAlbums.length">
+                <div class="title">Shared Albums</div>
+                <ng-container *ngFor="let album of sharedWithMeAlbums">
+                    {{album.name}}
+                </ng-container>
+            </div>
+        </div>
+    </div>
+</div>

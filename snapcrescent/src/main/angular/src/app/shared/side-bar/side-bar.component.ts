@@ -34,9 +34,15 @@ export class SideBarComponent implements OnInit, AfterViewInit {
             icon: "image",
             label: "Photos & Videos",
             link: "/asset/list"
+          },
+          {
+            id: "albums",
+            icon: "photo_library",
+            label: "Albums",
+            link: "/album/list"
           }
         ]
-      }
+      },
     );
 
     this.menuGroups.push(

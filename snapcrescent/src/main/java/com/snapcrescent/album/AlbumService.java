@@ -1,11 +1,13 @@
 package com.snapcrescent.album;
 
-import java.util.List;
+import com.snapcrescent.common.beans.BaseResponseBean;
+import com.snapcrescent.user.User;
 
 public interface AlbumService {
 
-	public List<Album> search(AlbumSearchCriteria albumSearchCriteria) throws Exception;
-	public void create(Album album) throws Exception;
-	public void update(Album album) throws Exception;
+	public BaseResponseBean<Long, UiAlbum> search(AlbumSearchCriteria albumSearchCriteria);
+	public UiAlbum save(UiAlbum album) throws Exception;
+	public void update(UiAlbum album) throws Exception;
+	void createOrUpdateDefaultAlbum(User entity) throws Exception;
 
 }

@@ -26,4 +26,8 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 		return filename.substring(indexOfSeparator);
 	}
 	
+	public static String generateDefaultAlbumName(String firstName, String lastName) {
+		return firstName + " " + lastName + "'s Album";
+	}
+	
 }

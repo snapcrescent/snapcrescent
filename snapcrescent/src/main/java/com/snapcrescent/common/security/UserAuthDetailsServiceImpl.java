@@ -30,7 +30,7 @@ public class UserAuthDetailsServiceImpl implements UserAuthDetailsService{
 		User user = userRepository.findByUsername(username);
 		
 		if(user != null) {
-			appUser = new AppUser(user.getUsername(), user.getPassword(), user.getFirstName(), new ArrayList<>());
+			appUser = new AppUser(user.getId(), user.getUsername(), user.getPassword(), user.getFirstName(), new ArrayList<>());
 
 			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(appUser.getUsername(),
 					appUser.getPassword(), appUser.getAuthorities());

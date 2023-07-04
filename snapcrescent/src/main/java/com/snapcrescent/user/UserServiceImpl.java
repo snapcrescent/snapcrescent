@@ -1,14 +1,17 @@
 package com.snapcrescent.user;
 
-import javax.security.auth.login.CredentialNotFoundException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.snapcrescent.common.beans.ResetPasswordRequest;
-import com.snapcrescent.common.utils.StringHasher;
+import com.snapcrescent.album.AlbumService;
+import com.snapcrescent.common.beans.BaseResponseBean;
+import com.snapcrescent.common.utils.Constant;
+import com.snapcrescent.common.utils.Constant.ResultType;
+import com.snapcrescent.config.EnvironmentProperties;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -16,49 +19,83 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private UserConverter userConverter;
+
+	@Autowired
+	private AlbumService albumService;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
+	@Transactional
+	public BaseResponseBean<Long, UiUser> search(UserSearchCriteria searchCriteria) {
+
+		BaseResponseBean<Long, UiUser> response = new BaseResponseBean<>();
+
+		int count = userRepository.count(searchCriteria);
+
+		if (count > 0) {
+
+			List<UiUser> searchResult = userConverter.getBeansFromEntities(
+					userRepository.search(searchCriteria, searchCriteria.getResultType() == ResultType.OPTION),
+					searchCriteria.getResultType());
+
+			response.setTotalResultsCount(count);
+			response.setResultCountPerPage(searchResult.size());
+			response.setCurrentPageIndex(searchCriteria.getPageNumber());
+
+			response.setObjects(searchResult);
+
+		}
+
+		return response;
+	}
+
 	@Override
 	@Transactional
-	public User saveUser(User user) throws Exception {
-		if (!validateUser(user)) {
-			throw new DuplicateKeyException("Username already exists.");
+	public UiUser save(UiUser bean) throws Exception {
+		User entity = userConverter.getEntityFromBean(bean);
+		userRepository.save(entity);
+		updateUserProperties(entity);
+		return userConverter.getBeanFromEntity(entity, ResultType.FULL);
+	}
+
+	private void updateUserProperties(User entity) throws Exception {
+		albumService.createOrUpdateDefaultAlbum(entity);
+	}
+
+	@Override
+	@Transactional
+	public void update(UiUser bean) throws Exception {
+		User entity = userRepository.findById(bean.getId());
+		userConverter.populateEntityWithBean(entity, bean);
+		updateUserProperties(entity);
+		userRepository.update(entity);
+	}
+
+	@Override
+	@Transactional
+	public void createOrUpdateDefaultUser() throws Exception {
+		
+		String password = passwordEncoder.encode(EnvironmentProperties.ADMIN_PASSWORD);
+		
+		User entity = userRepository.findById(Constant.DEFAULT_ADMIN_USER_ID);
+		
+		if(entity == null) {
+			UiUser bean = new UiUser();
+			
+			bean.setFirstName("Admin");
+			bean.setLastName("User");
+			bean.setUsername("admin");
+			bean.setActive(true);
+			bean.setPassword(password);
+			
+			
+			save(bean);	
 		} else {
-			user.setPassword(StringHasher.getBCrpytHash(user.getPassword()));
-			userRepository.save(user);
+			updateUserProperties(entity);
+			userRepository.updatePasswordByUserId(password, Constant.DEFAULT_ADMIN_USER_ID);
 		}
-
-		return user;
 	}
-
-	@Override
-	@Transactional
-	public String resetPassword(ResetPasswordRequest resetPasswordRequest) throws Exception {
-
-		User user = userRepository.findByUsername(resetPasswordRequest.getUsername());
-
-		if (user == null) {
-			throw new CredentialNotFoundException("User not exist.");
-		}
-
-		user.setPassword(StringHasher.getBCrpytHash(resetPasswordRequest.getPassword()));
-		userRepository.save(user);
-
-		return "Password successfully updated.";
-	}
-
-	private boolean validateUser(User user) {
-		boolean exists = userRepository.existsByUsername(user.getUsername());
-		return !exists;
-	}
-
-	@Override
-	public Boolean doesUserExists() throws Exception {
-		boolean exists = false;
-
-		if (userRepository.count() > 0) {
-			exists = true;
-		}
-
-		return exists;
-	}
-
 }
