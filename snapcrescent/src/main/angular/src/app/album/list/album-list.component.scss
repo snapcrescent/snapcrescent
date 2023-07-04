@@ -12,9 +12,16 @@
     .album{
         border: 1px solid  $accent-color;
         border-radius: 15px;
-        max-width: 200px;
-        height: 200px;
+        max-width: 150px;
+        height: 150px;
+        padding: 0px;
         cursor: pointer;
+
+        .thumbnail{
+            width: 100%;
+            border-radius: 10px;
+            height: 100%;
+        }
 
         .title{
             font-weight: 400;

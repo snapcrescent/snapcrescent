@@ -4,6 +4,7 @@ import { TrashAssetListComponent } from '../trash/list/trash-asset-list.componen
 import { SharedModule } from './shared.module';
 import { FavoriteAssetListComponent } from '../favorite/list/favorite-asset-list.component';
 import { AlbumListComponent } from '../album/list/album-list.component';
+import { AlbumAssetListComponent } from '../album/view/album-asset-list.component';
 
 
 const modules = [
@@ -14,7 +15,8 @@ const components:any = [
   AssetListComponent,
   TrashAssetListComponent,
   FavoriteAssetListComponent,
-  AlbumListComponent
+  AlbumListComponent,
+  AlbumAssetListComponent
 ];
 
 

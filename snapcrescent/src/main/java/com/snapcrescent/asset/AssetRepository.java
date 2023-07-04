@@ -59,6 +59,11 @@ public class AssetRepository extends BaseRepository<Asset>{
 		hql.append(" LEFT JOIN " + getJoinFetchType(isCountQuery) + " asset.metadata metadata");
 		hql.append(" LEFT JOIN " + getJoinFetchType(isCountQuery) + " asset.thumbnail thumbnail");
 		
+		if(searchCriteria.getAlbumId() != null)
+		{
+		hql.append(" JOIN " + getJoinFetchType(isCountQuery) + " asset.albums album");
+		}
+		
 		hql.append(" where 1=1 ");
 
 		if (searchCriteria != null && StringUtils.isNotBlank(searchCriteria.getSearchKeyword())) {
@@ -100,6 +105,12 @@ public class AssetRepository extends BaseRepository<Asset>{
 		{
 			hql.append(" AND asset.favorite = :favorite ");
 			paramsMap.put("favorite", searchCriteria.getFavorite());
+		}
+		
+		if(searchCriteria.getAlbumId() != null)
+		{
+			hql.append(" AND album.id = :albumId ");
+			paramsMap.put("albumId", searchCriteria.getAlbumId());
 		}
 		
 		if(isCountQuery == false && searchCriteria.getSortBy() != null){
@@ -159,6 +170,11 @@ public class AssetRepository extends BaseRepository<Asset>{
 		hql.append(" FROM Asset asset");
 		hql.append(" LEFT JOIN asset.metadata metadata");
 		
+		if(searchCriteria.getAlbumId() != null)
+		{
+		hql.append(" JOIN asset.albums album");
+		}
+		
 		hql.append(" where 1=1 ");
 		
 		hql.append(" AND asset.createdByUserId = :ownerId ");
@@ -174,6 +190,12 @@ public class AssetRepository extends BaseRepository<Asset>{
 		{
 			hql.append(" AND asset.favorite = :favorite ");
 			paramsMap.put("favorite", searchCriteria.getFavorite());
+		}
+		
+		if(searchCriteria.getAlbumId() != null)
+		{
+			hql.append(" AND album.id = :albumId ");
+			paramsMap.put("albumId", searchCriteria.getAlbumId());
 		}
 		
 		hql.append(" GROUP BY YEAR(metadata.creationDateTime), MONTH(metadata.creationDateTime), DATE(metadata.creationDateTime) ");

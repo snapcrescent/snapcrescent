@@ -6,10 +6,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Transient;
 
+import java.util.List;
+
+import com.snapcrescent.album.Album;
 import com.snapcrescent.common.BaseEntity;
 import com.snapcrescent.common.utils.Constant.AssetType;
 import com.snapcrescent.metadata.Metadata;
@@ -46,6 +51,12 @@ public class Asset extends BaseEntity {
 	private Long metadataId;
 	
 	private Boolean favorite = false;
+	
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+	@JoinTable(name = "ALBUM_ASSET_ASSN", joinColumns = {
+			@JoinColumn(name = "ASSET_ID", updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "ALBUM_ID", updatable = false) })
+	private List<Album> albums;
 	
 	@PostLoad
     void fillTransient() {

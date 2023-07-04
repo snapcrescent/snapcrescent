@@ -1,3 +1,4 @@
+import { Thumbnail } from "../asset/asset.model";
 import { BaseUiBean } from "../core/models/base.model";
 
 export class Album extends BaseUiBean{
@@ -10,6 +11,8 @@ export class Album extends BaseUiBean{
 
   ownedByMe:boolean;
   sharedWithOthers:boolean;
+
+  albumThumbnail:Thumbnail;
 }
 
 export let AlbumType = {

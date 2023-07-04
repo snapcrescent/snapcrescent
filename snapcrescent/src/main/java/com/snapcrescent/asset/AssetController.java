@@ -58,6 +58,10 @@ public class AssetController extends BaseController {
 		if (searchParams.get("favorite") != null) {
 			searchCriteria.setFavorite(Boolean.parseBoolean(searchParams.get("favorite")));
 		}
+		
+		if (searchParams.get("albumId") != null) {
+			searchCriteria.setAlbumId(Long.parseLong(searchParams.get("albumId")));
+		}
 	}
 
 	@GetMapping("/asset/{id}")

@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, Input, OnDestroy, Inject } from '@ang
 import { Action } from 'src/app/core/models/action.model'
 import { Asset } from 'src/app/asset/asset.model';
 import { BaseComponent } from 'src/app/core/components/base.component';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 import { AssetService } from 'src/app/asset/asset.service';
@@ -30,7 +30,6 @@ export class AssetViewComponent extends BaseComponent implements OnInit, AfterVi
   constructor(
     public dialogRef: MatDialogRef<AssetViewComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private router: Router,
     public activatedRoute: ActivatedRoute,
     private dialog: MatDialog,
     private assetService: AssetService,

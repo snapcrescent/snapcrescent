@@ -2,6 +2,7 @@ package com.snapcrescent.album;
 
 
 import com.snapcrescent.common.beans.BaseUiBean;
+import com.snapcrescent.thumbnail.UiThumbnail;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,5 +25,7 @@ public class UiAlbum extends BaseUiBean {
 	
 	private Boolean ownedByMe;
 	private Boolean sharedWithOthers;
+	
+	private UiThumbnail albumThumbnail;
 
 }

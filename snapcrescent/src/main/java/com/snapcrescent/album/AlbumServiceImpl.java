@@ -7,11 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.snapcrescent.asset.Asset;
 import com.snapcrescent.common.beans.BaseResponseBean;
 import com.snapcrescent.common.services.BaseService;
+import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
 import com.snapcrescent.common.utils.StringUtils;
 import com.snapcrescent.common.utils.Constant.AlbumType;
 import com.snapcrescent.common.utils.Constant.ResultType;
+import com.snapcrescent.thumbnail.ThumbnailConverter;
+import com.snapcrescent.thumbnail.UiThumbnail;
 import com.snapcrescent.user.User;
 
 @Service
@@ -22,6 +26,12 @@ public class AlbumServiceImpl extends BaseService implements AlbumService{
 	
 	@Autowired
 	private AlbumConverter albumConverter;
+	
+	@Autowired
+	private ThumbnailConverter thumbnailConverter;
+	
+	@Autowired
+	private SecuredStreamTokenUtil securedStreamTokenUtil;
 	
 	@Override
 	@Transactional
@@ -46,6 +56,11 @@ public class AlbumServiceImpl extends BaseService implements AlbumService{
 				if(entity.getUsers().size() > 1) {
 					bean.setSharedWithOthers(true);
 				}
+				
+				Asset lastAddedAsset = entity.getAssets().get(entity.getAssets().size() - 1);
+				UiThumbnail thumbnail = thumbnailConverter.getBeanFromEntity(lastAddedAsset.getThumbnail(), ResultType.FULL);
+				thumbnail.setToken(securedStreamTokenUtil.getSignedAssetStreamToken(lastAddedAsset.getThumbnail()));
+				bean.setAlbumThumbnail(thumbnail);
 				
 				beans.add(bean);
 			}
