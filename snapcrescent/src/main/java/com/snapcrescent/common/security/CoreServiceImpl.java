@@ -1,11 +1,19 @@
 package com.snapcrescent.common.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.snapcrescent.user.User;
+import com.snapcrescent.user.UserRepository;
 
 @Service
 public class CoreServiceImpl implements CoreService {
+	
+	@Autowired
+	private UserRepository userRepository;
 
 	@Override
 	public AppUser getAppUser() {
@@ -37,10 +45,16 @@ public class CoreServiceImpl implements CoreService {
 		AppUser appUser = getAppUser();
 
 		if (appUser != null) {
-			sessionInfo = new SessionInfo(appUser.getUsername(), appUser.getName());
+			sessionInfo = new SessionInfo(appUser.getId(), appUser.getUsername(), appUser.getName());
 		}
 
 		return sessionInfo;
+	}
+
+	@Override
+	@Transactional
+	public User getUser() {
+		return userRepository.findById(getAppUser().getId());
 	}
 
 }

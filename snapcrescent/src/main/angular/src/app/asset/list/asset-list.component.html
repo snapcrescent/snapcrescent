@@ -4,6 +4,15 @@
         <app-side-bar></app-side-bar>
     </div>
     <div class="col-xl-10 col-lg-9 col-12">
+        <div class="row">
+            <div class="col-12 m-t-20">
+                <mat-progress-bar
+                *ngIf="fileUploadProgress"  
+                [value]="fileUploadProgress">
+                </mat-progress-bar>
+              </div>
+        </div>
+        
         <app-asset-grid
         #assetGridComponent
         [searchStoreName]="searchStoreName"
@@ -18,3 +27,4 @@
     </app-asset-grid>    
     </div>
 </div>
+<input id="fileUploadButton" type="file" multiple class="invisible" (change)="fileBrowseHandler($event)" accept="image/png,image/jpeg,video/mp4,video/mov ">

@@ -66,8 +66,15 @@ public class AlbumRepository extends BaseRepository<Album> {
 					true));
 		}
 		
-		hql.append(" AND user.id = :ownerId ");
-		paramsMap.put("ownerId", searchCriteria.getOwnerId());
+		hql.append(" AND user.id = :userId ");
+		paramsMap.put("userId", searchCriteria.getUserId());
+		
+		if(searchCriteria.getCreatedByUserId() != null)
+		{
+			hql.append(" AND album.createdByUserId = :createdByUserId ");
+			paramsMap.put("createdByUserId", searchCriteria.getCreatedByUserId());
+		}
+		
 		
 		if(searchCriteria.getActive() != null)
 		{

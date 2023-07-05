@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.snapcrescent.asset.Asset;
+import com.snapcrescent.asset.AssetRepository;
 import com.snapcrescent.common.beans.BaseResponseBean;
 import com.snapcrescent.common.services.BaseService;
 import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
@@ -32,6 +33,9 @@ public class AlbumServiceImpl extends BaseService implements AlbumService{
 	
 	@Autowired
 	private SecuredStreamTokenUtil securedStreamTokenUtil;
+	
+	@Autowired
+	private AssetRepository assetRepository;
 	
 	@Override
 	@Transactional
@@ -125,5 +129,53 @@ public class AlbumServiceImpl extends BaseService implements AlbumService{
 			entity.setName(name);
 			albumRepository.update(entity);
 		}	
+	}
+
+	@Override
+	@Transactional
+	public void createAlbumAssetAssociation(UiCreateAlbumAssetAssnRequest createAlbumAssetAssnRequest) {
+		
+		Long userId = coreService.getAppUser().getId();
+		
+		List<Asset> assets = new ArrayList<>(createAlbumAssetAssnRequest.getAssetIds().size());
+		
+		for (Long assetId : createAlbumAssetAssnRequest.getAssetIds()) {
+			Asset asset = assetRepository.findById(assetId);
+			
+			if(asset != null && asset.getCreatedByUserId() == userId) {
+				assets.add(asset);
+			}
+		}
+		
+		for (UiAlbum album : createAlbumAssetAssnRequest.getAlbums()) {
+			
+			if(album.getId() != null) {
+				Album entity = albumRepository.findById(album.getId());
+				
+				if(entity != null) {
+					if(entity.getCreatedByUserId() == userId) {
+						entity.getAssets().addAll(assets);
+					}
+				}
+				
+				albumRepository.update(entity);
+			} else {
+				Album entity = new Album();
+				
+				entity.setName(album.getName());
+				entity.setAlbumType(AlbumType.CUSTOM.getId());
+				entity.setCreatedByUserId(userId);
+				
+				List<User> users = new ArrayList<User>();
+				users.add(coreService.getUser());
+				entity.setUsers(users);
+				
+				entity.setAssets(assets);
+				
+				albumRepository.save(entity);
+			}
+			
+		}
+		
 	}
 }

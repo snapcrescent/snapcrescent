@@ -58,7 +58,7 @@ export class AlbumListComponent extends BaseListComponent implements AfterViewIn
       if(response.objects) {
         response.objects.forEach((album:Album) => {
 
-          album.albumThumbnail.url =  `${environment.backendUrl}/thumbnail/${album.albumThumbnail.token}/stream`;
+          album.albumThumbnail!.url =  `${environment.backendUrl}/thumbnail/${album.albumThumbnail!.token}/stream`;
 
           if(album.ownedByMe) {
             this.myAlbums.push(album);

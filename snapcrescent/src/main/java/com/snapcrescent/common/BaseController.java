@@ -23,7 +23,7 @@ public class BaseController {
 	protected void parseCommonSearchParams(Map<String, String> searchParams, BaseSearchCriteria searchCriteria) {
 		
 		if(coreService.getAppUser() != null) {
-			searchCriteria.setOwnerId(coreService.getAppUser().getId());	
+			searchCriteria.setUserId(coreService.getAppUser().getId());	
 		}
 		
 		if (searchParams.get("searchKeyword") != null) {

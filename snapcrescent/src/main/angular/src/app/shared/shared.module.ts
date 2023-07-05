@@ -58,6 +58,7 @@ import { SideBarComponent } from './side-bar/side-bar.component';
 import { ScrubbableScrollbarComponent } from './scrubbable-scrollbar/scrubbable-scrollbar.component';
 import { SecurePipe } from '../core/pipes/secure.pipe';
 import { CustomVirtualScrollDirective } from '../core/directives/custom-virtual-scroll-strategy-directive';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 
 const modules = [
@@ -92,6 +93,7 @@ const modules = [
   MatChipsModule,
   MatListModule,
   MatMenuModule,
+  MatAutocompleteModule,
   ScrollingModule
 ];
 

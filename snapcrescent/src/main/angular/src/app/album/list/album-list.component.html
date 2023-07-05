@@ -10,7 +10,7 @@
                     <div class="col-12 title">My Albums</div>
                     <ng-container *ngFor="let album of myAlbums">
                         <div class="col-2 album" (click)="onAlbumClick(album)">
-                            <img  class="thumbnail mg-fluid" alt="thumbnail"  [src]="album.albumThumbnail.url"/>
+                            <img  class="thumbnail mg-fluid" alt="thumbnail"  [src]="album.albumThumbnail!.url"/>
                             <div class="title">{{album.name}}</div>
                         </div>
                     </ng-container>

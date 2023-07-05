@@ -4,15 +4,20 @@ import { BaseUiBean } from "../core/models/base.model";
 export class Album extends BaseUiBean{
   
   name:string;
-  publicAccess:boolean;
+  publicAccess?:boolean;
 
-  albumTypeName:string;
-  albumType:number
+  albumTypeName?:string;
+  albumType?:number
 
-  ownedByMe:boolean;
-  sharedWithOthers:boolean;
+  ownedByMe?:boolean;
+  sharedWithOthers?:boolean;
 
-  albumThumbnail:Thumbnail;
+  albumThumbnail?:Thumbnail;
+}
+
+export class CreateAlbumAssetAssnRequest {
+  albums:Album[];
+  assetIds:number[];
 }
 
 export let AlbumType = {

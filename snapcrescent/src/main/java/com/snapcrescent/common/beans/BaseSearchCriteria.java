@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class BaseSearchCriteria{
 
-	private Long ownerId;
+	private Long userId;
 	
 	private List<String> selectedIds = new ArrayList<>();
 	
