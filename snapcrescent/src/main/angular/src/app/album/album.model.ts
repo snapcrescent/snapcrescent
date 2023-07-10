@@ -20,6 +20,11 @@ export class CreateAlbumAssetAssnRequest {
   assetIds:number[];
 }
 
+export class CreateAlbumUserAssnRequest {
+  albumId:number;
+  userIds:number[];
+}
+
 export let AlbumType = {
   DEFAULT: {
     id: 1,

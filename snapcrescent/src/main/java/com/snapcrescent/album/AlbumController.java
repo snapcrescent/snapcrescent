@@ -35,6 +35,8 @@ public class AlbumController extends BaseController{
 		if (searchParams.get("createdByUserId") != null) {
 			searchCriteria.setCreatedByUserId(Long.parseLong(searchParams.get("createdByUserId")));
 		}
+		
+		searchCriteria.setUserId(coreService.getAppUserId());	
 	}
 	
 	@PostMapping("/album/asset/assn")
@@ -42,6 +44,13 @@ public class AlbumController extends BaseController{
 		albumService.createAlbumAssetAssociation(createAlbumAssetAssnRequest);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
+	
+	@PostMapping("/album/user/assn")
+	public @ResponseBody ResponseEntity<?> createAlbumUserAssociation(@RequestBody UiCreateAlbumUserAssnRequest createAlbumUserAssnRequest) {
+		albumService.createAlbumUserAssociation(createAlbumUserAssnRequest);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
 
 	
 	

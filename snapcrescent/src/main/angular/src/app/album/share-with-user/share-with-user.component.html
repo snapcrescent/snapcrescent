@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>Share with User</h2>
+<div mat-dialog-content>
+    <form>
+        <mat-form-field>
+          <mat-label>Users</mat-label>
+          <mat-chip-grid #chipGrid aria-label="User selection">
+            <mat-chip-row *ngFor="let selectedUser of selectedUsers" (removed)="remove(selectedUser)">
+              {{selectedUser.firstName}} {{selectedUser.lastName}}
+              <button matChipRemove [attr.aria-label]="'remove ' + selectedUser.firstName">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+          </mat-chip-grid>
+          <input placeholder="Search User..." #userInput [formControl]="userCtrl"
+            [matChipInputFor]="chipGrid" [matAutocomplete]="auto"
+            />
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+            <mat-option *ngFor="let filteredUser of filteredUsers | async" [value]="filteredUser">
+              {{filteredUser.firstName}} {{filteredUser.lastName}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </form>
+</div>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [mat-dialog-close]="true" (click)="createAlbumUserAssociation()" cdkFocusInitial>Share</button>
+</mat-dialog-actions>

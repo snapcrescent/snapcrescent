@@ -18,6 +18,7 @@ import com.snapcrescent.common.utils.StringUtils;
 import com.snapcrescent.thumbnail.ThumbnailConverter;
 import com.snapcrescent.thumbnail.UiThumbnail;
 import com.snapcrescent.user.User;
+import com.snapcrescent.user.UserRepository;
 
 @Service
 public class AlbumServiceImpl extends BaseService implements AlbumService{
@@ -36,6 +37,9 @@ public class AlbumServiceImpl extends BaseService implements AlbumService{
 	
 	@Autowired
 	private AssetRepository assetRepository;
+	
+	@Autowired
+	private UserRepository userRepository;
 	
 	@Override
 	@Transactional
@@ -57,7 +61,7 @@ public class AlbumServiceImpl extends BaseService implements AlbumService{
 					bean.setOwnedByMe(true);
 				}
 				
-				if(entity.getUsers().size() > 1) {
+				if(albumRepository.countUsersByAlbumId(entity.getId()) > 1) {
 					bean.setSharedWithOthers(true);
 				}
 				
@@ -181,6 +185,21 @@ public class AlbumServiceImpl extends BaseService implements AlbumService{
 		}
 		
 	}
+	
+
+	@Override
+	@Transactional
+	public void createAlbumUserAssociation(UiCreateAlbumUserAssnRequest createAlbumUserAssnRequest) {
+		
+		Album entity = albumRepository.findById(createAlbumUserAssnRequest.getAlbumId());
+		
+		if(entity.getCreatedByUserId() == coreService.getAppUserId()) {
+			
+			List<User> users = userRepository.findByIds(createAlbumUserAssnRequest.getUserIds());
+			entity.getUsers().addAll(users);
+			albumRepository.update(entity);
+		}
+	}
 
 	@Override
 	@Transactional
@@ -222,9 +241,4 @@ public class AlbumServiceImpl extends BaseService implements AlbumService{
 		albumRepository.flush();
 	}
 
-	@Override
-	public void updateAlbumPostAssetDeletion(Long asset) {
-		// TODO Auto-generated method stub
-		
-	}
 }

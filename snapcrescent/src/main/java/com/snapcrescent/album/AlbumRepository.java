@@ -114,4 +114,12 @@ public class AlbumRepository extends BaseRepository<Album> {
 		List<Album> results = typedQuery.getResultList();
 		return results.isEmpty() ? null : results.get(0);
 	}
+	
+	public Long countUsersByAlbumId(Long albumId) {
+		String query = "SELECT count(user) FROM Album album JOIN album.users user WHERE album.id = :albumId";
+		
+		TypedQuery<Long> typedQuery = entityManager.createQuery(query,Long.class);
+		typedQuery.setParameter("albumId", albumId);
+		return typedQuery.getResultList().get(0);
+	}
 }

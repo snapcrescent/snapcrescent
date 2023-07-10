@@ -7,6 +7,8 @@ import { Album } from '../album.model';
 import { BaseResponseBean } from 'src/app/core/models/base-response-bean';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ShareWithUserComponent } from '../share-with-user/share-with-user.component';
 
 @Component({
   selector: 'app-album-list',
@@ -25,7 +27,8 @@ export class AlbumListComponent extends BaseListComponent implements AfterViewIn
   constructor(
     private albumService: AlbumService,
     private router: Router,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private dialog: MatDialog,
   ) {
     super();
   }
@@ -58,8 +61,12 @@ export class AlbumListComponent extends BaseListComponent implements AfterViewIn
       if(response.objects) {
         response.objects.forEach((album:Album) => {
 
-          album.albumThumbnail!.url =  `${environment.backendUrl}/thumbnail/${album.albumThumbnail!.token}/stream`;
-
+          if(album.albumThumbnail) {
+            album.albumThumbnail!.url =  `${environment.backendUrl}/thumbnail/${album.albumThumbnail!.token}/stream`;
+          } else {
+            album.albumThumbnail = {name:'default', token : 'default', url: '/assets/images/default-album-cover.jpg'};
+          }
+          
           if(album.ownedByMe) {
             this.myAlbums.push(album);
           } else {
@@ -72,5 +79,15 @@ export class AlbumListComponent extends BaseListComponent implements AfterViewIn
 
   onAlbumClick(album:Album) {
     this.router.navigate(['/album/view', album.id]);
+  }
+
+  openShareWithUserDialog(album:Album) {
+    
+    this.dialog.open(ShareWithUserComponent, {
+      width: "50vw",
+      data: {
+        albumId: album.id
+      }
+    });
   }
 }

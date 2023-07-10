@@ -1,32 +1,46 @@
 @import "/src/assets/styles/variables.scss";
 
-.albums-container{
+.album-type-container{
     margin-top: 10px;
-
-
     .title{
         font-weight: 500;
         font-size: 20px;
+        width: 100vw;
     }
 
-    .album{
-        border: 1px solid  $accent-color;
-        border-radius: 15px;
-        max-width: 150px;
-        height: 150px;
-        padding: 0px;
-        cursor: pointer;
+    .albums-container{
+        display: flex;
+        flex-direction: row;
 
-        .thumbnail{
-            width: 100%;
-            border-radius: 10px;
-            height: 100%;
+        .album{
+            
+            border: 1px solid  $accent-color;
+            border-radius: 15px;
+            margin-right: 20px;
+            cursor: default;
+
+            .name {
+                float: left;
+            }
+
+            .sharing-status {
+                float: right;
+            }
+
+            .public-access-status {
+                float: right;
+            }
+
+            .thumbnail-container {
+                
+                .thumbnail{
+                    cursor: pointer;
+                    border-radius: 10px;
+                }
+            }
+    
+            
+    
         }
-
-        .title{
-            font-weight: 400;
-            font-size: 16px;
-        }
-
     }
 }
