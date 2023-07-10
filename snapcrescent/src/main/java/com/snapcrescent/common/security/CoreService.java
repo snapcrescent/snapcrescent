@@ -10,5 +10,7 @@ public interface CoreService {
 	public AppUser getAppUser();
 	
 	public User getUser();
+	
+	public Long getAppUserId();
 
 }

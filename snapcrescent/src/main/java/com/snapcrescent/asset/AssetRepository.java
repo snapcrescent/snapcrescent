@@ -212,4 +212,12 @@ public class AssetRepository extends BaseRepository<Asset>{
 		return results;
 	}
 	
+	public List<Long> findAssetIdsByCreatedById(Long createdByUserId) {
+		String query = "SELECT asset.id FROM Asset asset WHERE asset.createdByUserId = :createdByUserId";
+		
+		TypedQuery<Long> typedQuery = entityManager.createQuery(query,Long.class);
+		typedQuery.setParameter("createdByUserId", createdByUserId);
+		return typedQuery.getResultList();
+	}
+	
 }

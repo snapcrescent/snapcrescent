@@ -54,7 +54,10 @@ public class AlbumRepository extends BaseRepository<Album> {
 
 		hql.append(" FROM Album album");
 		
-		hql.append(" JOIN " + getJoinFetchType(isCountQuery) + " album.users user");
+		if(searchCriteria.getUserId() != null)
+		{
+			hql.append(" JOIN " + getJoinFetchType(isCountQuery) + " album.users user");
+		}
 		
 		hql.append(" where 1=1 ");
 
@@ -66,8 +69,11 @@ public class AlbumRepository extends BaseRepository<Album> {
 					true));
 		}
 		
-		hql.append(" AND user.id = :userId ");
-		paramsMap.put("userId", searchCriteria.getUserId());
+		if(searchCriteria.getUserId() != null)
+		{
+			hql.append(" AND user.id = :userId ");
+			paramsMap.put("userId", searchCriteria.getUserId());
+		}
 		
 		if(searchCriteria.getCreatedByUserId() != null)
 		{
@@ -99,11 +105,11 @@ public class AlbumRepository extends BaseRepository<Album> {
 		return q;
 	}
 	
-	public Album findDefaultAlbumByUserId(Long userId) {
-		String query = "SELECT album FROM Album album WHERE album.createdByUserId = :userId AND album.albumType = :albumType";
+	public Album findDefaultAlbumByUserId(Long createdByUserId) {
+		String query = "SELECT album FROM Album album WHERE album.createdByUserId = :createdByUserId AND album.albumType = :albumType";
 		
 		TypedQuery<Album> typedQuery = entityManager.createQuery(query,Album.class);
-		typedQuery.setParameter("userId", userId);
+		typedQuery.setParameter("createdByUserId", createdByUserId);
 		typedQuery.setParameter("albumType", AlbumType.DEFAULT.getId());
 		List<Album> results = typedQuery.getResultList();
 		return results.isEmpty() ? null : results.get(0);

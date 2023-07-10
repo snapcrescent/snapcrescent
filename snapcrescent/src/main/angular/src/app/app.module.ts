@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app.routing.module';
 import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { PasswordResetComponent } from './user/password-reset/password-reset.component';
 export let AppInjector: Injector;
 declare global{
   interface Navigator{
@@ -15,6 +16,7 @@ declare global{
 @NgModule({
   declarations: [
     AppComponent,
+    PasswordResetComponent
   ],
   imports: [
     SharedModule,

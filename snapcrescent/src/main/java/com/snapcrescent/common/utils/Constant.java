@@ -3,6 +3,8 @@ package com.snapcrescent.common.utils;
 public class Constant {
 	
 	public static final Long DEFAULT_ADMIN_USER_ID = 1L;
+	
+	public static final String HAS_ROLE_ADMIN = "hasRole('ROLE_ADMIN')";
 
 	public static final String UPLOAD_FILE_NAME_TEMPORARY_SEPARATOR = "FILE_NAME_SEPARATOR";
 
@@ -139,6 +141,40 @@ public class Constant {
 		public static AlbumType findById(int id) {
 			
 			for (AlbumType item : AlbumType.values()) {
+				if(item.getId() == id) {
+					return item;
+				}
+			}
+			
+			return null;
+		}
+	}
+    
+    public enum UserType implements DbEnum {
+		ADMIN(1,"Admin"),
+		USER(2, "User");
+		
+		private int id;
+		private String label;
+		
+		private UserType(int id, String label) {
+			this.id = id;
+			this.label = label;
+		}
+		
+		@Override
+		public int getId() {
+			return this.id;
+		}
+		
+		@Override
+		public String getLabel() {
+			return this.label;
+		}
+		
+		public static UserType findById(int id) {
+			
+			for (UserType item : UserType.values()) {
 				if(item.getId() == id) {
 					return item;
 				}

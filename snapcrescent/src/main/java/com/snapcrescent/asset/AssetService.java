@@ -23,6 +23,7 @@ public interface AssetService {
 	public void updateActiveFlag(Boolean active, List<Long> ids);
 	public void updateFavoriteFlag(Boolean favorite, List<Long> ids);
 	public void deletePermanently(List<Long> ids);
+	public void deleteAssetPostUserDeletion(Long userId);
 	SecuredAssetStreamDTO getAssetDetailsFromToken(String token) throws Exception;
 	void regenerateThumbnails(String indexRange);
 	List<UiAssetTimeline> getAssetTimeline(AssetSearchCriteria searchCriteria);

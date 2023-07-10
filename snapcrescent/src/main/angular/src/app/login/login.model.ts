@@ -6,10 +6,6 @@ export class UserLoginRequest {
     password: string = '';
 }
 
-export class ResetPasswordRequest {
-    username?: string = '';
-}
-
 export class UserLoginResponse extends BaseResponse{
     token!:string;
     user:SessionInfo

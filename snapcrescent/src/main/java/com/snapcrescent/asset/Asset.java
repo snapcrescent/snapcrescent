@@ -36,14 +36,14 @@ public class Asset extends BaseEntity {
 	@Transient
     private AssetType assetTypeEnum;
 
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JoinColumn(name = "THUMBNAIL_ID", nullable = false, insertable = false, updatable = false)
 	private Thumbnail thumbnail;
 
 	@Column(name = "THUMBNAIL_ID", nullable = false, insertable = true, updatable = true)
 	private Long thumbnailId;
 
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JoinColumn(name = "METADATA_ID", nullable = false, insertable = false, updatable = false)
 	private Metadata metadata;
 

@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.snapcrescent.album.AlbumService;
+import com.snapcrescent.asset.AssetService;
 import com.snapcrescent.common.beans.BaseResponseBean;
 import com.snapcrescent.common.utils.Constant;
 import com.snapcrescent.common.utils.Constant.ResultType;
+import com.snapcrescent.common.utils.Constant.UserType;
 import com.snapcrescent.config.EnvironmentProperties;
 
 @Service
@@ -24,6 +26,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private AlbumService albumService;
+	
+	@Autowired
+	private AssetService assetService;
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -56,6 +61,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public UiUser save(UiUser bean) throws Exception {
 		User entity = userConverter.getEntityFromBean(bean);
+		entity.setPassword(passwordEncoder.encode(entity.getPassword()));
 		userRepository.save(entity);
 		updateUserProperties(entity);
 		return userConverter.getBeanFromEntity(entity, ResultType.FULL);
@@ -69,7 +75,9 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public void update(UiUser bean) throws Exception {
 		User entity = userRepository.findById(bean.getId());
+		String password = entity.getPassword();
 		userConverter.populateEntityWithBean(entity, bean);
+		entity.setPassword(password);
 		updateUserProperties(entity);
 		userRepository.update(entity);
 	}
@@ -88,14 +96,41 @@ public class UserServiceImpl implements UserService {
 			bean.setFirstName("Admin");
 			bean.setLastName("User");
 			bean.setUsername("admin");
-			bean.setActive(true);
 			bean.setPassword(password);
+			bean.setUserType(UserType.ADMIN.getId());
 			
 			
 			save(bean);	
 		} else {
+			entity.setUserType(UserType.ADMIN.getId());
+			entity.setActive(true);
 			updateUserProperties(entity);
 			userRepository.updatePasswordByUserId(password, Constant.DEFAULT_ADMIN_USER_ID);
 		}
+	}
+
+	@Override
+	@Transactional
+	public UiUser getById(Long id) {
+		return userConverter.getBeanFromEntity(userRepository.findById(id), ResultType.FULL);
+	}
+
+	@Override
+	@Transactional
+	public void delete(Long id) throws Exception {
+		albumService.updateOrDeleteAlbumPostUserDeletion(id);
+		assetService.deleteAssetPostUserDeletion(id);
+		userRepository.delete(id);
+	}
+
+	@Override
+	@Transactional
+	public void resetPassword(UiUser bean) throws Exception {
+		User entity = userRepository.findById(bean.getId());
+		userConverter.populateEntityWithBean(entity, bean);
+		entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+		updateUserProperties(entity);
+		userRepository.update(entity);
+		
 	}
 }

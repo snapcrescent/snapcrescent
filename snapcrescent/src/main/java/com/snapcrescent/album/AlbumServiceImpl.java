@@ -11,10 +11,10 @@ import com.snapcrescent.asset.Asset;
 import com.snapcrescent.asset.AssetRepository;
 import com.snapcrescent.common.beans.BaseResponseBean;
 import com.snapcrescent.common.services.BaseService;
-import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
-import com.snapcrescent.common.utils.StringUtils;
 import com.snapcrescent.common.utils.Constant.AlbumType;
 import com.snapcrescent.common.utils.Constant.ResultType;
+import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
+import com.snapcrescent.common.utils.StringUtils;
 import com.snapcrescent.thumbnail.ThumbnailConverter;
 import com.snapcrescent.thumbnail.UiThumbnail;
 import com.snapcrescent.user.User;
@@ -61,10 +61,13 @@ public class AlbumServiceImpl extends BaseService implements AlbumService{
 					bean.setSharedWithOthers(true);
 				}
 				
-				Asset lastAddedAsset = entity.getAssets().get(entity.getAssets().size() - 1);
-				UiThumbnail thumbnail = thumbnailConverter.getBeanFromEntity(lastAddedAsset.getThumbnail(), ResultType.FULL);
-				thumbnail.setToken(securedStreamTokenUtil.getSignedAssetStreamToken(lastAddedAsset.getThumbnail()));
-				bean.setAlbumThumbnail(thumbnail);
+				if(entity.getAssets().size() > 0) {
+					Asset lastAddedAsset = entity.getAssets().get(entity.getAssets().size() - 1);
+					UiThumbnail thumbnail = thumbnailConverter.getBeanFromEntity(lastAddedAsset.getThumbnail(), ResultType.FULL);
+					thumbnail.setToken(securedStreamTokenUtil.getSignedAssetStreamToken(lastAddedAsset.getThumbnail()));
+					bean.setAlbumThumbnail(thumbnail);	
+				}
+				
 				
 				beans.add(bean);
 			}
@@ -176,6 +179,52 @@ public class AlbumServiceImpl extends BaseService implements AlbumService{
 			}
 			
 		}
+		
+	}
+
+	@Override
+	@Transactional
+	public void updateOrDeleteAlbumPostUserDeletion(Long userId) {
+		AlbumSearchCriteria searchCriteria = new AlbumSearchCriteria();
+		searchCriteria.setUserId(userId);
+		
+		List<Album> entities = albumRepository.search(searchCriteria, searchCriteria.getResultType() == ResultType.OPTION);
+		
+		for (Album entity : entities) {
+			
+			int index = -1;
+			for (User albumUser : entity.getUsers()) {
+				if(albumUser.getId() == userId) {
+					index = entity.getUsers().indexOf(albumUser);
+				}	
+			}
+			
+			
+			if(index > -1) {
+				entity.getUsers().remove(index);	
+			}
+			
+			albumRepository.update(entity);
+		}
+		
+		//Second Pass
+		//Remove albums created by User
+		
+		searchCriteria = new AlbumSearchCriteria();
+		searchCriteria.setCreatedByUserId(userId);
+		
+		entities = albumRepository.search(searchCriteria, searchCriteria.getResultType() == ResultType.OPTION);
+		
+		for (Album entity : entities) {
+			albumRepository.delete(entity);
+		}
+		
+		albumRepository.flush();
+	}
+
+	@Override
+	public void updateAlbumPostAssetDeletion(Long asset) {
+		// TODO Auto-generated method stub
 		
 	}
 }

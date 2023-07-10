@@ -1,0 +1,166 @@
+<div *ngIf="searchPageViewType === SearchPageViewType.SEARCH" class="row manage-page-title-bar">
+    <div class="col-md-12">
+        <h2>{{pageTitle}}</h2>
+    </div>
+    <div class="col-md-12">
+        <app-breadcrumb
+        [breadCrumbs]="breadCrumbs"
+        ></app-breadcrumb>
+    </div>
+    
+</div>
+<form class="advanced-search-panel" [formGroup]="searchFormGroup">
+<div class="row" *ngIf="showQuickSearch">
+    <div class="col-md-9 m-t-20">
+    
+    </div>
+    <div class="col-md-3 text-end">
+        <mat-form-field >
+            <input matInput placeholder="{{quickSearchTitle}}" formControlName="searchKeyword" (keyup.enter)="callQuickSearch()">
+            <button type="button" *ngIf="advancedSearchFields && advancedSearchFields.length > 0" matTooltip="Open Advance Search" matSuffix mat-icon-button (click)="toggleAdvancedSearch()">
+                <mat-icon>expand_more</mat-icon>
+            </button>
+        </mat-form-field>
+        
+    </div>
+</div>
+
+<mat-expansion-panel collapsedHeight="0" hideToggle>
+    
+    <div class="row text-center">
+        <ng-container *ngFor="let item of advancedSearchFields" [ngSwitch]="item.type">
+            <div class="col-lg-3 col-6">
+                <ng-container *ngSwitchCase="'text'">
+                    <app-text 
+                    [placeholder]="item.label" 
+                    [formControlName]="item.key" 
+                    (keyup.enter)="callSearch()"
+                    ></app-text>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'date'">
+                    <app-date [placeholder]="item.label" [formControlName]="item.key"></app-date>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'dropdown'">
+                    <app-select 
+                        [placeholder]="item.label" 
+                        [formControlName]="item.key" 
+                        [options]="item.options"
+                        >
+                        </app-select>
+                </ng-container>
+            </div>
+        </ng-container>
+        
+    </div>
+    <div class="row">
+        <div class="col-lg-2 col-12 offset-lg-10">
+            <div class="row text-center">
+                <div class="col-lg-4 col-6">
+                    <button type="button" mat-raised-button (click)="reset()">Reset</button>        
+                </div>
+                <div class="col-lg-4 col-6">
+                    <button type="button" mat-raised-button color="primary" (click)="callSearch()">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+</mat-expansion-panel>
+</form>
+<div class="row">
+    <div class="col-md-9">
+        
+    </div>
+    <div class="col-md-3 text-end">
+        <span>{{paginationInfo}}</span>
+    </div>
+    <div class="col-md-1 offset-11 text-end">
+        <mat-select 
+            #manageColumnsDropDown
+            role="listbox" 
+            placeholder="..." 
+            class="table-column-selection"
+            panelClass="table-column-selection-panel" 
+            [value]="visibleColumnIds" 
+            (selectionChange)="visibleColumnsChange($event)" 
+            multiple 
+            disableOptionCentering 
+            aria-label="Option list">
+            <mat-select-trigger>
+                
+            </mat-select-trigger>
+            <p class="heading">Show Columns</p>
+            <ng-container role="option" *ngFor="let column of columns">
+                <mat-option [disabled]="column.fixed"  [value]="column.id" role="option" >{{column.label}}</mat-option>
+            </ng-container>
+            </mat-select>
+    </div>
+    <div class="col-md-12">
+        <div class="mat-elevation-z8 table-container">
+            <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortingChanged($event)">
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef>
+                        <mat-checkbox class="wcag-mat-checkbox-table" tabindex="0" #tableCheckbox
+                            *ngIf="enableSelection" color="primary" (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [ngClass]="{'active': selection.hasValue() && isAllSelected()}" aria-label="Checkbox"
+                            [matTooltip]="checkboxLabel()">
+                        </mat-checkbox>
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                        <mat-checkbox tabindex="0" class="square wcag-mat-checkbox-table" color="primary"
+                            (click)="$event.stopPropagation();triggerOnSelectionChangeEvent();" (change)="$event ? selection.toggle(row) : null"
+                            [checked]="selection.isSelected(row)" [hidden]="!enableSelection" aria-label="Checkbox">
+                        </mat-checkbox>
+                    </td>
+                    <mat-footer-cell *matFooterCellDef>
+                        <mat-checkbox class="wcag-mat-checkbox-table" tabindex="0" *ngIf="enableSelection"
+                            [hidden]="true">
+                        </mat-checkbox>
+                    </mat-footer-cell>
+                </ng-container>
+                <ng-container *ngFor="let column of visibleColumns" [matColumnDef]="column.id">
+                    <th [ngClass]="[(column.class? column.class : ''), (column.hidden? 'hidden' : '')]" mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="column.headerStyle"> {{column.label}} </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="[(column.class? column.class : ''), (column.hidden? 'hidden' : '')]" [ngStyle]="column.cellStyle && column.cellStyle(element)">
+                        <ng-container *ngIf="cellDef(column.id) as cell; else clickable">
+                            <ng-container [ngTemplateOutlet]="cell.ref"
+                                [ngTemplateOutletContext]="{$implicit: element}"></ng-container>
+                        </ng-container>
+                        <ng-template #clickable>
+                            <ng-container *ngIf="column.onClick; else date">
+                                <div class="cursor-hand" (click)="column.onClick(element)">{{element[column.id]}}</div>
+                            </ng-container>
+                        </ng-template>
+                        <ng-template #date>
+                            <ng-container *ngIf="standardDateColumnIds.indexOf(column.id) > -1; else defaultColumn">
+                                {{element[column.id] | date }}
+                            </ng-container>
+                        </ng-template>
+                        <ng-template #defaultColumn>
+                            {{element[column.id]}}
+                        </ng-template>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="more">
+                    <th mat-header-cell *matHeaderCellDef>
+                        <i class="material-icons cursor-hand" (click)="manageColumnsDropDown.open()">more_vert</i>
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                    </td>
+                    <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+                  </ng-container>
+
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+            <mat-paginator *ngIf="enablePagination" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons (page)="pagingChanged($event)">
+            </mat-paginator>
+        </div>
+    </div>
+</div>
+
+<app-action-bar [position]="searchPageViewType === SearchPageViewType.SEARCH ? 'page' : 'table'" [actions]="actions"></app-action-bar>

@@ -1,7 +1,9 @@
 @import "/src/assets/styles/variables.scss";
 
 .side-bar-container{
+    width: 100%;
     padding: 20px 20px 20px 0px;
+    background: #FFFFFF;
     .item{
         padding: 10px 10px 5px 10px;
         padding-left: 20px;

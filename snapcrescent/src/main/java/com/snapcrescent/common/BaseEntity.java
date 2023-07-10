@@ -35,7 +35,7 @@ public abstract class BaseEntity implements Serializable{
 	
 	private Date lastModifiedDateTime;
 	
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CREATED_BY_USER_ID", nullable = true, insertable = false, updatable = false)
 	private User createdByUser;
 

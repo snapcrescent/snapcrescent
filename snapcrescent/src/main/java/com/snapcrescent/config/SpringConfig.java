@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 
 @Configuration
 public class SpringConfig {
@@ -18,7 +19,8 @@ public class SpringConfig {
         executor.setMaxPoolSize(20);
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadNamePrefix("Async-");
-        return executor;
+        executor.initialize();
+        return new DelegatingSecurityContextAsyncTaskExecutor(executor); 
     }
 	
 	@Bean

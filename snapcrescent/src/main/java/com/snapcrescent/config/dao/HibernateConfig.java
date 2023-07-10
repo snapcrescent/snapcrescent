@@ -17,6 +17,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+
 import jakarta.annotation.PostConstruct;
 
 @Configuration
@@ -66,6 +67,7 @@ public class HibernateConfig {
 	Map<String, Object> hibernateProperties() {
 		Map<String, Object> properties = new HashMap<String, Object>();
 	    properties.put("hibernate.hbm2ddl.auto", "validate");
+	    properties.put("hibernate.show_sql", true);
 	    properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
 	    properties.put("hibernate.session_factory.interceptor", daoSQLEntityInterceptor);
         properties.put("hibernate.physical_naming_strategy", CamelCaseToUnderscoresNamingStrategy.class.getPackage().getName() + "." + CamelCaseToUnderscoresNamingStrategy.class.getSimpleName());

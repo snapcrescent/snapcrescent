@@ -6,5 +6,6 @@ import lombok.Data;
 public class BaseResponse {
 	
 	private String message;
+	private Boolean success = true;
 	
 }

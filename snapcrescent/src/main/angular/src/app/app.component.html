@@ -2,16 +2,19 @@
       <app-screen-size-detector></app-screen-size-detector>
       <app-loader></app-loader>
       <app-alert></app-alert>
-     
-      <div class="col-12">
-            <mat-drawer-container hasBackdrop="false" autosize>
-                  <mat-drawer #sideBarDrawer mode="over">
-                        <app-side-bar></app-side-bar>
-                  </mat-drawer>
-                  <mat-drawer-content>
-                        <router-outlet></router-outlet>
-                  </mat-drawer-content>
-            </mat-drawer-container>
-            
+      <div class="header animate__animated"
+            [ngClass]="{'animate__bounceInDown': animationDirection === 1 , 'animate__bounceOutUp' : animationDirection === -1}">
+            <app-header *ngIf="loggedIn"></app-header>
+      </div>
+      <div class="page">
+            <div class="sideBar" *ngIf="loggedIn">
+                  <div class="animate__animated"
+                        [ngClass]="{'animate__bounceInLeft': animationDirection === 1 , 'animate__bounceOutLeft' : animationDirection === -1}">
+                        <app-side-bar ></app-side-bar>
+                  </div>
+            </div>
+            <div class="content">
+                  <router-outlet></router-outlet>
+            </div>
       </div>
 </div>

@@ -5,6 +5,7 @@ import { delay, Subscription } from 'rxjs';
 import { GlobalService } from './core/services/global.service';
 import { ScreenSize } from './shared/screen-size-detector/screen-size-detector.model';
 import { ScreenSizeDetectorService } from './shared/screen-size-detector/screen-size-detector.service';
+import { SessionService } from './core/services/session.service';
 
 export let browserRefresh = false;
 
@@ -16,6 +17,13 @@ export let browserRefresh = false;
 export class AppComponent implements OnInit {
 
   loggedIn: Boolean = false;
+
+  // 0 - NONE
+  // 1 - IN
+  // -1 - OUT
+  animationDirection: number = 0;
+  
+
   subscription: Subscription;
 
   @ViewChild("sideBarDrawer", { static: false })
@@ -27,31 +35,48 @@ export class AppComponent implements OnInit {
   constructor(
     private router: Router,
     private globalService: GlobalService,
+    private sessionService: SessionService,
     private screenSizeDetectorService: ScreenSizeDetectorService) {
 
   }
-  
+
   ngOnInit() {
     this.registerListeners();
+    this.sessionService.getLoginState();
   }
 
   registerListeners(): void {
 
-    this.subscription = this.router.events.subscribe((event:any) => {
+    this.subscription = this.router.events.subscribe((event: any) => {
       if (event instanceof NavigationStart) {
         browserRefresh = !this.router.navigated;
       }
-  });
-    
+    });
+
 
     this.globalService.onToggleSideBarStateChange.subscribe(toggleSideBar => {
-      if(toggleSideBar) {
+      if (toggleSideBar) {
         this.sideBarDrawer.open();
-      }else{
+      } else {
         this.sideBarDrawer.close();
       }
-
     });
+
+    this.sessionService.onLoggedInStateChange.subscribe(loggedIn => {
+      
+      if(loggedIn) {
+        this.animationDirection = 1;
+        this.loggedIn = loggedIn;
+      } else {
+        this.animationDirection = -1;
+        setTimeout(()=>{
+          this.loggedIn = loggedIn;
+          this.animationDirection = 0;
+        }, 500);
+      }
+      
+      
+    })
 
     this.screenSize = this.screenSizeDetectorService.getCurrentSize();
     this.adjustUIForScreen();
@@ -66,9 +91,9 @@ export class AppComponent implements OnInit {
   }
 
   adjustUIForScreen() {
-    if(this.sideBarDrawer) {
+    if (this.sideBarDrawer) {
       this.sideBarDrawer.close();
     }
-    
+
   }
 }

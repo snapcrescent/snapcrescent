@@ -2,7 +2,6 @@ import { Component, ViewChild, AfterViewInit, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AssetService } from 'src/app/asset/asset.service';
-import { BaseListComponent } from 'src/app/core/components/base-list.component';
 import { AlertService } from 'src/app/shared/alert/alert.service';
 import { AssetGridComponent } from 'src/app/shared/asset-grid/asset-grid.component';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
@@ -11,15 +10,15 @@ import { Action } from 'src/app/core/models/action.model';
 import { PageType } from 'src/app/core/models/page-type.model';
 import { AssetViewComponent } from '../view/asset-view.component';
 import { Asset } from '../asset.model';
-import { HttpEventType } from '@angular/common/http';
 import { AddToAlbumComponent } from '../add-to-album/add-to-album.component';
+import { BaseAssetGridComponent } from 'src/app/core/components/base-asset-grid.component';
 
 @Component({
   selector: 'app-asset-list',
   templateUrl: './asset-list.component.html',
   styleUrls: ['./asset-list.component.scss']
 })
-export class AssetListComponent extends BaseListComponent implements AfterViewInit {
+export class AssetListComponent extends BaseAssetGridComponent implements AfterViewInit {
 
   @Input()
   override pageType = PageType.SEARCH;
@@ -36,10 +35,7 @@ export class AssetListComponent extends BaseListComponent implements AfterViewIn
   @ViewChild("assetGridComponent", { static: false })
   assetGridComponent: AssetGridComponent;
 
-  fileUploadProgress: number = 0;
-  fileUploadButton: HTMLInputElement;
-
-  constructor(
+ constructor(
     private router: Router,
     private assetService: AssetService,
     private dialog: MatDialog,
@@ -54,7 +50,6 @@ export class AssetListComponent extends BaseListComponent implements AfterViewIn
   }
 
   ngAfterViewInit() {
-    this.fileUploadButton = document.querySelector("#fileUploadButton")!;
   }
 
 
@@ -104,9 +99,7 @@ export class AssetListComponent extends BaseListComponent implements AfterViewIn
           return hidden;
         },
         onClick: () => {
-          if (this.fileUploadButton) {
-            this.fileUploadButton.click();
-          }
+          this.router.navigate(['/asset/upload']);
         }
       });
 
@@ -227,35 +220,5 @@ export class AssetListComponent extends BaseListComponent implements AfterViewIn
         assetIds: this.assetGridComponent.selectedAssets.map((selectedAsset:Asset) => selectedAsset.id)
       }
     });
-  }
-
-  fileBrowseHandler(event: any) {
-    this.prepareAndSaveFiles(event.target.files)
-  }
-
-  prepareAndSaveFiles(files: Array<any>) {
-    let fileList: any[] = [];
-
-    for (const item of files) {
-      fileList.push(item);
-    }
-
-    return this.savePhoto(fileList);
-  }
-
-  savePhoto(files: File[]) {
-    this.assetService.save(files).subscribe((response: any) => {
-      if (response.type === HttpEventType.UploadProgress) {
-        this.fileUploadProgress = Math.round(100 * response.loaded / response.total);
-
-        if (this.fileUploadProgress == 100) {
-          this.alertService.showSuccess(`Asset${files.length > 1 ? 's' : ''} uploaded successfully, processing metadata`);
-        }
-      } else if (response.type === HttpEventType.Response) {
-        this.fileUploadProgress = 0;
-        this.alertService.showSuccess(`Asset${files.length > 1 ? 's' : ''} uploaded successfully`);
-      }
-    });
-
   }
 }

@@ -183,7 +183,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		long assetHash = getPerceptualHash(ImageIO.read(fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName())));
 		metadata.setHash(assetHash);
 		
-		Metadata existingMetadata =  metadataRepository.findByHash(metadata.getHash());
+		Metadata existingMetadata =  metadataRepository.findByHash(metadata.getHash(), metadata.getCreatedByUserId());
 		
 		if (existingMetadata == null) {
 
@@ -194,6 +194,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			Files.move(Paths.get(temporaryFile.getAbsolutePath()), Paths.get(finalFile.getAbsolutePath()));
 
 			Asset asset = new Asset();
+			asset.setCreatedByUserId(coreService.getAppUserId());
 			asset.setAssetType(assetType.getId());
 
 			metadataRepository.save(metadata);
@@ -459,8 +460,6 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 					e.printStackTrace();
 				}
 
-				// metadataRepository.delete(metadata);
-				// thumbnailRepository.delete(thumbnail);
 				assetRepository.delete(asset);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -520,6 +519,13 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	@Transactional
 	public List<UiAssetTimeline> getAssetTimeline(AssetSearchCriteria searchCriteria) {
 		return assetRepository.getAssetTimeline(searchCriteria);
+	}
+
+	@Override
+	@Transactional
+	public void deleteAssetPostUserDeletion(Long userId) {
+		deletePermanently(assetRepository.findAssetIdsByCreatedById(userId));
+		assetRepository.flush();
 	}
 
 	

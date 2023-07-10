@@ -28,6 +28,12 @@ const routes: Routes = [
     canActivate: [AuthenticationGuard]
   },
   {
+    path: "admin",
+    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
+    canActivate: [AuthenticationGuard],
+    data: { userType: ['ADMIN'] }
+  },
+  {
     path: "favorite",
     loadChildren: () => import('./favorite/favorite-asset.module').then(m => FavoriteAssetModule),
     canActivate: [AuthenticationGuard]

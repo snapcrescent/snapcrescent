@@ -45,7 +45,7 @@ public class CoreServiceImpl implements CoreService {
 		AppUser appUser = getAppUser();
 
 		if (appUser != null) {
-			sessionInfo = new SessionInfo(appUser.getId(), appUser.getUsername(), appUser.getName());
+			sessionInfo = new SessionInfo(appUser.getId(), appUser.getUsername(), appUser.getFirstName(), appUser.getLastName(),appUser.getUserType());
 		}
 
 		return sessionInfo;
@@ -55,6 +55,11 @@ public class CoreServiceImpl implements CoreService {
 	@Transactional
 	public User getUser() {
 		return userRepository.findById(getAppUser().getId());
+	}
+
+	@Override
+	public Long getAppUserId() {
+		return getAppUser().getId();
 	}
 
 }

@@ -8,13 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.snapcrescent.asset.AssetService;
+import com.snapcrescent.common.services.BaseService;
 import com.snapcrescent.common.utils.Constant.AssetType;
 import com.snapcrescent.metadata.Metadata;
 import com.snapcrescent.metadata.MetadataRepository;
 import com.snapcrescent.metadata.MetadataService;
 
 @Service("google")
-public class BulkImportGoogleTakeoutServiceImpl implements BulkImportService {
+public class BulkImportGoogleTakeoutServiceImpl extends BaseService implements BulkImportService {
 
 	@Autowired
 	private AssetService assetService;
@@ -28,7 +29,7 @@ public class BulkImportGoogleTakeoutServiceImpl implements BulkImportService {
 	@Override
 	@Transactional
 	public void processAsset(AssetType assetType, File asset, BulkImportRequest bulkImportRequest) throws Exception {
-		if (!metadataRepository.existByName(asset.getName())) {
+		if (!metadataRepository.existByName(asset.getName(), coreService.getAppUserId())) {
 			
 			File temporaryFile = assetService.migrateAssets(assetType, asset);
 			File assetJsonFile  = new File(asset.getAbsolutePath() + ".json"); 

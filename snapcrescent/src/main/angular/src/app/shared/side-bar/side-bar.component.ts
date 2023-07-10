@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { SessionService } from 'src/app/core/services/session.service';
 import { MenuGroup, MenuItem } from './side-bar.model';
 
@@ -21,8 +21,29 @@ export class SideBarComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
+    this.populateUserSideNav();
+  }
 
+  ngAfterViewInit() {
+    this.registerListeners();
+  }
 
+  registerListeners(): void {
+    this.router.events.subscribe((event: any) => {
+      if (event instanceof NavigationEnd) {
+         if(event.url.startsWith("/admin")) {
+            this.populateAdminSideNav();
+         } else {
+            this.populateUserSideNav();
+         }
+
+         this.detectActiveMenu();
+      }
+    });
+  }
+
+  populateUserSideNav() {
+    this.menuGroups = [];
 
     this.menuGroups.push(
       {
@@ -65,11 +86,28 @@ export class SideBarComponent implements OnInit, AfterViewInit {
         ]
       }
     );
-
   }
 
-  ngAfterViewInit() {
+  populateAdminSideNav() {
+    this.menuGroups = [];
 
+    this.menuGroups.push(
+      {
+        id: "userSettings",
+        label: '',
+        menuItems: [
+          {
+            id: "userList",
+            icon: "image",
+            label: "Users",
+            link: "/admin/user/list"
+          }
+        ]
+      },
+    );
+  }
+
+  detectActiveMenu() {
     let url = window.location.href;
 
     if (url) {
@@ -93,8 +131,4 @@ export class SideBarComponent implements OnInit, AfterViewInit {
     this.router.navigate([menuItem.link]);
   }
 
-  logout() {
-    this.sessionService.logout();
-    this.router.navigate(['/login']);
-  }
 }

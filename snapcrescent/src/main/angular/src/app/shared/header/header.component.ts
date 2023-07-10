@@ -12,8 +12,11 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
   activeMenu:any;
   menuItems:any[] = [];
-
   sideBarOpen = false;
+
+  userTypeAdmin = false;
+
+
 
   constructor(
     private sessionService: SessionService,
@@ -24,8 +27,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-
-    
+    this.userTypeAdmin = this.sessionService.isAdminUser();
   }
 
   ngAfterViewInit() {
@@ -55,6 +57,14 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     this.sideBarOpen = !this.sideBarOpen;
     this.globalService.updateToggleSideBarState(this.sideBarOpen);
   } 
+
+  navigateToAdminSection() {
+    this.router.navigate(['/admin']);
+  }
+
+  navigateToAssetList() {
+    this.router.navigate(['/asset']);
+  }
 
   logout() {
     this.sessionService.logout();

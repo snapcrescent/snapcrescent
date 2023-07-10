@@ -4,6 +4,11 @@
     flex: 0 1 auto;
     border-bottom: 1px solid $primary-color;
     height: 80px;
+    width: 100vw;
+
+    .logo {
+        cursor: pointer;
+    }
 
     .nav-item{
         padding: 16px 20px;
@@ -19,11 +24,12 @@
     }
 
 
-    .d-flex {
-        .logout-button {
-            color: black;
-            margin: 8px;
-        }
+    
+    .logout-button {
+        color: black;
+        font-size: 36px;
+        margin: 8px;
     }
+    
 }
 

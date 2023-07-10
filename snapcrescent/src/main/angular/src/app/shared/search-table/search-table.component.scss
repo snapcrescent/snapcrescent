@@ -1,0 +1,84 @@
+@import "/src/assets/styles/variables.scss";
+
+.table-container{
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.mat-header-cell {
+    &.mat-column-select {
+        width: 80px;
+    }
+}
+
+mat-expansion-panel {
+    border-radius: 0px;
+
+    &.mat-expanded {
+        background-color: #15c57f1b;
+        padding: 18px 0px 0px 0px;
+        border-bottom: 2px solid $primary-color;
+    }
+}
+
+::ng-deep .mat-table {
+
+    .mat-column-more {
+        width: 35px;
+        min-width: 35px;
+        max-width: 35px;
+        padding-left: 1px !important;
+        padding-right: 1px !important;
+        margin: 0px;
+  
+        .mat-select-value {
+          max-width: none;
+  
+          .mat-select-placeholder,
+          .mat-select-value-text {
+            color: $primary-color;
+            line-height: 0;
+            font-size: 36px;
+          }
+        }
+  
+        .mat-select-arrow {
+          display: none;
+        }
+      }
+
+}
+
+::ng-deep .table-column-selection{
+    .mat-select-trigger{
+        height: 55px;
+    }
+}
+
+
+
+::ng-deep .table-column-selection-panel {
+    position: absolute;
+    top: 5px;
+    right: -1px;
+    max-height: 500px !important;
+  
+    font-size: 12px;
+    color: $primary-color;
+  
+    .heading {
+      margin: 10px 15px;
+      white-space: nowrap;
+    }
+  
+    mat-option {
+      font: inherit;
+      white-space: nowrap !important;
+    }
+  }
+  .span-button {
+    &:focus {
+      outline-offset: 2px;
+      outline: dotted 1px black !important;
+    }
+  }

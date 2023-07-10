@@ -7,12 +7,16 @@ public class SessionInfo {
 
 	private Long id;
 	private String username;
-	private String name;
+	private String firstName;
+	private String lastName;
+	private Integer userType;
 	
-	public SessionInfo(Long id, String username, String name) {
+	public SessionInfo(Long id, String username, String firstName,String lastName, Integer userType) {
 		super();
 		this.id = id;
 		this.username = username;
-		this.name = name;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.userType = userType;
 	}
 }

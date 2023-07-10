@@ -1,5 +1,4 @@
-import { Component, OnInit, AfterViewInit, Input, OnDestroy, Inject, ViewChild, ElementRef } from '@angular/core';
-import { Action } from 'src/app/core/models/action.model'
+import { Component, OnInit, AfterViewInit, OnDestroy, Inject, ViewChild, ElementRef } from '@angular/core';
 import { BaseComponent } from 'src/app/core/components/base.component';
 import { ActivatedRoute } from '@angular/router';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -20,9 +19,6 @@ import {COMMA, ENTER} from '@angular/cdk/keycodes';
   styleUrls: ['./add-to-album.component.scss']
 })
 export class AddToAlbumComponent extends BaseComponent implements OnInit, AfterViewInit, OnDestroy {
-
-  @Input()
-  actions: Action[] = [];
 
   assetIds:number[]= [];
 

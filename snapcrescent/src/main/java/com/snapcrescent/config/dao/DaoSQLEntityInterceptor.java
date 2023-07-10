@@ -8,6 +8,7 @@ import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;
 import org.hibernate.type.Type;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.snapcrescent.common.BaseEntity;
@@ -22,7 +23,7 @@ public class DaoSQLEntityInterceptor implements Interceptor {
      * Called when new objects are saved.
      */
 	@Autowired
-	private CoreService coreService;
+	private ApplicationContext context;
 	
 	
 	@Override
@@ -33,6 +34,7 @@ public class DaoSQLEntityInterceptor implements Interceptor {
     		
     		BaseEntity entity = ((BaseEntity) object);
     		
+    		CoreService coreService = context.getBean(CoreService.class);
     		AppUser appUser = coreService.getAppUser();
 			Date now = new Date();
 			
