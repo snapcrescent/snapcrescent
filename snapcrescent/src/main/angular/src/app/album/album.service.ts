@@ -3,7 +3,7 @@ import { Injectable} from '@angular/core';
 import { BaseService } from '../core/services/base.service';
 import { Observable } from "rxjs";
 import { BaseResponseBean } from '../core/models/base-response-bean';
-import { Album, AlbumType, CreateAlbumAssetAssnRequest, CreateAlbumUserAssnRequest } from './album.model';
+import { Album, CreateAlbumAssetAssnRequest } from './album.model';
 
 @Injectable({
     providedIn: "root"
@@ -26,11 +26,19 @@ export class AlbumService extends BaseService {
     return this.httpClient.get(this.entityUrl, super.getSearchParameters(params));
   }
 
-  createAlbumAssetAssociation(payload:CreateAlbumAssetAssnRequest) {
-    return this.httpClient.post(this.entityUrl + '/asset/assn',payload);
+  read(id: number): Observable<BaseResponseBean<number, Album>> {
+    return this.httpClient.get(this.entityUrl + '/' + id);
   }
 
-  createAlbumUserAssociation(payload:CreateAlbumUserAssnRequest) {
-    return this.httpClient.post(this.entityUrl + '/user/assn',payload);
+  update(id: number,entity: Album): Observable<BaseResponseBean<number, Album>> {
+    return this.httpClient.put(this.entityUrl + '/' + id,this.preparePayload(entity));
+  }
+
+  preparePayload(entity: Album) {
+    return entity;
+}
+
+  createAlbumAssetAssociation(payload:CreateAlbumAssetAssnRequest) {
+    return this.httpClient.post(this.entityUrl + '/asset/assn',payload);
   }
 }

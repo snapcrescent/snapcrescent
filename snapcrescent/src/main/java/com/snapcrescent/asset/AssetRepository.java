@@ -56,12 +56,13 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		
 		
-		hql.append(" LEFT JOIN " + getJoinFetchType(isCountQuery) + " asset.metadata metadata");
-		hql.append(" LEFT JOIN " + getJoinFetchType(isCountQuery) + " asset.thumbnail thumbnail");
+		hql.append(" LEFT JOIN asset.metadata metadata");
+		hql.append(" LEFT JOIN  asset.thumbnail thumbnail");
 		
 		if(searchCriteria.getAlbumId() != null)
 		{
-		hql.append(" JOIN " + getJoinFetchType(isCountQuery) + " asset.albums album");
+			hql.append(" LEFT JOIN asset.albums album");
+			hql.append(" LEFT JOIN album.users user");
 		}
 		
 		hql.append(" where 1=1 ");
@@ -74,8 +75,23 @@ public class AssetRepository extends BaseRepository<Asset>{
 					true));
 		}
 		
-		hql.append(" AND asset.createdByUserId = :userId ");
-		paramsMap.put("userId", searchCriteria.getUserId());
+		if(searchCriteria.getAccessibleByUserId() != null)
+		{
+			if(searchCriteria.getAlbumId() != null)
+			{
+				hql.append(" AND ( asset.createdByUserId = :accessibleByUserId OR user.id = :accessibleByUserId ) ");
+			} else {
+				hql.append(" AND asset.createdByUserId = :accessibleByUserId ");
+			}
+			paramsMap.put("accessibleByUserId", searchCriteria.getAccessibleByUserId());	
+		}
+		
+		
+		if(searchCriteria.getCreatedByUserId() != null)
+		{
+			hql.append(" AND asset.createdByUserId = :createdByUserId ");
+			paramsMap.put("createdByUserId", searchCriteria.getCreatedByUserId());
+		}
 		
 		if(searchCriteria.getFromDate() != null)
 		{
@@ -111,7 +127,7 @@ public class AssetRepository extends BaseRepository<Asset>{
 		{
 			hql.append(" AND album.id = :albumId ");
 			paramsMap.put("albumId", searchCriteria.getAlbumId());
-		}
+		} 
 		
 		if(isCountQuery == false && searchCriteria.getSortBy() != null){
 			hql.append(" ORDER BY " + searchCriteria.getSortBy() + " " + searchCriteria.getSortOrder());
@@ -172,13 +188,22 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		if(searchCriteria.getAlbumId() != null)
 		{
-		hql.append(" JOIN asset.albums album");
+			hql.append(" LEFT JOIN  asset.albums album");
+			hql.append(" LEFT JOIN  album.users user");
 		}
 		
 		hql.append(" where 1=1 ");
 		
-		hql.append(" AND asset.createdByUserId = :userId ");
-		paramsMap.put("userId", searchCriteria.getUserId());
+		if(searchCriteria.getAccessibleByUserId() != null)
+		{
+			if(searchCriteria.getAlbumId() != null)
+			{
+				hql.append(" AND ( asset.createdByUserId = :accessibleByUserId OR user.id = :accessibleByUserId ) ");
+			} else {
+				hql.append(" AND asset.createdByUserId = :accessibleByUserId ");
+			}
+			paramsMap.put("accessibleByUserId", searchCriteria.getAccessibleByUserId());	
+		}
 		
 		if(searchCriteria.getActive() != null)
 		{

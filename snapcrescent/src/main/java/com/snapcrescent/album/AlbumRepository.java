@@ -54,10 +54,7 @@ public class AlbumRepository extends BaseRepository<Album> {
 
 		hql.append(" FROM Album album");
 		
-		if(searchCriteria.getUserId() != null)
-		{
-			hql.append(" JOIN " + getJoinFetchType(isCountQuery) + " album.users user");
-		}
+		hql.append(" LEFT JOIN album.users user");
 		
 		hql.append(" where 1=1 ");
 
@@ -69,10 +66,10 @@ public class AlbumRepository extends BaseRepository<Album> {
 					true));
 		}
 		
-		if(searchCriteria.getUserId() != null)
+		if(searchCriteria.getAccessibleByUserId() != null)
 		{
-			hql.append(" AND user.id = :userId ");
-			paramsMap.put("userId", searchCriteria.getUserId());
+			hql.append(" AND user.id = :accessibleByUserId ");
+			paramsMap.put("accessibleByUserId", searchCriteria.getAccessibleByUserId());
 		}
 		
 		if(searchCriteria.getCreatedByUserId() != null)

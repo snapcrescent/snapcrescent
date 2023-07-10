@@ -12,4 +12,5 @@ public class AssetSearchCriteria extends BaseSearchCriteria{
 	private Integer assetType;
 	private Boolean favorite;
 	private Long albumId;
+	private Long createdByUserId;
 }

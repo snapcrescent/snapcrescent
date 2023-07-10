@@ -1,45 +1,14 @@
 @import "/src/assets/styles/variables.scss";
 
-.page-controls{
-    position: absolute;
-    color: white;
-    left: 20px;
-    top:20px;
-    cursor: pointer;
-}
+.public-access-link-container {
+    height: 45px;
+    background-color: lightgray;
+    border-radius: 10px;
+    padding: 10px;
+    color: black;
 
-.asset-controls{
-    position: absolute;
-    color: white;
-    right: 20px;
-    top:20px;
-    text-align: right;
-
-    .control{
+    .copy-to-clipboard {
+        float: right;
         cursor: pointer;
-        margin: 0px 10px;
-    }
-}
-
-
-.navigation-controls{
-    position: absolute;
-    color: white;
-    top:50%;
-    width: 100%;
-    z-index: 1;
-    
-    .left{
-        padding-left: 10px;
-        float:left;
-        cursor: pointer;
-        font-size: 36px;
-    }
-
-    .right{
-        padding-right: 10px;
-        float:right;
-        cursor: pointer;
-        font-size: 36px;
     }
 }

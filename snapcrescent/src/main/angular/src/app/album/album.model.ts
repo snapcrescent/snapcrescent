@@ -1,28 +1,27 @@
 import { Thumbnail } from "../asset/asset.model";
 import { BaseUiBean } from "../core/models/base.model";
+import { User } from "../user/user.model";
 
 export class Album extends BaseUiBean{
   
-  name:string;
-  publicAccess?:boolean;
+  name:string = '';
+  publicAccess?:boolean = false;
 
-  albumTypeName?:string;
-  albumType?:number
+  albumTypeName?:string = '';
+  albumType?:number = 0;
 
-  ownedByMe?:boolean;
-  sharedWithOthers?:boolean;
+  ownedByMe?:boolean = false;
+  sharedWithOthers?:boolean = false;
 
   albumThumbnail?:Thumbnail;
+
+  users? : User[] = [];
+  newPassword? : string = '';
 }
 
 export class CreateAlbumAssetAssnRequest {
   albums:Album[];
   assetIds:number[];
-}
-
-export class CreateAlbumUserAssnRequest {
-  albumId:number;
-  userIds:number[];
 }
 
 export let AlbumType = {

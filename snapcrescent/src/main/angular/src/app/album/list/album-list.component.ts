@@ -83,11 +83,19 @@ export class AlbumListComponent extends BaseListComponent implements AfterViewIn
 
   openShareWithUserDialog(album:Album) {
     
-    this.dialog.open(ShareWithUserComponent, {
-      width: "50vw",
+    const dialogRef = this.dialog.open(ShareWithUserComponent, {
+      width: "800px",
       data: {
         albumId: album.id
       }
     });
+
+    dialogRef.afterClosed().subscribe(changed => {
+      if (changed) {
+          this.search();
+      }
+    });
+
+    
   }
 }

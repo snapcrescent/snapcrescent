@@ -5,7 +5,6 @@ import java.util.Date;
 
 import com.snapcrescent.user.User;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;

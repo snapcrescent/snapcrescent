@@ -10,6 +10,16 @@
     .mat-mdc-form-field-focus-overlay {
         background-color: transparent !important;
     }
+
+    .mat-mdc-input-element {
+        float: left;
+        width: 90%;
+    }
+
+    .mat-suffix {
+        float: right;
+        cursor: pointer;
+    }
 }
 
 .mat-body, .mat-body-1, .mat-typography {

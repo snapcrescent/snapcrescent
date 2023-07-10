@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.snapcrescent.common.BaseController;
 import com.snapcrescent.common.beans.BaseResponseBean;
+import com.snapcrescent.config.security.acl.AuthorizeURL;
 
 @RestController
 public class AlbumController extends BaseController{
@@ -36,7 +39,41 @@ public class AlbumController extends BaseController{
 			searchCriteria.setCreatedByUserId(Long.parseLong(searchParams.get("createdByUserId")));
 		}
 		
-		searchCriteria.setUserId(coreService.getAppUserId());	
+	}
+	
+	
+	@GetMapping("/album/{id}")
+	@AuthorizeURL(targetEntity = Album.class)
+	public @ResponseBody BaseResponseBean<Long, UiAlbum> get(@PathVariable Long id) {
+		BaseResponseBean<Long, UiAlbum> response = new BaseResponseBean<>();
+
+		try {
+			response.setObjectId(id);
+			response.setObject(albumService.getById(id));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return response;
+	}
+	
+	@PutMapping(value = "/album/{id}")
+	@AuthorizeURL(targetEntity = Album.class)
+	public @ResponseBody BaseResponseBean<Long, UiAlbum> update(@PathVariable Long id, @RequestBody UiAlbum album) {
+		BaseResponseBean<Long, UiAlbum> response = new BaseResponseBean<>();
+
+		try {
+			album.setId(id);
+			albumService.update(album);
+
+			response.setObjectId(id);
+			response.setObject(album);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setSuccess(false);
+		}
+		return response;
+
 	}
 	
 	@PostMapping("/album/asset/assn")
@@ -44,14 +81,5 @@ public class AlbumController extends BaseController{
 		albumService.createAlbumAssetAssociation(createAlbumAssetAssnRequest);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-	
-	@PostMapping("/album/user/assn")
-	public @ResponseBody ResponseEntity<?> createAlbumUserAssociation(@RequestBody UiCreateAlbumUserAssnRequest createAlbumUserAssnRequest) {
-		albumService.createAlbumUserAssociation(createAlbumUserAssnRequest);
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-
-
-	
-	
+		
 }

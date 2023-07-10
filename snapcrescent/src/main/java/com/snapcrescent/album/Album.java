@@ -5,6 +5,7 @@ import java.util.List;
 import com.snapcrescent.asset.Asset;
 import com.snapcrescent.common.BaseEntity;
 import com.snapcrescent.common.utils.Constant.AlbumType;
+import com.snapcrescent.config.security.acl.AccessControlQuery;
 import com.snapcrescent.user.User;
 
 import jakarta.persistence.Basic;
@@ -24,6 +25,11 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = false)
+@AccessControlQuery(
+		query="SELECT album.id from Album album " + 
+						  "where album.id = :targetEntityId " +
+						  "AND album.createdByUserId = :userId"
+)
 public class Album extends BaseEntity {
 	
 	private static final long serialVersionUID = -5687399600782387370L;

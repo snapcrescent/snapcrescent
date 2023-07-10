@@ -1,7 +1,11 @@
 package com.snapcrescent.common.utils;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.modelmapper.Converter;
 
+import com.snapcrescent.common.BaseEntity;
 import com.snapcrescent.common.utils.Constant.DbEnum;
 
 
@@ -13,6 +17,10 @@ public class ModelMapperUtils {
 	
 	public static Converter<DbEnum, String> getDbEnumConvertor() {
 		return context -> context.getSource() == null ? null :  context.getSource().getLabel();
+	}
+	
+	public static Converter<Collection<BaseEntity>, Collection<Long>> getCollectionIdsConvertor() {
+		return context -> context.getSource() == null ? null :  context.getSource().stream().map(entity -> entity.getId()).collect(Collectors.toList());
 	}
 	
 

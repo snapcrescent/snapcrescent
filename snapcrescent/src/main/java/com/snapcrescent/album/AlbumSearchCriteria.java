@@ -9,5 +9,4 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper=false)
 public class AlbumSearchCriteria extends BaseSearchCriteria{
 	
-	private Long createdByUserId;
 }
