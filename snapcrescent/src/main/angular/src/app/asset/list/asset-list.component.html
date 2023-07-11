@@ -1,20 +1,4 @@
-<app-header></app-header>
-<div class="row m-0">
-    <div class="col-xl-2 col-lg-3 d-none d-xl-block d-lg-block">
-        <app-side-bar></app-side-bar>
-    </div>
-    <div class="col-xl-10 col-lg-9 col-12">
-        <app-asset-grid
-        #assetGridComponent
-        [searchStoreName]="searchStoreName"
-        defaultSortColumn="creationDate"
-        [actions]="actions" 
-        [advancedSearchFields]="advancedSearchFields"
-        [extraSearchFields]="extraSearchFields"
-        [search]="search.bind(this)"
-        [getTimeline] = "getTimeline.bind(this)"
-        (onOpenAssetView)="openAssetView($event)"
-        >
-    </app-asset-grid>    
-    </div>
-</div>
+<app-asset-grid #assetGridComponent [searchStoreName]="searchStoreName" defaultSortColumn="creationDate"
+    [actions]="actions" [advancedSearchFields]="advancedSearchFields" [extraSearchFields]="extraSearchFields"
+    [search]="search.bind(this)" [getTimeline]="getTimeline.bind(this)" (onOpenAssetView)="openAssetView($event)">
+</app-asset-grid>

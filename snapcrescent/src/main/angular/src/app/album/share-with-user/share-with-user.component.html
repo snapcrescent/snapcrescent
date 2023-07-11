@@ -1,0 +1,56 @@
+<h2 mat-dialog-title>Share {{entity.name}}</h2>
+<div mat-dialog-content>
+    <form>
+        <div>User access</div>
+        <mat-form-field>
+          <mat-label>Users with access</mat-label>
+          <mat-chip-grid #chipGrid aria-label="User selection">
+            <mat-chip-row *ngFor="let selectedUser of selectedUsers" (removed)="remove(selectedUser)">
+              {{selectedUser.firstName}} {{selectedUser.lastName}}
+              <button matChipRemove [attr.aria-label]="'remove ' + selectedUser.firstName">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+          </mat-chip-grid>
+          <input placeholder="Search User..." #userInput [formControl]="userCtrl"
+            [matChipInputFor]="chipGrid" [matAutocomplete]="auto"
+            />
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+            <mat-option *ngFor="let filteredUser of filteredUsers | async" [value]="filteredUser">
+              {{filteredUser.firstName}} {{filteredUser.lastName}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </form>
+      <form *ngIf="entityFormGroup" [formGroup]="entityFormGroup">
+        <div>General access</div>
+        <div class="row input-row">
+            <div class="input-column col-md-6 col-12">
+              <app-select 
+              placeholder="Public Access" 
+              formControlName="publicAccess" 
+              [isRequired]="true"
+              [options]="publicAccessOptions"
+              >
+              </app-select>
+            </div>
+            <div *ngIf="entity.publicAccess" class="input-column col-md-6 col-12">
+              <app-text placeholder="Password" formControlName="newPassword" [isRequired]="true"
+                type="password" [showPasswordVisibilitySuffix]="entity.newPassword !== PLACEHOLDER_PASSWORD">
+              </app-text>
+            </div>
+          </div>
+      </form>
+      <ng-container *ngIf="entity.publicAccess">
+        <div>Link</div>
+        <div class="public-access-link-container">
+          <span class="public-access-link">{{publicAccessLink}}</span>
+          <span ngxClipboard [cbContent]="publicAccessLink" matTooltip="Copy Link" class="copy-to-clipboard material-symbols-outlined">link</span>
+        </div>
+      </ng-container>
+
+</div>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [mat-dialog-close]="true" (click)="updateAlbum()" cdkFocusInitial>Save</button>
+</mat-dialog-actions>

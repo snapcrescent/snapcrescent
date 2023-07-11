@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg header">
   <div class="container-fluid">
-    <div class="col-6 col-sm-2">
-      <img src="assets/images/header-logo.png" class="img-fluid" alt="Logo">
+    <div class="col-6 col-sm-2 logo" (click)="navigateToAssetList()">
+      <img src="assets/images/header-logo.png"  class="img-fluid" alt="Logo">
     </div>
     
     <div class="collapse navbar-collapse">
@@ -10,21 +10,35 @@
           <span class="label" >{{menuItem.label}}</span>
         </li>
       </ul>
-      <form class="d-flex" role="search">
-        <span class="logout-button material-icons cursor-hand" (click)="logout()">logout</span>
-      </form>
+      
+      <span *ngIf="!userTypePublicAccess" [matMenuTriggerFor]="menu" class="logout-button   material-icons cursor-hand">account_circle</span>
+      <span *ngIf="userTypePublicAccess" (click)="logout()" class="logout-button   material-icons cursor-hand">close</span>
+      
+      <mat-menu #menu="matMenu">
+        <!--
+        <button mat-menu-item>
+          <mat-icon>person</mat-icon>
+          <span>Personal settings</span>
+        </button>
+        -->
+        <button *ngIf="userTypeAdmin" (click)="navigateToAdminSection()" mat-menu-item>
+          <mat-icon>admin_panel_settings</mat-icon>
+          <span>Administration settings</span>
+        </button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>power_settings_new</mat-icon>
+          <span>Log out</span>
+        </button>
+      </mat-menu>
+      
     </div>
 
+    <button mat-icon-button class="navbar-toggler" [matMenuTriggerFor]="menu">
+      <mat-icon >account_circle</mat-icon>
+    </button>
     <button mat-icon-button (click)="toggleSideBar()" class="navbar-toggler" >
       <mat-icon>more_vert</mat-icon>
     </button>
-    <mat-menu #menu="matMenu">
-      <button mat-menu-item  *ngFor="let menuItem of menuItems" (click)="navigate(menuItem)">
-        <span class="label" >{{menuItem.label}}</span>
-      </button>
-      <button mat-menu-item >
-        <span class="logout-button material-icons cursor-hand" (click)="logout()">logout</span>
-      </button>
-    </mat-menu>
+    
   </div>
 </nav>

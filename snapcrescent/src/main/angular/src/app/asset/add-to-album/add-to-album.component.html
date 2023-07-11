@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Add to Album</h2>
+<div mat-dialog-content>
+    <form>
+        <mat-form-field>
+          <mat-label>Albums</mat-label>
+          <mat-chip-grid #chipGrid aria-label="Album selection">
+            <mat-chip-row *ngFor="let selectedAlbum of selectedAlbums" (removed)="remove(selectedAlbum)">
+              {{selectedAlbum.name}}
+              <button matChipRemove [attr.aria-label]="'remove ' + selectedAlbum.name">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+          </mat-chip-grid>
+          <input placeholder="New Album..." #albumInput [formControl]="albumCtrl"
+            [matChipInputFor]="chipGrid" [matAutocomplete]="auto"
+            [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+            (matChipInputTokenEnd)="add($event)"/>
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+            <mat-option *ngFor="let filteredAlbum of filteredAlbums | async" [value]="filteredAlbum">
+              {{filteredAlbum.name}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </form>
+</div>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [mat-dialog-close]="true" (click)="createAlbumAssetAssociation()" cdkFocusInitial>Add</button>
+</mat-dialog-actions>

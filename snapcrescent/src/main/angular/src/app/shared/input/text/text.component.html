@@ -1,6 +1,6 @@
 <mat-form-field>
     <mat-label>{{placeholder}}</mat-label>
-    <ng-container *ngIf="type === 'input' || type === 'number' || type === 'password'; else textArea">
+    <ng-container *ngIf="originalType === 'input' || originalType === 'number' ; else password">
         <input 
         matInput 
         [disabled]="disabled"
@@ -12,6 +12,33 @@
         (blur)="$event.stopPropagation(); onBlur()"
         >
     </ng-container>
+    <ng-template #password>
+        <ng-container *ngIf="originalType === 'password'; else textArea">
+            <input *ngIf="type === 'password'"
+            matInput 
+            [disabled]="disabled"
+            [value]="value"
+            type="password"
+            [required]="isRequired"
+            (input)="$event.stopPropagation(); onInput($event)"
+            (change)="$event.stopPropagation(); onChange($event)"
+            (blur)="$event.stopPropagation(); onBlur()"
+            >
+
+            <input *ngIf="type === 'input'"
+            matInput 
+            [disabled]="disabled"
+            [value]="value"
+            type="input"
+            [required]="isRequired"
+            (input)="$event.stopPropagation(); onInput($event)"
+            (change)="$event.stopPropagation(); onChange($event)"
+            (blur)="$event.stopPropagation(); onBlur()"
+            >
+            <span *ngIf="showPasswordVisibilitySuffix" matSuffix mat-icon-button aria-label="Show Password" (click)="togglePasswordVisibility()" matTooltip="Show Password" class="mat-suffix material-symbols-outlined">visibility</span>
+        </ng-container>
+    </ng-template>
+    
     <ng-template #textArea>
         <textarea 
         [rows]="textAreaSize"

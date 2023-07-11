@@ -1,0 +1,30 @@
+<div class="album-type-container">
+    <ng-container *ngTemplateOutlet="albums; context: {$implicit: {albums: myAlbums, albumGroup : 'My Albums'}}"></ng-container>   
+    
+    <div class="album-type-container" *ngIf="sharedWithMeAlbums && sharedWithMeAlbums.length">
+        <ng-container *ngTemplateOutlet="albums; context: {$implicit: {albums: sharedWithMeAlbums, albumGroup : 'Shared Albums'}}"></ng-container> 
+</div>
+
+<ng-template #albums let-that>
+    <div class="title">{{that.albumGroup}}</div>
+    <div class="albums-container">
+        <ng-container *ngFor="let album of that.albums">
+            <mat-card class="album">
+                <mat-card-content>
+                    <div class="name">
+                        {{album.name}}
+                    </div>
+                    <div *ngIf="album.ownedByMe" class="sharing-icon">
+                        <span (click)="openShareWithUserDialog(album)" matTooltip="Share" class="material-symbols-outlined">share</span>
+                    </div>
+                    <div *ngIf="album.ownedByMe" class="public-access-status">
+                        <span  matTooltip="Public Access" *ngIf="album.sharedWithOthers && album.publicAccess" class="material-symbols-outlined">public</span>
+                    </div>
+                    <div class="thumbnail-container">
+                        <img (click)="onAlbumClick(album)" class="thumbnail img-fluid" alt="thumbnail" [src]="album.albumThumbnail!.url" />    
+                    </div>
+                </mat-card-content>
+              </mat-card>
+        </ng-container>
+    </div>
+  </ng-template>

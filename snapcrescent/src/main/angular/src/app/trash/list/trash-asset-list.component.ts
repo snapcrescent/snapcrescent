@@ -1,17 +1,17 @@
 import { Component , ViewChild, AfterViewInit} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { AssetService } from 'src/app/asset/asset.service';
-import { BaseListComponent } from 'src/app/core/components/base-list.component';
 import { AlertService } from 'src/app/shared/alert/alert.service';
 import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 import { AssetListComponent } from 'src/app/asset/list/asset-list.component';
+import { BaseAssetGridComponent } from 'src/app/core/components/base-asset-grid.component';
 
 @Component({
   selector: 'app-trash-asset-list',
   templateUrl: './trash-asset-list.component.html',
   styleUrls:['./trash-asset-list.component.scss']
 })
-export class TrashAssetListComponent extends BaseListComponent implements AfterViewInit{
+export class TrashAssetListComponent extends BaseAssetGridComponent implements AfterViewInit{
 
   searchStoreName = "trash-assets"
 

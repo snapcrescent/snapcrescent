@@ -82,13 +82,23 @@ export class TextComponent implements ControlValueAccessor, OnInit, OnChanges {
   @ContentChild("suffix", { static: true })
   suffixRef: TemplateRef<any>;
 
+  @Input()
+  showPasswordVisibilitySuffix: boolean = true;
+
   originalValue:any;
 
   onChangeCallback = (value:any) => {};
   onTouchedCallback = () => {};
 
+  originalType:
+    | "input"
+    | "number"
+    | "password"
+    | "textArea" = "input";
+
   ngOnInit() {
     this.originalValue = this.value;
+    this.originalType = this.type;
 
     if (this.type === "number" && this.ngControl && this.handleZeroValue) {
       if (this.ngControl.value === 0) {
@@ -159,5 +169,13 @@ export class TextComponent implements ControlValueAccessor, OnInit, OnChanges {
 
   setDisabledState(disabled: boolean) {
     this.disabled = disabled;
+  }
+
+  togglePasswordVisibility() {
+    if(this.type === "password") {
+      this.type = "input";
+    } else {
+      this.type = "password";
+    }
   }
 }

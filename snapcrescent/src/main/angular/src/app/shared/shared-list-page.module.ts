@@ -3,6 +3,9 @@ import { AssetListComponent } from '../asset/list/asset-list.component';
 import { TrashAssetListComponent } from '../trash/list/trash-asset-list.component';
 import { SharedModule } from './shared.module';
 import { FavoriteAssetListComponent } from '../favorite/list/favorite-asset-list.component';
+import { AlbumListComponent } from '../album/list/album-list.component';
+import { AlbumAssetListComponent } from '../album/view/album-asset-list.component';
+import { UserListComponent } from '../user/list/user-list.component';
 
 
 const modules = [
@@ -12,7 +15,10 @@ const modules = [
 const components:any = [
   AssetListComponent,
   TrashAssetListComponent,
-  FavoriteAssetListComponent
+  FavoriteAssetListComponent,
+  AlbumListComponent,
+  AlbumAssetListComponent,
+  UserListComponent
 ];
 
 

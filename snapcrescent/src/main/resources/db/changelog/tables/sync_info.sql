@@ -1,3 +1,4 @@
+-- liquibase formatted sql
 -- changeset navalgandhi1989:create_sync_info logicalFilePath:path-independent
 CREATE TABLE IF NOT EXISTS `sync_info` (
   `id` bigint NOT NULL AUTO_INCREMENT,

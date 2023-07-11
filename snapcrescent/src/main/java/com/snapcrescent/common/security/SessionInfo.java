@@ -1,46 +1,22 @@
 package com.snapcrescent.common.security;
 
+import lombok.Data;
+
+@Data
 public class SessionInfo {
 
 	private Long id;
 	private String username;
-	private String password;
-	private String name;
-
-	public SessionInfo(String username, String name) {
-		this.username = username;
-		this.name = name;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
+	private String firstName;
+	private String lastName;
+	private Integer userType;
+	
+	public SessionInfo(Long id, String username, String firstName,String lastName, Integer userType) {
+		super();
 		this.id = id;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.userType = userType;
 	}
 }

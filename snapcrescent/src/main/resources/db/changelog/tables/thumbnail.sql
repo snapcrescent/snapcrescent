@@ -1,3 +1,4 @@
+-- liquibase formatted sql
 -- changeset navalgandhi1989:create_thumbnail logicalFilePath:path-independent
 CREATE TABLE IF NOT EXISTS `thumbnail` (
   `id` bigint NOT NULL AUTO_INCREMENT,

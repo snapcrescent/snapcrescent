@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.snapcrescent.asset.Asset;
 import com.snapcrescent.asset.SecuredAssetStreamDTO;
+import com.snapcrescent.common.services.BaseService;
 import com.snapcrescent.common.utils.Constant;
 import com.snapcrescent.common.utils.Constant.AssetType;
 import com.snapcrescent.common.utils.Constant.FILE_TYPE;
@@ -28,7 +29,7 @@ import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
 import com.snapcrescent.config.EnvironmentProperties;
 import com.snapcrescent.metadata.Metadata;
 @Service
-public class ThumbnailServiceImpl implements ThumbnailService {
+public class ThumbnailServiceImpl extends BaseService implements ThumbnailService {
 
 	@Autowired
 	private FileService fileService;
@@ -46,6 +47,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 		File thumbnailFile = createThumbnail(assetType, file, metadata);
 		
 		Thumbnail thumbnail = new Thumbnail();
+		thumbnail.setCreatedByUserId(coreService.getAppUserId());
 		String thumbnailName = thumbnailFile.getName();
 		thumbnail.setName(thumbnailName);
 		thumbnail.setPath(metadata.getPath());

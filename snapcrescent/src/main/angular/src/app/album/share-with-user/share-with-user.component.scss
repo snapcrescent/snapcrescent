@@ -1,0 +1,14 @@
+@import "/src/assets/styles/variables.scss";
+
+.public-access-link-container {
+    height: 45px;
+    background-color: lightgray;
+    border-radius: 10px;
+    padding: 10px;
+    color: black;
+
+    .copy-to-clipboard {
+        float: right;
+        cursor: pointer;
+    }
+}

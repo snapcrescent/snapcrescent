@@ -23,11 +23,11 @@ public abstract class BaseRepository<T> {
 
 	@PersistenceContext
     protected EntityManager entityManager;
-
 	
 	public List<T> findAll() {
 		
 		String query = "SELECT entity FROM "+ type.getName() +  " entity";
+	
 		
 		TypedQuery<T> typedQuery = entityManager.createQuery(query,type);
 		return typedQuery.getResultList();
@@ -42,15 +42,15 @@ public abstract class BaseRepository<T> {
 	 * 
 	 * @param entity
 	 */
-	public void update(Object entity) {
+	public void update(T entity) {
 		entityManager.merge(entity);
 	}
 
-	public void refresh(Object entity) {
+	public void refresh(T entity) {
 		entityManager.refresh(entity);
 	}
 
-	public void detach(Object entity) {
+	public void detach(T entity) {
 		entityManager.detach(entity);
 	}
 	

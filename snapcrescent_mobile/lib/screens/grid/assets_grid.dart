@@ -15,9 +15,9 @@ import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 import 'package:snapcrescent_mobile/stores/asset/asset_store.dart';
 import 'package:snapcrescent_mobile/utils/common_utilities.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
-import 'package:snapcrescent_mobile/widgets/asset_thumbnail/asset_thumbnail.dart';
-import 'package:snapcrescent_mobile/widgets/config_server_prompt/config_server_prompt.dart';
-import 'package:snapcrescent_mobile/widgets/sync_process/sync_process.dart';
+import 'package:snapcrescent_mobile/screens/grid/widgets/asset_thumbnail.dart';
+import 'package:snapcrescent_mobile/screens/grid/widgets/config_server_prompt.dart';
+import 'package:snapcrescent_mobile/screens/grid/widgets/sync_process.dart';
 
 class AssetsGridScreen extends StatelessWidget {
   static const routeName = '/assets';

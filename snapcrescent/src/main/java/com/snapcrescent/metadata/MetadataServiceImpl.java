@@ -36,6 +36,7 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 	@Override
 	public Metadata computeMetaData(AssetType assetType, String originalFilename, File file) throws Exception {
 		Metadata metadata = new Metadata();
+		metadata.setCreatedByUserId(coreService.getAppUserId());
 		extractMetaData(assetType, originalFilename, file, metadata);
 		return metadata;
 	}

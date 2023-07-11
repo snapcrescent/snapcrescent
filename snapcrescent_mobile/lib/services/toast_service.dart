@@ -7,6 +7,10 @@ class ToastService {
   static final ToastService instance = ToastService._privateConstructor();
 
   static showError(String message) {
+    if(message.contains("Exception:")) {
+      message = message.substring(11);
+    }
+    
     Fluttertoast.showToast(
         msg: message,
         toastLength: Toast.LENGTH_SHORT,

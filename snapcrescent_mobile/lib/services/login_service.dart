@@ -13,7 +13,10 @@ class LoginService extends BaseService {
   LoginService._privateConstructor():super();
   static final LoginService instance = LoginService._privateConstructor();
 
-  Future<UserLoginResponse> login() async {
+  Future<UserLoginResponse?> login() async {
+    
+    UserLoginResponse? response;
+
     try {
       final appConfigServerUserNameConfig = await AppConfigRepository.instance.findByKey(Constants.appConfigServerUserName);
       final appConfigServerPasswordConfig = await AppConfigRepository.instance.findByKey(Constants.appConfigServerPassword);
@@ -25,21 +28,20 @@ class LoginService extends BaseService {
         Dio dio = await getDio();
         final jsonResponse = await dio.post('/login', data : request.toJson());
 
-        UserLoginResponse response = UserLoginResponse.fromJson(json.decode(jsonResponse.data));
+        response = UserLoginResponse.fromJson(json.decode(jsonResponse.data));
 
         AppConfig appConfigSessionTokenConfig = new AppConfig(configKey: Constants.appConfigSessionToken,configValue: response.token);
         await AppConfigRepository.instance.saveOrUpdateConfig(appConfigSessionTokenConfig);
 
-        return response;
-
-      } else {
-        return new UserLoginResponse();
-      }
+      } 
     } on DioError catch (ex) {
       if (ex.type == DioErrorType.connectionTimeout) {
         throw Exception("Connection  Timeout Exception");
+      } else if (ex.type == DioErrorType.unknown) {
+        throw Exception("Unable to connect to server");
       }
-      return new UserLoginResponse();
     }
+
+    return response;
   }
 }

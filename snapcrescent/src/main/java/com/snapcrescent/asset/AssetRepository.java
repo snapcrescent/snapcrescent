@@ -56,8 +56,14 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		
 		
-		hql.append(" LEFT JOIN " + getJoinFetchType(isCountQuery) + " asset.metadata metadata");
-		hql.append(" LEFT JOIN " + getJoinFetchType(isCountQuery) + " asset.thumbnail thumbnail");
+		hql.append(" LEFT JOIN asset.metadata metadata");
+		hql.append(" LEFT JOIN  asset.thumbnail thumbnail");
+		
+		if(searchCriteria.getAlbumId() != null)
+		{
+			hql.append(" LEFT JOIN asset.albums album");
+			hql.append(" LEFT JOIN album.users user");
+		}
 		
 		hql.append(" where 1=1 ");
 
@@ -67,6 +73,24 @@ public class AssetRepository extends BaseRepository<Asset>{
 			String[] numberFields = {};
 			hql.append(daoHelper.getSearchWhereStatement(stringFields, numberFields, searchCriteria.getSearchKeyword(),
 					true));
+		}
+		
+		if(searchCriteria.getAccessibleByUserId() != null)
+		{
+			if(searchCriteria.getAlbumId() != null)
+			{
+				hql.append(" AND ( asset.createdByUserId = :accessibleByUserId OR user.id = :accessibleByUserId ) ");
+			} else {
+				hql.append(" AND asset.createdByUserId = :accessibleByUserId ");
+			}
+			paramsMap.put("accessibleByUserId", searchCriteria.getAccessibleByUserId());	
+		}
+		
+		
+		if(searchCriteria.getCreatedByUserId() != null)
+		{
+			hql.append(" AND asset.createdByUserId = :createdByUserId ");
+			paramsMap.put("createdByUserId", searchCriteria.getCreatedByUserId());
 		}
 		
 		if(searchCriteria.getFromDate() != null)
@@ -98,6 +122,12 @@ public class AssetRepository extends BaseRepository<Asset>{
 			hql.append(" AND asset.favorite = :favorite ");
 			paramsMap.put("favorite", searchCriteria.getFavorite());
 		}
+		
+		if(searchCriteria.getAlbumId() != null)
+		{
+			hql.append(" AND album.id = :albumId ");
+			paramsMap.put("albumId", searchCriteria.getAlbumId());
+		} 
 		
 		if(isCountQuery == false && searchCriteria.getSortBy() != null){
 			hql.append(" ORDER BY " + searchCriteria.getSortBy() + " " + searchCriteria.getSortOrder());
@@ -156,8 +186,24 @@ public class AssetRepository extends BaseRepository<Asset>{
 		hql.append(" FROM Asset asset");
 		hql.append(" LEFT JOIN asset.metadata metadata");
 		
+		if(searchCriteria.getAlbumId() != null)
+		{
+			hql.append(" LEFT JOIN  asset.albums album");
+			hql.append(" LEFT JOIN  album.users user");
+		}
+		
 		hql.append(" where 1=1 ");
 		
+		if(searchCriteria.getAccessibleByUserId() != null)
+		{
+			if(searchCriteria.getAlbumId() != null)
+			{
+				hql.append(" AND ( asset.createdByUserId = :accessibleByUserId OR user.id = :accessibleByUserId ) ");
+			} else {
+				hql.append(" AND asset.createdByUserId = :accessibleByUserId ");
+			}
+			paramsMap.put("accessibleByUserId", searchCriteria.getAccessibleByUserId());	
+		}
 		
 		if(searchCriteria.getActive() != null)
 		{
@@ -169,6 +215,12 @@ public class AssetRepository extends BaseRepository<Asset>{
 		{
 			hql.append(" AND asset.favorite = :favorite ");
 			paramsMap.put("favorite", searchCriteria.getFavorite());
+		}
+		
+		if(searchCriteria.getAlbumId() != null)
+		{
+			hql.append(" AND album.id = :albumId ");
+			paramsMap.put("albumId", searchCriteria.getAlbumId());
 		}
 		
 		hql.append(" GROUP BY YEAR(metadata.creationDateTime), MONTH(metadata.creationDateTime), DATE(metadata.creationDateTime) ");
@@ -183,6 +235,14 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		List<UiAssetTimeline> results = typedQuery.getResultList();
 		return results;
+	}
+	
+	public List<Long> findAssetIdsByCreatedById(Long createdByUserId) {
+		String query = "SELECT asset.id FROM Asset asset WHERE asset.createdByUserId = :createdByUserId";
+		
+		TypedQuery<Long> typedQuery = entityManager.createQuery(query,Long.class);
+		typedQuery.setParameter("createdByUserId", createdByUserId);
+		return typedQuery.getResultList();
 	}
 	
 }

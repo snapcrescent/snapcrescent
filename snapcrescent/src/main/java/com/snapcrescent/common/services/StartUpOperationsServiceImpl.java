@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.snapcrescent.common.utils.Constant;
 import com.snapcrescent.common.utils.FileService;
 import com.snapcrescent.common.utils.Constant.FILE_TYPE;
+import com.snapcrescent.user.UserService;
 
 @Service
 public class StartUpOperationsServiceImpl extends BaseService implements StartUpOperationsService {
@@ -16,16 +17,27 @@ public class StartUpOperationsServiceImpl extends BaseService implements StartUp
 	@Autowired
 	private FileService fileService;
 	
+	@Autowired
+	private UserService userService;
+	
 	@Override
 	@Transactional
 	public void performPostStartUpOperations() {
 		try {
 			createAssetFolders();
-			
+			createOrUpdateDefaultAdmin();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
+	}
+	
+	private void createOrUpdateDefaultAdmin() {
+		try {
+			userService.createOrUpdateDefaultUser();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void createAssetFolders() {

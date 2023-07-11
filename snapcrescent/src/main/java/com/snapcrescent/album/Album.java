@@ -1,45 +1,76 @@
 package com.snapcrescent.album;
 
-import java.io.Serializable;
+import java.util.List;
 
+import com.snapcrescent.asset.Asset;
+import com.snapcrescent.common.BaseEntity;
+import com.snapcrescent.common.utils.Constant.AlbumType;
+import com.snapcrescent.config.security.acl.AccessControlQuery;
+import com.snapcrescent.user.User;
+
+import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Transient;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 
 
 @Entity
-public class Album implements Serializable{
+@Data
+@EqualsAndHashCode(callSuper = false)
+@AccessControlQuery(
+		query="SELECT album.id from Album album " + 
+						  "where album.id = :targetEntityId " +
+						  "AND album.createdByUserId = :userId"
+)
+public class Album extends BaseEntity {
 	
 	private static final long serialVersionUID = -5687399600782387370L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
-	
 	private String name;
-	private String createdDate;
+	private Boolean publicAccess = false;
 	
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
-		this.id = id;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getCreatedDate() {
-		return createdDate;
-	}
-	public void setCreatedDate(String createdDate) {
-		this.createdDate = createdDate;
-	}
+	@Basic
+	private Integer albumType;
+	
+	@Transient
+    private AlbumType albumTypeEnum;
 	
 	
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+	@JoinTable(name = "ALBUM_USER_ASSN", joinColumns = {
+			@JoinColumn(name = "ALBUM_ID", updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "USER_ID", updatable = false) })
+	private List<User> users;
+	
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+	@JoinTable(name = "ALBUM_ASSET_ASSN", joinColumns = {
+			@JoinColumn(name = "ALBUM_ID", updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "ASSET_ID", updatable = false) })
+	private List<Asset> assets;
+	
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@JoinColumn(name = "PUBLIC_ACCESS_USER_ID", nullable = true, insertable = false, updatable = false)
+	private User publicAccessUser;
+	
+	@Column(name = "PUBLIC_ACCESS_USER_ID", nullable = true, insertable = true, updatable = true)
+	private Long publicAccessUserId;
+	
+	
+	@PostLoad
+    void fillTransient() {
+		if(albumType > 0) {
+			this.albumTypeEnum = AlbumType.findById(albumType);
+		}	
+    }
 
 }

@@ -1,0 +1,7 @@
+<div class="search-page">
+    <app-search-table #usersTable [searchPageViewType]="searchPageViewType" pageTitle="Users"
+        quickSearchTitle="Search by User Description" defaultSortColumn="fullName" [actions]="actions"
+        [columns]="columns" [advancedSearchFields]="advancedSearchFields" [extraSearchFields]="extraSearchFields"
+        [search]="search.bind(this)">
+    </app-search-table>
+</div>

@@ -4,18 +4,28 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 
 import com.snapcrescent.common.beans.BaseSearchCriteria;
+import com.snapcrescent.common.security.CoreService;
 import com.snapcrescent.common.utils.Constant.AssetType;
 import com.snapcrescent.common.utils.Constant.Direction;
 import com.snapcrescent.common.utils.Constant.ResourceRegionType;
 import com.snapcrescent.common.utils.Constant.ResultType;
 
 public class BaseController {
+	
+	@Autowired
+	protected CoreService coreService;
 
 	protected void parseCommonSearchParams(Map<String, String> searchParams, BaseSearchCriteria searchCriteria) {
+		
+		if(coreService.getAppUser() != null) {
+			searchCriteria.setAccessibleByUserId(coreService.getAppUser().getId());
+		}
+		
 		if (searchParams.get("searchKeyword") != null) {
 			searchCriteria.setSearchKeyword(searchParams.get("searchKeyword"));
 		}

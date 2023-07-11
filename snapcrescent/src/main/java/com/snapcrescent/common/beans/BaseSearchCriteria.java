@@ -12,6 +12,9 @@ import lombok.Data;
 @Data
 public class BaseSearchCriteria{
 
+	private Long createdByUserId;
+	private Long accessibleByUserId;
+	
 	private List<String> selectedIds = new ArrayList<>();
 	
 	private String searchKeyword;

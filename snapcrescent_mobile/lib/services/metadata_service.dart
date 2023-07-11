@@ -15,4 +15,8 @@ class MetadataService {
     return Metadata.fromMap(result);
   }
 
+  Future<Metadata?> findByNameAndSize(String name, int size) async {
+    return await MetadataRepository.instance.findByNameAndSize(name, size);
+  }
+
 }

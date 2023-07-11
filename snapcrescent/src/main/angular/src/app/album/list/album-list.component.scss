@@ -1,0 +1,47 @@
+@import "/src/assets/styles/variables.scss";
+
+.album-type-container{
+    margin-top: 10px;
+    .title{
+        font-weight: 500;
+        font-size: 20px;
+        width: 100vw;
+    }
+
+    .albums-container{
+        display: flex;
+        flex-direction: row;
+
+        .album{
+            
+            border: 1px solid  $accent-color;
+            border-radius: 15px;
+            margin-right: 20px;
+            cursor: default;
+
+            .name {
+                float: left;
+            }
+
+            .sharing-icon {
+                float: right;
+                cursor: pointer;
+            }
+
+            .public-access-status {
+                float: right;
+            }
+
+            .thumbnail-container {
+                
+                .thumbnail{
+                    cursor: pointer;
+                    border-radius: 10px;
+                }
+            }
+    
+            
+    
+        }
+    }
+}

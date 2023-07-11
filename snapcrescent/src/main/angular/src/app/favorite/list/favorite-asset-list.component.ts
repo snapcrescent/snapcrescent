@@ -1,15 +1,15 @@
 import { Component , ViewChild, AfterViewInit} from '@angular/core';
 import { AssetService } from 'src/app/asset/asset.service';
-import { BaseListComponent } from 'src/app/core/components/base-list.component';
 import { AlertService } from 'src/app/shared/alert/alert.service';
 import { AssetListComponent } from 'src/app/asset/list/asset-list.component';
+import { BaseAssetGridComponent } from 'src/app/core/components/base-asset-grid.component';
 
 @Component({
   selector: 'app-favorite-asset-list',
   templateUrl: './favorite-asset-list.component.html',
   styleUrls:['./favorite-asset-list.component.scss']
 })
-export class FavoriteAssetListComponent extends BaseListComponent implements AfterViewInit{
+export class FavoriteAssetListComponent extends BaseAssetGridComponent implements AfterViewInit{
 
   searchStoreName = "favorite-assets"
 

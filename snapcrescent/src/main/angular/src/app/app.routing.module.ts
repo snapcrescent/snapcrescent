@@ -5,6 +5,7 @@ import { AssetModule } from './asset/asset.module';
 import { AuthenticationGuard } from './core/services/auth.guard';
 import { TrashAssetModule } from './trash/trash-asset.module';
 import { FavoriteAssetModule } from './favorite/favorite-asset.module';
+import { AlbumModule } from './album/album.module';
 
 const routes: Routes = [
   {
@@ -21,13 +22,26 @@ const routes: Routes = [
     loadChildren: () => import('./asset/asset.module').then(m => AssetModule),
     canActivate: [AuthenticationGuard]
   },
-
+  {
+    path: "album",
+    loadChildren: () => import('./album/album.module').then(m => AlbumModule),
+    canActivate: [AuthenticationGuard]
+  },
+  {
+    path: "admin",
+    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
+    canActivate: [AuthenticationGuard],
+    data: { userType: ['ADMIN'] }
+  },
+  {
+    path: "public/album/:albumId",
+    loadChildren: () => import('./public/public-album-login/public-album-login.module').then(m => m.PublicAlbumLoginModule),
+  },
   {
     path: "favorite",
     loadChildren: () => import('./favorite/favorite-asset.module').then(m => FavoriteAssetModule),
     canActivate: [AuthenticationGuard]
   },
-
   {
     path: "trash",
     loadChildren: () => import('./trash/trash-asset.module').then(m => TrashAssetModule),
