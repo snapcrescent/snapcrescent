@@ -45,47 +45,49 @@ export class SideBarComponent implements OnInit, AfterViewInit {
   populateUserSideNav() {
     this.menuGroups = [];
 
-    this.menuGroups.push(
-      {
-        id: "photosAndVideos",
-        label: '',
-        menuItems: [
-          {
-            id: "photosAndVideos",
-            icon: "image",
-            label: "Photos & Videos",
-            link: "/asset/list"
-          },
-          {
-            id: "albums",
-            icon: "photo_library",
-            label: "Albums",
-            link: "/album/list"
-          }
-        ]
-      },
-    );
-
-    this.menuGroups.push(
-      {
-        id: "library",
-        label: 'Library',
-        menuItems: [
-          {
-            id: "bin",
-            icon: "star",
-            label: "Favorites",
-            link: "/favorite"
-          },
-          {
-            id: "bin",
-            icon: "delete",
-            label: "Trash",
-            link: "/trash"
-          }
-        ]
-      }
-    );
+    if(this.sessionService.isAdminUser() || this.sessionService.isUser()) {
+      this.menuGroups.push(
+        {
+          id: "photosAndVideos",
+          label: '',
+          menuItems: [
+            {
+              id: "photosAndVideos",
+              icon: "image",
+              label: "Photos & Videos",
+              link: "/asset/list"
+            },
+            {
+              id: "albums",
+              icon: "photo_library",
+              label: "Albums",
+              link: "/album/list"
+            }
+          ]
+        },
+      );
+  
+      this.menuGroups.push(
+        {
+          id: "library",
+          label: 'Library',
+          menuItems: [
+            {
+              id: "bin",
+              icon: "star",
+              label: "Favorites",
+              link: "/favorite"
+            },
+            {
+              id: "bin",
+              icon: "delete",
+              label: "Trash",
+              link: "/trash"
+            }
+          ]
+        }
+      );
+    }  
   }
 
   populateAdminSideNav() {

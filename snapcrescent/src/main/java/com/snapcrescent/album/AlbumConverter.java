@@ -61,6 +61,10 @@ public class AlbumConverter extends BaseConverter<Album, UiAlbum> {
 	public UiAlbum getBeanFromEntity(Album entity, ResultType resultType) {
 		UiAlbum bean = super.getBeanFromEntity(entity, resultType, createTypeMap(resultType));
 
+		if(resultType == ResultType.SEARCH) {
+			bean.setPublicAccessUserObject(userConverter.getBeanFromEntity(entity.getPublicAccessUser(), resultType));
+		}
+		
 		if (resultType == ResultType.FULL) {
 			bean.setUsers(userConverter.getBeansFromEntities(entity.getUsers(), resultType));
 		}
@@ -79,7 +83,7 @@ public class AlbumConverter extends BaseConverter<Album, UiAlbum> {
 		
 		//Skipping users because users are never needed on album screen and it will be fetched via custom method
 		typeMap.addMappings(mapper -> mapper.skip(Album::getUsers, UiAlbum::setUsers));
-
+		
 		return typeMapName;
 	}
 

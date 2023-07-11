@@ -26,7 +26,7 @@ public class DBInitializeConfig implements CommandLineRunner {
 	
 		try {
 			Resource adminCreatedByUserIdResource = new ByteArrayResource(("UPDATE user SET created_by_user_id='"
-					+ Constant.DEFAULT_ADMIN_USER_ID + "' WHERE id = 1").getBytes());
+					+ Constant.DEFAULT_ADMIN_USER_ID + "' WHERE id = "+ Constant.DEFAULT_ADMIN_USER_ID).getBytes());
 			ResourceDatabasePopulator adminPasswordPopulator = new ResourceDatabasePopulator(adminCreatedByUserIdResource);
 			adminPasswordPopulator.execute(dataSource);
 

@@ -68,7 +68,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private void updateUserProperties(User entity) throws Exception {
-		albumService.createOrUpdateDefaultAlbum(entity);
+		if(entity.getUserType() != UserType.PUBLIC_ACCESS.getId()) {
+			albumService.createOrUpdateDefaultAlbum(entity);	
+		}
 	}
 
 	@Override
@@ -86,8 +88,6 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public void createOrUpdateDefaultUser() throws Exception {
 		
-		String password = passwordEncoder.encode(EnvironmentProperties.ADMIN_PASSWORD);
-		
 		User entity = userRepository.findById(Constant.DEFAULT_ADMIN_USER_ID);
 		
 		if(entity == null) {
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
 			bean.setFirstName("Admin");
 			bean.setLastName("User");
 			bean.setUsername("admin");
-			bean.setPassword(password);
+			bean.setPassword(EnvironmentProperties.ADMIN_PASSWORD);
 			bean.setUserType(UserType.ADMIN.getId());
 			
 			
@@ -105,15 +105,16 @@ public class UserServiceImpl implements UserService {
 			entity.setUserType(UserType.ADMIN.getId());
 			entity.setActive(true);
 			updateUserProperties(entity);
-			userRepository.updatePasswordByUserId(password, Constant.DEFAULT_ADMIN_USER_ID);
+			userRepository.updatePasswordByUserId(passwordEncoder.encode(EnvironmentProperties.ADMIN_PASSWORD), Constant.DEFAULT_ADMIN_USER_ID);
 		}
 	}
-
+	
 	@Override
 	@Transactional
 	public UiUser getById(Long id) {
 		return userConverter.getBeanFromEntity(userRepository.findById(id), ResultType.FULL);
 	}
+	
 
 	@Override
 	@Transactional

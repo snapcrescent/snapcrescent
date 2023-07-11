@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 import { FormBuilder, FormControl } from '@angular/forms';
 import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-import { User } from 'src/app/user/user.model';
+import { User, UserType } from 'src/app/user/user.model';
 import { AlbumService } from '../album.service';
 import { UserService } from 'src/app/user/user.service';
 import { Album } from '../album.model';
@@ -29,6 +29,7 @@ export class ShareWithUserComponent extends BaseComponent implements OnInit, Aft
   filteredUsers: Observable<User[]>;
   selectedUsers:User[] = [];
   currentLoggedInUser: User;
+  publicAccessUser: User;
 
   publicAccessOptions :Option[] = [];
 
@@ -70,7 +71,7 @@ export class ShareWithUserComponent extends BaseComponent implements OnInit, Aft
     if (url) {
       url = url.substring(0, url.indexOf("#") + 2);
 
-      url = url + 'sharing/album/' + this.albumId;
+      url = url + 'public/album/' + this.albumId;
     }
 
     return url;
@@ -84,6 +85,9 @@ export class ShareWithUserComponent extends BaseComponent implements OnInit, Aft
         if(this.originalPublicAccess == true) {
           album.newPassword = this.PLACEHOLDER_PASSWORD;
         }
+
+        this.publicAccessUser = album.users?.find((user:User) => user.userType === UserType.PUBLIC_ACCESS.id)!;
+
         this.entityFormGroup.patchValue(album);
         this.getUsers();
     });
@@ -94,8 +98,8 @@ export class ShareWithUserComponent extends BaseComponent implements OnInit, Aft
     
     this.userService.search(params).subscribe((response : BaseResponseBean<number, User>) => {
       if(response.objects) {
-        this.currentLoggedInUser =  response.objects.find((user:User) => user.id === this.sessionService.getAuthInfo()?.user.id)!;
-
+        this.currentLoggedInUser = response.objects.find((user:User) => user.id === this.sessionService.getAuthInfo()?.user.id)!;
+        
         if(this.currentLoggedInUser != null) {
           response.objects.splice(response.objects.indexOf(this.currentLoggedInUser), 1);
         }
@@ -163,6 +167,10 @@ export class ShareWithUserComponent extends BaseComponent implements OnInit, Aft
     let album = this.entity;
     album.users = this.selectedUsers;
     album.users.push(this.currentLoggedInUser);
+
+    if(album.publicAccess == true && this.publicAccessUser) {
+      album.users.push(this.publicAccessUser);
+    }
     
     if(album.newPassword === this.PLACEHOLDER_PASSWORD
       || album.publicAccess === false) {

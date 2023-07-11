@@ -11,8 +11,9 @@
         </li>
       </ul>
       
-      <span [matMenuTriggerFor]="menu" class="logout-button   material-icons cursor-hand">account_circle</span>
-
+      <span *ngIf="!userTypePublicAccess" [matMenuTriggerFor]="menu" class="logout-button   material-icons cursor-hand">account_circle</span>
+      <span *ngIf="userTypePublicAccess" (click)="logout()" class="logout-button   material-icons cursor-hand">close</span>
+      
       <mat-menu #menu="matMenu">
         <!--
         <button mat-menu-item>

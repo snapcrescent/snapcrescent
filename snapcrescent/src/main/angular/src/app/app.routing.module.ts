@@ -34,6 +34,10 @@ const routes: Routes = [
     data: { userType: ['ADMIN'] }
   },
   {
+    path: "public/album/:albumId",
+    loadChildren: () => import('./public/public-album-login/public-album-login.module').then(m => m.PublicAlbumLoginModule),
+  },
+  {
     path: "favorite",
     loadChildren: () => import('./favorite/favorite-asset.module').then(m => FavoriteAssetModule),
     canActivate: [AuthenticationGuard]

@@ -46,7 +46,7 @@ public class UserConverter extends BaseConverter<User, UiUser> {
 		Converter<DbEnum, String> enumConvertor = ModelMapperUtils.getDbEnumConvertor();
 
 		typeMap.addMappings(mapper -> mapper.using(enumConvertor).map(User::getUserTypeEnum, UiUser::setUserTypeName));
-		
+		typeMap.addMappings(mapper -> mapper.skip(User::getPassword, UiUser::setPassword));
 
 		return typeMapName;
 	}

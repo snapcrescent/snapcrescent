@@ -1,6 +1,4 @@
 import { Component , ViewChild, AfterViewInit} from '@angular/core';
-import { AssetService } from 'src/app/asset/asset.service';
-import { AlertService } from 'src/app/shared/alert/alert.service';
 import { AssetListComponent } from 'src/app/asset/list/asset-list.component';
 import { ActivatedRoute } from '@angular/router';
 import { BaseAssetGridComponent } from 'src/app/core/components/base-asset-grid.component';
@@ -20,8 +18,6 @@ export class AlbumAssetListComponent extends BaseAssetGridComponent implements A
   assetListComponent: AssetListComponent;
 
   constructor(
-    private assetService: AssetService,
-    private alertService: AlertService,
     private activatedRoute: ActivatedRoute,
   ) {
     super();

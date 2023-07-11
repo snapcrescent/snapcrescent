@@ -152,7 +152,8 @@ public class Constant {
     
     public enum UserType implements DbEnum {
 		ADMIN(1,"Admin"),
-		USER(2, "User");
+		USER(2, "User"),
+		PUBLIC_ACCESS(3, "Public Access");
 		
 		private int id;
 		private String label;

@@ -56,6 +56,19 @@ public class AlbumController extends BaseController{
 		return response;
 	}
 	
+	@GetMapping("/album/{id}/lite")
+	public @ResponseBody BaseResponseBean<Long, UiAlbum> getLite(@PathVariable Long id) {
+		BaseResponseBean<Long, UiAlbum> response = new BaseResponseBean<>();
+
+		try {
+			response.setObjectId(id);
+			response.setObject(albumService.getLiteById(id));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return response;
+	}
+	
 	@PutMapping(value = "/album/{id}")
 	@AuthorizeURL(targetEntity = Album.class)
 	public @ResponseBody BaseResponseBean<Long, UiAlbum> update(@PathVariable Long id, @RequestBody UiAlbum album) {

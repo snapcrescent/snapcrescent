@@ -15,6 +15,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   sideBarOpen = false;
 
   userTypeAdmin = false;
+  userTypePublicAccess = false;
 
 
 
@@ -28,6 +29,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.userTypeAdmin = this.sessionService.isAdminUser();
+    this.userTypePublicAccess = this.sessionService.isPublicAccessUser();
   }
 
   ngAfterViewInit() {

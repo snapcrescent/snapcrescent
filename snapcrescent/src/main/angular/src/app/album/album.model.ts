@@ -17,6 +17,8 @@ export class Album extends BaseUiBean{
 
   users? : User[] = [];
   newPassword? : string = '';
+
+  publicAccessUserObject?: User;
 }
 
 export class CreateAlbumAssetAssnRequest {

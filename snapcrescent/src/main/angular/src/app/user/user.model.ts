@@ -19,6 +19,10 @@ export let UserType = {
   USER: {
     id: 2,
     label: "User"
+  },
+  PUBLIC_ACCESS: {
+    id: 3,
+    label: "Public Access"
   }
 };
 

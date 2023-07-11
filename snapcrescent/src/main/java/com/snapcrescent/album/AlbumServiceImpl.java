@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +13,14 @@ import com.snapcrescent.common.beans.BaseResponseBean;
 import com.snapcrescent.common.services.BaseService;
 import com.snapcrescent.common.utils.Constant.AlbumType;
 import com.snapcrescent.common.utils.Constant.ResultType;
+import com.snapcrescent.common.utils.Constant.UserType;
 import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
 import com.snapcrescent.common.utils.StringUtils;
 import com.snapcrescent.thumbnail.ThumbnailConverter;
 import com.snapcrescent.thumbnail.UiThumbnail;
+import com.snapcrescent.user.UiUser;
 import com.snapcrescent.user.User;
+import com.snapcrescent.user.UserService;
 
 @Service
 public class AlbumServiceImpl extends BaseService implements AlbumService {
@@ -39,8 +41,8 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 	private AssetRepository assetRepository;
 
 	@Autowired
-	private PasswordEncoder passwordEncoder;
-
+	private UserService userService;
+	
 	@Override
 	@Transactional
 	public BaseResponseBean<Long, UiAlbum> search(AlbumSearchCriteria searchCriteria) {
@@ -113,18 +115,40 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 
 		String password = null;
 		
-		if(bean.getNewPassword() != null) {
-			password = passwordEncoder.encode(bean.getNewPassword());	
-		} else if (bean.getPublicAccess()) {
-			password = entity.getPassword();
+		//Create new user
+		if(entity.getPublicAccess() == false && bean.getPublicAccess() == true) {
+			UiUser user = new UiUser();
+			
+			String name = "AlbumPublicAccessUser_" + entity.getId().toString();
+			
+			user.setFirstName(name);
+			user.setLastName(name);
+			user.setUsername(name);
+			user.setUserType(UserType.PUBLIC_ACCESS.getId());
+			user.setPassword(bean.getNewPassword());
+			
+			user = userService.save(user);
+			entity.setPublicAccessUserId(user.getId());
+			
+			bean.getUsers().add(user);
+			
+		}
+		//Remove user from DB
+		else if(entity.getPublicAccess() == true && bean.getPublicAccess() == false) {
+			userService.delete(entity.getPublicAccessUserId());
+			entity.setPublicAccessUserId(null);
 		} 
+		//Album owner have changed the password for the album
+		else if (entity.getPublicAccess() == true && bean.getPublicAccess() == true && bean.getNewPassword() != null) {
+			UiUser user = userService.getById(entity.getPublicAccessUserId());
+			user.setPassword(password);
+			
+			userService.resetPassword(user);
+		}
 		
 		
 		albumConverter.populateEntityWithBean(entity, bean);
-		
 		updateAlbumProperties(entity);
-		
-		entity.setPassword(password);
 		albumRepository.save(entity);
 
 	}
@@ -248,5 +272,10 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 	public UiAlbum getById(Long id) {
 		return albumConverter.getBeanFromEntity(albumRepository.findById(id), ResultType.FULL);
 	}
-
+	
+	@Override
+	@Transactional
+	public UiAlbum getLiteById(Long id) {
+		return albumConverter.getBeanFromEntity(albumRepository.findById(id), ResultType.SEARCH);
+	}
 }

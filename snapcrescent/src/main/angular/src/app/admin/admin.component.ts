@@ -1,7 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatDrawer } from '@angular/material/sidenav';
-import { NavigationStart, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
 
 export let browserRefresh = false;
 
@@ -12,31 +9,11 @@ export let browserRefresh = false;
 })
 export class AdminComponent implements OnInit {
 
-  loggedIn: Boolean = false;
-  redirectingToLogin: Boolean = false;
-  redirectingToHome: Boolean = false;
-
-  subscription: Subscription;
-
-  @ViewChild("sideBarDrawer", { static: false })
-  sideBarDrawer: MatDrawer;
-
-  constructor(
-    private router: Router) {
+  constructor() {
 
   }
 
   ngOnInit() {
-    this.registerListeners();
-  }
-
-  registerListeners(): void {
-
-    this.subscription = this.router.events.subscribe((event: any) => {
-      if (event instanceof NavigationStart) {
-        browserRefresh = !this.router.navigated;
-      }
-    });
-
+    
   }
 }

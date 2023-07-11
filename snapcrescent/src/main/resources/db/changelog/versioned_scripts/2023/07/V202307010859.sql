@@ -20,11 +20,11 @@ ALTER TABLE `album` ADD COLUMN `creation_date_time` DATETIME NULL AFTER `name`;
 
 -- changeset navalgandhi1989:alter_album_add_password logicalFilePath:path-independent
 ALTER TABLE `album` ADD COLUMN `password` varchar(255) DEFAULT NULL AFTER `creation_date_time`;
--- rollback ALTER TABLE `album` DROP COLUMN `creation_date_time`;
+-- rollback ALTER TABLE `album` DROP COLUMN `password`;
 
 -- changeset navalgandhi1989:alter_album_add_public_access logicalFilePath:path-independent
 ALTER TABLE `album` ADD COLUMN `public_access` BIT NULL AFTER `password`;
--- rollback ALTER TABLE `album` DROP COLUMN `creation_date_time`;
+-- rollback ALTER TABLE `album` DROP COLUMN `public_access`;
 
 -- changeset navalgandhi1989:alter_album_add_last_modified_date_time logicalFilePath:path-independent
 ALTER TABLE `album` ADD COLUMN `last_modified_date_time` DATETIME NULL AFTER `public_access`;

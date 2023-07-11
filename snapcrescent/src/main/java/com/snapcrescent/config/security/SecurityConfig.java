@@ -95,6 +95,7 @@ public class SecurityConfig {
     		.requestMatchers(new AntPathRequestMatcher("/thumbnail/**/stream")).permitAll()
     		.requestMatchers(new AntPathRequestMatcher("/asset/**/stream")).permitAll()
     		.requestMatchers(new AntPathRequestMatcher("/asset/**/download")).permitAll()
+    		.requestMatchers(new AntPathRequestMatcher("/album/**/lite")).permitAll()
     		.anyRequest().authenticated()
         )
         .csrf(csrfConfigurer -> csrfConfigurer.disable())

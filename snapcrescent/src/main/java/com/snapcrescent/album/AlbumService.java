@@ -12,6 +12,7 @@ public interface AlbumService {
 	void createAlbumAssetAssociation(UiCreateAlbumAssetAssnRequest createAlbumAssetAssnRequest);
 	public void updateOrDeleteAlbumPostUserDeletion(Long userId);
 	public UiAlbum getById(Long id);
+	UiAlbum getLiteById(Long id);
 	
 
 }

@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.springframework.stereotype.Repository;
 
 import com.snapcrescent.common.BaseRepository;
+import com.snapcrescent.common.utils.Constant.UserType;
 import com.snapcrescent.common.utils.SearchDAOHelper;
 import com.snapcrescent.common.utils.StringUtils;
 
@@ -75,6 +76,8 @@ public class UserRepository extends BaseRepository<User> {
 					true));
 		}
 		
+		hql.append(" AND user.userType <> :publicAccessUserTypeId ");
+		paramsMap.put("publicAccessUserTypeId", UserType.PUBLIC_ACCESS.getId());
 				
 		if(searchCriteria.getActive() != null)
 		{

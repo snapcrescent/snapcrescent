@@ -21,6 +21,12 @@ export class SessionService extends StorageService{
     this.loggedIn.next(value)
   };
 
+  apiLogin(response: UserLoginResponse) {
+    this.setItem('loggedIn', 'false');
+    this.setItem('authInfo', JSON.stringify(response));
+    this.updateLoginState(true);
+  }
+
   login(response: UserLoginResponse) {
     this.setItem('loggedIn', 'true');
     this.setItem('authInfo', JSON.stringify(response));
@@ -54,5 +60,13 @@ export class SessionService extends StorageService{
 
   isAdminUser() {
     return this.getAuthInfo()?.user?.userType === UserType.ADMIN.id;
+  }
+
+  isUser() {
+    return this.getAuthInfo()?.user?.userType === UserType.ADMIN.id;
+  }
+
+  isPublicAccessUser() {
+    return this.getAuthInfo()?.user?.userType === UserType.PUBLIC_ACCESS.id;
   }
 }

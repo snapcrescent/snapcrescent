@@ -4,6 +4,7 @@ import { BaseService } from '../core/services/base.service';
 import { Observable } from "rxjs";
 import { BaseResponseBean } from '../core/models/base-response-bean';
 import { Album, CreateAlbumAssetAssnRequest } from './album.model';
+import { UserLoginResponse } from '../login/login.model';
 
 @Injectable({
     providedIn: "root"
@@ -30,8 +31,16 @@ export class AlbumService extends BaseService {
     return this.httpClient.get(this.entityUrl + '/' + id);
   }
 
+  readLite(id: number): Observable<BaseResponseBean<number, Album>> {
+    return this.httpClient.get(this.entityUrl + '/' + id + '/lite');
+  }
+
   update(id: number,entity: Album): Observable<BaseResponseBean<number, Album>> {
     return this.httpClient.put(this.entityUrl + '/' + id,this.preparePayload(entity));
+  }
+
+  verifyPasswordForAlbum(id: number,entity: Album): Observable<any> {
+    return this.httpClient.post(this.entityUrl + '/' + id + '/login',this.preparePayload(entity));
   }
 
   preparePayload(entity: Album) {

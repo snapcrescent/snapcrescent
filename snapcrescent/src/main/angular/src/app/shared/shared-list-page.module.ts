@@ -18,7 +18,7 @@ const components:any = [
   FavoriteAssetListComponent,
   AlbumListComponent,
   AlbumAssetListComponent,
-  UserListComponent,
+  UserListComponent
 ];
 
 

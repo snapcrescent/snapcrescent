@@ -31,6 +31,9 @@ public class UiAlbum extends BaseUiBean {
 	private UiThumbnail albumThumbnail;
 	
 	private List<UiUser> users;
+	
+	private UiUser publicAccessUserObject;
 
+	//Transient
 	private String newPassword;
 }
