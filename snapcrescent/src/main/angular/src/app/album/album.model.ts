@@ -13,6 +13,7 @@ export class Album extends BaseUiBean{
   ownedByMe?:boolean = false;
   sharedWithOthers?:boolean = false;
 
+  albumThumbnailId?:number;
   albumThumbnail?:Thumbnail;
 
   users? : User[] = [];

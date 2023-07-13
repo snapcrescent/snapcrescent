@@ -6,6 +6,7 @@ import com.snapcrescent.asset.Asset;
 import com.snapcrescent.common.BaseEntity;
 import com.snapcrescent.common.utils.Constant.AlbumType;
 import com.snapcrescent.config.security.acl.AccessControlQuery;
+import com.snapcrescent.thumbnail.Thumbnail;
 import com.snapcrescent.user.User;
 
 import jakarta.persistence.Basic;
@@ -64,6 +65,13 @@ public class Album extends BaseEntity {
 	
 	@Column(name = "PUBLIC_ACCESS_USER_ID", nullable = true, insertable = true, updatable = true)
 	private Long publicAccessUserId;
+	
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@JoinColumn(name = "ALBUM_THUMBNAIL_ID", nullable = false, insertable = false, updatable = false)
+	private Thumbnail albumThumbnail;
+
+	@Column(name = "ALBUM_THUMBNAIL_ID", nullable = false, insertable = true, updatable = true)
+	private Long albumThumbnailId;
 	
 	
 	@PostLoad

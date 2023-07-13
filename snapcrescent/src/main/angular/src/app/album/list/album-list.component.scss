@@ -37,6 +37,9 @@
                 .thumbnail{
                     cursor: pointer;
                     border-radius: 10px;
+                    width: 200px;
+                    height: 160px;
+                    object-fit: cover;
                 }
             }
     

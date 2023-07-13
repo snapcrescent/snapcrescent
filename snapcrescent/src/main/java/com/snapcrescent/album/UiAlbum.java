@@ -29,6 +29,7 @@ public class UiAlbum extends BaseUiBean {
 	private Boolean sharedWithOthers;
 	
 	private UiThumbnail albumThumbnail;
+	private Long albumThumbnailId;
 	
 	private List<UiUser> users;
 	
