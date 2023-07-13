@@ -29,7 +29,9 @@ password: demo-password
 | User-defined backup schedule                 | Yes    | N/A |
 | Selective folder(s) for backup               | Yes    | N/A |
 | Download photos and videos to local device   | Yes    | Yes |
-| Multi-user support                           | No     | No  |
+| Multi-user support                           | Yes    | Yes |
+| User defined albums                          | No     | Yes |
+| Album sharing with other users               | No     | Yes |
 | Scrubbable/draggable scrollbar               | Yes    | Yes |
 | Archive and Favorites                        | Yes    | Yes |
 | Offline support                              | No     | No  |
