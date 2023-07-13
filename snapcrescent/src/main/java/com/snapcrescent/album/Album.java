@@ -66,11 +66,11 @@ public class Album extends BaseEntity {
 	@Column(name = "PUBLIC_ACCESS_USER_ID", nullable = true, insertable = true, updatable = true)
 	private Long publicAccessUserId;
 	
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
-	@JoinColumn(name = "ALBUM_THUMBNAIL_ID", nullable = false, insertable = false, updatable = false)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+	@JoinColumn(name = "ALBUM_THUMBNAIL_ID", nullable = true, insertable = false, updatable = false)
 	private Thumbnail albumThumbnail;
 
-	@Column(name = "ALBUM_THUMBNAIL_ID", nullable = false, insertable = true, updatable = true)
+	@Column(name = "ALBUM_THUMBNAIL_ID", nullable = true, insertable = true, updatable = true)
 	private Long albumThumbnailId;
 	
 	

@@ -440,27 +440,43 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 		for (Asset asset : assets) {
 			try {
-				Metadata metadata = asset.getMetadata();
+				 if(asset.getCreatedByUserId() == coreService.getAppUserId()) {
+					
+					 Metadata metadata = asset.getMetadata();
 
-				Thumbnail thumbnail = asset.getThumbnail();
+						Thumbnail thumbnail = asset.getThumbnail();
 
-				try {
-					fileService.removeFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+						try {
+							fileService.removeFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 
-				try {
-					if (asset.getAssetTypeEnum() == AssetType.PHOTO) {
-						fileService.removeFile(FILE_TYPE.PHOTO, metadata.getPath(), metadata.getInternalName());
-					} else if (asset.getAssetTypeEnum() == AssetType.VIDEO) {
-						fileService.removeFile(FILE_TYPE.VIDEO, metadata.getPath(), metadata.getInternalName());
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+						try {
+							if (asset.getAssetTypeEnum() == AssetType.PHOTO) {
+								fileService.removeFile(FILE_TYPE.PHOTO, metadata.getPath(), metadata.getInternalName());
+							} else if (asset.getAssetTypeEnum() == AssetType.VIDEO) {
+								fileService.removeFile(FILE_TYPE.VIDEO, metadata.getPath(), metadata.getInternalName());
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 
-				assetRepository.delete(asset);
+						List<Album> albums = albumRepository.getAlbumsByThumbnailId(asset.getThumbnailId());
+						
+						if(albums != null) {
+							for (Album album : albums) {
+								album.setAlbumThumbnail(null);
+								album.setAlbumThumbnailId(null);
+								albumRepository.update(album);
+							}
+						}
+						
+						assetRepository.delete(asset);
+					 
+				 }
+				
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

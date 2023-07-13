@@ -289,6 +289,4 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 
 		albumRepository.flush();
 	}
-	
-
 }
