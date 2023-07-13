@@ -64,7 +64,7 @@ export class AlbumListComponent extends BaseListComponent implements AfterViewIn
           if(album.albumThumbnail) {
             album.albumThumbnail!.url =  `${environment.backendUrl}/thumbnail/${album.albumThumbnail!.token}/stream`;
           } else {
-            album.albumThumbnail = {name:'default', token : 'default', url: '/assets/images/default-album-cover.jpg'};
+            album.albumThumbnail = {name:'default', token : 'default', url: 'assets/images/default-album-cover.jpg'};
           }
           
           if(album.ownedByMe) {

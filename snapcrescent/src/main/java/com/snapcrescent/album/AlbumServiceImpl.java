@@ -16,7 +16,6 @@ import com.snapcrescent.common.utils.Constant.ResultType;
 import com.snapcrescent.common.utils.Constant.UserType;
 import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
 import com.snapcrescent.common.utils.StringUtils;
-import com.snapcrescent.thumbnail.ThumbnailConverter;
 import com.snapcrescent.thumbnail.UiThumbnail;
 import com.snapcrescent.user.UiUser;
 import com.snapcrescent.user.User;
@@ -30,9 +29,6 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 
 	@Autowired
 	private AlbumConverter albumConverter;
-
-	@Autowired
-	private ThumbnailConverter thumbnailConverter;
 
 	@Autowired
 	private SecuredStreamTokenUtil securedStreamTokenUtil;
@@ -59,27 +55,7 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 
 			for (Album entity : entities) {
 				UiAlbum bean = albumConverter.getBeanFromEntity(entity, searchCriteria.getResultType());
-
-				if (entity.getCreatedByUserId() == coreService.getAppUser().getId()) {
-					bean.setOwnedByMe(true);
-				} else {
-					bean.setOwnedByMe(false);
-				}
-
-				if (albumRepository.countUsersByAlbumId(entity.getId()) > 1) {
-					bean.setSharedWithOthers(true);
-				} else {
-					bean.setSharedWithOthers(false);
-				}
-
-				if (entity.getAssets().size() > 0) {
-					Asset lastAddedAsset = entity.getAssets().get(entity.getAssets().size() - 1);
-					UiThumbnail thumbnail = thumbnailConverter.getBeanFromEntity(lastAddedAsset.getThumbnail(),
-							ResultType.FULL);
-					thumbnail.setToken(securedStreamTokenUtil.getSignedAssetStreamToken(lastAddedAsset.getThumbnail()));
-					bean.setAlbumThumbnail(thumbnail);
-				}
-
+				populateAlbumBeanTransientValues(entity, bean);
 				beans.add(bean);
 			}
 
@@ -92,6 +68,43 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 		}
 
 		return response;
+	}
+	
+	@Override
+	@Transactional
+	public UiAlbum getById(Long id) {
+		Album entity = albumRepository.findById(id);
+		UiAlbum bean = albumConverter.getBeanFromEntity(entity, ResultType.FULL);
+		populateAlbumBeanTransientValues(entity, bean);
+		return bean;
+	}
+	
+	@Override
+	@Transactional
+	public UiAlbum getLiteById(Long id) {
+		Album entity = albumRepository.findById(id);
+		UiAlbum bean = albumConverter.getBeanFromEntity(entity, ResultType.SEARCH);
+		populateAlbumBeanTransientValues(entity, bean);
+		return bean;
+	}
+	
+	private void populateAlbumBeanTransientValues(Album entity, UiAlbum bean) {
+		if (entity.getCreatedByUserId() == coreService.getAppUser().getId()) {
+			bean.setOwnedByMe(true);
+		} else {
+			bean.setOwnedByMe(false);
+		}
+
+		if (albumRepository.countUsersByAlbumId(entity.getId()) > 1) {
+			bean.setSharedWithOthers(true);
+		} else {
+			bean.setSharedWithOthers(false);
+		}
+
+		if(entity.getAlbumThumbnail() != null) {
+			UiThumbnail thumbnail = bean.getAlbumThumbnail();
+			thumbnail.setToken(securedStreamTokenUtil.getSignedAssetStreamToken(entity.getAlbumThumbnail()));	
+		}
 	}
 
 	@Override
@@ -205,6 +218,12 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 						entity.getAssets().addAll(assets);
 					}
 				}
+				
+				
+				//If no thumbnail is assigned by user then assign the last added asset as thumbnail. 
+				if(entity.getAlbumThumbnailId() == null) {
+					entity.setAlbumThumbnailId(assets.get(assets.size() - 1).getThumbnailId());
+				}
 
 				albumRepository.update(entity);
 			} else {
@@ -219,6 +238,10 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 				entity.setUsers(users);
 
 				entity.setAssets(assets);
+				
+				//it is a new album, hence no thumbnail is assigned by use.
+				//Assign the last added asset as thumbnail. 
+				entity.setAlbumThumbnailId(assets.get(assets.size() - 1).getThumbnailId());
 
 				albumRepository.save(entity);
 			}
@@ -267,15 +290,5 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 		albumRepository.flush();
 	}
 	
-	@Override
-	@Transactional
-	public UiAlbum getById(Long id) {
-		return albumConverter.getBeanFromEntity(albumRepository.findById(id), ResultType.FULL);
-	}
-	
-	@Override
-	@Transactional
-	public UiAlbum getLiteById(Long id) {
-		return albumConverter.getBeanFromEntity(albumRepository.findById(id), ResultType.SEARCH);
-	}
+
 }
