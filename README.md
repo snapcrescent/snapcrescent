@@ -65,8 +65,18 @@ SQL_PASSWORD - mysql password
 ADMIN_PASSWORD - admin password for login to app
 
 MEDIA_STORAGE_PATH - Local folder path for photos (c/Users/John/Documents/Images)
+```
 
-MEDIA_IMPORT_STORAGE_PATH - Local folder path for importing photos (c/Users/John/Documents/Images)
+Dependencies
+```bash title="dependencies"
+MYSQL Dependecies
+  1. The application needs 'ONLY_FULL_GROUP_BY' disabled on the db level
+  Solution :
+  Update mysql serve mode by following  : https://stackoverflow.com/questions/23921117/disable-only-full-group-by
+  OR
+  Use Mysql Version 5.7.5 or earlier
+ 
+
 ```
 
 Default Login
