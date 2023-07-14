@@ -13,6 +13,7 @@ public interface AlbumService {
 	public void updateOrDeleteAlbumPostUserDeletion(Long userId);
 	public UiAlbum getById(Long id);
 	UiAlbum getLiteById(Long id);
+	public void delete(Long id);
 	
 
 }

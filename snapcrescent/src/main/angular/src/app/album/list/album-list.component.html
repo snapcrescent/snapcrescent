@@ -14,14 +14,36 @@
                     <div class="name">
                         {{album.name}}
                     </div>
-                    <div *ngIf="album.ownedByMe" class="sharing-icon">
-                        <span (click)="openShareWithUserDialog(album)" matTooltip="Share" class="material-symbols-outlined">share</span>
+                    <div *ngIf="album.ownedByMe" class="album-menu">
+                        <span [matMenuTriggerFor]="albumMenu" matTooltip="Album Options" class="material-symbols-outlined">more_vert</span>
                     </div>
-                    <div *ngIf="album.ownedByMe" class="public-access-status">
-                        <span  matTooltip="Public Access" *ngIf="album.sharedWithOthers && album.publicAccess" class="material-symbols-outlined">public</span>
-                    </div>
+
+                    <mat-menu #albumMenu="matMenu">
+                        <button (click)="openShareWithUserDialog(album)" mat-menu-item>
+                          <mat-icon>share</mat-icon>
+                          <span>Share</span>
+                        </button>
+                        <ng-container *ngIf="album.albumType != AlbumType.DEFAULT.id">
+                            <button mat-menu-item (click)="delete(album)">
+                                <mat-icon>delete</mat-icon>
+                                <span>Delete</span>
+                              </button>
+                        </ng-container>
+                        
+                      </mat-menu>
+
                     <div class="thumbnail-container">
-                        <img (click)="onAlbumClick(album)" class="thumbnail img-fluid" alt="thumbnail" [src]="album.albumThumbnail!.url" />    
+                        <img (click)="onAlbumClick(album)" class="thumbnail img-fluid" alt="thumbnail" [src]="album.albumThumbnailObject!.url" />    
+                    </div>
+                    <div class="album-status">
+                        <div class="sharing-status">
+                            <span *ngIf="album.ownedByMe && album.sharedWithOthers"  matTooltip="Shared" class="material-symbols-outlined">share</span>
+                            <span *ngIf="album.ownedByMe && !album.sharedWithOthers"  matTooltip="Private" class="material-symbols-outlined">share_off</span>
+                        </div>
+                        <div  class="public-access-status">
+                            <span *ngIf="album.ownedByMe && album.publicAccess" matTooltip="Public Access Enabled"  class="material-symbols-outlined">public</span>
+                            <span *ngIf="album.ownedByMe && !album.publicAccess" matTooltip="Public Access Disabled"  class="material-symbols-outlined">vpn_lock</span>
+                        </div>
                     </div>
                 </mat-card-content>
               </mat-card>

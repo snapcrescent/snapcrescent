@@ -28,11 +28,12 @@ public class UiAlbum extends BaseUiBean {
 	private Boolean ownedByMe;
 	private Boolean sharedWithOthers;
 	
-	private UiThumbnail albumThumbnail;
+	private UiThumbnail albumThumbnailObject;
 	private Long albumThumbnailId;
 	
 	private List<UiUser> users;
 	
+	//Intentionally named different to control mapping via Modelmap
 	private UiUser publicAccessUserObject;
 
 	//Transient
