@@ -3,12 +3,13 @@ import { AlbumService } from 'src/app/album/album.service';
 import { BaseListComponent } from 'src/app/core/components/base-list.component';
 import { AlertService } from 'src/app/shared/alert/alert.service';
 import { Action } from 'src/app/core/models/action.model';
-import { Album } from '../album.model';
+import { Album, AlbumType } from '../album.model';
 import { BaseResponseBean } from 'src/app/core/models/base-response-bean';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ShareWithUserComponent } from '../share-with-user/share-with-user.component';
+import { DialogComponent } from 'src/app/shared/dialog/dialog.component';
 
 @Component({
   selector: 'app-album-list',
@@ -23,6 +24,8 @@ export class AlbumListComponent extends BaseListComponent implements AfterViewIn
 
   myAlbums:Album[] =[];
   sharedWithMeAlbums:Album[] =[];
+
+  AlbumType = AlbumType;
   
   constructor(
     private albumService: AlbumService,
@@ -61,10 +64,10 @@ export class AlbumListComponent extends BaseListComponent implements AfterViewIn
       if(response.objects) {
         response.objects.forEach((album:Album) => {
 
-          if(album.albumThumbnail) {
-            album.albumThumbnail!.url =  `${environment.backendUrl}/thumbnail/${album.albumThumbnail!.token}/stream`;
+          if(album.albumThumbnailObject) {
+            album.albumThumbnailObject!.url =  `${environment.backendUrl}/thumbnail/${album.albumThumbnailObject!.token}/stream`;
           } else {
-            album.albumThumbnail = {name:'default', token : 'default', url: 'assets/images/default-album-cover.jpg'};
+            album.albumThumbnailObject = {name:'default', token : 'default', url: 'assets/images/default-album-cover.jpg'};
           }
           
           if(album.ownedByMe) {
@@ -91,11 +94,30 @@ export class AlbumListComponent extends BaseListComponent implements AfterViewIn
     });
 
     dialogRef.afterClosed().subscribe(changed => {
-      if (changed) {
-          this.search();
+      this.search();
+    }); 
+  }
+
+  delete(album:Album) {
+    this.dialog.open(DialogComponent, {
+      data: {
+        title: "Are you sure?",
+        message: `This will delete ${album.name}`,
+        actions: [
+          { label: "CANCEL" },
+          {
+            label: "OK",
+            type: "flat",
+            onClick: () => {
+
+              this.albumService.delete(album.id!).subscribe(response => {
+                this.alertService.showSuccess(`${album.name} deleted successfully`);
+                this.search()
+              });
+            }
+          }
+        ]
       }
     });
-
-    
   }
 }

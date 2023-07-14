@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.snapcrescent.common.BaseConverter;
 import com.snapcrescent.common.utils.Constant.DbEnum;
 import com.snapcrescent.common.utils.Constant.ResultType;
+import com.snapcrescent.thumbnail.ThumbnailConverter;
 import com.snapcrescent.common.utils.ModelMapperUtils;
 import com.snapcrescent.user.User;
 import com.snapcrescent.user.UserConverter;
@@ -23,6 +24,9 @@ public class AlbumConverter extends BaseConverter<Album, UiAlbum> {
 
 	@Autowired
 	private UserConverter userConverter;
+	
+	@Autowired
+	private ThumbnailConverter thumbnailConverter;
 
 	public AlbumConverter() {
 		super(Album.class, UiAlbum.class);
@@ -39,9 +43,9 @@ public class AlbumConverter extends BaseConverter<Album, UiAlbum> {
 		String typeMapName = UUID.randomUUID().toString();
 		TypeMap<UiAlbum, Album> typeMap = getBeanToEntityMapper(typeMapName);
 
-		// Mapping questions via custom method to avoid hibernate expections
+		// Mapping users via custom method to avoid hibernate expections
 		typeMap.addMappings(mapper -> mapper.skip(UiAlbum::getUsers, Album::setUsers));
-
+		
 		List<User> persistedChildren = userConverter.processCollectionUpdate(entity.getUsers(), bean.getUsers(), false);
 
 		super.populateEntityWithBean(entity, bean, typeMapName);
@@ -61,6 +65,8 @@ public class AlbumConverter extends BaseConverter<Album, UiAlbum> {
 	public UiAlbum getBeanFromEntity(Album entity, ResultType resultType) {
 		UiAlbum bean = super.getBeanFromEntity(entity, resultType, createTypeMap(resultType));
 
+		bean.setAlbumThumbnailObject(thumbnailConverter.getBeanFromEntity(entity.getAlbumThumbnail(), resultType));
+		
 		if(resultType == ResultType.SEARCH) {
 			bean.setPublicAccessUserObject(userConverter.getBeanFromEntity(entity.getPublicAccessUser(), resultType));
 		}

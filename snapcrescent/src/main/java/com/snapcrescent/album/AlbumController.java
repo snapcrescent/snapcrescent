@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.snapcrescent.common.BaseController;
 import com.snapcrescent.common.beans.BaseResponseBean;
 import com.snapcrescent.config.security.acl.AuthorizeURL;
+import com.snapcrescent.user.UiUser;
 
 @RestController
 public class AlbumController extends BaseController{
@@ -87,6 +89,19 @@ public class AlbumController extends BaseController{
 		}
 		return response;
 
+	}
+	
+	@DeleteMapping(value = "/album/{id}")
+	@AuthorizeURL(targetEntity = Album.class)
+	public BaseResponseBean<Long, UiUser> delete(@PathVariable Long id) {
+		BaseResponseBean<Long, UiUser> response = new BaseResponseBean<>();
+
+		try {
+			albumService.delete(id);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return response;
 	}
 	
 	@PostMapping("/album/asset/assn")

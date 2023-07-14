@@ -19,17 +19,17 @@
             margin-right: 20px;
             cursor: default;
 
+            .mat-mdc-card-content:last-child {
+                padding-bottom: 0px;
+            }
+
             .name {
                 float: left;
             }
 
-            .sharing-icon {
+            .album-menu {
                 float: right;
                 cursor: pointer;
-            }
-
-            .public-access-status {
-                float: right;
             }
 
             .thumbnail-container {
@@ -40,6 +40,23 @@
                     width: 200px;
                     height: 160px;
                     object-fit: cover;
+                }
+            }
+
+            .album-status {
+                color: $primary-color;
+                margin-top: 10px;
+
+                .material-symbols-outlined {
+                    font-size: 20px;
+                }
+
+                .sharing-status {
+                    float: left;
+                }
+
+                .public-access-status{
+                    float: left;
                 }
             }
     

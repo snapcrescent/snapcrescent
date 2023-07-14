@@ -43,6 +43,10 @@ export class AlbumService extends BaseService {
     return this.httpClient.post(this.entityUrl + '/' + id + '/login',this.preparePayload(entity));
   }
 
+  delete(id: number): Observable<BaseResponseBean<number, Album>> {
+    return this.httpClient.delete(`${this.entityUrl}/${id}`);
+  }
+
   preparePayload(entity: Album) {
     return entity;
 }

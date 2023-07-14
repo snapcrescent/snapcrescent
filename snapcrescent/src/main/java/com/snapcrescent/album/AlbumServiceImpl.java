@@ -102,7 +102,7 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 		}
 
 		if(entity.getAlbumThumbnail() != null) {
-			UiThumbnail thumbnail = bean.getAlbumThumbnail();
+			UiThumbnail thumbnail = bean.getAlbumThumbnailObject();
 			thumbnail.setToken(securedStreamTokenUtil.getSignedAssetStreamToken(entity.getAlbumThumbnail()));	
 		}
 	}
@@ -288,5 +288,15 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 		}
 
 		albumRepository.flush();
+	}
+
+	@Override
+	@Transactional
+	public void delete(Long id) {
+		Album album = albumRepository.findById(id);
+		
+		if(album.getAlbumTypeEnum() != AlbumType.DEFAULT) {
+			albumRepository.delete(id);	
+		} 
 	}
 }
