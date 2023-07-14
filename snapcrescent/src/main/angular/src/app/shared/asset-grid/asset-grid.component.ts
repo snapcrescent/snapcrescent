@@ -189,18 +189,20 @@ constructor(
   }
 
   callSearch(section:Section) {
-    if(!section.segments || (section.segments && section.segments.length === 0)) {
+    if((!section.segments || (section.segments && section.segments.length === 0)) && section.searchInProgress == false) {
       let params:any = this.getSearchParams(section);
  
       this.pageDataService.setSearchPageData(this.searchStoreName, params);
       
       if(!!this.search) {
+        section.searchInProgress = true;
         this.loaderService.setOverrideSpinner(true);
 
         this.search(params).subscribe((response:any) => {
           let objects:any = response.objects;
           this.dataSource = new MatTableDataSource(objects);
           this.prepareDateGroup(section);
+          section.searchInProgress = false;
 
           this.loaderService.setOverrideSpinner(false);
         });
