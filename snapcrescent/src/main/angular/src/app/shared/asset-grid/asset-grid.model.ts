@@ -39,6 +39,7 @@ export class Section {
   monthYear : Date;
   height : number;
   assetCount : number;
+  searchInProgress: boolean = false;
   segments : Segment[];
 
   constructor(
