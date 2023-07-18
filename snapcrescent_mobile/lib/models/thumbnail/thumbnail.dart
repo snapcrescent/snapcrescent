@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:snapcrescent_mobile/models/base_model.dart';
+import 'package:snapcrescent_mobile/models/common/base_model.dart';
 
 class Thumbnail extends BaseUiBean {
   String? name;

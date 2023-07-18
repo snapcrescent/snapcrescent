@@ -2,10 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:provider/provider.dart';
-import 'package:snapcrescent_mobile/models/asset.dart';
+import 'package:snapcrescent_mobile/models/asset/asset.dart';
 import 'package:snapcrescent_mobile/models/unified_asset.dart';
-import 'package:snapcrescent_mobile/stores/asset/asset_store.dart';
+import 'package:snapcrescent_mobile/state/asset_state.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart' as AppConstants;
 
 class AssetThumbnail extends StatefulWidget {
@@ -27,8 +26,7 @@ class _AssetThumbnailState extends State<AssetThumbnail> with SingleTickerProvid
   late final Animation<double> _scaleAnimation;
   final UniFiedAsset unifiedAsset;
   final Future<Object?> assetThumbnail;
-  late AssetStore _assetStore;
-
+  
   _AssetThumbnailState(this.unifiedAsset, this.assetThumbnail);
 
   @override
@@ -134,7 +132,7 @@ class _AssetThumbnailState extends State<AssetThumbnail> with SingleTickerProvid
           ),
           // Display a Circle icon if the asset is not selected
           
-          if (_assetStore.isAnyItemSelected() && 
+          if (AssetState.instance.isAnyItemSelected() && 
               widget.selected == false)
             Positioned.fill(
               child: Align(
@@ -148,7 +146,7 @@ class _AssetThumbnailState extends State<AssetThumbnail> with SingleTickerProvid
             ),
             
           // Display a Checked icon if the asset is selected
-          if (_assetStore.isAnyItemSelected() && widget.selected)
+          if (AssetState.instance.isAnyItemSelected() && widget.selected)
             Positioned.fill(
               child: Align(
                   alignment: Alignment.topLeft,
@@ -174,15 +172,12 @@ class _AssetThumbnailState extends State<AssetThumbnail> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
 
-    _assetStore = Provider.of<AssetStore>(context);
-
-        
     return FutureBuilder<Object?>(
       future: assetThumbnail,
       builder: (context, snapshot) {
         final bytes = snapshot.data;
         // If we have no data, display a spinner
-        if (bytes == null) return CircularProgressIndicator();
+        if (bytes == null) return new Container(color: Colors.grey);
         // If there's data, display it as an image
         return _body(bytes);
       },

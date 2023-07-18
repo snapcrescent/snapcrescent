@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snapcrescent_mobile/models/asset_detail_arguments.dart';
-import 'package:snapcrescent_mobile/screens/grid/asset_detail.dart';
-import 'package:snapcrescent_mobile/screens/grid/assets_grid.dart';
+import 'package:snapcrescent_mobile/models/asset/asset_view_arguments.dart';
+import 'package:snapcrescent_mobile/screens/album/album_list.dart';
+import 'package:snapcrescent_mobile/screens/asset/asset_view.dart';
+import 'package:snapcrescent_mobile/screens/asset/asset_list.dart';
 import 'package:snapcrescent_mobile/screens/settings/folder_selection/folder_selection.dart';
 import 'package:snapcrescent_mobile/screens/settings/settings.dart';
 import 'package:snapcrescent_mobile/screens/splash/splash.dart';
 import 'package:snapcrescent_mobile/stores/asset/asset_store.dart';
 import 'package:snapcrescent_mobile/style.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class App extends StatelessWidget {
   // This widget is the root of your application.
@@ -23,6 +26,7 @@ class App extends StatelessWidget {
         initialRoute: SplashScreen.routeName,
         theme: _theme(),
         onGenerateRoute: _generateRoute,
+        navigatorKey: navigatorKey,
       ),
     );
   }
@@ -31,7 +35,7 @@ class App extends StatelessWidget {
     switch (settings.name) {
       case "/":
         return MaterialPageRoute(
-            builder: (_) => AssetsGridScreen());
+            builder: (_) => AssetListScreen());
       case SplashScreen.routeName:
         return MaterialPageRoute(builder: (_) => SplashScreen());
       case SettingsScreen.routeName:
@@ -39,17 +43,20 @@ class App extends StatelessWidget {
       case FolderSelectionScreen.routeName:
         return MaterialPageRoute(
             builder: (_) => FolderSelectionScreen(settings.arguments as String));
-      case AssetsGridScreen.routeName:
+      case AlbumListScreen.routeName:
         return MaterialPageRoute(
-            builder: (_) => AssetsGridScreen());
-      case AssetDetailScreen.routeName:
+            builder: (_) => AlbumListScreen());
+      case AssetListScreen.routeName:
+        return MaterialPageRoute(
+            builder: (_) => AssetListScreen());
+      case AssetViewScreen.routeName:
         return MaterialPageRoute(
             builder: (_) =>
-                AssetDetailScreen(settings.arguments as AssetDetailArguments));
+                AssetViewScreen(settings.arguments as AssetViewArguments));
 
       default:
         return MaterialPageRoute(
-            builder: (_) => AssetsGridScreen());
+            builder: (_) => AssetListScreen());
     }
   }
 

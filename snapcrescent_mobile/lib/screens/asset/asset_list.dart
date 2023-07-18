@@ -6,36 +6,39 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:snapcrescent_mobile/models/asset_detail_arguments.dart';
+import 'package:snapcrescent_mobile/models/asset/asset_view_arguments.dart';
 import 'package:snapcrescent_mobile/models/sync_state.dart';
-import 'package:snapcrescent_mobile/screens/grid/asset_detail.dart';
-import 'package:snapcrescent_mobile/screens/settings/settings.dart';
+import 'package:snapcrescent_mobile/screens/asset/asset_view.dart';
+import 'package:snapcrescent_mobile/services/asset_service.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
+import 'package:snapcrescent_mobile/state/asset_state.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 import 'package:snapcrescent_mobile/stores/asset/asset_store.dart';
 import 'package:snapcrescent_mobile/utils/common_utilities.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
-import 'package:snapcrescent_mobile/screens/grid/widgets/asset_thumbnail.dart';
-import 'package:snapcrescent_mobile/screens/grid/widgets/config_server_prompt.dart';
-import 'package:snapcrescent_mobile/screens/grid/widgets/sync_process.dart';
+import 'package:snapcrescent_mobile/screens/asset/widgets/asset_thumbnail.dart';
+import 'package:snapcrescent_mobile/screens/asset/widgets/config_server_prompt.dart';
+import 'package:snapcrescent_mobile/screens/asset/widgets/sync_process.dart';
+import 'package:snapcrescent_mobile/widgets/footer.dart';
+import 'package:snapcrescent_mobile/widgets/header.dart';
 
-class AssetsGridScreen extends StatelessWidget {
+class AssetListScreen extends StatelessWidget {
   static const routeName = '/assets';
-  AssetsGridScreen();
+  AssetListScreen();
   @override
   Widget build(BuildContext context) {
-    return _AssetGridView();
+    return _AssetListView();
   }
 }
 
-class _AssetGridView extends StatefulWidget {
-  _AssetGridView();
+class _AssetListView extends StatefulWidget {
+  _AssetListView();
 
   @override
-  _AssetGridViewState createState() => _AssetGridViewState();
+  _AssetListViewState createState() => _AssetListViewState();
 }
 
-class _AssetGridViewState extends State<_AssetGridView> {
+class _AssetListViewState extends State<_AssetListView> {
   DateTime currentDateTime = DateTime.now();
   final ScrollController _scrollController = new ScrollController();
   late AssetStore _assetStore;
@@ -46,20 +49,20 @@ class _AssetGridViewState extends State<_AssetGridView> {
   int periodicInitializerPageNumber = 0;
 
   _onAssetTap(BuildContext context, int assetIndex) {
-    AssetDetailArguments arguments =
-        new AssetDetailArguments(assetIndex: assetIndex);
+    AssetViewArguments arguments =
+        new AssetViewArguments(assetIndex: assetIndex);
 
     Navigator.pushNamed(
       context,
-      AssetDetailScreen.routeName,
+      AssetViewScreen.routeName,
       arguments: arguments,
     );
   }
 
   _shareAssets() async {
     _updateProcessingBarVisibility(true);
-    final List<XFile> assetFiles = await _assetStore
-        .getAssetFilesForSharing(_assetStore.getSelectedIndexes());
+    final List<XFile> assetFiles = await AssetService.instance
+        .getAssetFilesForSharing(AssetState.instance.getSelectedIndexes());
     await Share.shareXFiles(assetFiles);
     _updateProcessingBarVisibility(false);
   }
@@ -69,8 +72,8 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
     if (_permissionReady) {
       _updateProcessingBarVisibility(true);
-      final bool success = await _assetStore
-          .downloadAssetFilesToDevice(_assetStore.getSelectedIndexes());
+      final bool success = await AssetService.instance
+          .downloadAssetFilesToDevice(AssetState.instance.getSelectedIndexes());
       if (success) {
         ToastService.showSuccess("Successfully downloaded files.");
       }
@@ -83,8 +86,8 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
     if (_permissionReady) {
       _updateProcessingBarVisibility(true);
-      final bool success = await _assetStore
-          .uploadAssetFilesToServer(_assetStore.getSelectedIndexes());
+      final bool success = await AssetService.instance
+          .uploadAssetFilesToServer(AssetState.instance.getSelectedIndexes());
       if (success) {
         ToastService.showSuccess("Successfully uploaded files.");
       }
@@ -173,10 +176,11 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   int getAssetGroupIndexInScrollView() {
     try {
-      final double currentAsset = (_assetStore.groupedAssets.length - 1) *
-          _scrollController.offset /
-          (_scrollController.position.maxScrollExtent -
-              _scrollController.position.minScrollExtent);
+      final double currentAsset =
+          (AssetState.instance.groupedAssets.length - 1) *
+              _scrollController.offset /
+              (_scrollController.position.maxScrollExtent -
+                  _scrollController.position.minScrollExtent);
       if (currentAsset.isNaN || currentAsset.isInfinite) {
         return 0;
       }
@@ -187,17 +191,14 @@ class _AssetGridViewState extends State<_AssetGridView> {
   }
 
   Text getScrollLabel() {
-    final keys = List.from(_assetStore.getGroupedMapKeys());
+    final keys = AssetState.instance.groupedMapKeys;
     final label = keys[getAssetGroupIndexInScrollView()];
 
-    if (label == null) {
-      return const Text('');
-    }
     return Text(this._getFormattedGroupKey(label));
   }
 
-  _gridView(Orientation orientation, AssetStore assetStore) {
-    final keys = assetStore.getGroupedMapKeys();
+  _gridView(Orientation orientation) {
+    final keys = AssetState.instance.groupedMapKeys;
 
     return ListView.builder(
         controller: _scrollController,
@@ -205,21 +206,23 @@ class _AssetGridViewState extends State<_AssetGridView> {
         itemBuilder: (BuildContext context, int groupIndex) {
           if (groupIndex == keys.length) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 100,
-                  )],
-              )
-            );
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  height: 100,
+                )
+              ],
+            ));
           } else {
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (assetStore.groupedAssets[keys[groupIndex]]!.length > 0)
+                if (AssetState
+                        .instance.groupedAssets[keys[groupIndex]]!.length >
+                    0)
                   Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,10 +245,10 @@ class _AssetGridViewState extends State<_AssetGridView> {
                             physics:
                                 NeverScrollableScrollPhysics(), // to disable GridView's scrolling
                             shrinkWrap: true,
-                            itemCount: assetStore
+                            itemCount: AssetState.instance
                                 .groupedAssets[keys[groupIndex]]!.length,
                             itemBuilder: (BuildContext context2, index) {
-                              final asset = assetStore
+                              final asset = AssetState.instance
                                   .groupedAssets[keys[groupIndex]]![index];
 
                               return GestureDetector(
@@ -255,13 +258,15 @@ class _AssetGridViewState extends State<_AssetGridView> {
                                 },
                                 onTap: () {
                                   //Grid is in selection mode
-                                  if (assetStore.isAnyItemSelected()) {
+                                  if (AssetState.instance.isAnyItemSelected()) {
                                     asset.selected = !asset.selected;
                                     setState(() {});
                                   } //No asset is selected, proceed to asset detail page
                                   else {
-                                    _onAssetTap(context,
-                                        assetStore.assetList.indexOf(asset));
+                                    _onAssetTap(
+                                        context,
+                                        AssetState.instance.assetList
+                                            .indexOf(asset));
                                   }
                                 },
                                 child: AssetThumbnail(
@@ -280,7 +285,7 @@ class _AssetGridViewState extends State<_AssetGridView> {
         });
   }
 
-  _scrollableView(Orientation orientation, AssetStore assetStore) {
+  _scrollableView(Orientation orientation) {
     return RefreshIndicator(
         onRefresh: () async {
           return Future.delayed(Duration(seconds: 1), () {
@@ -295,21 +300,14 @@ class _AssetGridViewState extends State<_AssetGridView> {
                     BoxConstraints.tightFor(width: 150.0, height: 30.0),
                 heightScrollThumb: 50.0,
                 controller: _scrollController,
-                child: _gridView(orientation, assetStore))));
-  }
-
-  _syncProgress() {
-    return Container(
-        color: Colors.black,
-        width: double.infinity,
-        child: new SyncProcessWidget());
+                child: _gridView(orientation))));
   }
 
   _getLeadingIcon() {
-    if (_assetStore.isAnyItemSelected()) {
+    if (AssetState.instance.isAnyItemSelected()) {
       return IconButton(
         onPressed: () {
-          _assetStore.assetList.forEach((asset) {
+          AssetState.instance.assetList.forEach((asset) {
             asset.selected = false;
           });
           setState(() {});
@@ -321,16 +319,16 @@ class _AssetGridViewState extends State<_AssetGridView> {
 
   _body() {
     return Scaffold(
-      appBar: _assetStore.isAnyItemSelected()
-          ? AppBar(
+      appBar: AssetState.instance.isAnyItemSelected() ? AppBar(
               automaticallyImplyLeading: false,
               leading: _getLeadingIcon(),
-              title: Text(!_assetStore.isAnyItemSelected()
+              title: Text(!AssetState.instance.isAnyItemSelected()
                   ? ""
-                  : (_assetStore.getSelectedCount().toString() + " Selected")),
+                  : (AssetState.instance.getSelectedCount().toString() +
+                      " Selected")),
               backgroundColor: Colors.black,
               actions: [
-                if (_assetStore.isAnyItemSelected())
+                if (AssetState.instance.isAnyItemSelected())
                   IconButton(
                       onPressed: () {
                         _uploadAssets();
@@ -347,70 +345,43 @@ class _AssetGridViewState extends State<_AssetGridView> {
                     },
                     icon: Icon(Icons.share, color: Colors.white))
               ],
-            )
-          : AppBar(
-              automaticallyImplyLeading: false,
-              leading: _getLeadingIcon(),
-              title: Text(""),
-              backgroundColor: Colors.black,
-              actions: [
-                PopupMenuButton<String>(
-                  onSelected: (String result) {
-                    if (result == "Settings") {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute<dynamic>(
-                              builder: (BuildContext context) =>
-                                  SettingsScreen()));
-                    }
-                  },
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      PopupMenuItem(
-                        child: Text(
-                          "Settings",
-                        ),
-                        value: "Settings",
-                      ),
-                    ];
-                  },
-                ),
-              ],
-            ),
-      body: Column(
-        children: <Widget>[
-          _syncProgress(),
-          if (showProcessing)
-            Container(
-              height: 2,
-              child: const LinearProgressIndicator(),
-            ),
-          Expanded(
-              child: Row(
+            ) : Header(),
+      bottomNavigationBar: Footer(),
+      body: Container(
+        color: Colors.black,
+        child: new Stack(fit: StackFit.expand, children: <Widget>[
+          Observer(
+              builder: (context) => _assetStore.assetSearchProgress ==
+                      AssetSearchProgress.ASSETS_FOUND
+                  ? OrientationBuilder(builder: (context, orientation) {
+                      return _scrollableView(orientation);
+                    })
+                  : Container(color: Colors.black)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Expanded(
-                  child: Observer(
-                      builder: (context) => _assetStore.assetSearchProgress ==
-                              AssetSearchProgress.ASSETS_FOUND
-                          ? OrientationBuilder(builder: (context, orientation) {
-                              return _scrollableView(orientation, _assetStore);
-                            })
-                          : _assetStore.assetSearchProgress ==
-                                  AssetSearchProgress.PROCESSING
-                              ? Container(
-                                  color: Colors.black,
-                                  child: Center(
-                                    child: Container(
-                                      width: 60,
-                                      height: 60,
-                                      child: const CircularProgressIndicator(),
-                                    ),
-                                  ))
-                              : Container(color: Colors.black)))
+                flex: 2,
+                child: new SyncProcessWidget(),
+              ),
+              if (showProcessing)
+                Expanded(
+                  flex: 2,
+                  child: const LinearProgressIndicator(),
+                )
             ],
-          )),
-          ConfigServerPromptWidget(),
-        ],
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Container(
+                child: ConfigServerPromptWidget(),
+              )
+            ],
+          )
+        ]),
       ),
     );
   }

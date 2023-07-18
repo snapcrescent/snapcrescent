@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:snapcrescent_mobile/models/app_config.dart';
 import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
-import 'package:snapcrescent_mobile/screens/grid/assets_grid.dart';
+import 'package:snapcrescent_mobile/screens/asset/asset_list.dart';
 import 'package:snapcrescent_mobile/screens/settings/settings.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
@@ -60,7 +60,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
     Navigator.pushAndRemoveUntil<dynamic>(
       context,
       MaterialPageRoute<dynamic>(
-        builder: (BuildContext context) => AssetsGridScreen(),
+        builder: (BuildContext context) => AssetListScreen(),
       ),
       (route) => false, //if you want to disable back feature set to false
     );

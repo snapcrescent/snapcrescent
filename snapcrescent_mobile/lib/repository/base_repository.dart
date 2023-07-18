@@ -1,5 +1,5 @@
-import 'package:snapcrescent_mobile/models/base_model.dart';
-import 'package:snapcrescent_mobile/models/base_search_criteria.dart';
+import 'package:snapcrescent_mobile/models/common/base_model.dart';
+import 'package:snapcrescent_mobile/models/common/base_search_criteria.dart';
 import 'package:snapcrescent_mobile/repository/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
 

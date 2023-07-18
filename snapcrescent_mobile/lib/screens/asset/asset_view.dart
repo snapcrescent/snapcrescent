@@ -3,40 +3,39 @@ import 'dart:io';
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:snapcrescent_mobile/models/asset.dart';
-import 'package:snapcrescent_mobile/models/asset_detail_arguments.dart';
-import 'package:snapcrescent_mobile/models/base_response_bean.dart';
+import 'package:snapcrescent_mobile/models/asset/asset.dart';
+import 'package:snapcrescent_mobile/models/asset/asset_view_arguments.dart';
+import 'package:snapcrescent_mobile/models/common/base_response_bean.dart';
 import 'package:snapcrescent_mobile/models/unified_asset.dart';
 import 'package:snapcrescent_mobile/services/asset_service.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
-import 'package:snapcrescent_mobile/stores/asset/asset_store.dart';
+import 'package:snapcrescent_mobile/state/asset_state.dart';
 import 'package:snapcrescent_mobile/utils/common_utilities.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
-class AssetDetailScreen extends StatelessWidget {
+class AssetViewScreen extends StatelessWidget {
   static const routeName = '/asset_detail';
 
-  final AssetDetailArguments _arguments;
-  AssetDetailScreen(this._arguments);
+  final AssetViewArguments _arguments;
+  AssetViewScreen(this._arguments);
 
   @override
   Widget build(BuildContext context) {
-    return _AssetDetailView(_arguments.assetIndex);
+    return _AssetViewView(_arguments.assetIndex);
   }
 }
 
-class _AssetDetailView extends StatefulWidget {
+class _AssetViewView extends StatefulWidget {
   final int assetIndex;
 
-  _AssetDetailView(this.assetIndex);
+  _AssetViewView(this.assetIndex);
 
   @override
-  _AssetDetailViewState createState() => _AssetDetailViewState();
+  _AssetViewViewState createState() => _AssetViewViewState();
 }
 
-class _AssetDetailViewState extends State<_AssetDetailView> {
+class _AssetViewViewState extends State<_AssetViewView> {
   BetterPlayerController? _betterPlayerController;
   BetterPlayerConfiguration? betterPlayerConfiguration;
   BetterPlayerBufferingConfiguration? bufferingConfiguration;
@@ -45,7 +44,6 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   String serverUrl = "";
   bool showProcessing = false;
   UniFiedAsset? currentAsset;
-  late AssetStore _assetStore;
 
   _videoPlayer(UniFiedAsset? unifiedAsset, Object? object) {
     if (_betterPlayerController != null) {
@@ -150,7 +148,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   Future<void> _shareAssetFile(int assetIndex) async {
     _updateProcessingBarVisibility(true);
     final List<XFile> assetFiles =
-        await _assetStore.getAssetFilesForSharing([assetIndex]);
+        await AssetService.instance.getAssetFilesForSharing([assetIndex]);
     await Share.shareXFiles(assetFiles);
     _updateProcessingBarVisibility(false);
   }
@@ -161,7 +159,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
 
     if (_permissionReady) {
       final bool success =
-          await _assetStore.downloadAssetFilesToDevice([assetIndex]);
+          await AssetService.instance.downloadAssetFilesToDevice([assetIndex]);
       if (success) {
         ToastService.showSuccess("Successfully downloaded files.");
       }
@@ -174,7 +172,7 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
 
     if (_permissionReady) {
       _updateProcessingBarVisibility(true);
-      final bool success = await _assetStore
+      final bool success = await AssetService.instance
           .uploadAssetFilesToServer([assetIndex]);
       if (success) {
         ToastService.showSuccess("Successfully uploaded files.");
@@ -191,15 +189,15 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   _assetView(index) {
     return FutureBuilder<Object?>(
         future: Future.value(
-            _assetStore.assetList[index].assetSource == AssetSource.CLOUD
-                ? _assetStore.assetList[index].asset
-                : _assetStore.assetList[index].assetEntity!.file),
+            AssetState.instance.assetList[index].assetSource == AssetSource.CLOUD
+                ? AssetState.instance.assetList[index].asset
+                : AssetState.instance.assetList[index].assetEntity!.file),
         builder: (BuildContext context, AsyncSnapshot<Object?> snapshot) {
           
           if (snapshot.data == null) {
             return Container();
           } else {
-            currentAsset = _assetStore.assetList[index];
+            currentAsset = AssetState.instance.assetList[index];
 
             if(currentAsset!.assetSource == AssetSource.DEVICE) {
                 return Container(
@@ -232,9 +230,9 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
   }
 
   _getAssetById (int index) async {
-      BaseResponseBean<int, Asset> response = await AssetService.instance.getAssetById(_assetStore.assetList[index].asset!.id!);
-      _assetStore.assetList[index].asset!.token = response.object!.token!;
-      return _assetStore.assetList[index].asset;
+      BaseResponseBean<int, Asset> response = await AssetService.instance.getAssetById(AssetState.instance.assetList[index].asset!.id!);
+      AssetState.instance.assetList[index].asset!.token = response.object!.token!;
+      return AssetState.instance.assetList[index].asset;
   }
 
   _pageView() {
@@ -246,9 +244,9 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
           body: PageView.builder(
             controller: pageController,
             physics: PageScrollPhysics(),
-            itemCount: _assetStore.assetList.length,
+            itemCount: AssetState.instance.assetList.length,
             itemBuilder: (BuildContext context, int index) {
-              if (_assetStore.assetList.isEmpty) {
+              if (AssetState.instance.assetList.isEmpty) {
                 return Container();
               } else {
                 return _assetView(index);
@@ -340,8 +338,6 @@ class _AssetDetailViewState extends State<_AssetDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    _assetStore = Provider.of<AssetStore>(context);
-
     return _body();
   }
 

@@ -40,6 +40,20 @@ class AppConfigService extends BaseService {
 
     return appConfigValue;
   }
+
+  Future<List<String>> getStringListConfig(String configKey,[Pattern? separator]) async {
+    String? appConfigValueString = await getConfig(configKey);
+
+    if(separator == null) {
+      separator = ",";
+    }
+
+    if (appConfigValueString != null) {
+      return appConfigValueString.split(separator);
+    } else {
+      return List.empty();
+    }
+  }
   
 
   Future<String?> getConfig(String configKey) async {

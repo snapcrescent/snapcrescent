@@ -1,4 +1,6 @@
-import 'package:snapcrescent_mobile/models/base_model.dart';
+
+
+import 'package:snapcrescent_mobile/models/common/base_model.dart';
 
 class Metadata extends BaseUiBean {
   DateTime? creationDateTime;
@@ -7,6 +9,7 @@ class Metadata extends BaseUiBean {
   String? mimeType;
   int? orientation;
   int? size;
+  String? localAssetId;
 
   Metadata(
       {
@@ -16,7 +19,8 @@ class Metadata extends BaseUiBean {
       this.internalName,
       this.mimeType,
       this.orientation,
-      this.size
+      this.size,
+      this.localAssetId,
       })
       : super(
             id: bean.id);
@@ -45,7 +49,8 @@ class Metadata extends BaseUiBean {
         internalName: map['INTERNAL_NAME'],
         mimeType: map['MIME_TYPE'],
         orientation: map['ORIENTATION'],
-        size : map['SIZE']
+        size : map['SIZE'],
+        localAssetId: map['LOCAL_ASSET_ID'],
         );
   }
 
@@ -58,6 +63,7 @@ class Metadata extends BaseUiBean {
     map['MIME_TYPE'] = mimeType;
     map['ORIENTATION'] = orientation;
     map['SIZE'] = size;
+    map['LOCAL_ASSET_ID'] = localAssetId;
 
     return map;
   }

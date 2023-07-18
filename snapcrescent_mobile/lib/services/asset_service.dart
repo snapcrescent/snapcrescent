@@ -1,18 +1,24 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:quiver/iterables.dart';
-import 'package:snapcrescent_mobile/models/base_response_bean.dart';
-import 'package:snapcrescent_mobile/models/asset.dart';
-import 'package:snapcrescent_mobile/models/asset_search_criteria.dart';
-import 'package:snapcrescent_mobile/models/thumbnail.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:snapcrescent_mobile/models/asset/asset.dart';
+import 'package:snapcrescent_mobile/models/asset/asset_search_criteria.dart';
+import 'package:snapcrescent_mobile/models/common/base_response_bean.dart';
+import 'package:snapcrescent_mobile/models/metadata/metadata.dart';
+import 'package:snapcrescent_mobile/models/unified_asset.dart';
 import 'package:snapcrescent_mobile/repository/metadata_repository.dart';
 import 'package:snapcrescent_mobile/repository/asset_repository.dart';
 import 'package:snapcrescent_mobile/repository/thumbnail_repository.dart';
 import 'package:snapcrescent_mobile/services/base_service.dart';
 import 'package:snapcrescent_mobile/services/metadata_service.dart';
+import 'package:snapcrescent_mobile/services/thumbnail_service.dart';
+import 'package:snapcrescent_mobile/state/asset_state.dart';
 import 'package:snapcrescent_mobile/utils/common_utilities.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
+import 'package:mime/mime.dart';
 
 class AssetService extends BaseService {
   AssetService._privateConstructor() : super();
@@ -75,7 +81,7 @@ class AssetService extends BaseService {
   Future<List<Asset>> searchAndSync(
       AssetSearchCriteria searchCriteria, 
       Function progressCallBack) async {
-    searchCriteria.sortOrder = Direction.ASC;
+    searchCriteria.sortOrder = Direction.DESC;
     final data = await search(searchCriteria);
     await saveAllOnLocal(data.objects!, progressCallBack);
     return new List<Asset>.from(data.objects!);
@@ -189,7 +195,7 @@ class AssetService extends BaseService {
           await ThumbnailRepository.instance.existsById(entity.thumbnailId!);
 
       if (thumbnailExistsById == false) {
-        await _writeThumbnailFile(entity.thumbnail!);
+        await ThumbnailService.instance.writeThumbnailFile(entity.thumbnail!);
 
         if(createIfNotFound) {
           ThumbnailRepository.instance.save(entity.thumbnail!);
@@ -222,36 +228,6 @@ class AssetService extends BaseService {
     }
   }
 
-  Future<File> readThumbnailFile(String name) async {
-    String directory = await CommonUtilities().getThumbnailDirectory();
-    return File('$directory/$name');
-  }
-
-  String getThumbnailByIdUrl(String serverURL, int thumbnailId) {
-    return serverURL + '/thumbnail/$thumbnailId';
-  }
-
-  Future<void> _writeThumbnailFile(Thumbnail thumbnail) async {
-    try {
-      File thumbnailFile = await readThumbnailFile(thumbnail.name!);
-      if (!thumbnailFile.existsSync()) {
-        Dio dio = await getDio();
-
-        final url = getThumbnailByIdUrl(await getServerUrl(), thumbnail.id!);
-
-        String directory = await CommonUtilities().getThumbnailDirectory();
-        await download(dio, url, '$directory/${thumbnail.name}');
-      }
-    } on DioError catch (ex) {
-      print(ex.message);
-      if (ex.type == DioErrorType.connectionTimeout) {
-        throw Exception("Connection  Timeout Exception");
-      }
-      
-      throw Exception(ex.message);
-    }
-  }
-
   Future<int> countOnLocal() async {
     return AssetRepository.instance.countOnLocal(AssetSearchCriteria.defaultCriteria());
   }
@@ -262,7 +238,7 @@ class AssetService extends BaseService {
   }
 
   Future<DateTime?> getLatestAssetDate() async {
-    List<Asset> localAssetsList = await AssetService.instance.searchOnLocal(AssetSearchCriteria.defaultCriteria());
+    List<Asset> localAssetsList = await this.searchOnLocal(AssetSearchCriteria.defaultCriteria());
 
     DateTime? _latestAssetDate;
 
@@ -283,5 +259,81 @@ class AssetService extends BaseService {
     await AssetRepository.instance.deleteAll();
     await ThumbnailRepository.instance.deleteAll();
     await MetadataRepository.instance.deleteAll();
+  }
+
+
+
+  Future<List<XFile>> getAssetFilesForSharing(List<int> assetIndexes) async {
+    List<XFile> xFiles = [];
+    List<File> assetFiles = await _getAssetFile(assetIndexes);
+
+    for (var assetFile in assetFiles) {
+      xFiles.add(XFile(assetFile.path, mimeType:lookupMimeType(assetFile.path)));
+    }
+
+    return xFiles;
+  }
+
+
+
+  Future<bool> downloadAssetFilesToDevice(List<int> assetIndexes) async {
+
+    for (var assetIndex in assetIndexes) {
+      final UniFiedAsset unifiedAsset = AssetState.instance.assetList[assetIndex];
+
+      if (unifiedAsset.assetSource == AssetSource.CLOUD) {
+          Asset asset = unifiedAsset.asset!;
+          await this.permanentDownloadAssetById(asset.id!, asset.metadata!.name!, unifiedAsset.assetType);
+        }
+    }
+
+    return true;
+  }
+
+  _getAssetFile(List<int> assetIndexes) async {
+    List<File> assetFiles = [];
+
+    for (var assetIndex in assetIndexes) {
+      final UniFiedAsset unifiedAsset = AssetState.instance.assetList[assetIndex];
+
+      File? assetFile;
+
+      if (unifiedAsset.assetSource == AssetSource.CLOUD) {
+        Asset asset = unifiedAsset.asset!;
+        assetFile = await this
+            .tempDownloadAssetById(asset.id!, asset.metadata!.name!, unifiedAsset.assetType);
+      } else {
+        AssetEntity asset = unifiedAsset.assetEntity!;
+        assetFile = await asset.file;
+      }
+
+      if (assetFile != null) {
+        assetFiles.add(assetFile);
+      }
+    }
+
+    return assetFiles;
+  }
+
+  Future<bool> uploadAssetFilesToServer(List<int> assetIndexes) async {
+
+    for (var assetIndex in assetIndexes) {
+      final UniFiedAsset unifiedAsset = AssetState.instance.assetList[assetIndex];
+
+      if (unifiedAsset.assetSource == AssetSource.DEVICE) {
+          AssetEntity asset = unifiedAsset.assetEntity!;
+          File? assetFile  = await asset.file;
+          String filePath = assetFile!.path;
+          String fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length);
+          Metadata? metadata = await MetadataRepository.instance.findByNameAndSize(fileName, assetFile.lengthSync());
+        
+          if (metadata == null) {
+            //The asset is not uploaded to server yet;
+            await this.save([assetFile]);
+          }
+        }
+    }
+
+    return true;
   }
 }

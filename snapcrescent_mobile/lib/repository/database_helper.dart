@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static final _dbName = 'snap-crescent.db';
-  static final _dbVersion = 1;
+  static final _dbVersion = 20230717;
 
   // making it singleton class
   DatabaseHelper._privateConstructor();
@@ -22,19 +24,19 @@ class DatabaseHelper {
   _initiateDatabase() async {
      var directory = (await getApplicationDocumentsDirectory()).path;
     String path = '$directory/$_dbName';
-    return await openDatabase(path, version: _dbVersion, onCreate: _onCreate);
+    return await openDatabase(path, version: _dbVersion, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future _onCreate(Database database, int version) {
     database.execute('''
-      CREATE TABLE APP_CONFIG ( 
+      CREATE TABLE IF NOT EXISTS APP_CONFIG ( 
         CONFIG_KEY TEXT PRIMARY KEY,
         CONFIG_VALUE TEXT NOT NULL
         );
       ''');
 
     database.execute('''
-      CREATE TABLE ASSET ( 
+      CREATE TABLE IF NOT EXISTS ASSET ( 
         ID INTEGER PRIMARY KEY,
         ACTIVE INTEGER,
         THUMBNAIL_ID INTEGER,
@@ -45,7 +47,7 @@ class DatabaseHelper {
       ''');
 
     database.execute('''
-      CREATE TABLE METADATA ( 
+      CREATE TABLE IF NOT EXISTS METADATA ( 
         ID INTEGER PRIMARY KEY,
         CREATION_DATE_TIME INTEGER,
         NAME TEXT,
@@ -56,12 +58,39 @@ class DatabaseHelper {
         );
       ''');
 
-    return database.execute('''
-      CREATE TABLE THUMBNAIL (
+    database.execute('''
+      CREATE TABLE IF NOT EXISTS THUMBNAIL (
         ID INTEGER PRIMARY KEY,
         NAME TEXT
         );
       ''');
+
+    return database.execute('''
+      CREATE TABLE IF NOT EXISTS ALBUM (
+        ID INTEGER PRIMARY KEY,
+        NAME TEXT,
+        PUBLIC_ACCESS INTEGER,
+        ALBUM_TYPE INTEGER,
+        ALBUM_THUMBNAIL_ID INTEGER
+        );
+      ''');
+  }
+
+  Future _onUpgrade(Database database, int oldVersion, int newVersion) async {  
+    if (oldVersion < newVersion) {
+      database.execute("ALTER TABLE METADATA ADD COLUMN LOCAL_ASSET_ID INTEGER");
+
+
+      database.execute('''
+      CREATE TABLE IF NOT EXISTS ALBUM (
+        ID INTEGER PRIMARY KEY,
+        NAME TEXT,
+        PUBLIC_ACCESS INTEGER,
+        ALBUM_TYPE INTEGER,
+        ALBUM_THUMBNAIL_ID INTEGER
+        );
+      ''');
+    }
   }
 
   Future<int> save(String tableName, Map<String, dynamic> row) async {

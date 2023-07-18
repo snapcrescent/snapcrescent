@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 
@@ -86,20 +87,18 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		if (count > 0) {
 			
 			List<Asset> entities = assetRepository.search(searchCriteria, searchCriteria.getResultType() == ResultType.OPTION);
-
-			List<UiAsset> searchResult = new ArrayList<>(entities.size());
+			List<UiAsset> beans = assetConverter.getBeansFromEntities(entities, searchCriteria.getResultType());
 			
-			for (Asset entity : entities) {
-				UiAsset bean = assetConverter.getBeanFromEntity(entity,searchCriteria.getResultType());
-				bean.getThumbnail().setToken(securedStreamTokenUtil.getSignedAssetStreamToken(entity.getThumbnail()));
-				searchResult.add(bean);
+			for (int i = 0; i < beans.size(); i++) {
+				UiAsset bean = beans.get(i);
+				bean.getThumbnail().setToken(securedStreamTokenUtil.getSignedAssetStreamToken(entities.get(i).getThumbnail()));
 			}
-
+			
 			response.setTotalResultsCount(count);
-			response.setResultCountPerPage(searchResult.size());
+			response.setResultCountPerPage(beans.size());
 			response.setCurrentPageIndex(searchCriteria.getPageNumber());
 
-			response.setObjects(searchResult);
+			response.setObjects(beans);
 		
 		}
 
@@ -138,7 +137,20 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		return files;
 
 	}
-
+	
+	@Override
+	@Transactional
+	@Async("threadPoolTaskExecutor")
+	public Future<Boolean> processAssets(List<File> temporaryFiles) throws Exception {
+		boolean processed = false;
+		
+		for (File temporaryFile : temporaryFiles) {
+			processAsset(temporaryFile);
+		}
+		
+		return CompletableFuture.completedFuture(processed);
+	}
+	
 	@Override
 	@Transactional
 	@Async("threadPoolTaskExecutor")
@@ -220,7 +232,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 				
 				albumRepository.update(defaultAlbum);
 			}
-		} else {
+		} else if(metadata != null) {
 			
 			metadataRepository.detach(existingMetadata);
 			
@@ -309,7 +321,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	
 	private void moveAssetAndThumbnailPostRecomputeMetaData(Asset asset, Metadata preRecomputeMetadata, Metadata postRecomputeMetadata) {
 		
-			AssetType assetType = asset.getAssetTypeEnum();
+			AssetType assetType = AssetType.findById(asset.getAssetType());
 			
 			FILE_TYPE fileType = null;
 	
@@ -543,6 +555,8 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		deletePermanently(assetRepository.findAssetIdsByCreatedById(userId));
 		assetRepository.flush();
 	}
+
+
 
 	
 }

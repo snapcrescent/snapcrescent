@@ -1,4 +1,5 @@
-import 'package:snapcrescent_mobile/models/base_response.dart';
+
+import 'package:snapcrescent_mobile/models/common/base_response.dart';
 
 class BaseResponseBean<ID, T> extends BaseResponse {
   T? object;
