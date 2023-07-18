@@ -1,5 +1,5 @@
-import 'package:snapcrescent_mobile/models/asset.dart';
-import 'package:snapcrescent_mobile/models/asset_search_criteria.dart';
+import 'package:snapcrescent_mobile/models/asset/asset.dart';
+import 'package:snapcrescent_mobile/models/asset/asset_search_criteria.dart';
 import 'package:snapcrescent_mobile/repository/base_repository.dart';
 import 'package:snapcrescent_mobile/repository/database_helper.dart';
 import 'package:snapcrescent_mobile/repository/query_bean.dart';

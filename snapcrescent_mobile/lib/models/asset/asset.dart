@@ -1,6 +1,6 @@
-import 'package:snapcrescent_mobile/models/base_model.dart';
-import 'package:snapcrescent_mobile/models/metadata.dart';
-import 'package:snapcrescent_mobile/models/thumbnail.dart';
+import 'package:snapcrescent_mobile/models/common/base_model.dart';
+import 'package:snapcrescent_mobile/models/metadata/metadata.dart';
+import 'package:snapcrescent_mobile/models/thumbnail/thumbnail.dart';
 
 class Asset extends BaseUiBean {
 

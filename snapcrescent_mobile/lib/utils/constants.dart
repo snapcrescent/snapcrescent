@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class Constants {
 
   static final String appConfigFirstBootFlag = 'FIRST_BOOT';
@@ -40,6 +42,7 @@ class Constants {
   static final int notificationChannelId = 0213;
   static final int notificationChannelName = 0213;
   
+  static final DateFormat defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
 }
 
 enum AssetSearchProgress { 

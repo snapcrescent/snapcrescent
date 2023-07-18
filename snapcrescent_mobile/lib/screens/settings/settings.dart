@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:snapcrescent_mobile/models/user_login_response.dart';
-import 'package:snapcrescent_mobile/screens/grid/assets_grid.dart';
+import 'package:snapcrescent_mobile/models/user/user_login_response.dart';
+import 'package:snapcrescent_mobile/screens/asset/asset_list.dart';
 import 'package:snapcrescent_mobile/screens/settings/widgets/auto_backup_settings.dart';
 import 'package:snapcrescent_mobile/screens/settings/widgets/device_folders_settings.dart';
 import 'package:snapcrescent_mobile/services/app_config_service.dart';
@@ -16,31 +16,20 @@ import 'package:snapcrescent_mobile/style.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 import 'package:provider/provider.dart';
+import 'package:snapcrescent_mobile/widgets/footer.dart';
 
 class SettingsScreen extends StatelessWidget {
   static const routeName = '/settings';
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () {
-
-        Navigator.popAndPushNamed(
-          context,
-          AssetsGridScreen.routeName,
-           //if you want to disable back feature set to false
-        );
-
-        //we need to return a future
-        return Future.value(false);
-      },
-      child: Scaffold(
+    return  Scaffold(
           appBar: AppBar(
             title: Text('Settings'),
             backgroundColor: Colors.black,
           ),
-          body: _SettingsScreenView()),
-    );
+          bottomNavigationBar: Footer(),
+          body: _SettingsScreenView());
   }
 }
 

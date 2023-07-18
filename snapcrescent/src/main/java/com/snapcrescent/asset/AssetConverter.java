@@ -44,14 +44,13 @@ public class AssetConverter extends BaseConverter<Asset, UiAsset> {
 	@Override
 	public UiAsset getBeanFromEntity(Asset entity, ResultType resultType) {
 		
-
 		UiAsset bean = super.getBeanFromEntity(entity, resultType, createTypeMap(resultType)); 
 		
 		if (entity.getMetadataId() != null) {
 			bean.setMetadataId(entity.getMetadataId());
 			bean.setMetadata(metadataConverter.getBeanFromEntity(entity.getMetadata(), resultType));
 		}
-
+		
 		if (entity.getThumbnailId() != null) {
 			bean.setThumbnailId(entity.getThumbnailId());
 			bean.setThumbnail(thumbnailConverter.getBeanFromEntity(entity.getThumbnail(), resultType));

@@ -1,6 +1,6 @@
 import 'package:photo_manager/photo_manager.dart';
 import 'package:snapcrescent_mobile/models/app_config.dart';
-import 'package:snapcrescent_mobile/models/user_login_response.dart';
+import 'package:snapcrescent_mobile/models/user/user_login_response.dart';
 import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
 import 'package:snapcrescent_mobile/services/base_service.dart';
 import 'package:snapcrescent_mobile/services/login_service.dart';

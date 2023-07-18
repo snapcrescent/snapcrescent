@@ -160,9 +160,13 @@ public class AssetController extends BaseController {
 			List<File> temporaryFiles = assetService.uploadAssets(Arrays.asList(files));
 
 			List<Future<Boolean>> processingStatusList = new ArrayList<>(temporaryFiles.size());
+			//assetService.processAssets(temporaryFiles);
+			
+			
 			for (File temporaryFile : temporaryFiles) {
 				processingStatusList.add(assetService.processAsset(temporaryFile));
 			}
+			
 
 			// wait for all threads
 			/*
