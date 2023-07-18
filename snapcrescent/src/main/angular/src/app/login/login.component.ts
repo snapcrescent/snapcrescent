@@ -68,6 +68,14 @@ export class LoginComponent extends BaseComponent implements OnInit {
 
       });
 
+      if(this.isDemoApp) {
+        const demoLoginRequest = new UserLoginRequest();
+        demoLoginRequest.username = this.demoUsername;
+        demoLoginRequest.password = this.demoPassword;
+
+        this.form.patchValue(demoLoginRequest);
+      }
+
     });
   }
 
