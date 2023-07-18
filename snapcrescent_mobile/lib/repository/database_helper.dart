@@ -54,7 +54,8 @@ class DatabaseHelper {
         INTERNAL_NAME TEXT,
         MIME_TYPE TEXT,
         ORIENTATION INTEGER,
-        SIZE INTEGER
+        SIZE INTEGER,
+        LOCAL_ASSET_ID INTEGER
         );
       ''');
 
@@ -78,18 +79,7 @@ class DatabaseHelper {
 
   Future _onUpgrade(Database database, int oldVersion, int newVersion) async {  
     if (oldVersion < newVersion) {
-      database.execute("ALTER TABLE METADATA ADD COLUMN LOCAL_ASSET_ID INTEGER");
-
-
-      database.execute('''
-      CREATE TABLE IF NOT EXISTS ALBUM (
-        ID INTEGER PRIMARY KEY,
-        NAME TEXT,
-        PUBLIC_ACCESS INTEGER,
-        ALBUM_TYPE INTEGER,
-        ALBUM_THUMBNAIL_ID INTEGER
-        );
-      ''');
+      
     }
   }
 

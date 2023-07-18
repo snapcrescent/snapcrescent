@@ -164,8 +164,8 @@ class _AssetStore with Store {
        if(metadata == null) {
 
           //Attempt to find by size as it might be a new asset
-          //File? assetFile = await asset.file;
-          //metadata = await MetadataService.instance.findByNameAndSize(asset.title!, assetFile!.lengthSync());
+          File? assetFile = await asset.file;
+          metadata = await MetadataService.instance.findByNameAndSize(asset.title!, assetFile!.lengthSync());
 
           //Found by name and size match. Update the db to save future processing time
           if(metadata != null) {
