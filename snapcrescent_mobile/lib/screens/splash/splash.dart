@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:snapcrescent_mobile/models/app_config.dart';
@@ -81,14 +83,34 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
     await AppConfigRepository.instance
         .saveOrUpdateConfig(showDeviceAssetsFlagConfig);
 
-    final List<AssetPathEntity> folders =
-          await PhotoManager.getAssetPathList();
-      folders.sort(
-          (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
+    final List<AssetPathEntity> folders = await PhotoManager.getAssetPathList();
+      folders.sort((AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
+
+    final List<AssetPathEntity> deviceAssetFolders = [];
+    List<String> defaultFolderList = [];
+    
+    if (Platform.isAndroid) {
+        defaultFolderList = Constants.androidDefaultDeviceFolderList;
+    } else {
+        defaultFolderList = Constants.iosDefaultDeviceFolderList;
+    }
+
+    folders.forEach((folder) { 
+
+        defaultFolderList.forEach((defaultFolder) { 
+
+          if(folder.name.toLowerCase() == defaultFolder.toLowerCase()) {
+            deviceAssetFolders.add(folder);
+          }
+        });
+    });
+
+          
+
 
       AppConfig showDeviceAssetsFolders = new AppConfig(
           configKey: Constants.appConfigShowDeviceAssetsFolders,
-          configValue: folders.map((folder) => folder.id).join(","));
+          configValue: deviceAssetFolders.map((folder) => folder.id).join(","));
 
       await AppConfigRepository.instance
           .saveOrUpdateConfig(showDeviceAssetsFolders);

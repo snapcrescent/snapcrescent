@@ -43,6 +43,9 @@ class Constants {
   static final int notificationChannelName = 0213;
   
   static final DateFormat defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
+
+  static final List<String> androidDefaultDeviceFolderList = ["Camera"];
+  static final List<String> iosDefaultDeviceFolderList = ["Recent"];
 }
 
 enum AssetSearchProgress { 
