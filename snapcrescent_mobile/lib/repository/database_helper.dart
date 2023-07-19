@@ -55,7 +55,7 @@ class DatabaseHelper {
         MIME_TYPE TEXT,
         ORIENTATION INTEGER,
         SIZE INTEGER,
-        LOCAL_ASSET_ID INTEGER
+        LOCAL_ASSET_ID TEXT
         );
       ''');
 

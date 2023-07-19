@@ -50,6 +50,7 @@ class _AssetStore with Store {
 
   @action
   Future<void> refreshStore() async {
+    executionInProgress = false;
     assetSearchProgress = AssetSearchProgress.PROCESSING;
     AssetState.instance.groupedAssets.clear();
     AssetState.instance.assetList = [];
@@ -163,16 +164,22 @@ class _AssetStore with Store {
        //Local asset is not found 
        if(metadata == null) {
 
-          //Attempt to find by size as it might be a new asset
-          File? assetFile = await asset.file;
-          metadata = await MetadataService.instance.findByNameAndSize(asset.title!, assetFile!.lengthSync());
+          //Attempt to find by name to avoid file size calculation
+          List<Metadata>? matchingMetadataList = await MetadataService.instance.findByName(asset.title!);
+          
+          if(matchingMetadataList != null && matchingMetadataList.length > 0) {
 
-          //Found by name and size match. Update the db to save future processing time
-          if(metadata != null) {
-                metadata.localAssetId = asset.id;
-                await MetadataService.instance.updateOnLocal(metadata);
+            //Attempt to find by size as it might be a new asset
+            File? assetFile = await asset.file;
+            metadata = await MetadataService.instance.findByNameAndSize(asset.title!, assetFile!.lengthSync());
+
+            //Found by name and size match. Update the db to save future processing time
+            if(metadata != null) {
+                  metadata.localAssetId = asset.id;
+                  await MetadataService.instance.updateOnLocal(metadata);
+            }
+
           }
-
        }
 
         bool alreadyAdded = false;

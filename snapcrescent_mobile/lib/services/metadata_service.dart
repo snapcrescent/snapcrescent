@@ -23,6 +23,10 @@ class MetadataService {
     return await MetadataRepository.instance.findByLocalAssetId(localAssetId);
   }
 
+  Future<List<Metadata>?> findByName(String name) async {
+    return await MetadataRepository.instance.findByName(name);
+  }
+
   Future<Metadata?> findByNameAndSize(String name, int size) async {
     return await MetadataRepository.instance.findByNameAndSize(name, size);
   }

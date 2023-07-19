@@ -1,12 +1,32 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:snapcrescent_mobile/app.dart';
-import 'package:snapcrescent_mobile/screens/settings/settings.dart';
 import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
-class Header extends StatelessWidget  implements PreferredSizeWidget {
+class Header extends StatelessWidget implements PreferredSizeWidget {
+  Header();
+
+  @override
+    Size get preferredSize => new Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    return _HeaderView();
+  }
+}
+
+class _HeaderView extends StatefulWidget {
+  _HeaderView();
+
+   
+
+  @override
+  _HeaderViewState createState() => _HeaderViewState();
+}
+
+class _HeaderViewState extends State<_HeaderView> {
+
   bool _loggedInToServer = false;
 
   Future<bool> _getValue() async {
@@ -16,32 +36,16 @@ class Header extends StatelessWidget  implements PreferredSizeWidget {
   }
 
   _body() {
-    return new Container(
-      color: Colors.black,
-      child: Row(
-        children: [
-          Expanded(
-              flex: 1,
-              child: Container(
-                width: 0,
-                height: 0,
-              )),
-          Expanded(
-              flex: 1,
-              child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
-              children: [
-                Text("Snapcrescent",
+    return new AppBar(
+      backgroundColor: Colors.black,
+      centerTitle: true,
+      title: Text("Snapcrescent",
                     style: TextStyle(
                       color: Colors.white,
-                    ))
-              ])),
-          Expanded(
-              flex: 1,
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [_getAccountIcon()])),
-        ],
-      ),
+                    )),
+      actions: [
+        _getAccountIcon()
+      ],
     );
   }
 
@@ -65,8 +69,7 @@ class Header extends StatelessWidget  implements PreferredSizeWidget {
 
 
 
-  @override
-  Size get preferredSize => new Size.fromHeight(kToolbarHeight);
+ 
 
   @override
   Widget build(BuildContext context) {

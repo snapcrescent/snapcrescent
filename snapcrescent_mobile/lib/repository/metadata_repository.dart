@@ -23,6 +23,13 @@ class MetadataRepository extends BaseRepository {
     return metadata;
   }
 
+  Future<List<Metadata>?> findByName(String name) async {
+    Database database = await DatabaseHelper.instance.database;
+    final result = await database.rawQuery('''SELECT * from $tableName where NAME = ? ''',[name]);
+   
+    return result.map((e) => Metadata.fromMap(e)).toList();
+  }
+
   Future<Metadata?> findByNameAndSize(String name, int size) async {
     Database database = await DatabaseHelper.instance.database;
     final result = await database.rawQuery('''SELECT * from $tableName where NAME = ? AND SIZE = ?''',[name, size]);
