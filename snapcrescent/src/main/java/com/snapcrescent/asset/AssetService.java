@@ -24,9 +24,9 @@ public interface AssetService {
 	public void updateActiveFlag(Boolean active, List<Long> ids);
 	public void updateFavoriteFlag(Boolean favorite, List<Long> ids);
 	public void deletePermanently(List<Long> ids);
-	public void deleteAssetPostUserDeletion(Long userId);
+	public void deleteAssetPostUserDeletion(Long userId) throws Exception;
 	SecuredAssetStreamDTO getAssetDetailsFromToken(String token) throws Exception;
-	void regenerateThumbnails(String indexRange);
+	void regenerateThumbnails(String indexRange, String indexList);
 	List<UiAssetTimeline> getAssetTimeline(AssetSearchCriteria searchCriteria);
 		
 }

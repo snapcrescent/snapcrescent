@@ -21,14 +21,14 @@ class AlbumService extends BaseService {
         Dio dio = await getDio();
         Options options = await getHeaders();
         final response = await dio.get('/album',
-            queryParameters: searchCriteria.toMap(), options: options);
+            queryParameters: searchCriteria.toJson(), options: options);
 
         return BaseResponseBean.fromJson(response.data, Album.fromJsonModel);
       } else {
-        return new BaseResponseBean.defaultResponse();
+        return BaseResponseBean.defaultResponse();
       }
-    } on DioError catch (ex) {
-      if (ex.type == DioErrorType.connectionTimeout) {
+    } on DioException catch (ex) {
+      if (ex.type == DioExceptionType.connectionTimeout) {
         throw Exception("Connection  Timeout Exception");
       }
       throw Exception(ex.message);
@@ -41,7 +41,7 @@ class AlbumService extends BaseService {
     searchCriteria.sortOrder = Direction.ASC;
     final data = await search(searchCriteria);
     await saveAllOnLocal(data.objects!, progressCallBack);
-    return new List<Album>.from(data.objects!);
+    return List<Album>.from(data.objects!);
   }
 
 
@@ -66,26 +66,26 @@ class AlbumService extends BaseService {
         await AlbumRepository.instance.existsById(entity.id!);
 
     if (albumExistsById == false) {
-      final albumThumbnailExistsById = await ThumbnailRepository.instance.existsById(entity.albumThumbnailId!);
+      final albumThumbnailExistsById = await ThumbnailRepository().existsById(entity.albumThumbnailId!);
 
       if (albumThumbnailExistsById == false) {
-        await ThumbnailService.instance.writeThumbnailFile(entity.albumThumbnail!);
+        await ThumbnailService().writeThumbnailFile(entity.albumThumbnail!);
 
         if(createIfNotFound) {
-          ThumbnailRepository.instance.save(entity.albumThumbnail!);
+          ThumbnailRepository().saveOrUpdate(entity.albumThumbnail!);
         }
       } else{
-        ThumbnailRepository.instance.update(entity.albumThumbnail!);
+        ThumbnailRepository().saveOrUpdate(entity.albumThumbnail!);
       }
 
       if(createIfNotFound) {
         progressCallBack(assetIndex + 1);
-        return AlbumRepository.instance.save(entity);
+        return AlbumRepository.instance.saveOrUpdate(entity);
       }
       
       return Future.value(0);
     } else {
-      AlbumRepository.instance.update(entity);
+      AlbumRepository.instance.saveOrUpdate(entity);
       progressCallBack(assetIndex + 1);
       return Future.value(0);
     }

@@ -6,14 +6,12 @@ import 'package:snapcrescent_mobile/models/asset/asset.dart';
 import 'package:snapcrescent_mobile/models/asset/asset_search_criteria.dart';
 import 'package:snapcrescent_mobile/models/metadata/metadata.dart';
 import 'package:snapcrescent_mobile/models/unified_asset.dart';
-import 'package:snapcrescent_mobile/repository/metadata_repository.dart';
 import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/asset_service.dart';
 import 'package:snapcrescent_mobile/services/metadata_service.dart';
 import 'package:snapcrescent_mobile/services/thumbnail_service.dart';
 import 'package:snapcrescent_mobile/state/asset_state.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
-import 'dart:developer';
 
 
 
@@ -66,24 +64,24 @@ class _AssetStore with Store {
   
     executionInProgress = true;
 
-    List<UniFiedAsset> _assetList = [];
+    List<UniFiedAsset> assetList = [];
 
     try {
       final newAssets =
-          await AssetService.instance.searchOnLocal(searchCriteria);
+          await AssetService().searchOnLocal(searchCriteria);
 
       if (newAssets.isNotEmpty) {
         for (Asset asset in newAssets) {
-          final thumbnail = await ThumbnailService.instance
+          final thumbnail = await ThumbnailService()
               .findByIdOnLocal(asset.thumbnailId!);
           asset.thumbnail = thumbnail;
 
           final metadata =
-              await MetadataService.instance.findByIdOnLocal(asset.metadataId!);
+              await MetadataService().findById(asset.metadataId!);
           asset.metadata = metadata;
         }
 
-        await _getUnifiedAssetsFromCloudAssets(_assetList, newAssets);
+        await _getUnifiedAssetsFromCloudAssets(assetList, newAssets);
       }
 
       
@@ -100,8 +98,8 @@ class _AssetStore with Store {
             (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
             
         for (final album in albums) {
-          if (selectedDeviceFolders.indexOf(album.id) != -1) {
-            await _getUnifiedAssetsFromLocalAssets(_assetList, album);
+          if (selectedDeviceFolders.contains(album.id)) {
+            await _getUnifiedAssetsFromLocalAssets(assetList, album);
           }
         }
       }
@@ -112,13 +110,13 @@ class _AssetStore with Store {
 
     assetSearchProgress = AssetSearchProgress.PROCESSING;
 
-    _assetList.sort((UniFiedAsset a, UniFiedAsset b) => b.assetCreationDate.compareTo(a.assetCreationDate));
+    assetList.sort((UniFiedAsset a, UniFiedAsset b) => b.assetCreationDate.compareTo(a.assetCreationDate));
 
     if (AssetState.instance.assetList.isEmpty) {
       AssetState.instance.assetList = [];
     }
 
-    AssetState.instance.assetList.addAll(_assetList);
+    AssetState.instance.assetList.addAll(assetList);
 
     for (var asset in AssetState.instance.assetList) {
       _addUnifiedAssetToGroup(asset.assetCreationDate, asset);
@@ -146,7 +144,7 @@ class _AssetStore with Store {
     executionInProgress = false;
   }
 
-  _getUnifiedAssetsFromLocalAssets(List<UniFiedAsset> _assetList, AssetPathEntity? album) async {
+  _getUnifiedAssetsFromLocalAssets(List<UniFiedAsset> assetList, AssetPathEntity? album) async {
     
         
     if (album != null) {
@@ -159,40 +157,40 @@ class _AssetStore with Store {
 
       for (final asset in allAssets) {
         
-       Metadata? metadata = await MetadataService.instance.findByLocalAssetId(asset.id);
+       Metadata? metadata = await MetadataService().findByLocalAssetId(asset.id);
 
        //Local asset is not found 
        if(metadata == null) {
 
           //Attempt to find by name to avoid file size calculation
-          List<Metadata>? matchingMetadataList = await MetadataService.instance.findByName(asset.title!);
+          List<Metadata>? matchingMetadataList = await MetadataService().findByName(asset.title!);
           
-          if(matchingMetadataList != null && matchingMetadataList.length > 0) {
+          if(matchingMetadataList != null && matchingMetadataList.isNotEmpty) {
 
             //Attempt to find by size as it might be a new asset
             File? assetFile = await asset.file;
-            metadata = await MetadataService.instance.findByNameAndSize(asset.title!, assetFile!.lengthSync());
+            metadata = await MetadataService().findByNameAndSize(asset.title!, assetFile!.lengthSync());
 
             //Found by name and size match. Update the db to save future processing time
             if(metadata != null) {
                   metadata.localAssetId = asset.id;
-                  await MetadataService.instance.updateOnLocal(metadata);
+                  await MetadataService().saveOrUpdate(metadata);
             }
 
           }
        }
 
         bool alreadyAdded = false;
-        _assetList.forEach((unifiedAsset) {
+        for (var unifiedAsset in assetList) {
 
           if(
             unifiedAsset.assetSource == AssetSource.DEVICE
             && unifiedAsset.assetEntity!.id == asset.id
           ) {
                 alreadyAdded = true;
-                return;
+                continue;
             }
-        });
+        }
 
         if (metadata == null && alreadyAdded == false) {
           final assetDate = asset.createDateTime;
@@ -200,7 +198,7 @@ class _AssetStore with Store {
           AppAssetType assetType = asset.type == AssetType.image
               ? AppAssetType.PHOTO
               : AppAssetType.VIDEO;
-          _assetList.add(new UniFiedAsset(
+          assetList.add(UniFiedAsset(
               assetType, AssetSource.DEVICE, assetDate,
               assetEntity: asset));
         }
@@ -210,17 +208,17 @@ class _AssetStore with Store {
    
   }
 
-  _getUnifiedAssetsFromCloudAssets(List<UniFiedAsset> _assetList, List<Asset> newAssets) async {
+  _getUnifiedAssetsFromCloudAssets(List<UniFiedAsset> assetList, List<Asset> newAssets) async {
     
     for (final asset in newAssets) {
       final assetDate = asset.metadata!.creationDateTime!;
       asset.thumbnail!.thumbnailFile =
-          await ThumbnailService.instance.readThumbnailFile(asset.thumbnail!.name!);
+          await ThumbnailService().readThumbnailFile(asset.thumbnail!.name!);
 
       AppAssetType assetType = asset.assetType == AppAssetType.PHOTO.id
           ? AppAssetType.PHOTO
           : AppAssetType.VIDEO;
-      _assetList.add(new UniFiedAsset(
+      assetList.add(UniFiedAsset(
           assetType, AssetSource.CLOUD, assetDate,
           asset: asset));
     }
@@ -234,21 +232,21 @@ class _AssetStore with Store {
 
       bool assetAlreadyPresent = false;
 
-      unifiedAssets.forEach((unifiedAsset) {
+      for (var unifiedAsset in unifiedAssets) {
         if (asset.assetSource == AssetSource.DEVICE &&
             asset.assetSource == unifiedAsset.assetSource) {
           if (unifiedAsset.assetEntity!.id == asset.assetEntity!.id) {
             assetAlreadyPresent = true;
-            return;
+            continue;
           }
         } else if (asset.assetSource == AssetSource.CLOUD &&
             asset.assetSource == unifiedAsset.assetSource) {
           if (unifiedAsset.asset!.id == asset.asset!.id) {
             assetAlreadyPresent = true;
-            return;
+            continue;
           }
         }
-      });
+      }
 
       if (!assetAlreadyPresent) {
         unifiedAssets.add(asset);

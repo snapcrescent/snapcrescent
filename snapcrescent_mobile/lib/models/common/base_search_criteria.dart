@@ -26,8 +26,22 @@ class BaseSearchCriteria {
       this.pageNumber,
       this.resultPerPage});
 
-  Map<String, dynamic> toMap() {
-    Map<String, dynamic> map = new Map();
+  factory BaseSearchCriteria.fromJson(Map<String, dynamic> json) {
+    return BaseSearchCriteria(
+        searchKeyword: json['searchKeyword'],
+        active: json['active'],
+        fromDate: json['fromDate'],
+        toDate: json['toDate'],
+        sortBy: json['sortBy'],
+        sortOrder:  json['sortOrder'] != null ?  Direction.findByLabel(json['sortOrder']) : Direction.ASC,
+        resultType: json['resultType'] != null ?  ResultType.findByLabel(json['resultType']) : ResultType.SEARCH,
+        pageNumber: json['pageNumber'],
+        resultPerPage: json['resultPerPage'],
+        );
+  }    
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = {};
 
     if (searchKeyword != null) {
       map['searchKeyword'] = searchKeyword;

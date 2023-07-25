@@ -6,9 +6,9 @@ import 'package:snapcrescent_mobile/models/app_config.dart';
 import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
 import 'package:snapcrescent_mobile/screens/asset/asset_list.dart';
 import 'package:snapcrescent_mobile/screens/settings/settings.dart';
-import 'package:snapcrescent_mobile/services/toast_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
+import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
 
 class SplashScreen extends StatelessWidget {
   static const routeName = '/splash';
@@ -76,7 +76,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
   }
 
   _setDefaultSettings() async {
-    AppConfig showDeviceAssetsFlagConfig = new AppConfig(
+    AppConfig showDeviceAssetsFlagConfig = AppConfig(
         configKey: Constants.appConfigShowDeviceAssetsFlag,
         configValue: true.toString());
 
@@ -95,27 +95,27 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
         defaultFolderList = Constants.iosDefaultDeviceFolderList;
     }
 
-    folders.forEach((folder) { 
+    for (var folder in folders) { 
 
-        defaultFolderList.forEach((defaultFolder) { 
+        for (var defaultFolder in defaultFolderList) { 
 
           if(folder.name.toLowerCase() == defaultFolder.toLowerCase()) {
             deviceAssetFolders.add(folder);
           }
-        });
-    });
+        }
+    }
 
           
 
 
-      AppConfig showDeviceAssetsFolders = new AppConfig(
+      AppConfig showDeviceAssetsFolders = AppConfig(
           configKey: Constants.appConfigShowDeviceAssetsFolders,
           configValue: deviceAssetFolders.map((folder) => folder.id).join(","));
 
       await AppConfigRepository.instance
           .saveOrUpdateConfig(showDeviceAssetsFolders);
 
-    AppConfig appConfigAutoBackupFrequencyConfig = new AppConfig(
+    AppConfig appConfigAutoBackupFrequencyConfig = AppConfig(
         configKey: Constants.appConfigAutoBackupFrequency,
         configValue: Constants.defaultAutoBackupFrequency.toString());
 
@@ -123,9 +123,9 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
         .saveOrUpdateConfig(appConfigAutoBackupFrequencyConfig);
 
 
-    AppConfig appConfigLastSyncTimestampConfig = new AppConfig(
+    AppConfig appConfigLastSyncTimestampConfig = AppConfig(
         configKey: Constants.appConfigLastSyncActivityTimestamp,
-        configValue: DateUtilities().formatDate(DateTime(2000, 1, 1, 0, 0, 0, 0, 0), DateUtilities.timeStampFormat));
+        configValue: DateUtilities().formatDate(Constants.defaultLastSyncActivityTimestamp, DateUtilities.timeStampFormat));
 
     await AppConfigRepository.instance
         .saveOrUpdateConfig(appConfigLastSyncTimestampConfig);
@@ -135,28 +135,28 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
   }
 
   _setSystemSettings() async {
-    AppConfig configLoggedInFlagConfig = new AppConfig(
+    AppConfig configLoggedInFlagConfig = AppConfig(
         configKey: Constants.appConfigLoggedInFlag,
         configValue: false.toString());
 
     await AppConfigRepository.instance
         .saveOrUpdateConfig(configLoggedInFlagConfig);
 
-    AppConfig thumbnailsFolderConfig = new AppConfig(
+    AppConfig thumbnailsFolderConfig = AppConfig(
         configKey: Constants.appConfigThumbnailsFolder,
         configValue: 'thumbnails');
 
     await AppConfigRepository.instance
         .saveOrUpdateConfig(thumbnailsFolderConfig);
 
-    AppConfig tempDownloadsFolderConfig = new AppConfig(
+    AppConfig tempDownloadsFolderConfig = AppConfig(
         configKey: Constants.appConfigTempDownloadsFolder,
         configValue: 'tempDownload');
 
     await AppConfigRepository.instance
         .saveOrUpdateConfig(tempDownloadsFolderConfig);
 
-    AppConfig permanentDownloadsFolderConfig = new AppConfig(
+    AppConfig permanentDownloadsFolderConfig = AppConfig(
         configKey: Constants.appConfigPermanentDownloadsFolder,
         configValue: 'SnapCrescent');
 
@@ -165,26 +165,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
   }
 
   Future<bool> _requestPermissions() async {
-    bool allApproved = true;
-
-    if (allApproved) {
-      allApproved = await _requestFolderPermissions();
-    }
-
-    return allApproved;
-  }
-
-  Future<bool> _requestFolderPermissions() async {
-    bool approved = false;
-
-    final PermissionState _ps = await PhotoManager.requestPermissionExtend();
-
-    if (_ps.isAuth) {
-      approved = true;
-    } else {
-      ToastService.showError('Permission to device folders denied!');
-    }
-
-    return approved;
+    await PermissionUtilities().askAllPermissions();
+    return true;
   }
 }

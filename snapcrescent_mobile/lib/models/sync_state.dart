@@ -31,10 +31,10 @@ class SyncState  {
 
   _getPercentageString(int? count, int? total) {
     if(total == 0) {
-      return 0.toStringAsFixed(2) + "%";
+      return "${0.toStringAsFixed(2)}%";
     }
     
-    return (count! * 100 / total!).toStringAsFixed(2) + "%";
+    return "${(count! * 100 / total!).toStringAsFixed(2)}%";
   }
 
   SyncState(

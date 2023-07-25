@@ -34,8 +34,8 @@ class AlbumSearchCriteria extends BaseSearchCriteria {
   }          
 
   @override
-  Map<String, dynamic> toMap() {
-    Map<String, dynamic> map = super.toMap();
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = super.toJson();
 
     return map;
   }

@@ -223,9 +223,9 @@ public class AssetController extends BaseController {
 	}
 	
 	@PutMapping(value = "/asset/thumbnail/regenerate")
-	public ResponseEntity<?> regenerateThumbnails(@RequestParam String assetIdRange) {
+	public ResponseEntity<?> regenerateThumbnails(@RequestParam String assetIdRange, @RequestParam String assetIdList) {
 		try {
-			assetService.regenerateThumbnails(assetIdRange);
+			assetService.regenerateThumbnails(assetIdRange, assetIdList);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -23,21 +23,21 @@ class LoginService extends BaseService {
 
       if (appConfigServerUserNameConfig.configValue != null && appConfigServerPasswordConfig.configValue != null) {
 
-        UserLoginRequest request = new UserLoginRequest(username : appConfigServerUserNameConfig.configValue , password : appConfigServerPasswordConfig.configValue);
+        UserLoginRequest request = UserLoginRequest(username : appConfigServerUserNameConfig.configValue , password : appConfigServerPasswordConfig.configValue);
 
         Dio dio = await getDio();
         final jsonResponse = await dio.post('/login', data : request.toJson());
 
         response = UserLoginResponse.fromJson(json.decode(jsonResponse.data));
 
-        AppConfig appConfigSessionTokenConfig = new AppConfig(configKey: Constants.appConfigSessionToken,configValue: response.token);
+        AppConfig appConfigSessionTokenConfig = AppConfig(configKey: Constants.appConfigSessionToken,configValue: response.token);
         await AppConfigRepository.instance.saveOrUpdateConfig(appConfigSessionTokenConfig);
 
       } 
-    } on DioError catch (ex) {
-      if (ex.type == DioErrorType.connectionTimeout) {
+    } on DioException catch (ex) {
+      if (ex.type == DioExceptionType.connectionTimeout) {
         throw Exception("Connection  Timeout Exception");
-      } else if (ex.type == DioErrorType.unknown) {
+      } else if (ex.type == DioExceptionType.unknown) {
         throw Exception("Unable to connect to server");
       }
     }

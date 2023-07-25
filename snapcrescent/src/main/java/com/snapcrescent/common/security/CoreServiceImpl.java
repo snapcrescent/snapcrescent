@@ -62,4 +62,9 @@ public class CoreServiceImpl implements CoreService {
 		return getAppUser().getId();
 	}
 
+	@Override
+	public String getAppUsername() {
+		return getAppUser().getUsername();
+	}
+
 }

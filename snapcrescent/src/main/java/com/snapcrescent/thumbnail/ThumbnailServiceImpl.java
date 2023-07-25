@@ -15,6 +15,7 @@ import javax.imageio.ImageIO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.snapcrescent.asset.Asset;
@@ -28,7 +29,12 @@ import com.snapcrescent.common.utils.OSFinder;
 import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
 import com.snapcrescent.config.EnvironmentProperties;
 import com.snapcrescent.metadata.Metadata;
+
+import lombok.extern.slf4j.Slf4j;
+
+
 @Service
+@Slf4j
 public class ThumbnailServiceImpl extends BaseService implements ThumbnailService {
 
 	@Autowired
@@ -57,7 +63,7 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 	
 	
 	@Override
-	@Transactional
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@Async("threadPoolTaskExecutor")
 	public void regenerateThumbnails(Asset asset) {
 		
@@ -72,11 +78,20 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 				fileType = FILE_TYPE.VIDEO;
 			}
 			
-			File file = fileService .getFile(fileType, asset.getMetadata().getPath(), asset.getMetadata().getInternalName());
+			Thumbnail thumbnail = thumbnailRepository.findById(asset.getThumbnailId());
 			
-			createThumbnail(asset.getAssetTypeEnum(), file, asset.getMetadata());
+			File file = fileService.getFile(fileType, thumbnail.getCreatedByUserId(), asset.getMetadata().getPath(), asset.getMetadata().getInternalName());
+			
+			File thumbnailFile = createThumbnail(asset.getAssetTypeEnum(), file, asset.getMetadata());
+			
+			thumbnail.setName(thumbnailFile.getName());
+			thumbnail.setPath(asset.getMetadata().getPath());
+			
+			thumbnailRepository.update(thumbnail);
+			
+			log.debug("Processed : " + asset.getId());
 		} catch(Exception e) {
-			e.printStackTrace();
+			log.error("Asset ID : " + asset.getId());
 		}
 		
 		
@@ -85,7 +100,7 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 
 	private File createThumbnail(AssetType assetType , File file, Metadata metadata) throws Exception {
 		
-			String directoryPath = fileService.getBasePath(FILE_TYPE.THUMBNAIL) + metadata.getPath();
+			String directoryPath = fileService.getBasePath(FILE_TYPE.THUMBNAIL, coreService.getAppUserId()) + metadata.getPath();
 			fileService.mkdirs(directoryPath);
 			
 			BufferedImage extractedImage = extractImage(assetType, file, metadata);
@@ -124,7 +139,7 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 			}
 			
 			if(assetType == AssetType.VIDEO) {
-				File videoThumbnailTempFile =  new File(fileService.getBasePath(assetType) + Constant.UNPROCESSED_ASSET_FOLDER + file.getName() + "_thumbnail.jpg");
+				File videoThumbnailTempFile =  new File(fileService.getBasePath(assetType, coreService.getAppUserId()) + Constant.UNPROCESSED_ASSET_FOLDER + file.getName() + "_thumbnail.jpg");
 				
 				String ffmpegCommand = "ffmpeg -i " + file.getAbsolutePath() + " -vf thumbnail=25 -vframes 1 -qscale 0 " + videoThumbnailTempFile.getAbsolutePath() + "";
 				
@@ -157,7 +172,6 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
         while (true) {
             line = r.readLine();
             if (line == null) { break; }
-            System.out.println(line);
         }
 	}
 
@@ -206,14 +220,14 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 	@Transactional
 	public String getFilePathByThumbnailById(Long id) throws Exception {
 		Thumbnail thumbnail = thumbnailRepository.findById(id);
-		return fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName()).getAbsolutePath();
+		return fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getCreatedByUserId(), thumbnail.getPath(), thumbnail.getName()).getAbsolutePath();
 	}
 
 	@Override
 	@Transactional
 	public byte[] getById(Long id) {
 		Thumbnail thumbnail = thumbnailRepository.findById(id);
-		return fileService.readFileBytes(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName());
+		return fileService.readFileBytes(FILE_TYPE.THUMBNAIL, thumbnail.getCreatedByUserId(), thumbnail.getPath(), thumbnail.getName());
 	}
 
 	public static AffineTransform getExifTransformation(int orientation, int width, int height) {

@@ -7,14 +7,13 @@ class AssetState {
 
   static final AssetState instance = AssetState._privateConstructor();
 
-  List<UniFiedAsset> assetList = new List.empty();
-  Map<String, List<UniFiedAsset>> groupedAssets = new Map();
+  List<UniFiedAsset> assetList = List.empty();
+  Map<String, List<UniFiedAsset>> groupedAssets = {};
 
-  List<String> groupedMapKeys = new List.empty();
+  List<String> groupedMapKeys = List.empty();
 
   List<int> getSelectedIndexes() {
-    return this
-        .assetList
+    return assetList
         .where((asset) => asset.selected == true)
         .map((asset) => AssetState.instance.assetList.indexOf(asset))
         .toList();
@@ -34,14 +33,14 @@ class AssetState {
 
   void prepareGroupedMapKeysList() {
 
-    List<DateTime> dateTimeKeys = this.groupedAssets.keys
+    List<DateTime> dateTimeKeys = groupedAssets.keys
           .toList()
           .map((key) => Constants.defaultYearFormatter.parse(key))
           .toList();
 
       dateTimeKeys.sort((DateTime a, DateTime b) => b.compareTo(a));
       
-      this.groupedMapKeys = dateTimeKeys.map<String>((dateTime) => Constants.defaultYearFormatter.format(dateTime)).toList();
+      groupedMapKeys = dateTimeKeys.map<String>((dateTime) => Constants.defaultYearFormatter.format(dateTime)).toList();
 
   }
 }

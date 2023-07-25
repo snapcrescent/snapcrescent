@@ -27,7 +27,10 @@ import com.snapcrescent.common.utils.JsonUtils;
 import com.snapcrescent.common.utils.StringUtils;
 import com.snapcrescent.location.LocationService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class MetadataServiceImpl extends BaseService implements MetadataService {
 
 	@Autowired
@@ -86,7 +89,7 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 				try {
 					metadata.setCreationDateTime(DateUtils.parseCreateDate(creationDateString));
 				} catch (ParseException e) {
-					logger.error(e.getLocalizedMessage());
+					log.error(e.getLocalizedMessage());
 					metadata.setCreationDateTime(modifiedDate);
 				}
 
@@ -168,7 +171,7 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error(e.getLocalizedMessage());
+			log.error(e.getLocalizedMessage());
 		}
 	}
 
@@ -194,7 +197,7 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 			metadata.setLocationId(locationId);
 
 		} catch (Exception e) {
-			logger.error(e.getLocalizedMessage());
+			log.error(e.getLocalizedMessage());
 		}
 
 		return metadata;

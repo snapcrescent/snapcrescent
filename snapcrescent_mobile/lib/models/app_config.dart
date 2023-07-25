@@ -18,7 +18,7 @@ class AppConfig  {
    }
 
   Map<String,dynamic> toMap() {
-    Map<String,dynamic> map =  new Map();
+    Map<String,dynamic> map =  {};
 
     map['CONFIG_KEY'] = configKey;
     map['CONFIG_VALUE'] = configValue;

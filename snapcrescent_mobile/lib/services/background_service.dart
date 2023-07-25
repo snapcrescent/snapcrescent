@@ -14,6 +14,7 @@ import 'package:snapcrescent_mobile/services/notification_service.dart';
 import 'package:snapcrescent_mobile/services/sync_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
+import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
 
 class BackgroundService {
   BackgroundService._privateConstructor() : super();
@@ -102,7 +103,7 @@ class BackgroundService {
 
       AndroidConfiguration androidConfiguration;
 
-      if(await NotificationService.instance.isAndroidPermissionGranted()) {
+      if(await PermissionUtilities().isNotificationPermissionGranted()) {
 
         await NotificationService.instance.registerBackgroundServiceNotification();
 

@@ -2,10 +2,12 @@
     package="com.snapcrescent"
     >
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" /> <!-- To read all files until API level 32 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" /> <!-- To write all files until API level 29. We will MediaStore from API level 30 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/> <!-- To read images created by other apps -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/> <!-- To read vidoes created by other apps -->
     <uses-permission android:name="android.permission.INTERNET" />
 
    <application

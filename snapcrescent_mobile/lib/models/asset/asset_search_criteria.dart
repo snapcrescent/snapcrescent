@@ -6,30 +6,23 @@ class AssetSearchCriteria extends BaseSearchCriteria {
   bool? favorite;
 
   AssetSearchCriteria(
-      {searchKeyword,
-      active,
-      fromDate,
-      toDate,
-      sortBy,
-      sortOrder,
-      resultType,
-      pageNumber,
-      resultPerPage,
+      {
+      bean,
       this.assetType,
       this.favorite})
       : super(
-            searchKeyword: searchKeyword,
-            active: active,
-            fromDate: fromDate,
-            toDate: toDate,
-            sortBy: sortBy,
-            sortOrder: sortOrder,
-            resultType: resultType,
-            pageNumber: pageNumber,
-            resultPerPage: resultPerPage);
+            searchKeyword: bean.searchKeyword,
+            active: bean.active,
+            fromDate: bean.fromDate,
+            toDate: bean.toDate,
+            sortBy: bean.sortBy,
+            sortOrder: bean.sortOrder,
+            resultType: bean.resultType,
+            pageNumber: bean.pageNumber,
+            resultPerPage: bean.resultPerPage);
 
   factory AssetSearchCriteria.defaultCriteria() {
-    return AssetSearchCriteria(
+    BaseSearchCriteria bean = BaseSearchCriteria(
       sortBy : 'metadata.creationDateTime',
       sortOrder : Direction.DESC,
       resultType : ResultType.SEARCH,
@@ -37,11 +30,22 @@ class AssetSearchCriteria extends BaseSearchCriteria {
       resultPerPage : 1000,
       active: true
     );
+    return AssetSearchCriteria( 
+      bean:bean
+    );
+  }
+
+  factory AssetSearchCriteria.fromJson(Map<String, dynamic> json) {
+    return AssetSearchCriteria(
+      bean: BaseSearchCriteria.fromJson(json),
+      assetType: json['assetType'],
+      favorite: json['favorite'],
+    );
   }          
 
   @override
-  Map<String, dynamic> toMap() {
-    Map<String, dynamic> map = super.toMap();
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> map = super.toJson();
 
     if (assetType != null) {
       map['assetType'] = assetType;

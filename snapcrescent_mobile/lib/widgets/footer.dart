@@ -59,7 +59,7 @@ class _FooterViewState extends State<_FooterView> {
           (route) => false, //if you want to disable back feature set to false
         );
         break;
-      case 9:
+      case 10:
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => AssetListScreen()));
         break;
@@ -73,15 +73,14 @@ class _FooterViewState extends State<_FooterView> {
   }
 
   _body() {
-    return new Container(
-        child: BottomNavigationBar(
+    return BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           onTap: (int index) => _onTap(index),
           currentIndex: _selectedIndex,
           backgroundColor: Colors.black,
           unselectedItemColor: Colors.white,
           items: [
-            new BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(Icons.photo),
               label: "Photos",
             ),
@@ -95,12 +94,12 @@ class _FooterViewState extends State<_FooterView> {
               label: "Library",
             ),
             */
-            new BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(Icons.settings),
               label: "Settings",
             )
           ],
-        ));
+        );
   }
 
   @override
@@ -109,7 +108,7 @@ class _FooterViewState extends State<_FooterView> {
         future: _getValue(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
-            return new Container();
+            return Container();
           } else {
             return _body();
           }

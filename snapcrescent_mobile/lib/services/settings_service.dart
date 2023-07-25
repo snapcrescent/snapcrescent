@@ -14,32 +14,32 @@ class SettingsService extends BaseService {
     AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigAutoBackupFolders);
 
-    String _autoBackupFolders = "";
+    String autoBackupFolders = "";
     if (value.configValue != null) {
       List<String> autoBackupFolderIdList = value.configValue!.split(",");
 
       final List<AssetPathEntity> assets =
           await PhotoManager.getAssetPathList();
       List<String> autoBackupFolderNameList = assets
-          .where((asset) => autoBackupFolderIdList.indexOf(asset.id) > -1)
+          .where((asset) => autoBackupFolderIdList.contains(asset.id))
           .map((asset) => asset.name)
           .toList();
 
       if (autoBackupFolderNameList.length == assets.length) {
-        _autoBackupFolders = "All";
+        autoBackupFolders = "All";
       } else if (autoBackupFolderNameList.length < assets.length) {
-        _autoBackupFolders = autoBackupFolderNameList.join(", ");
+        autoBackupFolders = autoBackupFolderNameList.join(", ");
       } 
     }
 
-    return _autoBackupFolders;
+    return autoBackupFolders;
   }
 
   Future<String> getShowDeviceAssetsFolderInfo() async {
     AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigShowDeviceAssetsFolders);
 
-    String _showDeviceAssetsFolders = "";
+    String showDeviceAssetsFolders = "";
 
     if (value.configValue != null) {
       List<String> showDeviceAssetsFolderIdList = value.configValue!.split(",");
@@ -47,31 +47,31 @@ class SettingsService extends BaseService {
       final List<AssetPathEntity> assets =
           await PhotoManager.getAssetPathList();
       List<String> showDeviceAssetsFolderNameList = assets
-          .where((asset) => showDeviceAssetsFolderIdList.indexOf(asset.id) > -1)
+          .where((asset) => showDeviceAssetsFolderIdList.contains(asset.id))
           .map((asset) => asset.name)
           .toList();
 
       if (showDeviceAssetsFolderNameList.length == assets.length) {
-        _showDeviceAssetsFolders = "All";
+        showDeviceAssetsFolders = "All";
       } else {
-        _showDeviceAssetsFolders = showDeviceAssetsFolderNameList.join(", ");
+        showDeviceAssetsFolders = showDeviceAssetsFolderNameList.join(", ");
       }
     }
 
-    return _showDeviceAssetsFolders;
+    return showDeviceAssetsFolders;
   }
 
   Future<String> getAutoBackupFrequencyInfo() async {
     AppConfig value = await AppConfigRepository.instance
         .findByKey(Constants.appConfigAutoBackupFrequency);
 
-    String _autoBackupFrequency = "";
+    String autoBackupFrequency = "";
 
     if (value.configValue != null) {
-      _autoBackupFrequency = value.configValue!;
+      autoBackupFrequency = value.configValue!;
     }
 
-    return _autoBackupFrequency;
+    return autoBackupFrequency;
   }
 
   AutoBackupFrequencyType getReadableOfAutoBackupFrequency(String autoBackupFrequencyString) {
@@ -125,13 +125,13 @@ class SettingsService extends BaseService {
 
   Future<UserLoginResponse?> saveAccountInformation(
       String serverUrl, String username, String password) async {
-    AppConfig serverUrlConfig = new AppConfig(
+    AppConfig serverUrlConfig = AppConfig(
         configKey: Constants.appConfigServerURL, configValue: serverUrl);
 
-    AppConfig serverUserNameConfig = new AppConfig(
+    AppConfig serverUserNameConfig = AppConfig(
         configKey: Constants.appConfigServerUserName, configValue: username);
 
-    AppConfig serverPasswordConfig = new AppConfig(
+    AppConfig serverPasswordConfig = AppConfig(
         configKey: Constants.appConfigServerPassword, configValue: password);
 
     await AppConfigRepository.instance.saveOrUpdateConfig(serverUrlConfig);

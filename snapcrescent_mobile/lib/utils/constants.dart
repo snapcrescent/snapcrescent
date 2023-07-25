@@ -2,50 +2,54 @@ import 'package:intl/intl.dart';
 
 class Constants {
 
-  static final String appConfigFirstBootFlag = 'FIRST_BOOT';
+  static const String appConfigFirstBootFlag = 'FIRST_BOOT';
 
-  static final String appConfigLoggedInFlag = 'LOGGED_IN';
-  static final String appConfigSessionToken = 'SESSION_TOKEN';
+  static const String appConfigLoggedInFlag = 'LOGGED_IN';
+  static const String appConfigSessionToken = 'SESSION_TOKEN';
 
-  static final String appConfigServerURL = 'SERVER_URL';
-  static final String appConfigServerUserName = 'SERVER_USERNAME';
-  static final String appConfigServerPassword = 'SERVER_PASSWORD';
+  static const String appConfigServerURL = 'SERVER_URL';
+  static const String appConfigServerUserName = 'SERVER_USERNAME';
+  static const String appConfigServerPassword = 'SERVER_PASSWORD';
 
-  static final String appConfigAutoBackupFlag = 'AUTO_BACKUP';
-  static final String appConfigAutoBackupFolders = 'AUTO_BACKUP_FOLDERS';
-  static final String appConfigAutoBackupFrequency = 'AUTO_BACKUP_FREQUENCY';
+  static const String appConfigAutoBackupFlag = 'AUTO_BACKUP';
+  static const String appConfigAutoBackupFolders = 'AUTO_BACKUP_FOLDERS';
+  static const String appConfigAutoBackupFrequency = 'AUTO_BACKUP_FREQUENCY';
   
-  static final String appConfigSyncInProgress = 'SYNC_IN_PROGRESS';
-  static final String appConfigLastSyncActivityTimestamp = 'LAST_SYNC_ACTIVITY_TIMESTAMP';
+  static const String appConfigSyncInProgress = 'SYNC_IN_PROGRESS';
+  static const String appConfigLastSyncActivityTimestamp = 'LAST_SYNC_ACTIVITY_TIMESTAMP';
 
-  static final String appConfigCacheLocallyFlag = 'CACHE_LOCALLY';
-  static final String appConfigLocalCacheAge = 'LOCAL_CACHE_AGE';
+  static const String appConfigCacheLocallyFlag = 'CACHE_LOCALLY';
+  static const String appConfigLocalCacheAge = 'LOCAL_CACHE_AGE';
 
-  static final String appConfigShowDeviceAssetsFlag = 'SHOW_DEVICE_ASSETS';
-  static final String appConfigShowDeviceAssetsFolders = 'SHOW_DEVICE_ASSETS_FOLDERS';
+  static const String appConfigShowDeviceAssetsFlag = 'SHOW_DEVICE_ASSETS';
+  static const String appConfigShowDeviceAssetsFolders = 'SHOW_DEVICE_ASSETS_FOLDERS';
 
-  static final String appConfigThumbnailsFolder = 'THUMBNAILS_FOLDER';
-  static final String appConfigTempDownloadsFolder = 'TEMP_DOWNLOADS_FOLDER';
-  static final String appConfigPermanentDownloadsFolder = 'PERMANENT_DOWNLOADS_FOLDER';
+  static const String appConfigThumbnailsFolder = 'THUMBNAILS_FOLDER';
+  static const String appConfigTempDownloadsFolder = 'TEMP_DOWNLOADS_FOLDER';
+  static const String appConfigPermanentDownloadsFolder = 'PERMANENT_DOWNLOADS_FOLDER';
 
-  static final String appConfigShowLoginPromptFlag = 'SHOW_LOGIN_PROMPT';
-  static final String appConfigShowAutoBackupPromptFlag = 'SHOW_AUTO_BACKUP_PROMPT';
-
-
-  static final String defaultNotificationChannel = 'Snap-Crescent';
-  static final String downloadProgressNotificationChannel = 'Download Progress';
-  static final String uploadProgressNotificationChannel = 'Upload Progress';
-
-  static final int defaultAutoBackupFrequency = 1 * 60;
+  static const String appConfigShowLoginPromptFlag = 'SHOW_LOGIN_PROMPT';
+  static const String appConfigShowAutoBackupPromptFlag = 'SHOW_AUTO_BACKUP_PROMPT';
 
 
-  static final int notificationChannelId = 0213;
-  static final int notificationChannelName = 0213;
+  static const String defaultNotificationChannel = 'Snap-Crescent';
+  static const String downloadProgressNotificationChannel = 'Download Progress';
+  static const String uploadProgressNotificationChannel = 'Upload Progress';
+
+  static const int defaultAutoBackupFrequency = 1 * 60;
+
+
+  static const int notificationChannelId = 0213;
+  static const int notificationChannelName = 0213;
   
   static final DateFormat defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
 
   static final List<String> androidDefaultDeviceFolderList = ["Camera"];
   static final List<String> iosDefaultDeviceFolderList = ["Recent"];
+
+  static final DateTime defaultLastSyncActivityTimestamp = DateTime(2000, 1, 1, 0, 0, 0, 0, 0);
+
+  static const int defaultSyncResultPerPage = 5;
 }
 
 enum AssetSearchProgress { 
@@ -68,14 +72,40 @@ enum AppAssetType {
 }
 
 enum ResultType {  
-   OPTION,
-   SEARCH,
-   FULL
+   OPTION("OPTION"),
+   SEARCH("SEARCH"),
+   FULL("FULL");
+
+   final String label;
+
+  const ResultType(this.label);
+
+  static ResultType? findByLabel(String label) {
+    for (var value in ResultType.values) {
+      if(value.label == label) {
+        return value;
+      }
+    }
+    return null;
+  }
 }
 
 enum Direction {  
-   ASC,
-   DESC
+   ASC("ASC"),
+   DESC("DESC");
+
+  final String label;
+
+  const Direction(this.label);
+
+  static Direction? findByLabel(String label) {
+    for (var value in Direction.values) {
+      if(value.label == label) {
+        return value;
+      }
+    }
+    return null;
+  }
 }
 
 enum AutoBackupFrequencyType { 

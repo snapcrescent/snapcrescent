@@ -1,36 +1,28 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class CommonUtilities {
-  
-   Future<bool> checkPermission() async {
-    if (Platform.isAndroid) {
-      final status = await Permission.photos.status;
-      if (status != PermissionStatus.granted) {
-        final result = await Permission.photos.request();
-        if (result == PermissionStatus.granted) {
-          return true;
-        }
-      } else {
-        return true;
-      }
-    } else {
-      return true;
-    }
-    return false;
-  }
 
+  Future<String> getRootDirectory() async{
+
+    if (Platform.isAndroid) {
+      return "/storage/emulated/0";
+    } else {
+      var directory = await getApplicationDocumentsDirectory();
+      return '${directory.path}${Platform.pathSeparator}Download';
+    }
+  }
+  
   Future<String> getPermanentDownloadsDirectory() async{
 
     if (Platform.isAndroid) {
       return "/storage/emulated/0/Download";
     } else {
       var directory = await getApplicationDocumentsDirectory();
-      return directory.path + Platform.pathSeparator + 'Download';
+      return '${directory.path}${Platform.pathSeparator}Download';
     }
   }
 

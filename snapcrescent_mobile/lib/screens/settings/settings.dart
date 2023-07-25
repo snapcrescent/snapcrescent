@@ -3,19 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:snapcrescent_mobile/models/user/user_login_response.dart';
-import 'package:snapcrescent_mobile/screens/asset/asset_list.dart';
 import 'package:snapcrescent_mobile/screens/settings/widgets/auto_backup_settings.dart';
 import 'package:snapcrescent_mobile/screens/settings/widgets/device_folders_settings.dart';
+import 'package:snapcrescent_mobile/screens/settings/widgets/files_settings.dart';
 import 'package:snapcrescent_mobile/services/app_config_service.dart';
-import 'package:snapcrescent_mobile/services/asset_service.dart';
 import 'package:snapcrescent_mobile/services/notification_service.dart';
 import 'package:snapcrescent_mobile/services/settings_service.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
-import 'package:snapcrescent_mobile/stores/asset/asset_store.dart';
 import 'package:snapcrescent_mobile/style.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
-import 'package:snapcrescent_mobile/utils/date_utilities.dart';
-import 'package:provider/provider.dart';
 import 'package:snapcrescent_mobile/widgets/footer.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -42,9 +38,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   bool _connectedToServer = false;
   String _loggedInUserName = "";
   String _loggedServerName = "";
-  bool _cacheLocally = false;
-  String _latestAssetDate = "Never";
-  int _syncedAssetCount = 0;
   String _appVersion = "";
   
   final _formKey = GlobalKey<FormState>();
@@ -59,10 +52,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  late AssetStore _assetStore;
-
-  
-
   FutureOr onBackFromChild(dynamic value) {
     _getSettingsData();
     setState(() {});
@@ -72,13 +61,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     await _getAccountInfo();
     _connectedToServer =
         await AppConfigService.instance.getFlag(Constants.appConfigLoggedInFlag);
-    _cacheLocally = await AppConfigService.instance
-        .getFlag(Constants.appConfigCacheLocallyFlag);
-    _latestAssetDate = DateUtilities().formatDate(
-        (await AssetService.instance.getLatestAssetDate()),
-        DateUtilities.timeStampFormat);
-
-    _syncedAssetCount = await AssetService.instance.countOnLocal();
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
@@ -92,9 +74,8 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     List<String> result =
         await SettingsService.instance.getAccountInformation();
 
-    this.serverURLController.text = result[0];
-    _loggedServerName = this
-        .serverURLController
+    serverURLController.text = result[0];
+    _loggedServerName = serverURLController
         .text
         .replaceAll("https://", "")
         .replaceAll("http://", "");
@@ -104,10 +85,10 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     }    
     
 
-    this.nameController.text = result[1];
-    _loggedInUserName = this.nameController.text;
+    nameController.text = result[1];
+    _loggedInUserName = nameController.text;
 
-    this.passwordController.text = result[2];
+    passwordController.text = result[2];
   }
 
   _showAccountInfoDialog() {
@@ -117,7 +98,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Account'),
-          content: Container(
+          content: SizedBox(
               height: 300,
               child: Form(
                   key: _formKey,
@@ -128,7 +109,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
                           autovalidateMode: _autovalidateMode,
                           controller: serverURLController,
                           validator: (v) {
-                            if (v!.length > 0 && _urlRegex.hasMatch(v)) {
+                            if (v!.isNotEmpty && _urlRegex.hasMatch(v)) {
                               return null;
                             } else {
                               return 'Please enter a valid url';
@@ -184,48 +165,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   
-  _showCacheClearConfirmationDialog() {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Are you sure?'),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[Text('This action cannot be undone')],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: const Text('Ok'),
-              onPressed: () {
-                _clearCache();
-              },
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  _clearCache() async {
-    await AssetService.instance.deleteAllData();
-    await _assetStore.refreshStore();
-    _latestAssetDate = DateUtilities().formatDate(
-        (await AssetService.instance.getLatestAssetDate()),
-        DateUtilities.timeStampFormat);
-    await AppConfigService.instance.updateDateConfig(Constants.appConfigLastSyncActivityTimestamp, DateTime(2000, 1, 1, 0, 0, 0, 0, 0), DateUtilities.timeStampFormat);
-    ToastService.showSuccess("Successfully deleted locally cached data.");
-    setState(() {});
-    Navigator.pop(context);
-  }
 
   _onLoginPressed() async {
     if (_formKey.currentState!.validate()) {
@@ -271,18 +210,11 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
 
 
-  _updateCacheLocallyFlag(bool value) async {
-    _cacheLocally = value;
-    await AppConfigService.instance
-        .updateFlag(Constants.appConfigCacheLocallyFlag, value);
-    setState(() {});
-  }
-
-  
+ 
   _settingsList(BuildContext context) {
     return ListView(padding: EdgeInsets.zero, children: <Widget>[
       ListTile(
-        title: Text("Account", style: TitleTextStyle),
+        title: Text("Account", style: titleTextStyle),
         subtitle: Text(_connectedToServer == true
             ? '''$_loggedInUserName@$_loggedServerName'''
             : "Not Connected"),
@@ -298,51 +230,9 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
       if (_connectedToServer)
         AutoBackupSettingsView(),
       DeviceFoldersSettingsView(),
+      FilesSettingsView(),
       ListTile(
-          title: Text("Cache Photos and Videos Locally", style: TitleTextStyle),
-          subtitle: Text(
-              "Automatically download photos and videos from your snap-crescent server"),
-          leading: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: const Icon(Icons.cloud_upload, color: Colors.teal),
-          ),
-          trailing: Switch(
-              value: _cacheLocally,
-              onChanged: (bool value) {
-                _updateCacheLocallyFlag(value);
-              }),
-        ),
-      if (_cacheLocally)
-        ListTile(
-          title: Text("Local Cache Age ", style: TitleTextStyle),
-          subtitle: Text(""),
-          leading: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: const Icon(Icons.sync, color: Colors.teal),
-          ),
-          onTap: () {
-          },
-        ),
-      ListTile(
-        title: Text("Delete Synced Photos and Videos", style: TitleTextStyle),
-        subtitle: Text("Last Sync: " +
-            (_latestAssetDate.isEmpty ? "Never" : _latestAssetDate) +
-            "\n" +
-            "Synced Pictures and Videos Count : " +
-            _syncedAssetCount.toString()),
-        leading: Container(
-          width: 40,
-          alignment: Alignment.center,
-          child: const Icon(Icons.delete, color: Colors.teal),
-        ),
-        onTap: () {
-          _showCacheClearConfirmationDialog();
-        },
-      ),
-      ListTile(
-        title: Text("About App", style: TitleTextStyle),
+        title: Text("About App", style: titleTextStyle),
         subtitle: Text(_appVersion),
         leading: Container(
           width: 40,
@@ -362,14 +252,12 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   @override
   Widget build(BuildContext context) {
 
-    _assetStore = Provider.of<AssetStore>(context);
-
     return FutureBuilder<bool>(
         future: _getSettingsData(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
             return Center(
-              child: Container(
+              child: SizedBox(
                 width: 60,
                 height: 60,
                 child: const CircularProgressIndicator(),

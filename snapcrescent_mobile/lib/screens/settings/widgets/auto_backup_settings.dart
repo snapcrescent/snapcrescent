@@ -10,7 +10,7 @@ import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class AutoBackupSettingsView extends StatefulWidget {
   @override
-  _AutoBackupSettingsViewState createState() => _AutoBackupSettingsViewState();
+  createState() => _AutoBackupSettingsViewState();
 }
 
 class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
@@ -49,28 +49,24 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
     _autoBackupFrequencyType = SettingsService.instance
         .getReadableOfAutoBackupFrequency(_autoBackupFrequency);
 
-    double _autoBackupFrequencyNumber = double.parse(_autoBackupFrequency);
+    double autoBackupFrequencyNumber = double.parse(_autoBackupFrequency);
 
     switch (_autoBackupFrequencyType) {
       case AutoBackupFrequencyType.HOURS:
-        _autoBackupFrequencyNumber = (_autoBackupFrequencyNumber / 60);
+        autoBackupFrequencyNumber = (autoBackupFrequencyNumber / 60);
         _autoBackupFrequencyString =
-            _autoBackupFrequencyNumber.toStringAsFixed(0) +
-                " Hour" +
-                (_autoBackupFrequencyNumber > 1 ? "s" : "");
+            "${autoBackupFrequencyNumber.toStringAsFixed(0)} Hour${autoBackupFrequencyNumber > 1 ? "s" : ""}";
         break;
       case AutoBackupFrequencyType.DAYS:
-        _autoBackupFrequencyNumber = ((_autoBackupFrequencyNumber / 60) / 24);
+        autoBackupFrequencyNumber = ((autoBackupFrequencyNumber / 60) / 24);
         _autoBackupFrequencyString =
-            _autoBackupFrequencyNumber.toStringAsFixed(0) +
-                " Day" +
-                (_autoBackupFrequencyNumber > 1 ? "s" : "");
+            "${autoBackupFrequencyNumber.toStringAsFixed(0)} Day${autoBackupFrequencyNumber > 1 ? "s" : ""}";
         break;
       default:
     }
 
-    this.autoBackUpFrequencyController.text =
-        _autoBackupFrequencyNumber.toStringAsFixed(0);
+    autoBackUpFrequencyController.text =
+        autoBackupFrequencyNumber.toStringAsFixed(0);
   }
 
   _showAutoBackupFrequencyInfoDialog() async {
@@ -81,7 +77,7 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
           title: const Text('Auto Backup Frequency'),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Container(
+              return SizedBox(
                   height: 280,
                   child: Form(
                       key: _formKey,
@@ -92,7 +88,7 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
                               autovalidateMode: _autovalidateMode,
                               controller: autoBackUpFrequencyController,
                               validator: (v) {
-                                if (v!.length > 0) {
+                                if (v!.isNotEmpty) {
                                   return null;
                                 } else {
                                   return 'Please enter a valid value';
@@ -104,8 +100,7 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
                                 FilteringTextInputFormatter.digitsOnly,
                               ]),
                         ),
-                        Container(
-                            child: Column(
+                        Column(
                           children: <Widget>[
                             ListTile(
                               title: const Text('Hours'),
@@ -132,7 +127,7 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
                               ),
                             ),
                           ],
-                        ))
+                        )
                       ])));
             },
           ),
@@ -198,12 +193,13 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
   _settingsList(BuildContext context) {
     return ListView(
       shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
       padding: EdgeInsets.zero, children: <Widget>[
       ListTile(
           title: Text("Backup Settings"),
       ),
       ListTile(
-          title: Text("Auto Backup", style: TitleTextStyle),
+          title: Text("Auto Backup", style: titleTextStyle),
           subtitle: Text(
               "Automatically backup your photos and videos to your snap-crescent server"),
           leading: Container(
@@ -219,7 +215,7 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
         ),
       if (_autoBackup)
         ListTile(
-          title: Text("Auto Backup Frequency ", style: TitleTextStyle),
+          title: Text("Auto Backup Frequency ", style: titleTextStyle),
           subtitle: Text(_autoBackupFrequencyString),
           leading: Container(
             width: 40,
@@ -232,7 +228,7 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
         ),
       if (_autoBackup)
         ListTile(
-          title: Text("Backup Folders", style: TitleTextStyle),
+          title: Text("Backup Folders", style: titleTextStyle),
           subtitle:
               Text(_autoBackupFolders.isNotEmpty ? _autoBackupFolders : "None"),
           leading: Container(
@@ -264,7 +260,7 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
             return Center(
-              child: Container(
+              child: SizedBox(
                 width: 60,
                 height: 60,
                 child: const CircularProgressIndicator(),

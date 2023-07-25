@@ -7,20 +7,20 @@ import 'package:sqflite/sqflite.dart';
 
 class AlbumRepository extends BaseRepository{
 
-  static final _tableName = 'ALBUM'; 
+  static const _tableName = 'ALBUM'; 
 
   AlbumRepository._privateConstructor():super(_tableName);
   static final AlbumRepository instance = AlbumRepository._privateConstructor();
 
   Future<int> countOnLocal(AlbumSearchCriteria albumSearchCriteria) async {
-    Database database = await DatabaseHelper.instance.database;
+    Database database = await DatabaseHelper().database;
     QueryBean queryBean = getSearchQuery(albumSearchCriteria, true);
     final result = await database.rawQuery(queryBean.query,queryBean.arguments).then((value) => value);
     return Sqflite.firstIntValue(result)!;
   }
 
    Future<List<Album>> searchOnLocal(AlbumSearchCriteria albumSearchCriteria) async {
-    Database database = await DatabaseHelper.instance.database;
+    Database database = await DatabaseHelper().database;
     QueryBean queryBean = getSearchQuery(albumSearchCriteria, false);
     final result = await database.rawQuery(queryBean.query,queryBean.arguments);
     return result.map((e) => Album.fromMap(e)).toList();
@@ -29,7 +29,7 @@ class AlbumRepository extends BaseRepository{
   QueryBean getSearchQuery(AlbumSearchCriteria albumSearchCriteria, bool isCountQuery) {
     
     List<Object?>? arguments = [];
-    StringBuffer buffer = new StringBuffer();
+    StringBuffer buffer = StringBuffer();
 
     if(isCountQuery) {
         buffer.write(" SELECT COUNT($_tableName.ID) from ");
@@ -47,7 +47,7 @@ class AlbumRepository extends BaseRepository{
     }
     
 
-    return new QueryBean(buffer.toString(), arguments);
+    return QueryBean(buffer.toString(), arguments);
   }
 
   
