@@ -21,7 +21,7 @@ public class SecuredStreamTokenUtil {
 	
 	
 	public String getSignedAssetStreamToken(Thumbnail thumbnail) {
-		String filePath = fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getPath(), thumbnail.getName()).getAbsolutePath();
+		String filePath = fileService.getFile(FILE_TYPE.THUMBNAIL, thumbnail.getCreatedByUserId(), thumbnail.getPath(), thumbnail.getName()).getAbsolutePath();
 		return generateToken(null, filePath);
 		
 	}
@@ -38,7 +38,7 @@ public class SecuredStreamTokenUtil {
 			fileType = FILE_TYPE.VIDEO;
 		}
 		
-		String filePath = fileService .getFile(fileType, asset.getMetadata().getPath(), asset.getMetadata().getInternalName()).getAbsolutePath();
+		String filePath = fileService .getFile(fileType, asset.getCreatedByUserId(), asset.getMetadata().getPath(), asset.getMetadata().getInternalName()).getAbsolutePath();
 
 		return generateToken(asset.getAssetType(), filePath);
 	}

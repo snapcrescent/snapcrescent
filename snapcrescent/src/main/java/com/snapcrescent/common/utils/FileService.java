@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +35,9 @@ public class FileService {
 		
     }
 	
-	public byte[] readFileBytes(FILE_TYPE fileType,String path, String fileName) {
+	public byte[] readFileBytes(FILE_TYPE fileType,Long userId,String path, String fileName) {
 		
-		File file = getFile(fileType, path, fileName);
+		File file = getFile(fileType, userId, path, fileName);
 		
 		byte[] fileBytes = null;
 		try {
@@ -49,47 +50,67 @@ public class FileService {
 		return fileBytes;
 	}
 	
-	public long getFileSize(FILE_TYPE fileType,String path, String fileName) throws IOException {
-		return Files.size(Paths.get(getBasePath(fileType) + path + fileName));
+	public long getFileSize(FILE_TYPE fileType, Long userId,String path, String fileName) throws IOException {
+		return Files.size(Paths.get(getBasePath(fileType, userId) + path + fileName));
 	}
 	
-	public File getFile(FILE_TYPE fileType, String path, String fileName) {
-		return new File(getBasePath(fileType) + path + fileName);
+	public File getFile(FILE_TYPE fileType, Long userId, String path, String fileName) {
+		return new File(getBasePath(fileType, userId) + path + fileName);
 	}
 	
-	public InputStream getFileInputStream(FILE_TYPE fileType, String path, String fileName) throws IOException {
-		return Files.newInputStream(Paths.get(getBasePath(fileType) + path + fileName));
+	public InputStream getFileInputStream(FILE_TYPE fileType, Long userId, String path, String fileName) throws IOException {
+		return Files.newInputStream(Paths.get(getBasePath(fileType, userId) + path + fileName));
 	}
 	
-	public void removeFile(FILE_TYPE fileType,String path, String fileName) throws IOException {
-		Files.delete(Paths.get(getBasePath(fileType) + path + fileName));
+	public void removeFile(FILE_TYPE fileType, Long userId,String path, String fileName) throws IOException {
+		Files.delete(Paths.get(getBasePath(fileType, userId) + path + fileName));
 	}
 	
-	public String getBasePath(AssetType assetType) {
+	public void removeFile(Long userId) throws IOException {
+		removeFile(getBasePath(userId));
+	}
+	
+	public void removeFile(String path) throws IOException {
+		FileUtils.deleteDirectory(new File(path));
+	}
+	
+	public String getBasePath(AssetType assetType, Long userId) {
 		
 		String basepath = null;
 		
 		if(assetType == AssetType.PHOTO) {
-			basepath =  getBasePath(FILE_TYPE.PHOTO);
+			basepath =  getBasePath(FILE_TYPE.PHOTO, userId);
 		} else  if(assetType == AssetType.VIDEO) {
-			basepath =  getBasePath(FILE_TYPE.VIDEO);
+			basepath =  getBasePath(FILE_TYPE.VIDEO, userId);
 		} 
 		
 		return basepath;
 	}
 	
-	public String getBasePath(FILE_TYPE fileType) {
+	public String getBasePath(FILE_TYPE fileType, Long userId) {
 		
-		String basepath = null;
+		String basepath = getBasePath(userId);
+		
 		
 		if(fileType == FILE_TYPE.THUMBNAIL) {
-			basepath =  EnvironmentProperties.STORAGE_PATH + Constant.THUMBNAIL_FOLDER;
+			basepath =  basepath + Constant.THUMBNAIL_FOLDER;
 		} else  if(fileType == FILE_TYPE.PHOTO) {
-			basepath = EnvironmentProperties.STORAGE_PATH + Constant.PHOTO_FOLDER;
+			basepath = basepath + Constant.PHOTO_FOLDER;
 		} else if(fileType == FILE_TYPE.VIDEO) {
-			basepath = EnvironmentProperties.STORAGE_PATH + Constant.VIDEO_FOLDER;
+			basepath = basepath + Constant.VIDEO_FOLDER;
 		}
+		
 		return basepath;
+	}
+	
+	public String getBasePath(Long userId) {
+		
+		String basepath = EnvironmentProperties.STORAGE_PATH;
+		if(!basepath.endsWith("/") && !basepath.endsWith("\\")) {
+			basepath = basepath + "/";
+		}
+		
+		return basepath +  userId;
 	}
 	
 	public boolean mkdirs(String directoryPath) {

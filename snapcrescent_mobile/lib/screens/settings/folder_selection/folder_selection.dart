@@ -3,6 +3,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
 import 'package:snapcrescent_mobile/style.dart';
+import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
 
 class FolderSelectionScreen extends StatelessWidget {
   static const routeName = '/folder_selection';
@@ -18,7 +19,7 @@ class FolderSelectionScreen extends StatelessWidget {
           title: Text('Device Folders'),
           backgroundColor: Colors.black,
         ),
-        body: _FoldersScreenView(this.appConfigKey));
+        body: _FoldersScreenView(appConfigKey));
   }
 }
 
@@ -39,9 +40,9 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
   Future<List<AssetPathEntity>> _getDeviceFolderList() async {
     await _getFolderInfo();
   
-    final PermissionState _ps = await PhotoManager.requestPermissionExtend();
+    bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
 
-    if (!_ps.isAuth) {
+    if (!permissionReady) {
       ToastService.showError('Permission to device folders denied!');
       Navigator.pop(context);
       return Future.value([]);
@@ -54,7 +55,7 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
     List<String> folderNameList = _folders.split(",");
 
     _folderStatusList = folders
-        .map((asset) => folderNameList.indexOf(asset.id) > -1 ? true : false)
+        .map((asset) => folderNameList.contains(asset.id) ? true : false)
         .toList();
     _folderList = folders.map((asset) => asset.id).toList();
 
@@ -95,11 +96,11 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
             child: Text(
                 "Selected folder from the list below")),
         Expanded(
-            child: new ListView.builder(
+            child: ListView.builder(
                 itemCount: assets.length,
-                itemBuilder: (BuildContext ctxt, int index) {
-                  return new SwitchListTile(
-                    title: Text(assets[index].name, style: TitleTextStyle),
+                itemBuilder: (BuildContext context, int index) {
+                  return SwitchListTile(
+                    title: Text(assets[index].name, style: titleTextStyle),
                     secondary: const Icon(Icons.folder),
                     value: _folderStatusList[index],
                     onChanged: (bool value) {

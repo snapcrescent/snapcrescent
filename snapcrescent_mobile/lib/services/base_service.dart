@@ -12,13 +12,13 @@ class BaseService {
         .findByKey(Constants.appConfigServerURL);
 
     if (_dio == null) {
-      BaseOptions options = new BaseOptions(
+      BaseOptions options = BaseOptions(
           baseUrl: baseURL.configValue!,
           receiveDataWhenStatusError: true,
           connectTimeout: Duration(hours: 0, minutes: 1, seconds: 0),
           receiveTimeout: Duration(hours: 0, minutes: 5, seconds: 0));
 
-      _dio = new Dio(options);
+      _dio = Dio(options);
     } else {
       _dio!.options.baseUrl = baseURL.configValue!;
     }
@@ -49,7 +49,7 @@ class BaseService {
     final appConfigSessionTokenConfig = await AppConfigRepository.instance
         .findByKey(Constants.appConfigSessionToken);
     headers["Authorization"] =
-        "Bearer " + appConfigSessionTokenConfig.configValue!;
+        "Bearer ${appConfigSessionTokenConfig.configValue!}";
 
     return headers;
   }
@@ -64,7 +64,7 @@ class BaseService {
       }
 
       if (value is String || value is int || value is double || value is bool) {
-        if (query.length > 0) {
+        if (query.isNotEmpty) {
           query += '$prefix$key=$value';
         } else {
           query += '$key=$value';

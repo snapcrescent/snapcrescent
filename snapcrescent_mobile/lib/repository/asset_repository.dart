@@ -7,20 +7,25 @@ import 'package:sqflite/sqflite.dart';
 
 class AssetRepository extends BaseRepository{
 
-  static final _tableName = 'ASSET'; 
+  static const _tableName = 'ASSET'; 
 
-  AssetRepository._privateConstructor():super(_tableName);
-  static final AssetRepository instance = AssetRepository._privateConstructor();
+  static final AssetRepository _singleton = AssetRepository._internal();
+
+  factory AssetRepository() {
+    return _singleton;
+  }
+
+  AssetRepository._internal() : super(_tableName);
 
   Future<int> countOnLocal(AssetSearchCriteria assetSearchCriteria) async {
-    Database database = await DatabaseHelper.instance.database;
+    Database database = await DatabaseHelper().database;
     QueryBean queryBean = getSearchQuery(assetSearchCriteria, true);
     final result = await database.rawQuery(queryBean.query,queryBean.arguments).then((value) => value);
     return Sqflite.firstIntValue(result)!;
   }
 
    Future<List<Asset>> searchOnLocal(AssetSearchCriteria assetSearchCriteria) async {
-    Database database = await DatabaseHelper.instance.database;
+    Database database = await DatabaseHelper().database;
     QueryBean queryBean = getSearchQuery(assetSearchCriteria, false);
     final result = await database.rawQuery(queryBean.query,queryBean.arguments);
     return result.map((e) => Asset.fromMap(e)).toList();
@@ -29,7 +34,7 @@ class AssetRepository extends BaseRepository{
   QueryBean getSearchQuery(AssetSearchCriteria assetSearchCriteria, bool isCountQuery) {
     
     List<Object?>? arguments = [];
-    StringBuffer buffer = new StringBuffer();
+    StringBuffer buffer = StringBuffer();
 
     if(isCountQuery) {
         buffer.write(" SELECT COUNT($_tableName.ID) from ");
@@ -60,7 +65,7 @@ class AssetRepository extends BaseRepository{
     }
     
 
-    return new QueryBean(buffer.toString(), arguments);
+    return QueryBean(buffer.toString(), arguments);
   }
 
 }

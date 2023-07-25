@@ -1,7 +1,7 @@
-import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
+import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
 
 class NotificationService {
   NotificationService._privateConstructor() : super();
@@ -11,11 +11,11 @@ class NotificationService {
   static final NotificationService instance = NotificationService._privateConstructor();
 
   Future initialize() async {
-    await requestPermissions();
+    await PermissionUtilities().checkAndAskForNotificationPermission();
 
-    var androidInitialize = new AndroidInitializationSettings('mipmap/ic_launcher');
-    var iOSInitialize = new DarwinInitializationSettings();
-    var initializationsSettings = new InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
+    var androidInitialize = AndroidInitializationSettings('mipmap/ic_launcher');
+    var iOSInitialize = DarwinInitializationSettings();
+    var initializationsSettings = InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
     await _flutterLocalNotificationsPlugin.initialize(initializationsSettings);
   }
 
@@ -33,16 +33,14 @@ class NotificationService {
   }
 
   showNotification(String title,String message, [String? channelName]) async {
-    if(await isAndroidPermissionGranted()) {
+    if(await PermissionUtilities().isNotificationPermissionGranted()) {
 
-      if(channelName == null) {
-      channelName = Constants.defaultNotificationChannel;
-    }
+      channelName ??= Constants.defaultNotificationChannel;
     await _flutterLocalNotificationsPlugin.show(
           Constants.notificationChannelId,
           title,
           message,
-          new NotificationDetails(
+          NotificationDetails(
             android: AndroidNotificationDetails(
               "Snap-Crescent",
               channelName,
@@ -50,7 +48,7 @@ class NotificationService {
               playSound: false,
               enableVibration: false,
               onlyAlertOnce: true,
-              importance:Importance.min,
+              importance:Importance.none,
               priority:Priority.min
             ),
           ),
@@ -64,38 +62,4 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.cancelAll();
   }
 
-  Future<bool> isAndroidPermissionGranted() async {
-    bool granted = false;
-    if (Platform.isAndroid) {
-      granted = await _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.areNotificationsEnabled() ?? false;   
-      }
-    return granted;
-  }
-
-  Future<void> requestPermissions() async {
-    if (Platform.isIOS || Platform.isMacOS) {
-      await _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(
-            alert: true,
-            badge: true,
-            sound: true,
-          );
-      await _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              MacOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(
-            alert: true,
-            badge: true,
-            sound: true,
-          );
-    } else if (Platform.isAndroid) {
-      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-          _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-
-      await androidImplementation?.requestPermission();
-    }
-  }
 }

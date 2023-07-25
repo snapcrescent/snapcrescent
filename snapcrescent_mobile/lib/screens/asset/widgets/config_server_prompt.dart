@@ -106,19 +106,18 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
                   onPressed: () {
                     _onDoNotShowLoginPromptAgain();
                   },
-                  child: Text('Do not show again'),
                   style: ElevatedButton.styleFrom(shape: StadiumBorder()),
+                  child: Text('Do not show again'),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute<dynamic>(
-                            builder: (BuildContext context) =>
-                                SettingsScreen()));
+                    Navigator.pushReplacement(
+            context,
+            MaterialPageRoute<dynamic>(
+                builder: (BuildContext context) => SettingsScreen()));
                   },
-                  child: Text('Login now'),
                   style: ElevatedButton.styleFrom(shape: StadiumBorder()),
+                  child: Text('Login now'),
                 ),
               ],
             )
@@ -140,19 +139,18 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
                   onPressed: () {
                     _onDoNotShowAutoBackUpPromptAgain();
                   },
-                  child: Text('Do not show again'),
                   style: ElevatedButton.styleFrom(shape: StadiumBorder()),
+                  child: Text('Do not show again'),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute<dynamic>(
-                            builder: (BuildContext context) =>
-                                SettingsScreen()));
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute<dynamic>(
+                          builder: (BuildContext context) => SettingsScreen()));
                   },
-                  child: Text('Enable Auto Backup now'),
                   style: ElevatedButton.styleFrom(shape: StadiumBorder()),
+                  child: Text('Enable Auto Backup now'),
                 ),
               ],
             )
@@ -164,12 +162,14 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
     await AppConfigService.instance
         .updateFlag(Constants.appConfigShowLoginPromptFlag, false);
     _getAppConfigs();
+    setState(() {});
   }
 
   _onDoNotShowAutoBackUpPromptAgain() async {
     await AppConfigService.instance
         .updateFlag(Constants.appConfigShowAutoBackupPromptFlag, false);
     _getAppConfigs();
+    setState(() {});
   }
 
   @override
@@ -179,7 +179,7 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
             return Center(
-              child: Container(
+              child: SizedBox(
                 width: 60,
                 height: 60,
                 child: const CircularProgressIndicator(),

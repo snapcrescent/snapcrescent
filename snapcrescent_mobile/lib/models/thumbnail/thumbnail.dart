@@ -31,6 +31,7 @@ class Thumbnail extends BaseUiBean {
         );
   }
 
+  @override
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = super.toMap();
 

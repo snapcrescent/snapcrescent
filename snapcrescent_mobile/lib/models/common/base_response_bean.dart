@@ -36,11 +36,11 @@ class BaseResponseBean<ID, T> extends BaseResponse {
       logoutResponse: json['logoutResponse'],
       message: json['message'],
       object: json['object'] == null ? null : fromJsonModel(json['object']),
-      objects: json['objects']  == null ? null : new List<T>.from(objects.map((objectJson) => fromJsonModel(objectJson))),
-      objectId: json['objectId'] ?? null,
-      totalResultsCount: json['totalResultsCount'] ?? null,
-      resultCountPerPage: json['resultCountPerPage'] ?? null,
-      currentPageIndex: json['currentPageIndex'] ?? null,
+      objects: json['objects']  == null ? null : List<T>.from(objects.map((objectJson) => fromJsonModel(objectJson))),
+      objectId: json['objectId'],
+      totalResultsCount: json['totalResultsCount'],
+      resultCountPerPage: json['resultCountPerPage'],
+      currentPageIndex: json['currentPageIndex'],
     );
   }
 }

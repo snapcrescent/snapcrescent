@@ -17,23 +17,23 @@ import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 
 class SyncService extends BaseService {
-  SyncService._privateConstructor() : super();
+  static final SyncService _singleton = SyncService._internal();
 
   factory SyncService() {
-    return _instance;
+    return _singleton;
   }
 
-  static final SyncService _instance = SyncService._privateConstructor();
+  SyncService._internal();
 
   Future<void> syncAssets(Function progressCallBack) async {
     
-    SyncState syncMetadata = new SyncState(0, 0, 0, 0);
+    SyncState syncMetadata = SyncState(0, 0, 0, 0);
 
-    bool _executionInProgress = await AppConfigService.instance.getFlag(Constants.appConfigSyncInProgress);
+    bool executionInProgress = await AppConfigService.instance.getFlag(Constants.appConfigSyncInProgress);
 
     bool syncNow = false;
 
-    if (!_executionInProgress) {
+    if (!executionInProgress) {
       syncNow = true;
     } else {
         DateTime? lastSyncActivityTimestamp = await AppConfigService.instance.getDateConfig(Constants.appConfigLastSyncActivityTimestamp, DateUtilities.timeStampFormat);
@@ -51,18 +51,18 @@ class SyncService extends BaseService {
     }
 
     if (syncNow) {
-      bool _loggedInToServer = await AppConfigService.instance.getFlag(Constants.appConfigLoggedInFlag);
+      bool loggedInToServer = await AppConfigService.instance.getFlag(Constants.appConfigLoggedInFlag);
 
-      if(_loggedInToServer) {
+      if(loggedInToServer) {
         await PhotoManager.setIgnorePermissionCheck(true);
         
         await AppConfigService.instance.updateFlag(Constants.appConfigSyncInProgress, true );
 
         await _downloadAssetsFromServer(syncMetadata, progressCallBack);
 
-        bool _autoBackupEnabled = await AppConfigService.instance.getFlag(Constants.appConfigAutoBackupFlag);
+        bool autoBackupEnabled = await AppConfigService.instance.getFlag(Constants.appConfigAutoBackupFlag);
         
-        if(_autoBackupEnabled) {
+        if(autoBackupEnabled) {
           await _uploadAssetsToServer(syncMetadata, progressCallBack);
         }
         
@@ -78,7 +78,7 @@ class SyncService extends BaseService {
     bool refreshAssetStores = false;
 
     DateTime? latestAssetDate =
-        await AssetService.instance.getLatestAssetDate();
+        await AssetService().getLatestAssetDate();
 
     try {
         AssetSearchCriteria assetSearchCriteria =
@@ -86,7 +86,7 @@ class SyncService extends BaseService {
         assetSearchCriteria.resultPerPage = 1;
 
         BaseResponseBean<int, Asset> serverAssetResponse =
-            await AssetService.instance.search(assetSearchCriteria);
+            await AssetService().search(assetSearchCriteria);
 
         if (serverAssetResponse.totalResultsCount! > 0) {
           DateTime latestServerAssetDate =
@@ -107,12 +107,12 @@ class SyncService extends BaseService {
               refreshAssetStores = true;
             }
 
-            final newAssetCount = await AssetService.instance.countOnLocal();
+            final newAssetCount = await AssetService().countOnLocal();
             if (serverAssetResponse.totalResultsCount! < newAssetCount) {
               //Server has less records than app, means some server items are deleted
               AssetSearchCriteria assetSearchCriteria =
                   AssetSearchCriteria.defaultCriteria();
-              await AssetService.instance
+              await AssetService()
                   .searchAndSyncInactiveRecords(assetSearchCriteria);
               refreshAssetStores = true;
             } else if (serverAssetResponse.totalResultsCount! > newAssetCount) {
@@ -126,7 +126,7 @@ class SyncService extends BaseService {
           // No records present on server
           // It is first boot of server or server is reset and it has no data
           // Empty the local sync info
-          await AssetService.instance.deleteAllData();
+          await AssetService().deleteAllData();
 
           refreshAssetStores = true;
         }
@@ -151,7 +151,7 @@ class SyncService extends BaseService {
     }
 
     final assetCountResponse =
-        await AssetService.instance.search(searchCriteria);
+        await AssetService().search(searchCriteria);
     syncMetadata.totalServerAssetCount = assetCountResponse.totalResultsCount!;
 
     if (syncMetadata.totalServerAssetCount > 0) {
@@ -161,9 +161,9 @@ class SyncService extends BaseService {
       searchCriteria.resultPerPage = syncMetadata.totalServerAssetCount;
       searchCriteria.resultType = ResultType.SEARCH;
 
-      await AssetService.instance.searchAndSync(searchCriteria,
-          (_downloadedAssetCount) {
-        syncMetadata.downloadedAssetCount = _downloadedAssetCount;
+      await AssetService().searchAndSync(searchCriteria,
+          (downloadedAssetCount) {
+        syncMetadata.downloadedAssetCount = downloadedAssetCount;
 
         if (
           syncMetadata.downloadedAssetCount % 10 == 0
@@ -182,18 +182,20 @@ class SyncService extends BaseService {
     bool refreshAssetStores = false;
     syncMetadata.uploadedAssetCount = 0;
     try {
-        List<File> assets = await _getAssetsSetForAutoBackUp();
+        List<AssetEntity> assets = await _getAssetsSetForAutoBackUp();
 
         List<File> filteredAssets = [];
         for (var asset in assets) {
-          String filePath = asset.path;
-          String fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length);
-          int size = asset.lengthSync();
-          Metadata? metadata = await MetadataService.instance.findByNameAndSize(fileName, size);
-
+          
+          Metadata? metadata = await MetadataService().findByLocalAssetId(asset.id);
+          
           if (metadata == null) {
             //The asset is not uploaded to server yet;
-            filteredAssets.add(asset);
+            File? assetFile = await asset.file;
+
+            if(assetFile != null) {
+              filteredAssets.add(assetFile);
+            }
           }
         }
 
@@ -209,7 +211,7 @@ class SyncService extends BaseService {
 
         for (final File asset in filteredAssets) {
           postUploadUpdates(syncMetadata, progressCallBack);
-          await AssetService.instance.save([asset]);
+          await AssetService().save([asset]);
           syncMetadata.uploadedAssetCount = syncMetadata.uploadedAssetCount + 1;
           postUploadUpdates(syncMetadata, progressCallBack);
         }
@@ -220,8 +222,8 @@ class SyncService extends BaseService {
     return refreshAssetStores;
   }
 
-  _getAssetsSetForAutoBackUp() async {
-    List<File> assetFiles = [];
+  Future<List<AssetEntity>> _getAssetsSetForAutoBackUp() async {
+    List<AssetEntity> assets = [];
 
     try {
       AppConfig value = await AppConfigRepository.instance
@@ -237,7 +239,7 @@ class SyncService extends BaseService {
         List<AssetPathEntity> autoBackupFolders = [];
 
         for (int i = 0; i < folders.length; i++) {
-          if (autoBackupFolderNameList.indexOf(folders[i].id) > -1) {
+          if (autoBackupFolderNameList.contains(folders[i].id)) {
             autoBackupFolders.add(folders[i]);
           }
         }
@@ -250,23 +252,20 @@ class SyncService extends BaseService {
             end: 100000, // end at a very big index (to get all the assets)
           );
 
-          for (final AssetEntity asset in allAssets) {
-            final File? assetFile = await asset.file;
-            assetFiles.add(assetFile!);
-          }
+          assets = allAssets;
         }
       }
     } catch (e) {
       print("Network error");
     }
 
-    return assetFiles;
+    return assets;
   }
 
   postDownloadUpdates(SyncState syncMetadata, Function progressCallBack) {
     NotificationService.instance.showNotification(
         "Downloading photos and videos",
-        "Downloaded : " + syncMetadata.downloadedPercentageString(),
+        '''Downloaded : ${syncMetadata.downloadedPercentageString()}''',
         Constants.downloadProgressNotificationChannel);
     updateLastSyncActivityTimestamp();
     progressCallBack(syncMetadata);
@@ -275,7 +274,7 @@ class SyncService extends BaseService {
   postUploadUpdates(SyncState syncMetadata, Function progressCallBack) {
     NotificationService.instance.showNotification(
         "Uploading photos and videos",
-        "Uploaded : " + syncMetadata.uploadPercentageString(),
+        '''Uploaded : ${syncMetadata.uploadPercentageString()}''',
         Constants.uploadProgressNotificationChannel);
     updateLastSyncActivityTimestamp();
     progressCallBack(syncMetadata);

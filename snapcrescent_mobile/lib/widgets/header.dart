@@ -8,7 +8,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
   Header();
 
   @override
-    Size get preferredSize => new Size.fromHeight(kToolbarHeight);
+    Size get preferredSize => Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class _HeaderViewState extends State<_HeaderView> {
   }
 
   _body() {
-    return new AppBar(
+    return AppBar(
       backgroundColor: Colors.black,
       centerTitle: true,
       title: Text("Snapcrescent",
@@ -77,7 +77,7 @@ class _HeaderViewState extends State<_HeaderView> {
         future: _getValue(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
-            return new Container();
+            return Container();
           } else {
             return _body();
           }

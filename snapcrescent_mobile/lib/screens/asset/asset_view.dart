@@ -11,8 +11,8 @@ import 'package:snapcrescent_mobile/models/unified_asset.dart';
 import 'package:snapcrescent_mobile/services/asset_service.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
 import 'package:snapcrescent_mobile/state/asset_state.dart';
-import 'package:snapcrescent_mobile/utils/common_utilities.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
+import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
 
 class AssetViewScreen extends StatelessWidget {
   static const routeName = '/asset_detail';
@@ -78,7 +78,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
     if (unifiedAsset!.assetSource == AssetSource.CLOUD) {
       Asset asset = unifiedAsset.asset!;
       String assetURL =
-          AssetService.instance.streamAssetByIdUrl(serverUrl, asset.token!);
+          AssetService().streamAssetByIdUrl(serverUrl, asset.token!);
 
       dataSource = BetterPlayerDataSource(
         BetterPlayerDataSourceType.network,
@@ -102,11 +102,10 @@ class _AssetViewViewState extends State<_AssetViewView> {
       _betterPlayerController!.setupDataSource(dataSource);
     }
 
-    return Container(
-        child: AspectRatio(
+    return AspectRatio(
       aspectRatio: 16 / 9,
       child: BetterPlayer(controller: _betterPlayerController!),
-    ));
+    );
   }
 
   _imageBanner(UniFiedAsset unifiedAsset, Object? object) {
@@ -115,16 +114,14 @@ class _AssetViewViewState extends State<_AssetViewView> {
 
       return PhotoView(
           loadingBuilder: (context, progress) => Center(
-                child: Container(
-                  child: Image.file(asset.thumbnail!.thumbnailFile!,
+                child: Image.file(asset.thumbnail!.thumbnailFile!,
                       fit: BoxFit.fitWidth),
-                ),
               ),
           gaplessPlayback: true,
           minScale: PhotoViewComputedScale.contained * 0.8,
           maxScale: PhotoViewComputedScale.covered * 1.8,
           imageProvider: NetworkImage(
-              AssetService.instance.streamAssetByIdUrl(serverUrl, asset.token!),
+              AssetService().streamAssetByIdUrl(serverUrl, asset.token!),
               headers: headers));
     } else if (unifiedAsset.assetSource == AssetSource.DEVICE &&
         object is File) {
@@ -136,8 +133,8 @@ class _AssetViewViewState extends State<_AssetViewView> {
   void initState() {
     super.initState();
 
-    AssetService.instance.getHeadersMap().then((value) => {headers = value});
-    AssetService.instance.getServerUrl().then((value) => {serverUrl = value});
+    AssetService().getHeadersMap().then((value) => {headers = value});
+    AssetService().getServerUrl().then((value) => {serverUrl = value});
 
     pageController = PageController(
       initialPage: widget.assetIndex,
@@ -148,18 +145,18 @@ class _AssetViewViewState extends State<_AssetViewView> {
   Future<void> _shareAssetFile(int assetIndex) async {
     _updateProcessingBarVisibility(true);
     final List<XFile> assetFiles =
-        await AssetService.instance.getAssetFilesForSharing([assetIndex]);
+        await AssetService().getAssetFilesForSharing([assetIndex]);
     await Share.shareXFiles(assetFiles);
     _updateProcessingBarVisibility(false);
   }
 
   Future<void> _downloadAsset(int assetIndex) async {
     _updateProcessingBarVisibility(true);
-    bool _permissionReady = await CommonUtilities().checkPermission();
+    bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
 
-    if (_permissionReady) {
+    if (permissionReady) {
       final bool success =
-          await AssetService.instance.downloadAssetFilesToDevice([assetIndex]);
+          await AssetService().downloadAssetFilesToDevice([assetIndex]);
       if (success) {
         ToastService.showSuccess("Successfully downloaded files.");
       }
@@ -168,11 +165,11 @@ class _AssetViewViewState extends State<_AssetViewView> {
   }
 
   _uploadAsset(int assetIndex) async {
-    bool _permissionReady = await CommonUtilities().checkPermission();
+    bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
 
-    if (_permissionReady) {
+    if (permissionReady) {
       _updateProcessingBarVisibility(true);
-      final bool success = await AssetService.instance
+      final bool success = await AssetService()
           .uploadAssetFilesToServer([assetIndex]);
       if (success) {
         ToastService.showSuccess("Successfully uploaded files.");
@@ -200,7 +197,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
             currentAsset = AssetState.instance.assetList[index];
 
             if(currentAsset!.assetSource == AssetSource.DEVICE) {
-                return Container(
+                return SizedBox(
                 width: 90,
                 height: 90,
                 child: currentAsset!.assetType == AppAssetType.PHOTO
@@ -215,7 +212,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
                     return Container();
                   } else {
 
-                  return Container(
+                  return SizedBox(
                     width: 90,
                     height: 90,
                     child: currentAsset!.assetType == AppAssetType.PHOTO
@@ -230,7 +227,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
   }
 
   _getAssetById (int index) async {
-      BaseResponseBean<int, Asset> response = await AssetService.instance.getAssetById(AssetState.instance.assetList[index].asset!.id!);
+      BaseResponseBean<int, Asset> response = await AssetService().getAssetById(AssetState.instance.assetList[index].asset!.id!);
       AssetState.instance.assetList[index].asset!.token = response.object!.token!;
       return AssetState.instance.assetList[index].asset;
   }
@@ -238,8 +235,8 @@ class _AssetViewViewState extends State<_AssetViewView> {
   _pageView() {
     return Container(
       color: Colors.black,
-      child: new Stack(fit: StackFit.expand, children: <Widget>[
-        new Scaffold(
+      child: Stack(fit: StackFit.expand, children: <Widget>[
+        Scaffold(
           backgroundColor: Colors.transparent,
           body: PageView.builder(
             controller: pageController,
@@ -259,7 +256,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
           children: <Widget>[
             Expanded(
               flex: 0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: IconButton(
@@ -277,7 +274,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
             ),
             Expanded(
               flex: 0,
-              child: Container(
+              child: SizedBox(
                 width: 200.0,
                 height: 100.0,
                 child: Row(
@@ -290,7 +287,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
                               if(!showProcessing) {
                                 _uploadAsset(widget.assetIndex);
                               } else{
-                                return null;
+                                return;
                               }
                             },
                             icon: Icon(Icons.upload, color: Colors.white)),
@@ -301,7 +298,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
                               if(!showProcessing) {
                                 _downloadAsset(widget.assetIndex);
                               } else{
-                                return null;
+                                return;
                               }
                             },
                             icon: Icon(Icons.download, color: Colors.white)),
@@ -310,7 +307,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
                             if(!showProcessing) {
                                 _shareAssetFile(widget.assetIndex);
                             } else{
-                              return null;
+                              return;
                             }
                           },
                           icon: Icon(Icons.share, color: Colors.white))
@@ -329,7 +326,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
       body: Column(
         children: [
           if(showProcessing) 
-            Expanded(flex:0, child: Container( height: 2,child: const LinearProgressIndicator(),)),
+            Expanded(flex:0, child: SizedBox( height: 2,child: const LinearProgressIndicator(),)),
           Expanded(child : _pageView()),
         ],
       ),

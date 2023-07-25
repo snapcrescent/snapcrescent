@@ -2,9 +2,14 @@ import 'package:snapcrescent_mobile/repository/base_repository.dart';
 
 class ThumbnailRepository extends BaseRepository{
 
-  static final _tableName = 'THUMBNAIL'; 
+  static const _tableName = 'THUMBNAIL'; 
 
-  ThumbnailRepository._privateConstructor():super(_tableName);
-  static final ThumbnailRepository instance = ThumbnailRepository._privateConstructor();
+  static final ThumbnailRepository _singleton = ThumbnailRepository._internal();
+
+  factory ThumbnailRepository() {
+    return _singleton;
+  }
+
+  ThumbnailRepository._internal():super(_tableName);
   
 }

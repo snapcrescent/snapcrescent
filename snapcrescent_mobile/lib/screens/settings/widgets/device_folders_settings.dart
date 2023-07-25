@@ -9,7 +9,7 @@ import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class DeviceFoldersSettingsView extends StatefulWidget {
   @override
-  _DeviceFoldersSettingsViewState createState() => _DeviceFoldersSettingsViewState();
+  createState() => _DeviceFoldersSettingsViewState();
 }
 
 class _DeviceFoldersSettingsViewState extends State<DeviceFoldersSettingsView> {
@@ -57,12 +57,13 @@ class _DeviceFoldersSettingsViewState extends State<DeviceFoldersSettingsView> {
   _settingsList(BuildContext context) {
     return ListView(
       shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
       padding: EdgeInsets.zero, children: <Widget>[
       ListTile(
-          title: Text("Device Folders Settings"),
+          title: Text("Local Library Settings"),
       ),
       ListTile(
-          title: Text("Show Device Photos And Videos", style: TitleTextStyle),
+          title: Text("Show Local Photos And Videos", style: titleTextStyle),
           subtitle:
               Text("Show photos and videos on your device on snap crescent"),
           leading: Container(
@@ -77,7 +78,7 @@ class _DeviceFoldersSettingsViewState extends State<DeviceFoldersSettingsView> {
               })),
       if (_showDeviceAssets)
         ListTile(
-          title: Text("Device Folders", style: TitleTextStyle),
+          title: Text("Local Folders", style: titleTextStyle),
           subtitle: Text(_showDeviceAssetsFolders.isNotEmpty
               ? _showDeviceAssetsFolders
               : "None"),
@@ -111,7 +112,7 @@ class _DeviceFoldersSettingsViewState extends State<DeviceFoldersSettingsView> {
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
             return Center(
-              child: Container(
+              child: SizedBox(
                 width: 60,
                 height: 60,
                 child: const CircularProgressIndicator(),

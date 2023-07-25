@@ -10,7 +10,7 @@ class AppConfigService extends BaseService {
 
   updateFlag(String flag, bool value) async {
     AppConfig appConfig =
-        new AppConfig(configKey: flag, configValue: value.toString());
+        AppConfig(configKey: flag, configValue: value.toString());
 
     await AppConfigRepository.instance.saveOrUpdateConfig(appConfig);
   }
@@ -18,14 +18,14 @@ class AppConfigService extends BaseService {
   Future<bool> getFlag(String flag, [bool? defaultValue]) async {
     AppConfig value = await AppConfigRepository.instance.findByKey(flag);
 
-    bool _flag = false;
+    bool flag0 = false;
     if (value.configValue != null) {
-      _flag = value.configValue == 'true' ? true : false;
+      flag0 = value.configValue == 'true' ? true : false;
     } else if (defaultValue != null) {
-      _flag = defaultValue;
+      flag0 = defaultValue;
     }
 
-    return _flag;
+    return flag0;
   }
 
 
@@ -44,9 +44,7 @@ class AppConfigService extends BaseService {
   Future<List<String>> getStringListConfig(String configKey,[Pattern? separator]) async {
     String? appConfigValueString = await getConfig(configKey);
 
-    if(separator == null) {
-      separator = ",";
-    }
+    separator ??= ",";
 
     if (appConfigValueString != null) {
       return appConfigValueString.split(separator);
@@ -74,7 +72,7 @@ class AppConfigService extends BaseService {
 
   updateConfig(String configKey, String configValue) async {
     AppConfig appConfig =
-        new AppConfig(configKey: configKey, configValue: configValue);
+        AppConfig(configKey: configKey, configValue: configValue);
 
     await AppConfigRepository.instance.saveOrUpdateConfig(appConfig);
   }

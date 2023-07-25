@@ -26,16 +26,20 @@ class App extends StatelessWidget {
         initialRoute: SplashScreen.routeName,
         theme: _theme(),
         onGenerateRoute: _generateRoute,
+        onUnknownRoute: (RouteSettings settings) {
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (BuildContext context) =>
+              Scaffold(body: Center(child: Text('Not Found'))),
+        );
+      },
         navigatorKey: navigatorKey,
       ),
     );
   }
 
-  Route<dynamic> _generateRoute(RouteSettings settings) {
+  Route<dynamic>? _generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case "/":
-        return MaterialPageRoute(
-            builder: (_) => AssetListScreen());
       case SplashScreen.routeName:
         return MaterialPageRoute(builder: (_) => SplashScreen());
       case SettingsScreen.routeName:
@@ -54,18 +58,16 @@ class App extends StatelessWidget {
             builder: (_) =>
                 AssetViewScreen(settings.arguments as AssetViewArguments));
 
-      default:
-        return MaterialPageRoute(
-            builder: (_) => AssetListScreen());
     }
+    return null;
   }
 
   ThemeData _theme() {
     return ThemeData(
       appBarTheme:
-          AppBarTheme(toolbarTextStyle: AppBarTextStyle),
+          AppBarTheme(toolbarTextStyle: appBarTextStyle),
       textTheme:
-          TextTheme(titleLarge: TitleTextStyle, bodyMedium: Body1TextStyle),
+          TextTheme(titleLarge: titleTextStyle, bodyMedium: body1TextStyle),
       primarySwatch: Colors.teal,
     );
   }

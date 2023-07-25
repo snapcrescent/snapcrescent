@@ -14,11 +14,11 @@ import 'package:snapcrescent_mobile/services/toast_service.dart';
 import 'package:snapcrescent_mobile/state/asset_state.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 import 'package:snapcrescent_mobile/stores/asset/asset_store.dart';
-import 'package:snapcrescent_mobile/utils/common_utilities.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/screens/asset/widgets/asset_thumbnail.dart';
 import 'package:snapcrescent_mobile/screens/asset/widgets/config_server_prompt.dart';
 import 'package:snapcrescent_mobile/screens/asset/widgets/sync_process.dart';
+import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
 import 'package:snapcrescent_mobile/widgets/footer.dart';
 import 'package:snapcrescent_mobile/widgets/header.dart';
 
@@ -40,7 +40,7 @@ class _AssetListView extends StatefulWidget {
 
 class _AssetListViewState extends State<_AssetListView> {
   DateTime currentDateTime = DateTime.now();
-  final ScrollController _scrollController = new ScrollController();
+  final ScrollController _scrollController = ScrollController();
   late AssetStore _assetStore;
   bool showProcessing = false;
   int gridPageNumber = 0;
@@ -50,7 +50,7 @@ class _AssetListViewState extends State<_AssetListView> {
 
   _onAssetTap(BuildContext context, int assetIndex) {
     AssetViewArguments arguments =
-        new AssetViewArguments(assetIndex: assetIndex);
+        AssetViewArguments(assetIndex: assetIndex);
 
     Navigator.pushNamed(
       context,
@@ -61,18 +61,18 @@ class _AssetListViewState extends State<_AssetListView> {
 
   _shareAssets() async {
     _updateProcessingBarVisibility(true);
-    final List<XFile> assetFiles = await AssetService.instance
+    final List<XFile> assetFiles = await AssetService()
         .getAssetFilesForSharing(AssetState.instance.getSelectedIndexes());
     await Share.shareXFiles(assetFiles);
     _updateProcessingBarVisibility(false);
   }
 
   _downloadAssets() async {
-    bool _permissionReady = await CommonUtilities().checkPermission();
+    bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
 
-    if (_permissionReady) {
+    if (permissionReady) {
       _updateProcessingBarVisibility(true);
-      final bool success = await AssetService.instance
+      final bool success = await AssetService()
           .downloadAssetFilesToDevice(AssetState.instance.getSelectedIndexes());
       if (success) {
         ToastService.showSuccess("Successfully downloaded files.");
@@ -82,11 +82,11 @@ class _AssetListViewState extends State<_AssetListView> {
   }
 
   _uploadAssets() async {
-    bool _permissionReady = await CommonUtilities().checkPermission();
+    bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
 
-    if (_permissionReady) {
+    if (permissionReady) {
       _updateProcessingBarVisibility(true);
-      final bool success = await AssetService.instance
+      final bool success = await AssetService()
           .uploadAssetFilesToServer(AssetState.instance.getSelectedIndexes());
       if (success) {
         ToastService.showSuccess("Successfully uploaded files.");
@@ -194,7 +194,7 @@ class _AssetListViewState extends State<_AssetListView> {
     final keys = AssetState.instance.groupedMapKeys;
     final label = keys[getAssetGroupIndexInScrollView()];
 
-    return Text(this._getFormattedGroupKey(label));
+    return Text(_getFormattedGroupKey(label));
   }
 
   _gridView(Orientation orientation) {
@@ -221,8 +221,7 @@ class _AssetListViewState extends State<_AssetListView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 if (AssetState
-                        .instance.groupedAssets[keys[groupIndex]]!.length >
-                    0)
+                        .instance.groupedAssets[keys[groupIndex]]!.isNotEmpty)
                   Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,7 +229,7 @@ class _AssetListViewState extends State<_AssetListView> {
                         Padding(
                           padding: EdgeInsets.all(5),
                           child:
-                              Text(this._getFormattedGroupKey(keys[groupIndex]),
+                              Text(_getFormattedGroupKey(keys[groupIndex]),
                                   style: TextStyle(
                                     color: Colors.white,
                                   )),
@@ -307,9 +306,9 @@ class _AssetListViewState extends State<_AssetListView> {
     if (AssetState.instance.isAnyItemSelected()) {
       return IconButton(
         onPressed: () {
-          AssetState.instance.assetList.forEach((asset) {
+          for (var asset in AssetState.instance.assetList) {
             asset.selected = false;
-          });
+          }
           setState(() {});
         },
         icon: Icon(Icons.cancel),
@@ -324,8 +323,7 @@ class _AssetListViewState extends State<_AssetListView> {
               leading: _getLeadingIcon(),
               title: Text(!AssetState.instance.isAnyItemSelected()
                   ? ""
-                  : (AssetState.instance.getSelectedCount().toString() +
-                      " Selected")),
+                  : ("${AssetState.instance.getSelectedCount()} Selected")),
               backgroundColor: Colors.black,
               actions: [
                 if (AssetState.instance.isAnyItemSelected())
@@ -349,7 +347,7 @@ class _AssetListViewState extends State<_AssetListView> {
       bottomNavigationBar: Footer(),
       body: Container(
         color: Colors.black,
-        child: new Stack(fit: StackFit.expand, children: <Widget>[
+        child: Stack(fit: StackFit.expand, children: <Widget>[
           Observer(
               builder: (context) => _assetStore.assetSearchProgress ==
                       AssetSearchProgress.ASSETS_FOUND
@@ -363,7 +361,7 @@ class _AssetListViewState extends State<_AssetListView> {
             children: <Widget>[
               Expanded(
                 flex: 2,
-                child: new SyncProcessWidget(),
+                child: SyncProcessWidget(),
               ),
               if (showProcessing)
                 Expanded(
@@ -376,9 +374,7 @@ class _AssetListViewState extends State<_AssetListView> {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Container(
-                child: ConfigServerPromptWidget(),
-              )
+              ConfigServerPromptWidget(),
             ],
           )
         ]),
