@@ -13,9 +13,7 @@ import java.math.RoundingMode;
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.snapcrescent.asset.Asset;
@@ -47,6 +45,17 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 	private SecuredStreamTokenUtil securedStreamTokenUtil;
 
 	private final String FILE_TYPE_SEPARATOR = ".";
+	
+	@Override
+	public Thumbnail createThumbnailEntity(File file, Metadata metadata, AssetType assetType) throws Exception {
+
+		Thumbnail thumbnail = new Thumbnail();
+		thumbnail.setCreatedByUserId(coreService.getAppUserId());
+		thumbnail.setName(getThumbnailName(metadata));
+		thumbnail.setPath(metadata.getPath());
+		return thumbnail;
+		
+	}
 
 	public Thumbnail generateThumbnail(File file, Metadata metadata, AssetType assetType) throws Exception {
 
@@ -63,8 +72,7 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 	
 	
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	@Async("threadPoolTaskExecutor")
+	@Transactional
 	public void regenerateThumbnails(Asset asset) {
 		
 		try {

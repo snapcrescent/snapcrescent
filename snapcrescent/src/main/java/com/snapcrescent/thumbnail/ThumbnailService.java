@@ -15,4 +15,5 @@ public interface ThumbnailService {
 	public String getFilePathByThumbnailById(Long id) throws Exception;
 	SecuredAssetStreamDTO getAssetDetailsFromToken(String token) throws Exception;
 	public void regenerateThumbnails(Asset asset);
+	public Thumbnail createThumbnailEntity(File file, Metadata metadata, AssetType assetType) throws Exception;
 }

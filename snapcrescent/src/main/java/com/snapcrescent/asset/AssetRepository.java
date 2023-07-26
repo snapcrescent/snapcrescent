@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.snapcrescent.common.BaseRepository;
 import com.snapcrescent.common.utils.SearchDAOHelper;
 import com.snapcrescent.common.utils.StringUtils;
+import com.snapcrescent.common.utils.Constant.BatchProcessStatus;
 
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
@@ -74,6 +75,10 @@ public class AssetRepository extends BaseRepository<Asset>{
 			hql.append(daoHelper.getSearchWhereStatement(stringFields, numberFields, searchCriteria.getSearchKeyword(),
 					true));
 		}
+		
+		
+		hql.append(" AND asset.batchProcessStatus = :batchProcessStatus ");
+		paramsMap.put("batchProcessStatus", BatchProcessStatus.COMPLETED.getId());
 		
 		if(searchCriteria.getAccessibleByUserId() != null)
 		{
@@ -164,7 +169,15 @@ public class AssetRepository extends BaseRepository<Asset>{
 		query.executeUpdate();
 	}
 	
-	
+	public Asset findByHash(long hash, long createdByUserId) {
+		String query = "SELECT asset FROM Asset asset JOIN asset.metadata metadata WHERE metadata.hash = :hash AND metadata.createdByUserId = :createdByUserId ";
+
+		TypedQuery<Asset> typedQuery = entityManager.createQuery(query, Asset.class);
+		typedQuery.setParameter("hash", hash);
+		typedQuery.setParameter("createdByUserId", createdByUserId);
+		List<Asset> results = typedQuery.getResultList();
+		return results.isEmpty() ? null : results.get(0);
+	}
 
 	
 	public Asset findByMetadataId(Long metadataId) {

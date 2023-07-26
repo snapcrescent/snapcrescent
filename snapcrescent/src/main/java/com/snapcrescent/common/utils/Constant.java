@@ -184,6 +184,41 @@ public class Constant {
 			return null;
 		}
 	}
+    
+    public enum BatchProcessStatus implements DbEnum {
+    	PENDING(1,"Pending"),
+    	IN_PROGRESS(2, "In Progress"),
+    	COMPLETED(3, "Completed");
+		
+		private int id;
+		private String label;
+		
+		private BatchProcessStatus(int id, String label) {
+			this.id = id;
+			this.label = label;
+		}
+		
+		@Override
+		public int getId() {
+			return this.id;
+		}
+		
+		@Override
+		public String getLabel() {
+			return this.label;
+		}
+		
+		public static BatchProcessStatus findById(int id) {
+			
+			for (BatchProcessStatus item : BatchProcessStatus.values()) {
+				if(item.getId() == id) {
+					return item;
+				}
+			}
+			
+			return null;
+		}
+	}
 	
 	
 	public static enum FILE_TYPE {

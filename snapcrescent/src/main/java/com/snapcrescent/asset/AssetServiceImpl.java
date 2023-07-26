@@ -1,9 +1,5 @@
 package com.snapcrescent.asset;
 
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,13 +8,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +28,7 @@ import com.snapcrescent.common.utils.Constant.FILE_TYPE;
 import com.snapcrescent.common.utils.Constant.ResultType;
 import com.snapcrescent.common.utils.DateUtils;
 import com.snapcrescent.common.utils.FileService;
+import com.snapcrescent.common.utils.ImageUtils;
 import com.snapcrescent.common.utils.SecuredStreamTokenUtil;
 import com.snapcrescent.common.utils.StringUtils;
 import com.snapcrescent.metadata.Metadata;
@@ -44,7 +38,10 @@ import com.snapcrescent.thumbnail.Thumbnail;
 import com.snapcrescent.thumbnail.ThumbnailRepository;
 import com.snapcrescent.thumbnail.ThumbnailService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class AssetServiceImpl extends BaseService implements AssetService {
 
 	@Autowired
@@ -140,42 +137,41 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	
 	@Override
 	@Transactional
-	@Async("threadPoolTaskExecutor")
-	public Future<Boolean> processAssets(List<File> temporaryFiles) throws Exception {
-		boolean processed = false;
+	public List<Asset> processAssets(List<File> temporaryFiles) throws Exception {
+		List<Asset> assets = new ArrayList<>(temporaryFiles.size());
 		
 		for (File temporaryFile : temporaryFiles) {
-			processAsset(temporaryFile);
+			Asset asset = processAsset(temporaryFile);
+			
+			if(asset != null) {
+				assets.add(asset);
+			}
 		}
 		
-		return CompletableFuture.completedFuture(processed);
+		return assets;
 	}
 	
 	@Override
 	@Transactional
-	@Async("threadPoolTaskExecutor")
-	public CompletableFuture<Boolean> processAsset(File temporaryFile) throws Exception {
+	public Asset processAsset(File temporaryFile) throws Exception {
 
-		boolean processed = false;
+		Asset asset = null;
 		try {
 			AssetType assetType = FileService.getAssetType(temporaryFile.getName());
 			String originalFilename = StringUtils.extractFileNameFromTemporary(temporaryFile.getName());
 			Metadata metadata = metadataService.computeMetaData(assetType, originalFilename, temporaryFile);
-			Thumbnail thumbnail = thumbnailService.generateThumbnail(temporaryFile, metadata, assetType);
-			saveProcessedAsset(assetType, temporaryFile, metadata, thumbnail);
+			Thumbnail thumbnail = thumbnailService.createThumbnailEntity(temporaryFile, metadata, assetType);
+			asset = saveProcessedAsset(assetType, temporaryFile, metadata, thumbnail);
 		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			processed = true;
-		}
+			log.error("Exception while processing asset",e);
+		} 
 
-		return CompletableFuture.completedFuture(processed);
+		return asset;
 	}
 	
 	@Override
 	@Transactional
-	@Async("threadPoolTaskExecutor")
-	public CompletableFuture<Boolean> processAsset(AssetType assetType, File temporaryFile, Metadata metadata) throws Exception {
+	public Boolean processAsset(AssetType assetType, File temporaryFile, Metadata metadata) throws Exception {
 
 		boolean processed = false;
 		try {
@@ -187,17 +183,17 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			processed = true;
 		}
 
-		return CompletableFuture.completedFuture(processed);
+		return processed;
 	}
 	
-	public void saveProcessedAsset(AssetType assetType,File temporaryFile, Metadata metadata, Thumbnail thumbnail) throws IOException {
+	public Asset saveProcessedAsset(AssetType assetType,File temporaryFile, Metadata metadata, Thumbnail thumbnail) throws IOException {
 		
-		long assetHash = getPerceptualHash(ImageIO.read(fileService.getFile(FILE_TYPE.THUMBNAIL, coreService.getAppUserId(), thumbnail.getPath(), thumbnail.getName())));
+		long assetHash = ImageUtils.getPerceptualHash(ImageIO.read(fileService.getFile(FILE_TYPE.THUMBNAIL, coreService.getAppUserId(), thumbnail.getPath(), thumbnail.getName())));
 		metadata.setHash(assetHash);
 		
-		Metadata existingMetadata =  metadataRepository.findByHash(metadata.getHash(), metadata.getCreatedByUserId());
+		Asset asset =  assetRepository.findByHash(metadata.getHash(), metadata.getCreatedByUserId());
 		
-		if (existingMetadata == null) {
+		if (asset == null) {
 
 			String directoryPath = fileService.getBasePath(assetType, coreService.getAppUserId()) + metadata.getPath();
 			fileService.mkdirs(directoryPath);
@@ -205,7 +201,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			File finalFile = new File(directoryPath + "/" + metadata.getInternalName());
 			Files.move(Paths.get(temporaryFile.getAbsolutePath()), Paths.get(finalFile.getAbsolutePath()));
 
-			Asset asset = new Asset();
+			asset = new Asset();
 			asset.setCreatedByUserId(coreService.getAppUserId());
 			asset.setAssetType(assetType.getId());
 
@@ -234,6 +230,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			}
 		} else if(metadata != null) {
 			
+			Metadata existingMetadata = asset.getMetadata();
 			metadataRepository.detach(existingMetadata);
 			
 			metadata.setId(existingMetadata.getId());
@@ -251,6 +248,8 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 			fileService.removeFile(FILE_TYPE.THUMBNAIL, coreService.getAppUserId(), thumbnail.getPath(), thumbnail.getName());
 		}
+		
+		return asset;
 	}
 	
 
@@ -393,43 +392,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 	}
 
-	public long getPerceptualHash(final Image image) {
-		final BufferedImage scaledImage = new BufferedImage(8, 8, BufferedImage.TYPE_BYTE_GRAY);
-		{
-			final Graphics2D graphics = scaledImage.createGraphics();
-			graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-
-			graphics.drawImage(image, 0, 0, 8, 8, null);
-
-			graphics.dispose();
-		}
-
-		final int[] pixels = new int[64];
-		scaledImage.getData().getPixels(0, 0, 8, 8, pixels);
-
-		final int average;
-		{
-			int total = 0;
-
-			for (int pixel : pixels) {
-				total += pixel;
-			}
-
-			average = total / 64;
-		}
-
-		long hash = 0;
-
-		for (final int pixel : pixels) {
-			hash <<= 1;
-
-			if (pixel > average) {
-				hash |= 1;
-			}
-		}
-
-		return hash;
-	}
+	
 
 	@Override
 	@Transactional
@@ -474,9 +437,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
 		}
-
 	}
 
 	@Override
@@ -484,56 +445,6 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		return securedStreamTokenUtil.getAssetDetailsFromToken(token);
 	}
 	
-	@Override
-	@Transactional
-	public void regenerateThumbnails(String assetIdRange, String assetIdList) {
-		
-		long startingId = Long.parseLong(assetIdRange.split("-")[0]);
-		long  endingId = Long.parseLong(assetIdRange.split("-")[1]);
-		
-		String[] assetIds = assetIdList.split(",");
-		
-		for (long assetId = startingId; assetId <= endingId; assetId++) {
-			regenerateThumbnail(assetId);
-		}
-		
-		for (String assetId : assetIds) {
-			regenerateThumbnail(Long.parseLong(assetId));
-		}
-		
-		
-	}
-	
-	private void regenerateThumbnail(long assetId) {
-		try {
-			Asset asset = assetRepository.findById(assetId);
-			
-			if(asset != null) {
-				FILE_TYPE fileType = null;
-				
-				if (asset.getAssetType() == AssetType.PHOTO.getId()) {
-					fileType = FILE_TYPE.PHOTO;
-				}
-
-				if (asset.getAssetType() == AssetType.VIDEO.getId()) {
-					fileType = FILE_TYPE.VIDEO;
-				}
-				
-				//File file = fileService.getFile(fileType, asset.getMetadata().getPath(), asset.getMetadata().getInternalName());
-				
-				
-				//metadataService.recomputeMetaData(asset.getAssetTypeEnum(), asset.getMetadata(), file);
-				//metadataRepository.update(asset.getMetadata());
-				//metadataRepository.flush();
-				
-				thumbnailService.regenerateThumbnails(asset);	
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	@Override
 	@Transactional
 	public List<UiAssetTimeline> getAssetTimeline(AssetSearchCriteria searchCriteria) {
@@ -548,7 +459,4 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		assetRepository.flush();
 	}
 
-
-
-	
 }
