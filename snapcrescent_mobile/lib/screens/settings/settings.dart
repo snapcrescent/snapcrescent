@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:snapcrescent_mobile/models/user/account_info.dart';
 import 'package:snapcrescent_mobile/models/user/user_login_response.dart';
 import 'package:snapcrescent_mobile/screens/settings/widgets/auto_backup_settings.dart';
 import 'package:snapcrescent_mobile/screens/settings/widgets/device_folders_settings.dart';
 import 'package:snapcrescent_mobile/screens/settings/widgets/files_settings.dart';
 import 'package:snapcrescent_mobile/services/app_config_service.dart';
+import 'package:snapcrescent_mobile/services/login_service.dart';
 import 'package:snapcrescent_mobile/services/notification_service.dart';
-import 'package:snapcrescent_mobile/services/settings_service.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
 import 'package:snapcrescent_mobile/style.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
@@ -60,7 +61,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   Future<bool> _getSettingsData() async {
     await _getAccountInfo();
     _connectedToServer =
-        await AppConfigService.instance.getFlag(Constants.appConfigLoggedInFlag);
+        await AppConfigService().getFlag(Constants.appConfigLoggedInFlag);
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
@@ -71,10 +72,9 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   Future<void> _getAccountInfo() async {
-    List<String> result =
-        await SettingsService.instance.getAccountInformation();
+    AccountInfo accountInfo = await LoginService().getAccountInformation();
 
-    serverURLController.text = result[0];
+    serverURLController.text = accountInfo.serverUrl;
     _loggedServerName = serverURLController
         .text
         .replaceAll("https://", "")
@@ -85,10 +85,10 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     }    
     
 
-    nameController.text = result[1];
+    nameController.text = accountInfo.username;
     _loggedInUserName = nameController.text;
 
-    passwordController.text = result[2];
+    passwordController.text = accountInfo.password;
   }
 
   _showAccountInfoDialog() {
@@ -171,15 +171,13 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
       try {
 
-      UserLoginResponse? userLoginResponse = await SettingsService.instance
-          .saveAccountInformation(serverURLController.text, nameController.text,
-              passwordController.text);
+      UserLoginResponse? userLoginResponse = await LoginService().login(serverURLController.text, nameController.text, passwordController.text);
 
       if (userLoginResponse != null) {
-        await AppConfigService.instance
+        await AppConfigService()
             .updateFlag(Constants.appConfigLoggedInFlag, true);
         await _getAccountInfo();
-        await NotificationService.instance.initialize();
+        await NotificationService().initialize();
         setState(() {});
         Navigator.pop(context);
       } else {
@@ -202,7 +200,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   }
 
   _onLogoutPressed() async {
-    await AppConfigService.instance.updateFlag(Constants.appConfigLoggedInFlag, false);
+    await AppConfigService().updateFlag(Constants.appConfigLoggedInFlag, false);
     await _getAccountInfo();
     setState(() {});
     Navigator.pop(context);

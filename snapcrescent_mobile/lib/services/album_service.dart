@@ -9,8 +9,13 @@ import 'package:snapcrescent_mobile/services/thumbnail_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class AlbumService extends BaseService {
-  AlbumService._privateConstructor() : super();
-  static final AlbumService instance = AlbumService._privateConstructor();
+ static final AlbumService _singleton = AlbumService._internal();
+
+  factory AlbumService() {
+    return _singleton;
+  }
+
+  AlbumService._internal();
 
   bool executionInProgress = false;
 
@@ -63,7 +68,7 @@ class AlbumService extends BaseService {
 
   Future<int> saveOnLocal(Album entity, bool createIfNotFound, Function progressCallBack,int assetIndex) async {
     final albumExistsById =
-        await AlbumRepository.instance.existsById(entity.id!);
+        await AlbumRepository().existsById(entity.id!);
 
     if (albumExistsById == false) {
       final albumThumbnailExistsById = await ThumbnailRepository().existsById(entity.albumThumbnailId!);
@@ -80,12 +85,12 @@ class AlbumService extends BaseService {
 
       if(createIfNotFound) {
         progressCallBack(assetIndex + 1);
-        return AlbumRepository.instance.saveOrUpdate(entity);
+        return AlbumRepository().saveOrUpdate(entity);
       }
       
       return Future.value(0);
     } else {
-      AlbumRepository.instance.saveOrUpdate(entity);
+      AlbumRepository().saveOrUpdate(entity);
       progressCallBack(assetIndex + 1);
       return Future.value(0);
     }
@@ -95,17 +100,17 @@ class AlbumService extends BaseService {
   
 
   Future<int> countOnLocal() async {
-    return AlbumRepository.instance.countOnLocal(AlbumSearchCriteria.defaultCriteria());
+    return AlbumRepository().countOnLocal(AlbumSearchCriteria.defaultCriteria());
   }
 
   Future<List<Album>> searchOnLocal(
       AlbumSearchCriteria assetSearchCriteria) async {
-    return AlbumRepository.instance.searchOnLocal(assetSearchCriteria);
+    return AlbumRepository().searchOnLocal(assetSearchCriteria);
   }
 
 
   Future<void> deleteAllData() async {
-    await AlbumRepository.instance.deleteAll();
+    await AlbumRepository().deleteAll();
   }
 
 }

@@ -42,7 +42,6 @@ class _AssetListViewState extends State<_AssetListView> {
   DateTime currentDateTime = DateTime.now();
   final ScrollController _scrollController = ScrollController();
   late AssetStore _assetStore;
-  bool showProcessing = false;
   int gridPageNumber = 0;
 
   Timer? timer;
@@ -60,24 +59,20 @@ class _AssetListViewState extends State<_AssetListView> {
   }
 
   _shareAssets() async {
-    _updateProcessingBarVisibility(true);
     final List<XFile> assetFiles = await AssetService()
-        .getAssetFilesForSharing(AssetState.instance.getSelectedIndexes());
+        .getAssetFilesForSharing(AssetState().getSelectedIndexes());
     await Share.shareXFiles(assetFiles);
-    _updateProcessingBarVisibility(false);
   }
 
   _downloadAssets() async {
     bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
 
     if (permissionReady) {
-      _updateProcessingBarVisibility(true);
       final bool success = await AssetService()
-          .downloadAssetFilesToDevice(AssetState.instance.getSelectedIndexes());
+          .downloadAssetFilesToDevice(AssetState().getSelectedIndexes());
       if (success) {
         ToastService.showSuccess("Successfully downloaded files.");
       }
-      _updateProcessingBarVisibility(false);
     }
   }
 
@@ -85,19 +80,12 @@ class _AssetListViewState extends State<_AssetListView> {
     bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
 
     if (permissionReady) {
-      _updateProcessingBarVisibility(true);
       final bool success = await AssetService()
-          .uploadAssetFilesToServer(AssetState.instance.getSelectedIndexes());
+          .uploadAssetFilesToServer(AssetState().getSelectedIndexes());
       if (success) {
         ToastService.showSuccess("Successfully uploaded files.");
       }
-      _updateProcessingBarVisibility(false);
     }
-  }
-
-  _updateProcessingBarVisibility(bool isVisible) {
-    showProcessing = isVisible;
-    setState(() {});
   }
 
   @override
@@ -177,7 +165,7 @@ class _AssetListViewState extends State<_AssetListView> {
   int getAssetGroupIndexInScrollView() {
     try {
       final double currentAsset =
-          (AssetState.instance.groupedAssets.length - 1) *
+          (AssetState().groupedAssets.length - 1) *
               _scrollController.offset /
               (_scrollController.position.maxScrollExtent -
                   _scrollController.position.minScrollExtent);
@@ -191,14 +179,14 @@ class _AssetListViewState extends State<_AssetListView> {
   }
 
   Text getScrollLabel() {
-    final keys = AssetState.instance.groupedMapKeys;
+    final keys = AssetState().groupedMapKeys;
     final label = keys[getAssetGroupIndexInScrollView()];
 
     return Text(_getFormattedGroupKey(label));
   }
 
   _gridView(Orientation orientation) {
-    final keys = AssetState.instance.groupedMapKeys;
+    final keys = AssetState().groupedMapKeys;
 
     return ListView.builder(
         controller: _scrollController,
@@ -220,8 +208,7 @@ class _AssetListViewState extends State<_AssetListView> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (AssetState
-                        .instance.groupedAssets[keys[groupIndex]]!.isNotEmpty)
+                if (AssetState().groupedAssets[keys[groupIndex]]!.isNotEmpty)
                   Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,10 +231,10 @@ class _AssetListViewState extends State<_AssetListView> {
                             physics:
                                 NeverScrollableScrollPhysics(), // to disable GridView's scrolling
                             shrinkWrap: true,
-                            itemCount: AssetState.instance
+                            itemCount: AssetState()
                                 .groupedAssets[keys[groupIndex]]!.length,
                             itemBuilder: (BuildContext context2, index) {
-                              final asset = AssetState.instance
+                              final asset = AssetState()
                                   .groupedAssets[keys[groupIndex]]![index];
 
                               return GestureDetector(
@@ -257,14 +244,14 @@ class _AssetListViewState extends State<_AssetListView> {
                                 },
                                 onTap: () {
                                   //Grid is in selection mode
-                                  if (AssetState.instance.isAnyItemSelected()) {
+                                  if (AssetState().isAnyItemSelected()) {
                                     asset.selected = !asset.selected;
                                     setState(() {});
                                   } //No asset is selected, proceed to asset detail page
                                   else {
                                     _onAssetTap(
                                         context,
-                                        AssetState.instance.assetList
+                                        AssetState().assetList
                                             .indexOf(asset));
                                   }
                                 },
@@ -303,10 +290,10 @@ class _AssetListViewState extends State<_AssetListView> {
   }
 
   _getLeadingIcon() {
-    if (AssetState.instance.isAnyItemSelected()) {
+    if (AssetState().isAnyItemSelected()) {
       return IconButton(
         onPressed: () {
-          for (var asset in AssetState.instance.assetList) {
+          for (var asset in AssetState().assetList) {
             asset.selected = false;
           }
           setState(() {});
@@ -318,15 +305,15 @@ class _AssetListViewState extends State<_AssetListView> {
 
   _body() {
     return Scaffold(
-      appBar: AssetState.instance.isAnyItemSelected() ? AppBar(
+      appBar: AssetState().isAnyItemSelected() ? AppBar(
               automaticallyImplyLeading: false,
               leading: _getLeadingIcon(),
-              title: Text(!AssetState.instance.isAnyItemSelected()
+              title: Text(!AssetState().isAnyItemSelected()
                   ? ""
-                  : ("${AssetState.instance.getSelectedCount()} Selected")),
+                  : ("${AssetState().getSelectedCount()} Selected")),
               backgroundColor: Colors.black,
               actions: [
-                if (AssetState.instance.isAnyItemSelected())
+                if (AssetState().isAnyItemSelected())
                   IconButton(
                       onPressed: () {
                         _uploadAssets();
@@ -360,14 +347,9 @@ class _AssetListViewState extends State<_AssetListView> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Expanded(
-                flex: 2,
+                flex: 0,
                 child: SyncProcessWidget(),
               ),
-              if (showProcessing)
-                Expanded(
-                  flex: 2,
-                  child: const LinearProgressIndicator(),
-                )
             ],
           ),
           Row(

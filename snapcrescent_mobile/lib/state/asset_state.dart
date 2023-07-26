@@ -3,9 +3,14 @@ import 'package:collection/collection.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class AssetState {
-  AssetState._privateConstructor() : super();
+  
+  static final AssetState _singleton = AssetState._internal();
 
-  static final AssetState instance = AssetState._privateConstructor();
+  factory AssetState() {
+    return _singleton;
+  }
+
+  AssetState._internal();
 
   List<UniFiedAsset> assetList = List.empty();
   Map<String, List<UniFiedAsset>> groupedAssets = {};
@@ -15,18 +20,18 @@ class AssetState {
   List<int> getSelectedIndexes() {
     return assetList
         .where((asset) => asset.selected == true)
-        .map((asset) => AssetState.instance.assetList.indexOf(asset))
+        .map((asset) => assetList.indexOf(asset))
         .toList();
   }
 
   bool isAnyItemSelected() {
-    return AssetState.instance.assetList
+    return assetList
             .firstWhereOrNull((asset) => asset.selected == true) !=
         null;
   }
 
   int getSelectedCount() {
-    return AssetState.instance.assetList
+    return assetList
         .where((asset) => asset.selected == true)
         .length;
   }

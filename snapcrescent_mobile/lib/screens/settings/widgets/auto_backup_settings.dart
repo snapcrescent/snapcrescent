@@ -16,7 +16,7 @@ class AutoBackupSettingsView extends StatefulWidget {
 class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
   bool _autoBackup = false;
   String _autoBackupFolders = "None";
-  String _autoBackupFrequency = "";
+  String? _autoBackupFrequency = "";
   String _autoBackupFrequencyString = "";
   
   AutoBackupFrequencyType _autoBackupFrequencyType = AutoBackupFrequencyType.HOURS;
@@ -35,21 +35,22 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
   Future<bool> _getSettingsData() async {
     await _getAutoBackupFrequency();
     
-    _autoBackup = await AppConfigService.instance
+    _autoBackup = await AppConfigService()
         .getFlag(Constants.appConfigAutoBackupFlag);
-    _autoBackupFolders =
-        await SettingsService.instance.getAutoBackupFolderInfo();
+    _autoBackupFolders = await SettingsService().getFolderInfo(Constants.appConfigAutoBackupFolders);
     
     return Future.value(true);
   }
 
   Future<void> _getAutoBackupFrequency() async {
-    _autoBackupFrequency =
-        await SettingsService.instance.getAutoBackupFrequencyInfo();
-    _autoBackupFrequencyType = SettingsService.instance
-        .getReadableOfAutoBackupFrequency(_autoBackupFrequency);
+    _autoBackupFrequency = await AppConfigService().getConfig(Constants.appConfigAutoBackupFrequency);
+    
 
-    double autoBackupFrequencyNumber = double.parse(_autoBackupFrequency);
+    if(_autoBackupFrequency != null) {
+
+      _autoBackupFrequencyType = SettingsService().getReadableOfAutoBackupFrequency(_autoBackupFrequency!);
+
+      double autoBackupFrequencyNumber = double.parse(_autoBackupFrequency!);
 
     switch (_autoBackupFrequencyType) {
       case AutoBackupFrequencyType.HOURS:
@@ -65,8 +66,11 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
       default:
     }
 
-    autoBackUpFrequencyController.text =
-        autoBackupFrequencyNumber.toStringAsFixed(0);
+      autoBackUpFrequencyController.text =
+          autoBackupFrequencyNumber.toStringAsFixed(0);
+
+    }
+    
   }
 
   _showAutoBackupFrequencyInfoDialog() async {
@@ -165,19 +169,18 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
     }
     _autoBackupFrequency = minutes.toStringAsFixed(0);
 
-    await AppConfigService.instance.updateConfig(Constants.appConfigAutoBackupFrequency, _autoBackupFrequency);
+    await AppConfigService().updateConfig(Constants.appConfigAutoBackupFrequency, _autoBackupFrequency!);
     await _getAutoBackupFrequency();
     setState(() {});
   }
 
   _updateAutoBackupFlag(bool value) async {
     _autoBackup = value;
-    await AppConfigService.instance
+    await AppConfigService()
         .updateFlag(Constants.appConfigAutoBackupFlag, value);
     setState(() {});
     if (_autoBackup) {
-      _autoBackupFolders =
-          await SettingsService.instance.getAutoBackupFolderInfo();
+      _autoBackupFolders = await SettingsService().getFolderInfo(Constants.appConfigAutoBackupFolders);
 
       if (_autoBackupFolders.isEmpty) {
         

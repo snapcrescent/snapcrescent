@@ -132,7 +132,7 @@ class _AssetThumbnailState extends State<AssetThumbnail> with SingleTickerProvid
           ),
           // Display a Circle icon if the asset is not selected
           
-          if (AssetState.instance.isAnyItemSelected() && 
+          if (AssetState().isAnyItemSelected() && 
               widget.selected == false)
             Positioned.fill(
               child: Align(
@@ -145,7 +145,7 @@ class _AssetThumbnailState extends State<AssetThumbnail> with SingleTickerProvid
             ),
             
           // Display a Checked icon if the asset is selected
-          if (AssetState.instance.isAnyItemSelected() && widget.selected)
+          if (AssetState().isAnyItemSelected() && widget.selected)
             Positioned.fill(
               child: Align(
                   alignment: Alignment.topLeft,

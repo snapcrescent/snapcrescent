@@ -6,9 +6,13 @@ import 'package:sqflite/sqflite.dart';
 class AppConfigRepository extends BaseRepository {
   static const _tableName = 'APP_CONFIG';
 
-  AppConfigRepository._privateConstructor() : super(_tableName);
-  static final AppConfigRepository instance =
-      AppConfigRepository._privateConstructor();
+  static final AppConfigRepository _singleton = AppConfigRepository._internal();
+
+  factory AppConfigRepository() {
+    return _singleton;
+  }
+
+  AppConfigRepository._internal() : super(_tableName);
 
   Future<int> saveOrUpdateConfig(AppConfig entity) async {
     AppConfig config = await findByKey(entity.configKey!);

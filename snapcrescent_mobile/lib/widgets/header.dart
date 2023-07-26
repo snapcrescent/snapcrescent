@@ -30,8 +30,7 @@ class _HeaderViewState extends State<_HeaderView> {
   bool _loggedInToServer = false;
 
   Future<bool> _getValue() async {
-    _loggedInToServer = await AppConfigService.instance
-        .getFlag(Constants.appConfigAutoBackupFlag);
+    _loggedInToServer = await AppConfigService().getFlag(Constants.appConfigAutoBackupFlag);
     return Future.value(true);
   }
 

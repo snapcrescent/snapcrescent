@@ -34,7 +34,7 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
 
   Future<bool> _getSettingsData() async {
 
-    String? lastSyncActivityTimestamp = await AppConfigService.instance.getConfig(Constants.appConfigLastSyncActivityTimestamp);
+    String? lastSyncActivityTimestamp = await AppConfigService().getConfig(Constants.appConfigLastSyncActivityTimestamp);
     String defaultLastSyncActivityTimestamp = DateUtilities().formatDate(Constants.defaultLastSyncActivityTimestamp, DateUtilities.timeStampFormat);
 
     if(lastSyncActivityTimestamp != null && lastSyncActivityTimestamp != defaultLastSyncActivityTimestamp) {
@@ -103,7 +103,7 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
     await AssetService().deleteAllData();
     await _assetStore.refreshStore();
     _lastSyncActivityDate = "Never";
-    await AppConfigService.instance.updateDateConfig(Constants.appConfigLastSyncActivityTimestamp, Constants.defaultLastSyncActivityTimestamp, DateUtilities.timeStampFormat);
+    await AppConfigService().updateDateConfig(Constants.appConfigLastSyncActivityTimestamp, Constants.defaultLastSyncActivityTimestamp, DateUtilities.timeStampFormat);
     ToastService.showSuccess("Successfully deleted downloaded data.");
     setState(() {});
     Navigator.pop(context);

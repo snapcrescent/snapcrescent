@@ -4,6 +4,6 @@ import 'package:snapcrescent_mobile/services/background_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await BackgroundService.instance.initializeService();
+  await BackgroundService().initializeService();
   runApp(App());
 }

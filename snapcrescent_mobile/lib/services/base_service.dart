@@ -1,40 +1,35 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
+import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class BaseService {
   Dio? _dio;
 
   Future<Dio> getDio() async {
-    final baseURL = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigServerURL);
+    String? baseURL = await AppConfigService().getConfig(Constants.appConfigServerURL);
 
     if (_dio == null) {
       BaseOptions options = BaseOptions(
-          baseUrl: baseURL.configValue!,
+          baseUrl: baseURL!,
           receiveDataWhenStatusError: true,
           connectTimeout: Duration(hours: 0, minutes: 1, seconds: 0),
           receiveTimeout: Duration(hours: 0, minutes: 5, seconds: 0));
 
       _dio = Dio(options);
     } else {
-      _dio!.options.baseUrl = baseURL.configValue!;
+      _dio!.options.baseUrl = baseURL!;
     }
     return Future.value(_dio);
   }
 
-  Future<String> getServerUrl() async {
-    final result = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigServerURL);
-    return Future.value(result.configValue!);
+  Future<String?> getServerUrl() async {
+    return await AppConfigService().getConfig(Constants.appConfigServerURL);
   }
 
   Future<bool> isUserLoggedIn() async {
-    final result = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigLoggedInFlag);
-    return Future.value(result.configValue == "true" ? true : false);
+    return await AppConfigService().getFlag(Constants.appConfigLoggedInFlag);
   }
 
   Future<Options> getHeaders() async {
@@ -46,10 +41,8 @@ class BaseService {
   Future<Map<String, String>> getHeadersMap() async {
     Map<String, String> headers = {};
 
-    final appConfigSessionTokenConfig = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigSessionToken);
-    headers["Authorization"] =
-        "Bearer ${appConfigSessionTokenConfig.configValue!}";
+    String? appConfigSessionTokenConfig = await AppConfigService().getConfig(Constants.appConfigSessionToken);
+    headers["Authorization"] = "Bearer ${appConfigSessionTokenConfig!}";
 
     return headers;
   }
