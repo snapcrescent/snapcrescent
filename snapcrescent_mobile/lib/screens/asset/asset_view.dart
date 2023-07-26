@@ -41,7 +41,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
   BetterPlayerBufferingConfiguration? bufferingConfiguration;
   PageController? pageController;
   Map<String, String> headers = {};
-  String serverUrl = "";
+  String? serverUrl = "";
   bool showProcessing = false;
   UniFiedAsset? currentAsset;
 
@@ -186,15 +186,15 @@ class _AssetViewViewState extends State<_AssetViewView> {
   _assetView(index) {
     return FutureBuilder<Object?>(
         future: Future.value(
-            AssetState.instance.assetList[index].assetSource == AssetSource.CLOUD
-                ? AssetState.instance.assetList[index].asset
-                : AssetState.instance.assetList[index].assetEntity!.file),
+            AssetState().assetList[index].assetSource == AssetSource.CLOUD
+                ? AssetState().assetList[index].asset
+                : AssetState().assetList[index].assetEntity!.file),
         builder: (BuildContext context, AsyncSnapshot<Object?> snapshot) {
           
           if (snapshot.data == null) {
             return Container();
           } else {
-            currentAsset = AssetState.instance.assetList[index];
+            currentAsset = AssetState().assetList[index];
 
             if(currentAsset!.assetSource == AssetSource.DEVICE) {
                 return SizedBox(
@@ -227,9 +227,9 @@ class _AssetViewViewState extends State<_AssetViewView> {
   }
 
   _getAssetById (int index) async {
-      BaseResponseBean<int, Asset> response = await AssetService().getAssetById(AssetState.instance.assetList[index].asset!.id!);
-      AssetState.instance.assetList[index].asset!.token = response.object!.token!;
-      return AssetState.instance.assetList[index].asset;
+      BaseResponseBean<int, Asset> response = await AssetService().getAssetById(AssetState().assetList[index].asset!.id!);
+      AssetState().assetList[index].asset!.token = response.object!.token!;
+      return AssetState().assetList[index].asset;
   }
 
   _pageView() {
@@ -241,9 +241,9 @@ class _AssetViewViewState extends State<_AssetViewView> {
           body: PageView.builder(
             controller: pageController,
             physics: PageScrollPhysics(),
-            itemCount: AssetState.instance.assetList.length,
+            itemCount: AssetState().assetList.length,
             itemBuilder: (BuildContext context, int index) {
-              if (AssetState.instance.assetList.isEmpty) {
+              if (AssetState().assetList.isEmpty) {
                 return Container();
               } else {
                 return _assetView(index);

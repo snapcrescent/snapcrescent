@@ -4,11 +4,19 @@ import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
 
 class NotificationService {
-  NotificationService._privateConstructor() : super();
+
+  static final NotificationService _singleton = NotificationService._internal();
+
+  factory NotificationService() {
+    return _singleton;
+  }
+
+  NotificationService._internal();
+  
 
   static FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  static final NotificationService instance = NotificationService._privateConstructor();
+  
 
   Future initialize() async {
     await PermissionUtilities().checkAndAskForNotificationPermission();
@@ -17,6 +25,7 @@ class NotificationService {
     var iOSInitialize = DarwinInitializationSettings();
     var initializationsSettings = InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
     await _flutterLocalNotificationsPlugin.initialize(initializationsSettings);
+
   }
 
   Future registerBackgroundServiceNotification() async{
@@ -55,7 +64,32 @@ class NotificationService {
         );
 
     }
-    
+  }
+
+  showProgressNotification(String title,String message, int maxProgress, int progress, [String? channelName]) async {
+    if(await PermissionUtilities().isNotificationPermissionGranted()) {
+
+      channelName ??= Constants.defaultNotificationChannel;
+    await _flutterLocalNotificationsPlugin.show(
+          Constants.notificationChannelId,
+          title,
+          message,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              "Snap-Crescent",
+              channelName,
+              channelShowBadge: false,
+              importance:Importance.max,
+              priority:Priority.high,
+              onlyAlertOnce: true,
+              showProgress: true,
+              maxProgress: maxProgress,
+              progress: progress
+            ),
+          ),
+        );
+
+    }
   }
 
   clearNotifications() async{

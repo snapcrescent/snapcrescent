@@ -2,10 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:snapcrescent_mobile/models/app_config.dart';
-import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
 import 'package:snapcrescent_mobile/screens/asset/asset_list.dart';
 import 'package:snapcrescent_mobile/screens/settings/settings.dart';
+import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
@@ -42,15 +41,11 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
 
     bool allPermissionsApproved = await _requestPermissions();
 
-    AppConfig firstBootConfig = await AppConfigRepository.instance
-        .findByKey(Constants.appConfigFirstBootFlag);
+    bool firstBoot = await AppConfigService().getFlag(Constants.appConfigFirstBootFlag, true);
 
     // This is first boot of application
-    if (firstBootConfig.configValue == null) {
-      firstBootConfig.configKey = Constants.appConfigFirstBootFlag;
-      firstBootConfig.configValue = false.toString();
-
-      await AppConfigRepository.instance.saveOrUpdateConfig(firstBootConfig);
+    if (firstBoot == true) {
+      await await AppConfigService().updateFlag(Constants.appConfigFirstBootFlag, false);
 
       if(allPermissionsApproved) {
         await _setDefaultSettings();
@@ -76,13 +71,8 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
   }
 
   _setDefaultSettings() async {
-    AppConfig showDeviceAssetsFlagConfig = AppConfig(
-        configKey: Constants.appConfigShowDeviceAssetsFlag,
-        configValue: true.toString());
-
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(showDeviceAssetsFlagConfig);
-
+    await AppConfigService().updateFlag(Constants.appConfigShowDeviceAssetsFlag, true);
+    
     final List<AssetPathEntity> folders = await PhotoManager.getAssetPathList();
       folders.sort((AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
@@ -105,63 +95,16 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
         }
     }
 
-          
-
-
-      AppConfig showDeviceAssetsFolders = AppConfig(
-          configKey: Constants.appConfigShowDeviceAssetsFolders,
-          configValue: deviceAssetFolders.map((folder) => folder.id).join(","));
-
-      await AppConfigRepository.instance
-          .saveOrUpdateConfig(showDeviceAssetsFolders);
-
-    AppConfig appConfigAutoBackupFrequencyConfig = AppConfig(
-        configKey: Constants.appConfigAutoBackupFrequency,
-        configValue: Constants.defaultAutoBackupFrequency.toString());
-
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(appConfigAutoBackupFrequencyConfig);
-
-
-    AppConfig appConfigLastSyncTimestampConfig = AppConfig(
-        configKey: Constants.appConfigLastSyncActivityTimestamp,
-        configValue: DateUtilities().formatDate(Constants.defaultLastSyncActivityTimestamp, DateUtilities.timeStampFormat));
-
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(appConfigLastSyncTimestampConfig);
-
-
-        
+    await AppConfigService().updateConfig(Constants.appConfigShowDeviceAssetsFolders, deviceAssetFolders.map((folder) => folder.id).join(","));
+    await AppConfigService().updateIntConfig(Constants.appConfigAutoBackupFrequency, Constants.defaultAutoBackupFrequency);
+    await AppConfigService().updateDateConfig(Constants.appConfigLastSyncActivityTimestamp, Constants.defaultLastSyncActivityTimestamp, DateUtilities.timeStampFormat);    
   }
 
   _setSystemSettings() async {
-    AppConfig configLoggedInFlagConfig = AppConfig(
-        configKey: Constants.appConfigLoggedInFlag,
-        configValue: false.toString());
-
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(configLoggedInFlagConfig);
-
-    AppConfig thumbnailsFolderConfig = AppConfig(
-        configKey: Constants.appConfigThumbnailsFolder,
-        configValue: 'thumbnails');
-
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(thumbnailsFolderConfig);
-
-    AppConfig tempDownloadsFolderConfig = AppConfig(
-        configKey: Constants.appConfigTempDownloadsFolder,
-        configValue: 'tempDownload');
-
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(tempDownloadsFolderConfig);
-
-    AppConfig permanentDownloadsFolderConfig = AppConfig(
-        configKey: Constants.appConfigPermanentDownloadsFolder,
-        configValue: 'SnapCrescent');
-
-    await AppConfigRepository.instance
-        .saveOrUpdateConfig(permanentDownloadsFolderConfig);
+    await AppConfigService().updateFlag(Constants.appConfigLoggedInFlag, false);
+    await AppConfigService().updateConfig(Constants.appConfigThumbnailsFolder, 'thumbnails');
+    await AppConfigService().updateConfig(Constants.appConfigTempDownloadsFolder, 'tempDownload');
+    await AppConfigService().updateConfig(Constants.appConfigPermanentDownloadsFolder, 'SnapCrescent');
   }
 
   Future<bool> _requestPermissions() async {

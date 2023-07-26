@@ -50,8 +50,8 @@ class _AssetStore with Store {
   Future<void> refreshStore() async {
     executionInProgress = false;
     assetSearchProgress = AssetSearchProgress.PROCESSING;
-    AssetState.instance.groupedAssets.clear();
-    AssetState.instance.assetList = [];
+    AssetState().groupedAssets.clear();
+    AssetState().assetList = [];
     await _processAssetRequest(getAssetSearchCriteria());
   }
 
@@ -87,8 +87,8 @@ class _AssetStore with Store {
       
 
       
-      if (await AppConfigService.instance.getFlag(Constants.appConfigShowDeviceAssetsFlag)) {
-        List<String> selectedDeviceFolders = await AppConfigService.instance.getStringListConfig(Constants.appConfigShowDeviceAssetsFolders);
+      if (await AppConfigService().getFlag(Constants.appConfigShowDeviceAssetsFlag)) {
+        List<String> selectedDeviceFolders = await AppConfigService().getStringListConfig(Constants.appConfigShowDeviceAssetsFolders);
 
         
 
@@ -112,22 +112,22 @@ class _AssetStore with Store {
 
     assetList.sort((UniFiedAsset a, UniFiedAsset b) => b.assetCreationDate.compareTo(a.assetCreationDate));
 
-    if (AssetState.instance.assetList.isEmpty) {
-      AssetState.instance.assetList = [];
+    if (AssetState().assetList.isEmpty) {
+      AssetState().assetList = [];
     }
 
-    AssetState.instance.assetList.addAll(assetList);
+    AssetState().assetList.addAll(assetList);
 
-    for (var asset in AssetState.instance.assetList) {
+    for (var asset in AssetState().assetList) {
       _addUnifiedAssetToGroup(asset.assetCreationDate, asset);
     }
 
-    AssetState.instance.prepareGroupedMapKeysList();
+    AssetState().prepareGroupedMapKeysList();
 
     /*
-    if (AssetState.instance.assetList.length > 0) {
-      AssetState.instance.groupedAssets.keys.forEach((key) {
-        AssetState.instance.groupedAssets[key]!.sort((UniFiedAsset a, UniFiedAsset b) =>
+    if (AssetState().assetList.length > 0) {
+      AssetState().groupedAssets.keys.forEach((key) {
+        AssetState().groupedAssets[key]!.sort((UniFiedAsset a, UniFiedAsset b) =>
             b.assetCreationDate.compareTo(a.assetCreationDate));
       });
 
@@ -227,8 +227,8 @@ class _AssetStore with Store {
   _addUnifiedAssetToGroup(DateTime assetDate, UniFiedAsset asset) {
     String key = Constants.defaultYearFormatter.format(assetDate);
 
-    if (AssetState.instance.groupedAssets.containsKey(key)) {
-      List<UniFiedAsset> unifiedAssets = AssetState.instance.groupedAssets[key]!;
+    if (AssetState().groupedAssets.containsKey(key)) {
+      List<UniFiedAsset> unifiedAssets = AssetState().groupedAssets[key]!;
 
       bool assetAlreadyPresent = false;
 
@@ -254,7 +254,7 @@ class _AssetStore with Store {
     } else {
       List<UniFiedAsset> assets = [];
       assets.add(asset);
-      AssetState.instance.groupedAssets.putIfAbsent(key, () => assets);
+      AssetState().groupedAssets.putIfAbsent(key, () => assets);
     }
   }
 

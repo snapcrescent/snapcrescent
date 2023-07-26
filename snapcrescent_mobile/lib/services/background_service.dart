@@ -6,10 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:snapcrescent_mobile/models/app_config.dart';
 import 'package:snapcrescent_mobile/models/sync_state.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
+import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/notification_service.dart';
 import 'package:snapcrescent_mobile/services/sync_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
@@ -17,8 +16,14 @@ import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
 
 class BackgroundService {
-  BackgroundService._privateConstructor() : super();
-  static final BackgroundService instance = BackgroundService._privateConstructor();
+  
+  static final BackgroundService _singleton = BackgroundService._internal();
+
+  factory BackgroundService() {
+    return _singleton;
+  }
+
+  BackgroundService._internal();
 
   FlutterBackgroundService? service;
 
@@ -59,15 +64,12 @@ class BackgroundService {
       if (service is AndroidServiceInstance) {
         if (await service.isForegroundService()) {
 
-          DateTime lastSyncTime = DateTime.now();
-          AppConfig lastSyncTimeValue = await AppConfigRepository.instance.findByKey(Constants.appConfigLastSyncActivityTimestamp);
-          if(lastSyncTimeValue.configValue != null) {
-              lastSyncTime  = DateUtilities().parseDate(lastSyncTimeValue.configValue!, DateUtilities.timeStampFormat) ;
-          }
+          DateTime? lastSyncTime = await AppConfigService().getDateConfig(Constants.appConfigLastSyncActivityTimestamp, DateUtilities.timeStampFormat);
+          lastSyncTime ??= DateTime.now();
+          
 
-          AppConfig autoBackupFrequencyValue = await AppConfigRepository.instance.findByKey(Constants.appConfigAutoBackupFrequency);
-          if(autoBackupFrequencyValue.configValue != null) {
-            int autoBackupFrequency = int.parse(autoBackupFrequencyValue.configValue!);
+          int? autoBackupFrequency = await AppConfigService().getIntegerConfig(Constants.appConfigAutoBackupFrequency);
+          if(autoBackupFrequency != null) {
             int minutesSinceLastBackup =  DateUtilities().calculateMinutesBetween(lastSyncTime, DateTime.now());
 
             if(minutesSinceLastBackup > autoBackupFrequency) {
@@ -105,7 +107,7 @@ class BackgroundService {
 
       if(await PermissionUtilities().isNotificationPermissionGranted()) {
 
-        await NotificationService.instance.registerBackgroundServiceNotification();
+        await NotificationService().registerBackgroundServiceNotification();
 
         androidConfiguration = AndroidConfiguration(
           // this will be executed when app is in foreground or background in separated isolate

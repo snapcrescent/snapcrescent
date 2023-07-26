@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
+import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class CommonUtilities {
@@ -28,7 +28,7 @@ class CommonUtilities {
 
   Future<String> getTempDownloadsDirectory() async{
     String dir = (await getApplicationDocumentsDirectory()).path;
-    String temporaryDownloadsFolder = (await AppConfigRepository.instance.findByKey(Constants.appConfigThumbnailsFolder)).configValue!;
+    String temporaryDownloadsFolder = (await AppConfigService().getConfig(Constants.appConfigThumbnailsFolder))!;
     String finalFolder = '$dir/$temporaryDownloadsFolder';
     await Directory(finalFolder).create();
     return finalFolder;
@@ -36,7 +36,7 @@ class CommonUtilities {
 
   Future<String> getThumbnailDirectory() async{
     String dir = (await getApplicationDocumentsDirectory()).path;
-    String thumbnailsFolder = (await AppConfigRepository.instance.findByKey(Constants.appConfigThumbnailsFolder)).configValue!;
+    String thumbnailsFolder = (await AppConfigService().getConfig(Constants.appConfigThumbnailsFolder))!;
     String finalFolder = '$dir/$thumbnailsFolder';
     await Directory(finalFolder).create();
     return finalFolder;

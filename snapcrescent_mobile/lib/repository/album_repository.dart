@@ -9,8 +9,13 @@ class AlbumRepository extends BaseRepository{
 
   static const _tableName = 'ALBUM'; 
 
-  AlbumRepository._privateConstructor():super(_tableName);
-  static final AlbumRepository instance = AlbumRepository._privateConstructor();
+  static final AlbumRepository _singleton = AlbumRepository._internal();
+
+  factory AlbumRepository() {
+    return _singleton;
+  }
+
+  AlbumRepository._internal():super(_tableName);
 
   Future<int> countOnLocal(AlbumSearchCriteria albumSearchCriteria) async {
     Database database = await DatabaseHelper().database;

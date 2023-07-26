@@ -24,24 +24,19 @@ class _DeviceFoldersSettingsViewState extends State<DeviceFoldersSettingsView> {
   }
 
   Future<bool> _getSettingsData() async {
-    _showDeviceAssets = await AppConfigService.instance
-        .getFlag(Constants.appConfigShowDeviceAssetsFlag);
-    _showDeviceAssetsFolders =
-        await SettingsService.instance.getShowDeviceAssetsFolderInfo();
-    
+    _showDeviceAssets = await AppConfigService().getFlag(Constants.appConfigShowDeviceAssetsFlag);
+    _showDeviceAssetsFolders = await SettingsService().getFolderInfo(Constants.appConfigShowDeviceAssetsFolders);
     return Future.value(true);
   }
 
   
   _updateShowDeviceAssetsFlag(bool value) async {
     _showDeviceAssets = value;
-    await AppConfigService.instance
-        .updateFlag(Constants.appConfigShowDeviceAssetsFlag, value);
+    await AppConfigService().updateFlag(Constants.appConfigShowDeviceAssetsFlag, value);
     setState(() {});
 
     if (_showDeviceAssets) {
-      _showDeviceAssetsFolders =
-          await SettingsService.instance.getShowDeviceAssetsFolderInfo();
+      _showDeviceAssetsFolders = await SettingsService().getFolderInfo(Constants.appConfigShowDeviceAssetsFolders);
 
       if (_showDeviceAssetsFolders.isEmpty) {
         Navigator.push(

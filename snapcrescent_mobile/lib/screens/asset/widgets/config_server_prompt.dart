@@ -39,13 +39,13 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
   }
 
   Future<bool> _getAppConfigs() async {
-    _loggedInToServer = await AppConfigService.instance
+    _loggedInToServer = await AppConfigService()
         .getFlag(Constants.appConfigLoggedInFlag);
-    _showLoginPrompt = await AppConfigService.instance
+    _showLoginPrompt = await AppConfigService()
         .getFlag(Constants.appConfigShowLoginPromptFlag, true);
-    _autoBackupConfigured = await AppConfigService.instance
+    _autoBackupConfigured = await AppConfigService()
         .getFlag(Constants.appConfigAutoBackupFlag);
-    _showAutoBackupPrompt = await AppConfigService.instance
+    _showAutoBackupPrompt = await AppConfigService()
         .getFlag(Constants.appConfigShowAutoBackupPromptFlag, true);
 
     return Future.value(true);
@@ -159,14 +159,14 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
   }
 
   _onDoNotShowLoginPromptAgain() async {
-    await AppConfigService.instance
+    await AppConfigService()
         .updateFlag(Constants.appConfigShowLoginPromptFlag, false);
     _getAppConfigs();
     setState(() {});
   }
 
   _onDoNotShowAutoBackUpPromptAgain() async {
-    await AppConfigService.instance
+    await AppConfigService()
         .updateFlag(Constants.appConfigShowAutoBackupPromptFlag, false);
     _getAppConfigs();
     setState(() {});

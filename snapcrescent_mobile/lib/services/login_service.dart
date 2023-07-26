@@ -1,39 +1,39 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:snapcrescent_mobile/models/app_config.dart';
+import 'package:snapcrescent_mobile/models/user/account_info.dart';
 import 'package:snapcrescent_mobile/models/user/user_login_request.dart';
 import 'package:snapcrescent_mobile/models/user/user_login_response.dart';
-import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
+import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/base_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class LoginService extends BaseService {
+  static final LoginService _singleton = LoginService._internal();
 
-  LoginService._privateConstructor():super();
-  static final LoginService instance = LoginService._privateConstructor();
+  factory LoginService() {
+    return _singleton;
+  }
 
-  Future<UserLoginResponse?> login() async {
-    
+  LoginService._internal();
+
+  Future<UserLoginResponse?> login(
+      String serverUrl, String username, String password) async {
     UserLoginResponse? response;
 
     try {
-      final appConfigServerUserNameConfig = await AppConfigRepository.instance.findByKey(Constants.appConfigServerUserName);
-      final appConfigServerPasswordConfig = await AppConfigRepository.instance.findByKey(Constants.appConfigServerPassword);
+      saveAccountInformation(serverUrl, username, password);
 
-      if (appConfigServerUserNameConfig.configValue != null && appConfigServerPasswordConfig.configValue != null) {
+      UserLoginRequest request =
+          UserLoginRequest(username: username, password: password);
 
-        UserLoginRequest request = UserLoginRequest(username : appConfigServerUserNameConfig.configValue , password : appConfigServerPasswordConfig.configValue);
+      Dio dio = await getDio();
+      final jsonResponse = await dio.post('/login', data: request.toJson());
 
-        Dio dio = await getDio();
-        final jsonResponse = await dio.post('/login', data : request.toJson());
+      response = UserLoginResponse.fromJson(json.decode(jsonResponse.data));
 
-        response = UserLoginResponse.fromJson(json.decode(jsonResponse.data));
-
-        AppConfig appConfigSessionTokenConfig = AppConfig(configKey: Constants.appConfigSessionToken,configValue: response.token);
-        await AppConfigRepository.instance.saveOrUpdateConfig(appConfigSessionTokenConfig);
-
-      } 
+      await AppConfigService()
+          .updateConfig(Constants.appConfigSessionToken, response.token!);
     } on DioException catch (ex) {
       if (ex.type == DioExceptionType.connectionTimeout) {
         throw Exception("Connection  Timeout Exception");
@@ -43,5 +43,29 @@ class LoginService extends BaseService {
     }
 
     return response;
+  }
+
+  Future<AccountInfo> getAccountInformation() async {
+    String? serverUrl =
+        await AppConfigService().getConfig(Constants.appConfigServerURL);
+    serverUrl ??= "https://";
+    String? username =
+        await AppConfigService().getConfig(Constants.appConfigServerUserName);
+    username ??= "";
+    String? password =
+        await AppConfigService().getConfig(Constants.appConfigServerPassword);
+    password ??= "";
+
+    return AccountInfo(serverUrl, username, password);
+  }
+
+  Future<void> saveAccountInformation(
+      String serverUrl, String username, String password) async {
+    await AppConfigService()
+        .updateConfig(Constants.appConfigServerURL, serverUrl);
+    await AppConfigService()
+        .updateConfig(Constants.appConfigServerUserName, username);
+    await AppConfigService()
+        .updateConfig(Constants.appConfigServerPassword, password);
   }
 }

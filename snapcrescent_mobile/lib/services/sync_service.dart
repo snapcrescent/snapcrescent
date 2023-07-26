@@ -1,13 +1,11 @@
 import 'dart:io';
 
 import 'package:photo_manager/photo_manager.dart';
-import 'package:snapcrescent_mobile/models/app_config.dart';
 import 'package:snapcrescent_mobile/models/asset/asset.dart';
 import 'package:snapcrescent_mobile/models/asset/asset_search_criteria.dart';
 import 'package:snapcrescent_mobile/models/common/base_response_bean.dart';
 import 'package:snapcrescent_mobile/models/metadata/metadata.dart';
 import 'package:snapcrescent_mobile/models/sync_state.dart';
-import 'package:snapcrescent_mobile/repository/app_config_repository.dart';
 import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/asset_service.dart';
 import 'package:snapcrescent_mobile/services/base_service.dart';
@@ -29,14 +27,14 @@ class SyncService extends BaseService {
     
     SyncState syncMetadata = SyncState(0, 0, 0, 0);
 
-    bool executionInProgress = await AppConfigService.instance.getFlag(Constants.appConfigSyncInProgress);
+    bool executionInProgress = await AppConfigService().getFlag(Constants.appConfigSyncInProgress);
 
     bool syncNow = false;
 
     if (!executionInProgress) {
       syncNow = true;
     } else {
-        DateTime? lastSyncActivityTimestamp = await AppConfigService.instance.getDateConfig(Constants.appConfigLastSyncActivityTimestamp, DateUtilities.timeStampFormat);
+        DateTime? lastSyncActivityTimestamp = await AppConfigService().getDateConfig(Constants.appConfigLastSyncActivityTimestamp, DateUtilities.timeStampFormat);
 
         if(lastSyncActivityTimestamp != null) {
            int minutesSinceLastBackup =  DateUtilities().calculateMinutesBetween(lastSyncActivityTimestamp, DateTime.now());
@@ -51,23 +49,23 @@ class SyncService extends BaseService {
     }
 
     if (syncNow) {
-      bool loggedInToServer = await AppConfigService.instance.getFlag(Constants.appConfigLoggedInFlag);
+      bool loggedInToServer = await AppConfigService().getFlag(Constants.appConfigLoggedInFlag);
 
       if(loggedInToServer) {
         await PhotoManager.setIgnorePermissionCheck(true);
         
-        await AppConfigService.instance.updateFlag(Constants.appConfigSyncInProgress, true );
+        await AppConfigService().updateFlag(Constants.appConfigSyncInProgress, true );
 
         await _downloadAssetsFromServer(syncMetadata, progressCallBack);
 
-        bool autoBackupEnabled = await AppConfigService.instance.getFlag(Constants.appConfigAutoBackupFlag);
+        bool autoBackupEnabled = await AppConfigService().getFlag(Constants.appConfigAutoBackupFlag);
         
         if(autoBackupEnabled) {
           await _uploadAssetsToServer(syncMetadata, progressCallBack);
         }
         
-        await NotificationService.instance.clearNotifications();
-        await AppConfigService.instance.updateFlag(Constants.appConfigSyncInProgress, false );
+        await NotificationService().clearNotifications();
+        await AppConfigService().updateFlag(Constants.appConfigSyncInProgress, false );
       }
     }
   }
@@ -226,16 +224,13 @@ class SyncService extends BaseService {
     List<AssetEntity> assets = [];
 
     try {
-      AppConfig value = await AppConfigRepository.instance
-          .findByKey(Constants.appConfigAutoBackupFolders);
 
-      if (value.configValue != null) {
         final List<AssetPathEntity> folders =
             await PhotoManager.getAssetPathList();
         folders.sort(
             (AssetPathEntity a, AssetPathEntity b) => a.name.compareTo(b.name));
 
-        List<String> autoBackupFolderNameList = value.configValue!.split(",");
+        List<String> autoBackupFolderNameList = await AppConfigService().getStringListConfig(Constants.appConfigAutoBackupFolders, ",");
         List<AssetPathEntity> autoBackupFolders = [];
 
         for (int i = 0; i < folders.length; i++) {
@@ -254,7 +249,7 @@ class SyncService extends BaseService {
 
           assets = allAssets;
         }
-      }
+      
     } catch (e) {
       print("Network error");
     }
@@ -263,7 +258,7 @@ class SyncService extends BaseService {
   }
 
   postDownloadUpdates(SyncState syncMetadata, Function progressCallBack) {
-    NotificationService.instance.showNotification(
+    NotificationService().showNotification(
         "Downloading photos and videos",
         '''Downloaded : ${syncMetadata.downloadedPercentageString()}''',
         Constants.downloadProgressNotificationChannel);
@@ -272,7 +267,7 @@ class SyncService extends BaseService {
   }
 
   postUploadUpdates(SyncState syncMetadata, Function progressCallBack) {
-    NotificationService.instance.showNotification(
+    NotificationService().showNotification(
         "Uploading photos and videos",
         '''Uploaded : ${syncMetadata.uploadPercentageString()}''',
         Constants.uploadProgressNotificationChannel);
@@ -281,6 +276,6 @@ class SyncService extends BaseService {
   }
 
   updateLastSyncActivityTimestamp() async{
-    await AppConfigService.instance.updateDateConfig(Constants.appConfigLastSyncActivityTimestamp, DateTime.now(), DateUtilities.timeStampFormat);
+    await AppConfigService().updateDateConfig(Constants.appConfigLastSyncActivityTimestamp, DateTime.now(), DateUtilities.timeStampFormat);
   }
 }

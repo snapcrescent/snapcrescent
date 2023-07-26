@@ -48,7 +48,7 @@ class ThumbnailService extends BaseService {
     }
   }
 
-  String getThumbnailByIdUrl(String serverURL, int thumbnailId) {
+  String getThumbnailByIdUrl(String? serverURL, int thumbnailId) {
     return '$serverURL/thumbnail/$thumbnailId';
   }
 

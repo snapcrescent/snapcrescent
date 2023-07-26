@@ -14,6 +14,7 @@ import 'package:snapcrescent_mobile/repository/asset_repository.dart';
 import 'package:snapcrescent_mobile/repository/thumbnail_repository.dart';
 import 'package:snapcrescent_mobile/services/base_service.dart';
 import 'package:snapcrescent_mobile/services/metadata_service.dart';
+import 'package:snapcrescent_mobile/services/notification_service.dart';
 import 'package:snapcrescent_mobile/services/thumbnail_service.dart';
 import 'package:snapcrescent_mobile/state/asset_state.dart';
 import 'package:snapcrescent_mobile/utils/common_utilities.dart';
@@ -123,12 +124,12 @@ class AssetService extends BaseService {
     }
   }
 
-  String streamAssetByIdUrl(String serverURL, String token) {
-    return '''$serverURL + '/asset/$token/stream''';
+  String streamAssetByIdUrl(String? serverURL, String token) {
+    return '''$serverURL/asset/$token/stream''';
   }
 
-  String downloadAssetByIdUrl(String serverURL, String token) {
-    return '''$serverURL + '/asset/$token/download''';
+  String downloadAssetByIdUrl(String? serverURL, String token) {
+    return '''$serverURL/asset/$token/download''';
   }
 
   Future<bool> permanentDownloadAssetById(
@@ -153,8 +154,7 @@ class AssetService extends BaseService {
         Dio dio = await getDio();
 
         BaseResponseBean<int, Asset> response = await getAssetById(assetId);
-        final url =
-            downloadAssetByIdUrl(await getServerUrl(), response.object!.token!);
+        final url = downloadAssetByIdUrl(await getServerUrl(), response.object!.token!);
 
         String directory = await CommonUtilities().getTempDownloadsDirectory();
         String fullPath = '$directory/$assetName';
@@ -325,17 +325,20 @@ class AssetService extends BaseService {
   }
 
   Future<bool> downloadAssetFilesToDevice(List<int> assetIndexes) async {
+    NotificationService().showProgressNotification("Downloading", "Downloading files on device", assetIndexes.length, 0);
     for (var assetIndex in assetIndexes) {
       final UniFiedAsset unifiedAsset =
-          AssetState.instance.assetList[assetIndex];
+          AssetState().assetList[assetIndex];
 
       if (unifiedAsset.assetSource == AssetSource.CLOUD) {
         Asset asset = unifiedAsset.asset!;
-        await permanentDownloadAssetById(
-            asset.id!, asset.metadata!.name!, unifiedAsset.assetType);
+        await permanentDownloadAssetById(asset.id!, asset.metadata!.name!, unifiedAsset.assetType);
+        NotificationService().showProgressNotification("Downloading", "Downloading files on device", assetIndexes.length, assetIndexes.indexOf(assetIndex));
       }
     }
-
+    NotificationService().showProgressNotification("Downloading", "Downloading files on device", assetIndexes.length, assetIndexes.length);
+    NotificationService().clearNotifications();
+    NotificationService().showNotification("Download Complete", "Download Complete");
     return true;
   }
 
@@ -344,7 +347,7 @@ class AssetService extends BaseService {
 
     for (var assetIndex in assetIndexes) {
       final UniFiedAsset unifiedAsset =
-          AssetState.instance.assetList[assetIndex];
+          AssetState().assetList[assetIndex];
 
       File? assetFile;
 
@@ -368,7 +371,7 @@ class AssetService extends BaseService {
   Future<bool> uploadAssetFilesToServer(List<int> assetIndexes) async {
     for (var assetIndex in assetIndexes) {
       final UniFiedAsset unifiedAsset =
-          AssetState.instance.assetList[assetIndex];
+          AssetState().assetList[assetIndex];
 
       if (unifiedAsset.assetSource == AssetSource.DEVICE) {
         AssetEntity asset = unifiedAsset.assetEntity!;

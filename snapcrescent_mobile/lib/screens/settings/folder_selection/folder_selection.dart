@@ -63,7 +63,7 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
   }
 
   Future<void> _getFolderInfo() async {
-    String? value = await AppConfigService.instance.getConfig(widget.appConfigKey);
+    String? value = await AppConfigService().getConfig(widget.appConfigKey);
     
     if (value != null) {
       _folders = value;
@@ -82,7 +82,7 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
 
     _folders = newFolderList.join(",");
     
-    await AppConfigService.instance.updateConfig(widget.appConfigKey, _folders);
+    await AppConfigService().updateConfig(widget.appConfigKey, _folders);
 
     setState(() {});
   }
