@@ -2,7 +2,6 @@ package com.snapcrescent.album;
 
 import java.util.List;
 
-import com.snapcrescent.asset.Asset;
 import com.snapcrescent.common.BaseEntity;
 import com.snapcrescent.common.utils.Constant.AlbumType;
 import com.snapcrescent.config.security.acl.AccessControlQuery;
@@ -52,12 +51,6 @@ public class Album extends BaseEntity {
 			@JoinColumn(name = "ALBUM_ID", updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "USER_ID", updatable = false) })
 	private List<User> users;
-	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
-	@JoinTable(name = "ALBUM_ASSET_ASSN", joinColumns = {
-			@JoinColumn(name = "ALBUM_ID", updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "ASSET_ID", updatable = false) })
-	private List<Asset> assets;
 	
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JoinColumn(name = "PUBLIC_ACCESS_USER_ID", nullable = true, insertable = false, updatable = false)

@@ -1,6 +1,5 @@
 package com.snapcrescent.asset;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -25,8 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.snapcrescent.batchProcess.assetImport.AssetImportBatchProcessService;
-import com.snapcrescent.batchProcess.assetImport.UiAssetImportBatchProcess;
+import com.snapcrescent.batch.assetImport.AssetImportBatchService;
 import com.snapcrescent.common.BaseController;
 import com.snapcrescent.common.beans.BaseResponse;
 import com.snapcrescent.common.beans.BaseResponseBean;
@@ -40,7 +38,7 @@ public class AssetController extends BaseController {
 	private AssetService assetService;
 	
 	@Autowired
-	private AssetImportBatchProcessService assetImportBatchProcessService;
+	private AssetImportBatchService assetImportBatchService;
 
 	@GetMapping("/asset")
 	public @ResponseBody BaseResponseBean<Long, UiAsset> search(@RequestParam Map<String, String> searchParams) {
@@ -111,17 +109,6 @@ public class AssetController extends BaseController {
 			}
 	}
 
-	@PutMapping(value = "/asset/{id}/metadata")
-	public ResponseEntity<?> updateMetadata(@PathVariable Long id) {
-		try {
-			assetService.updateMetadata(id);
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	}
-
 	@PutMapping(value = "/asset/{id}")
 	public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UiAsset asset) {
 		try {
@@ -159,14 +146,8 @@ public class AssetController extends BaseController {
 
 		BaseResponse response = new BaseResponse();
 		try {
-
-			List<File> temporaryFiles = assetService.uploadAssets(Arrays.asList(files));
-			List<Asset> savedAssetEntities = assetService.processAssets(temporaryFiles);
-			
-			UiAssetImportBatchProcess assetImportBatchProcess = new UiAssetImportBatchProcess();
-			assetImportBatchProcess.setAssetEntities(savedAssetEntities);
-			assetImportBatchProcessService.save(assetImportBatchProcess);
-			
+			String filesBasePath = assetService.uploadAssets(Arrays.asList(files));
+			assetImportBatchService.createBatch(filesBasePath);
 			response.setMessage("Asset uploaded successfully.");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {

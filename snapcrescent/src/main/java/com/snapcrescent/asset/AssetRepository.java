@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import com.snapcrescent.common.BaseRepository;
 import com.snapcrescent.common.utils.SearchDAOHelper;
 import com.snapcrescent.common.utils.StringUtils;
-import com.snapcrescent.common.utils.Constant.BatchProcessStatus;
 
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
@@ -62,7 +61,8 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		if(searchCriteria.getAlbumId() != null)
 		{
-			hql.append(" LEFT JOIN asset.albums album");
+			hql.append(" LEFT JOIN asset.albumAssetAssns albumAssetAssn");
+			hql.append(" LEFT JOIN albumAssetAssn.id.album album");
 			hql.append(" LEFT JOIN album.users user");
 		}
 		
@@ -76,9 +76,6 @@ public class AssetRepository extends BaseRepository<Asset>{
 					true));
 		}
 		
-		
-		hql.append(" AND asset.batchProcessStatus = :batchProcessStatus ");
-		paramsMap.put("batchProcessStatus", BatchProcessStatus.COMPLETED.getId());
 		
 		if(searchCriteria.getAccessibleByUserId() != null)
 		{
@@ -201,8 +198,9 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		if(searchCriteria.getAlbumId() != null)
 		{
-			hql.append(" LEFT JOIN  asset.albums album");
-			hql.append(" LEFT JOIN  album.users user");
+			hql.append(" LEFT JOIN asset.albumAssetAssns albumAssetAssn");
+			hql.append(" LEFT JOIN albumAssetAssn.id.album album");
+			hql.append(" LEFT JOIN album.users user");
 		}
 		
 		hql.append(" where 1=1 ");
@@ -255,6 +253,15 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		TypedQuery<Long> typedQuery = entityManager.createQuery(query,Long.class);
 		typedQuery.setParameter("createdByUserId", createdByUserId);
+		return typedQuery.getResultList();
+	}
+	
+	public List<Asset> filterAssetsByCreatedById(List<Long> assetIds, Long createdByUserId) {
+		String query = "SELECT asset FROM Asset asset WHERE asset.createdByUserId = :createdByUserId AND id IN (:assetIds)";
+		
+		TypedQuery<Asset> typedQuery = entityManager.createQuery(query,Asset.class);
+		typedQuery.setParameter("createdByUserId", createdByUserId);
+		typedQuery.setParameter("assetIds", assetIds);
 		return typedQuery.getResultList();
 	}
 	

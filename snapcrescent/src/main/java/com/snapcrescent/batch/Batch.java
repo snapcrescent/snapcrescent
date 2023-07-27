@@ -1,10 +1,11 @@
-package com.snapcrescent.batchProcess;
+package com.snapcrescent.batch;
+
+import java.util.Date;
 
 import com.snapcrescent.common.BaseEntity;
-import com.snapcrescent.common.utils.Constant.BatchProcessStatus;
+import com.snapcrescent.common.utils.Constant.BatchStatus;
 
 import jakarta.persistence.Basic;
-import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Transient;
@@ -12,23 +13,27 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @MappedSuperclass
-@Entity
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class BatchProcess extends BaseEntity {
+public class Batch extends BaseEntity {
 
 	private static final long serialVersionUID = -4250460739319965956L;
 	
+	private String name;
+	
+	private Date startDateTime;
+	private Date endDateTime;
+	
 	@Basic
-	private Integer batchProcessStatus;
+	private Integer batchStatus;
 	
 	@Transient
-    private BatchProcessStatus batchProcessStatusEnum;
+    private BatchStatus batchStatusEnum;
 
 	@PostLoad
     void fillTransient() {
-		if(batchProcessStatus > 0) {
-			this.batchProcessStatusEnum = BatchProcessStatus.findById(batchProcessStatus);
+		if(batchStatus > 0) {
+			this.batchStatusEnum = BatchStatus.findById(batchStatus);
 		}
 	}
 }

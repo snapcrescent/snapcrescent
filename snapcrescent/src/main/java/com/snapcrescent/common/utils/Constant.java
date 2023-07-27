@@ -1,5 +1,8 @@
 package com.snapcrescent.common.utils;
 
+import com.snapcrescent.common.utils.Constant.AssetType;
+import com.snapcrescent.common.utils.Constant.FILE_TYPE;
+
 public class Constant {
 	
 	public static final Long DEFAULT_ADMIN_USER_ID = 1L;
@@ -185,7 +188,7 @@ public class Constant {
 		}
 	}
     
-    public enum BatchProcessStatus implements DbEnum {
+    public enum BatchStatus implements DbEnum {
     	PENDING(1,"Pending"),
     	IN_PROGRESS(2, "In Progress"),
     	COMPLETED(3, "Completed");
@@ -193,7 +196,7 @@ public class Constant {
 		private int id;
 		private String label;
 		
-		private BatchProcessStatus(int id, String label) {
+		private BatchStatus(int id, String label) {
 			this.id = id;
 			this.label = label;
 		}
@@ -208,9 +211,9 @@ public class Constant {
 			return this.label;
 		}
 		
-		public static BatchProcessStatus findById(int id) {
+		public static BatchStatus findById(int id) {
 			
-			for (BatchProcessStatus item : BatchProcessStatus.values()) {
+			for (BatchStatus item : BatchStatus.values()) {
 				if(item.getId() == id) {
 					return item;
 				}
@@ -222,7 +225,26 @@ public class Constant {
 	
 	
 	public static enum FILE_TYPE {
-		PHOTO, VIDEO, THUMBNAIL
+		PHOTO, VIDEO, THUMBNAIL;
+		
+		public static FILE_TYPE findAssetType(int assetTypeId) {
+			return findAssetType(AssetType.findById(assetTypeId));
+		}
+		
+		public static FILE_TYPE findAssetType(AssetType assetType) {
+			
+			FILE_TYPE fileType = null;
+			
+			if (assetType == AssetType.PHOTO) {
+				fileType = FILE_TYPE.PHOTO;
+			}
+
+			if (assetType == AssetType.VIDEO) {
+				fileType = FILE_TYPE.VIDEO;
+			}
+			
+			return fileType;
+		}
 	}
 	
 	public enum Direction {

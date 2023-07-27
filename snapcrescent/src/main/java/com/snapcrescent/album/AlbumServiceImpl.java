@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.snapcrescent.album.albumAssetAssn.AlbumAssetAssn;
+import com.snapcrescent.album.albumAssetAssn.AlbumAssetAssnId;
+import com.snapcrescent.album.albumAssetAssn.AlbumAssetAssnRepository;
 import com.snapcrescent.asset.Asset;
 import com.snapcrescent.asset.AssetRepository;
 import com.snapcrescent.common.beans.BaseResponseBean;
@@ -38,6 +41,9 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private AlbumAssetAssnRepository albumAssetAssnRepository;
 	
 	@Override
 	@Transactional
@@ -198,38 +204,22 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 
 		Long userId = coreService.getAppUser().getId();
 
-		List<Asset> assets = new ArrayList<>(createAlbumAssetAssnRequest.getAssetIds().size());
+		List<Asset> assets = assetRepository.filterAssetsByCreatedById(createAlbumAssetAssnRequest.getAssetIds(), userId);
 
-		for (Long assetId : createAlbumAssetAssnRequest.getAssetIds()) {
-			Asset asset = assetRepository.findById(assetId);
+		for (UiAlbum albumBean : createAlbumAssetAssnRequest.getAlbums()) {
 
-			if (asset != null && asset.getCreatedByUserId() == userId) {
-				assets.add(asset);
-			}
-		}
+			Album entity = null;
+			
+			if (albumBean.getId() != null) {
+				Album album = albumRepository.findById(albumBean.getId());
 
-		for (UiAlbum album : createAlbumAssetAssnRequest.getAlbums()) {
-
-			if (album.getId() != null) {
-				Album entity = albumRepository.findById(album.getId());
-
-				if (entity != null) {
-					if (entity.getCreatedByUserId() == userId) {
-						entity.getAssets().addAll(assets);
-					}
+				if (album != null && album.getCreatedByUserId() == userId) {
+					entity = album;
 				}
-				
-				
-				//If no thumbnail is assigned by user then assign the last added asset as thumbnail. 
-				if(entity.getAlbumThumbnailId() == null) {
-					entity.setAlbumThumbnailId(assets.get(assets.size() - 1).getThumbnailId());
-				}
-
-				albumRepository.update(entity);
 			} else {
-				Album entity = new Album();
+				entity = new Album();
 
-				entity.setName(album.getName());
+				entity.setName(albumBean.getName());
 				entity.setAlbumType(AlbumType.CUSTOM.getId());
 				entity.setCreatedByUserId(userId);
 
@@ -237,17 +227,43 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 				users.add(coreService.getUser());
 				entity.setUsers(users);
 
-				entity.setAssets(assets);
-				
-				//it is a new album, hence no thumbnail is assigned by use.
-				//Assign the last added asset as thumbnail. 
-				entity.setAlbumThumbnailId(assets.get(assets.size() - 1).getThumbnailId());
-
 				albumRepository.save(entity);
 			}
+			
+			if(entity != null && assets.isEmpty() == false) {
+				
+				for (Asset asset : assets) {
+					persistAlbumAssetAssociation(entity, asset);
+				}
+				
+				if(entity.getAlbumThumbnailId() == null) {
+					entity.setAlbumThumbnailId(assets.get(assets.size() - 1).getThumbnailId());
+				}
+				
+			}
+			
 
 		}
-
+	}
+	
+	@Override
+	@Transactional
+	public void persistAlbumAssetAssociationForDefaultAlbum(Long userId, Asset asset) {
+		Album entity = albumRepository.findDefaultAlbumByUserId(userId);
+		persistAlbumAssetAssociation(entity, asset);
+	}
+	
+	private void persistAlbumAssetAssociation(Album entity, Asset asset) {
+		
+		AlbumAssetAssn albumAssetAssn = new AlbumAssetAssn();
+		
+		AlbumAssetAssnId albumAssetAssnId = new AlbumAssetAssnId();
+		albumAssetAssnId.setAlbum(entity);
+		albumAssetAssnId.setAsset(asset);
+		
+		albumAssetAssn.setId(albumAssetAssnId);
+		
+		albumAssetAssnRepository.save(albumAssetAssn);
 	}
 
 	@Override
@@ -298,5 +314,21 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 		if(album.getAlbumTypeEnum() != AlbumType.DEFAULT) {
 			albumRepository.delete(id);	
 		} 
+	}
+
+	@Override
+	@Transactional
+	public void updateAlbumPostThumbnailDeletion(Long thumbnailId) {
+		
+		List<Album> albums = albumRepository.getAlbumsByThumbnailId(thumbnailId);
+
+		if (albums != null) {
+			for (Album album : albums) {
+				album.setAlbumThumbnail(null);
+				album.setAlbumThumbnailId(null);
+				albumRepository.update(album);
+			}
+		}
+		
 	}
 }
