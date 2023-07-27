@@ -27,7 +27,7 @@ public class BulkImportDirectoryServiceImpl extends BaseService implements BulkI
 		if (!metadataRepository.existByName(asset.getName(), coreService.getAppUserId())) {
 			File temporaryFile = assetService.migrateAssets(assetType, asset);
 			moveFileAfterProcessing(bulkImportRequest, asset);
-			assetService.processAsset(temporaryFile);
+			//assetService.processAsset(temporaryFile);
 			}
 		}
 	}

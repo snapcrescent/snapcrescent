@@ -1,12 +1,9 @@
 package com.snapcrescent.asset;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
@@ -27,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.snapcrescent.batch.assetImport.AssetImportBatchService;
 import com.snapcrescent.common.BaseController;
 import com.snapcrescent.common.beans.BaseResponse;
 import com.snapcrescent.common.beans.BaseResponseBean;
@@ -38,6 +36,9 @@ public class AssetController extends BaseController {
 
 	@Autowired
 	private AssetService assetService;
+	
+	@Autowired
+	private AssetImportBatchService assetImportBatchService;
 
 	@GetMapping("/asset")
 	public @ResponseBody BaseResponseBean<Long, UiAsset> search(@RequestParam Map<String, String> searchParams) {
@@ -108,17 +109,6 @@ public class AssetController extends BaseController {
 			}
 	}
 
-	@PutMapping(value = "/asset/{id}/metadata")
-	public ResponseEntity<?> updateMetadata(@PathVariable Long id) {
-		try {
-			assetService.updateMetadata(id);
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	}
-
 	@PutMapping(value = "/asset/{id}")
 	public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UiAsset asset) {
 		try {
@@ -156,30 +146,8 @@ public class AssetController extends BaseController {
 
 		BaseResponse response = new BaseResponse();
 		try {
-
-			List<File> temporaryFiles = assetService.uploadAssets(Arrays.asList(files));
-
-			List<Future<Boolean>> processingStatusList = new ArrayList<>(temporaryFiles.size());
-			//assetService.processAssets(temporaryFiles);
-			
-			
-			for (File temporaryFile : temporaryFiles) {
-				processingStatusList.add(assetService.processAsset(temporaryFile));
-			}
-			
-
-			// wait for all threads
-			/*
-			processingStatusList.forEach(result -> {
-				try {
-					result.get();
-				} catch (Exception e) {
-
-				}
-			});
-			*/
-			
-
+			String filesBasePath = assetService.uploadAssets(Arrays.asList(files));
+			assetImportBatchService.createBatch(filesBasePath);
 			response.setMessage("Asset uploaded successfully.");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
@@ -215,17 +183,6 @@ public class AssetController extends BaseController {
 	public ResponseEntity<?> deletePermanently(@RequestParam List<Long> ids) {
 		try {
 			assetService.deletePermanently(ids);
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	}
-	
-	@PutMapping(value = "/asset/thumbnail/regenerate")
-	public ResponseEntity<?> regenerateThumbnails(@RequestParam String assetIdRange, @RequestParam String assetIdList) {
-		try {
-			assetService.regenerateThumbnails(assetIdRange, assetIdList);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

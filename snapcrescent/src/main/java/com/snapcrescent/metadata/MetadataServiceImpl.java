@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,8 @@ import com.snapcrescent.common.services.BaseService;
 import com.snapcrescent.common.utils.Constant;
 import com.snapcrescent.common.utils.Constant.AssetType;
 import com.snapcrescent.common.utils.DateUtils;
+import com.snapcrescent.common.utils.FileService;
+import com.snapcrescent.common.utils.ImageUtils;
 import com.snapcrescent.common.utils.JsonUtils;
 import com.snapcrescent.common.utils.StringUtils;
 import com.snapcrescent.location.LocationService;
@@ -35,25 +39,34 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 
 	@Autowired
 	private LocationService locationService;
+	
+	@Autowired
+	private FileService fileService;
 
 	@Override
-	public Metadata computeMetaData(AssetType assetType, String originalFilename, File file) throws Exception {
+	public Metadata createMetadataEntity(File temporaryFile) throws Exception {
 		Metadata metadata = new Metadata();
-		metadata.setCreatedByUserId(coreService.getAppUserId());
-		extractMetaData(assetType, originalFilename, file, metadata);
+		
+		AssetType assetType = FileService.getAssetType(temporaryFile.getName());
+		String originalFilename = StringUtils.extractFileNameFromTemporary(temporaryFile.getName());
+		
+		long assetHash = 0;
+		
+		if(assetType == AssetType.PHOTO) {
+			assetHash = ImageUtils.getPerceptualHash(ImageIO.read(temporaryFile));	
+		} else if (assetType == AssetType.VIDEO) {
+			assetHash = StringUtils.generateHashFromFileName(originalFilename) + fileService.getFileSize(temporaryFile.getAbsolutePath());	
+		}
+		
+		metadata.setHash(assetHash);
+		metadata.setName(originalFilename);
+		
+		extractMetaData(assetType, temporaryFile, metadata);
+		
 		return metadata;
 	}
 
-	@Override
-	public void recomputeMetaData(AssetType assetType, Metadata metadata, File file) throws Exception {
-		String internalName = metadata.getInternalName();
-		String path = metadata.getPath();
-		extractMetaData(assetType, metadata.getName(), file, metadata);
-		metadata.setInternalName(internalName);
-		metadata.setPath(path);
-	}
-
-	private void extractMetaData(AssetType assetType, String originalFilename, File file, Metadata metadata)
+	private void extractMetaData(AssetType assetType, File file, Metadata metadata)
 			throws Exception {
 
 		try {
@@ -68,7 +81,7 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 				}
 			}
 
-			metadata.setName(originalFilename);
+			
 			metadata.setInternalName(StringUtils.generateFinalFileName(file.getName()));
 
 			metadata.setSize(Long.parseLong(StringUtils.replaceString(metaDataMap.get(Constant.METADATA_FILE_SIZE),
@@ -187,7 +200,7 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 					new TypeReference<GoogleTakeoutMetadata>() {
 					});
 
-			extractMetaData(assetType, googleTakeoutMetadata.getTitle(), temporaryFile, metadata);
+			extractMetaData(assetType, temporaryFile, metadata);
 
 			metadata.setName(googleTakeoutMetadata.getTitle());
 			metadata.setCreationDateTime(googleTakeoutMetadata.getCreationDate());

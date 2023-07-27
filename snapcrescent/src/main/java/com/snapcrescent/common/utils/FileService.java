@@ -51,7 +51,11 @@ public class FileService {
 	}
 	
 	public long getFileSize(FILE_TYPE fileType, Long userId,String path, String fileName) throws IOException {
-		return Files.size(Paths.get(getBasePath(fileType, userId) + path + fileName));
+		return getFileSize(getBasePath(fileType, userId) + path + fileName);
+	}
+	
+	public long getFileSize(String path) throws IOException {
+		return Files.size(Paths.get(path));
 	}
 	
 	public File getFile(FILE_TYPE fileType, Long userId, String path, String fileName) {

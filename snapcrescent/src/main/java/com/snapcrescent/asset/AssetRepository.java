@@ -61,7 +61,8 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		if(searchCriteria.getAlbumId() != null)
 		{
-			hql.append(" LEFT JOIN asset.albums album");
+			hql.append(" LEFT JOIN asset.albumAssetAssns albumAssetAssn");
+			hql.append(" LEFT JOIN albumAssetAssn.id.album album");
 			hql.append(" LEFT JOIN album.users user");
 		}
 		
@@ -74,6 +75,7 @@ public class AssetRepository extends BaseRepository<Asset>{
 			hql.append(daoHelper.getSearchWhereStatement(stringFields, numberFields, searchCriteria.getSearchKeyword(),
 					true));
 		}
+		
 		
 		if(searchCriteria.getAccessibleByUserId() != null)
 		{
@@ -164,7 +166,15 @@ public class AssetRepository extends BaseRepository<Asset>{
 		query.executeUpdate();
 	}
 	
-	
+	public Asset findByHash(long hash, long createdByUserId) {
+		String query = "SELECT asset FROM Asset asset JOIN asset.metadata metadata WHERE metadata.hash = :hash AND metadata.createdByUserId = :createdByUserId ";
+
+		TypedQuery<Asset> typedQuery = entityManager.createQuery(query, Asset.class);
+		typedQuery.setParameter("hash", hash);
+		typedQuery.setParameter("createdByUserId", createdByUserId);
+		List<Asset> results = typedQuery.getResultList();
+		return results.isEmpty() ? null : results.get(0);
+	}
 
 	
 	public Asset findByMetadataId(Long metadataId) {
@@ -188,8 +198,9 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		if(searchCriteria.getAlbumId() != null)
 		{
-			hql.append(" LEFT JOIN  asset.albums album");
-			hql.append(" LEFT JOIN  album.users user");
+			hql.append(" LEFT JOIN asset.albumAssetAssns albumAssetAssn");
+			hql.append(" LEFT JOIN albumAssetAssn.id.album album");
+			hql.append(" LEFT JOIN album.users user");
 		}
 		
 		hql.append(" where 1=1 ");
@@ -242,6 +253,15 @@ public class AssetRepository extends BaseRepository<Asset>{
 		
 		TypedQuery<Long> typedQuery = entityManager.createQuery(query,Long.class);
 		typedQuery.setParameter("createdByUserId", createdByUserId);
+		return typedQuery.getResultList();
+	}
+	
+	public List<Asset> filterAssetsByCreatedById(List<Long> assetIds, Long createdByUserId) {
+		String query = "SELECT asset FROM Asset asset WHERE asset.createdByUserId = :createdByUserId AND id IN (:assetIds)";
+		
+		TypedQuery<Asset> typedQuery = entityManager.createQuery(query,Asset.class);
+		typedQuery.setParameter("createdByUserId", createdByUserId);
+		typedQuery.setParameter("assetIds", assetIds);
 		return typedQuery.getResultList();
 	}
 	

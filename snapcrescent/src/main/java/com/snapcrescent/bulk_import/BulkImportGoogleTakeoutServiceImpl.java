@@ -37,7 +37,7 @@ public class BulkImportGoogleTakeoutServiceImpl extends BaseService implements B
 			moveFileAfterProcessing(bulkImportRequest, asset);
 
 			if (bulkImportRequest.getExtractMetadataViaInternalService() || assetJsonFile.exists() == false) {
-				assetService.processAsset(temporaryFile);
+				//assetService.processAsset(temporaryFile);
 				
 				if(assetJsonFile.exists()) {
 					moveFileAfterProcessing(bulkImportRequest, assetJsonFile);	

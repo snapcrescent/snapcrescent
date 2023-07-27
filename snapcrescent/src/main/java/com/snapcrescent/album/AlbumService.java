@@ -1,5 +1,6 @@
 package com.snapcrescent.album;
 
+import com.snapcrescent.asset.Asset;
 import com.snapcrescent.common.beans.BaseResponseBean;
 import com.snapcrescent.user.User;
 
@@ -11,9 +12,11 @@ public interface AlbumService {
 	void createOrUpdateDefaultAlbum(User entity) throws Exception;
 	void createAlbumAssetAssociation(UiCreateAlbumAssetAssnRequest createAlbumAssetAssnRequest);
 	public void updateOrDeleteAlbumPostUserDeletion(Long userId);
+	public void updateAlbumPostThumbnailDeletion(Long thumbnailId);
 	public UiAlbum getById(Long id);
 	UiAlbum getLiteById(Long id);
 	public void delete(Long id);
+	void persistAlbumAssetAssociationForDefaultAlbum(Long userId, Asset asset);
 	
 
 }

@@ -1,25 +1,23 @@
 package com.snapcrescent.asset;
 
+import java.util.List;
+
+import com.snapcrescent.album.albumAssetAssn.AlbumAssetAssn;
+import com.snapcrescent.common.BaseEntity;
+import com.snapcrescent.common.utils.Constant.AssetType;
+import com.snapcrescent.metadata.Metadata;
+import com.snapcrescent.thumbnail.Thumbnail;
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Transient;
-
-import java.util.List;
-
-import com.snapcrescent.album.Album;
-import com.snapcrescent.common.BaseEntity;
-import com.snapcrescent.common.utils.Constant.AssetType;
-import com.snapcrescent.metadata.Metadata;
-import com.snapcrescent.thumbnail.Thumbnail;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -35,7 +33,7 @@ public class Asset extends BaseEntity {
 	
 	@Transient
     private AssetType assetTypeEnum;
-
+	
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JoinColumn(name = "THUMBNAIL_ID", nullable = false, insertable = false, updatable = false)
 	private Thumbnail thumbnail;
@@ -52,11 +50,8 @@ public class Asset extends BaseEntity {
 	
 	private Boolean favorite = false;
 	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
-	@JoinTable(name = "ALBUM_ASSET_ASSN", joinColumns = {
-			@JoinColumn(name = "ASSET_ID", updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "ALBUM_ID", updatable = false) })
-	private List<Album> albums;
+	@OneToMany(mappedBy = "id.asset", fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+	private List<AlbumAssetAssn> albumAssetAssns;
 	
 	@PostLoad
     void fillTransient() {

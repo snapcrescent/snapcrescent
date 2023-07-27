@@ -15,16 +15,6 @@ public class MetadataRepository extends BaseRepository<Metadata> {
 		super(Metadata.class);
 	}
 
-	public Metadata findByHash(long hash, long createdByUserId) {
-		String query = "SELECT metadata FROM Metadata metadata WHERE metadata.hash = :hash AND metadata.createdByUserId = :createdByUserId ";
-
-		TypedQuery<Metadata> typedQuery = entityManager.createQuery(query, Metadata.class);
-		typedQuery.setParameter("hash", hash);
-		typedQuery.setParameter("createdByUserId", createdByUserId);
-		List<Metadata> results = typedQuery.getResultList();
-		return results.isEmpty() ? null : results.get(0);
-	}
-
 	public boolean existByName(String name, long createdByUserId) {
 		String query = "SELECT metadata FROM Metadata metadata WHERE metadata.name = :name AND metadata.createdByUserId = :createdByUserId";
 
