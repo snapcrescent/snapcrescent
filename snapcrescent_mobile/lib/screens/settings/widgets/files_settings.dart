@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/asset_service.dart';
@@ -17,7 +18,6 @@ class FilesSettingsView extends StatefulWidget {
 }
 
 class _FilesSettingsViewState extends State<FilesSettingsView> {
-
   String _lastSyncActivityDate = "Never";
   int _downloadedAssetCount = 0;
 
@@ -25,19 +25,26 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
   int _uploadedAssetCount = 0;
 
   late AssetStore _assetStore;
-  
-  
+
+  final _formKey = GlobalKey<FormState>();
+  FreeUpSpaceType _freeUpSpaceType = FreeUpSpaceType.ALL;
+  AutovalidateMode _autovalidateMode = AutovalidateMode.onUserInteraction;
+  TextEditingController freeUpSpaceDaysController = TextEditingController();
+
   FutureOr onBackFromChild(dynamic value) {
     _getSettingsData();
     setState(() {});
   }
 
   Future<bool> _getSettingsData() async {
+    String? lastSyncActivityTimestamp = await AppConfigService()
+        .getConfig(Constants.appConfigLastSyncActivityTimestamp);
+    String defaultLastSyncActivityTimestamp = DateUtilities().formatDate(
+        Constants.defaultLastSyncActivityTimestamp,
+        DateUtilities.timeStampFormat);
 
-    String? lastSyncActivityTimestamp = await AppConfigService().getConfig(Constants.appConfigLastSyncActivityTimestamp);
-    String defaultLastSyncActivityTimestamp = DateUtilities().formatDate(Constants.defaultLastSyncActivityTimestamp, DateUtilities.timeStampFormat);
-
-    if(lastSyncActivityTimestamp != null && lastSyncActivityTimestamp != defaultLastSyncActivityTimestamp) {
+    if (lastSyncActivityTimestamp != null &&
+        lastSyncActivityTimestamp != defaultLastSyncActivityTimestamp) {
       _lastSyncActivityDate = lastSyncActivityTimestamp;
     }
 
@@ -45,22 +52,31 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
 
     _uploadedAssetCount = await MetadataService().countByLocalAssetIdNotNull();
 
-    double sizeInBytes = (await MetadataService().sizeByLocalAssetIdNotNull()).toDouble();
+    double sizeInBytes =
+        (await MetadataService().sizeByLocalAssetIdNotNull()).toDouble();
     _uploadedAssetSize = _convertToHigherSize(sizeInBytes, 0);
 
     //Convert bytes to higher units
-    
+
     return Future.value(true);
   }
 
   String _convertToHigherSize(double size, int iteration) {
-    if(size < 1024) {
+    if (size < 1024) {
       String suffix = "";
-      switch(iteration){
-        case 0 : suffix = "Bytes";  break;
-        case 1 : suffix = "KB"; break;
-        case 2 : suffix = "MB"; break;
-        case 3 : suffix = "GB"; break;
+      switch (iteration) {
+        case 0:
+          suffix = "Bytes";
+          break;
+        case 1:
+          suffix = "KB";
+          break;
+        case 2:
+          suffix = "MB";
+          break;
+        case 3:
+          suffix = "GB";
+          break;
       }
       return size.toStringAsFixed(1) + suffix;
     } else {
@@ -68,13 +84,14 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
     }
   }
 
-    _showDownloadsClearConfirmationDialog() {
+  _showDownloadsClearConfirmationDialog() {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Do you want to delete all downloaded photos and videos from this device?'),
+          title: const Text(
+              'Do you want to delete all downloaded photos and videos from this device?'),
           content: const SingleChildScrollView(
             child: ListBody(
               children: <Widget>[Text('This action cannot be undone')],
@@ -103,23 +120,78 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
     await AssetService().deleteAllData();
     await _assetStore.refreshStore();
     _lastSyncActivityDate = "Never";
-    await AppConfigService().updateDateConfig(Constants.appConfigLastSyncActivityTimestamp, Constants.defaultLastSyncActivityTimestamp, DateUtilities.timeStampFormat);
+    await AppConfigService().updateDateConfig(
+        Constants.appConfigLastSyncActivityTimestamp,
+        Constants.defaultLastSyncActivityTimestamp,
+        DateUtilities.timeStampFormat);
     ToastService.showSuccess("Successfully deleted downloaded data.");
     setState(() {});
     Navigator.pop(context);
   }
 
-  _showFreeUpDeviceConfirmationDialog() {
-    return showDialog<void>(
+  _showFreeUpDeviceConfirmationDialog() async {
+    _freeUpSpaceType = FreeUpSpaceType.ALL;
+    await showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Do you want to delete all backed up photos and videos from this device?'),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[Text('This action cannot be undone')],
-            ),
+          title: const Text(
+              'Do you want to delete backed up photos and videos from this device?'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SizedBox(
+                  height: _freeUpSpaceType == FreeUpSpaceType.XOLD ? 200 : 120,
+                  child: Form(
+                      key: _formKey,
+                      child: Column(children: <Widget>[
+                        Column(
+                          children: <Widget>[
+                            ListTile(
+                              title: const Text('Remove All'),
+                              leading: Radio<FreeUpSpaceType>(
+                                value: FreeUpSpaceType.ALL,
+                                groupValue: _freeUpSpaceType,
+                                onChanged: (FreeUpSpaceType? value) {
+                                  setState(() {
+                                    _freeUpSpaceType = value!;
+                                  });
+                                },
+                              ),
+                            ),
+                            ListTile(
+                              title: const Text('Remove older than'),
+                              leading: Radio<FreeUpSpaceType>(
+                                value: FreeUpSpaceType.XOLD,
+                                groupValue: _freeUpSpaceType,
+                                onChanged: (FreeUpSpaceType? value) {
+                                  setState(() {
+                                    _freeUpSpaceType = value!;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        if(_freeUpSpaceType == FreeUpSpaceType.XOLD)
+                          Container(
+                            child: TextFormField(
+                                autovalidateMode: _autovalidateMode,
+                                controller: freeUpSpaceDaysController,
+                                validator: (v) {
+                                  if (v!.isNotEmpty && v != "0") {
+                                    return null;
+                                  } else {
+                                    return 'Please enter a valid value';
+                                  }
+                                },
+                                decoration: InputDecoration(labelText: 'Days'),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: <TextInputFormatter>[
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ]),
+                          ),
+                      ])));
+            },
           ),
           actions: <Widget>[
             TextButton(
@@ -129,7 +201,7 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
               },
             ),
             TextButton(
-              child: const Text('Ok'),
+              child: const Text('Delete'),
               onPressed: () {
                 _freeUpDevice();
               },
@@ -141,47 +213,58 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
   }
 
   _freeUpDevice() async {
-    await AssetService().deleteUploadedAssets();
+    
+    DateTime tillDate = DateTime.now();
+    
+    if (_freeUpSpaceType == FreeUpSpaceType.XOLD && _formKey.currentState!.validate()){
+        int keepDataOfDays =  int.parse(freeUpSpaceDaysController.text);
+        tillDate = tillDate.subtract(Duration(days: keepDataOfDays));
+    }
+
+    await AssetService().deleteUploadedAssets(tillDate);
     await _assetStore.refreshStore();
-    ToastService.showSuccess("Successfully deleted uploaded photos and videos.");
+    ToastService.showSuccess(
+        "Successfully deleted uploaded photos and videos.");
     setState(() {});
     Navigator.pop(context);
   }
 
-
   _settingsList(BuildContext context) {
     return ListView(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero, children: <Widget>[
-      ListTile(
-          title: Text("File Info"),
-      ),
-      ListTile(
-        title: Text("Downloaded Photos and Videos", style: titleTextStyle),
-        subtitle: Text("Last Download: ${_lastSyncActivityDate.isEmpty ? "Never" : _lastSyncActivityDate}\nTotal Pictures and Videos: $_downloadedAssetCount"),
-        leading: Container(
-          width: 40,
-          alignment: Alignment.center,
-          child: const Icon(Icons.delete, color: Colors.teal),
-        ),
-        onTap: () {
-          _showDownloadsClearConfirmationDialog();
-        },
-      ),
-      ListTile(
-        title: Text("Free Up Space", style: titleTextStyle),
-        subtitle: Text("${_uploadedAssetCount > 0 ? ("Size $_uploadedAssetSize\n") : ""}Backed up Pictures and Videos: $_uploadedAssetCount"),
-        leading: Container(
-          width: 40,
-          alignment: Alignment.center,
-          child: const Icon(Icons.delete, color: Colors.teal),
-        ),
-        onTap: () {
-          _showFreeUpDeviceConfirmationDialog();
-        },
-      ),
-    ]);
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          ListTile(
+            title: Text("File Info"),
+          ),
+          ListTile(
+            title: Text("Downloaded Photos and Videos", style: titleTextStyle),
+            subtitle: Text(
+                "Last Download: ${_lastSyncActivityDate.isEmpty ? "Never" : _lastSyncActivityDate}\nTotal Pictures and Videos: $_downloadedAssetCount"),
+            leading: Container(
+              width: 40,
+              alignment: Alignment.center,
+              child: const Icon(Icons.delete, color: Colors.teal),
+            ),
+            onTap: () {
+              _showDownloadsClearConfirmationDialog();
+            },
+          ),
+          ListTile(
+            title: Text("Free Up Space", style: titleTextStyle),
+            subtitle: Text(
+                "${_uploadedAssetCount > 0 ? ("Size $_uploadedAssetSize\n") : ""}Backed up Pictures and Videos: $_uploadedAssetCount"),
+            leading: Container(
+              width: 40,
+              alignment: Alignment.center,
+              child: const Icon(Icons.delete, color: Colors.teal),
+            ),
+            onTap: () {
+              _showFreeUpDeviceConfirmationDialog();
+            },
+          ),
+        ]);
   }
 
   @override
@@ -191,8 +274,7 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
 
   @override
   Widget build(BuildContext context) {
-
-     _assetStore = Provider.of<AssetStore>(context);
+    _assetStore = Provider.of<AssetStore>(context);
 
     return FutureBuilder<bool>(
         future: _getSettingsData(),

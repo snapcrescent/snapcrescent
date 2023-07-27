@@ -24,6 +24,10 @@ class DateUtilities {
     return woy;
   }
 
+  bool isBefore(DateTime source, DateTime target) {
+      return calculateMinutesBetween(source, target) > 0;
+  }
+
   int calculateMinutesBetween(DateTime source, DateTime target) {
     return (((target.millisecondsSinceEpoch - source.millisecondsSinceEpoch)/1000)/60).floor();
   }
