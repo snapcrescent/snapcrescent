@@ -47,41 +47,6 @@ public class AssetImportBatchServiceImpl extends BaseService implements AssetImp
 		
 	}
 
-	/*
-	@Override
-	@Transactional
-	public void createBatch(List<Long> assetIds) throws Exception {
-		AssetImportBatch thumbnailGenerationBatch = new AssetImportBatch();
-		
-		thumbnailGenerationBatch.setName("Thumbnail_Generation_Batch");
-		thumbnailGenerationBatch.setBatchStatus(BatchStatus.PENDING.getId());
-		
-		thumbnailGenerationBatchRepository.save(thumbnailGenerationBatch);
-		
-		List<Asset> assets = assetRepository.findByIds(assetIds);
-		
-		for (Asset asset : assets) {
-			asset.setThumbnailGenerationBatchId(thumbnailGenerationBatch.getId());
-			assetRepository.update(asset);
-		}
-		
-		Album defaultAlbum =  albumRepository.findDefaultAlbumByUserId(coreService.getAppUser().getId());
-		
-		if(defaultAlbum != null) {
-			List<Asset> albumAssets = defaultAlbum.getAssets();
-			
-			if(albumAssets == null) {
-				albumAssets = new ArrayList<Asset>();
-			}
-			
-			albumAssets.addAll(assets);
-			defaultAlbum.setAssets(albumAssets);
-			albumRepository.update(defaultAlbum);
-		}
-		
-		
-	}*/
-	
 	@Override
 	@Transactional
 	public AssetImportBatch findPendingBatch() {
