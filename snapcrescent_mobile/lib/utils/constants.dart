@@ -112,3 +112,8 @@ enum AutoBackupFrequencyType {
     HOURS,
     DAYS
   }
+
+enum FreeUpSpaceType { 
+    ALL,
+    XOLD
+  }

@@ -20,6 +20,7 @@ import 'package:snapcrescent_mobile/state/asset_state.dart';
 import 'package:snapcrescent_mobile/utils/common_utilities.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:mime/mime.dart';
+import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 
 class AssetService extends BaseService {
   static final AssetService _singleton = AssetService._internal();
@@ -271,12 +272,15 @@ class AssetService extends BaseService {
     await MetadataRepository().deleteAll();
   }
 
-  Future<void> deleteUploadedAssets() async {
-    List<Metadata>? localAssetsSyncedWithServer =
-        await MetadataService().findByLocalAssetIdNotNull();
+  Future<void> deleteUploadedAssets(DateTime tillDate) async {
+    List<Metadata>? localAssetsSyncedWithServer = await MetadataService().findByLocalAssetIdNotNull();
 
     if (localAssetsSyncedWithServer != null &&
         localAssetsSyncedWithServer.isNotEmpty) {
+
+      localAssetsSyncedWithServer = localAssetsSyncedWithServer.where((metadata) => DateUtilities().isBefore(metadata.creationDateTime!, tillDate) ).toList();
+      
+      
       List<String> syncedAssetIds = localAssetsSyncedWithServer
           .map((metadata) => metadata.localAssetId!)
           .toList();
