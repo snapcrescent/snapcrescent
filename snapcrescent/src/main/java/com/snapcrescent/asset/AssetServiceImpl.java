@@ -278,7 +278,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 		for (Asset asset : assets) {
 			try {
 				if (asset.getCreatedByUserId() == coreService.getAppUserId() || coreService.getAppUser().isAdmin()) {
-					albumService.updateAlbumPostThumbnailDeletion(asset.getThumbnailId());
+					albumService.updateAlbumPostAssetDeletion(asset);
 					assetRepository.delete(asset);
 				}
 

@@ -135,9 +135,9 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 			metadata.setModel(metaDataMap.get(Constant.METADATA_MODEL));
 			metadata.setFstop(metaDataMap.get(Constant.METADATA_FSTOP));
 
-			String duration = metaDataMap.get(Constant.METADATA_DURATION);
-			if (duration != null) {
-				metadata.setDuration(Long.parseLong(duration) / 1000);
+			String durationInSeconds = metaDataMap.get(Constant.METADATA_DURATION_IN_SECONDS);
+			if (durationInSeconds != null) {
+				metadata.setDuration(DateUtils.getSecondsFromTimeString(durationInSeconds));
 			} else {
 				metadata.setDuration(0L);
 			}

@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:intl/intl.dart';
 
 class DateUtilities {
@@ -55,5 +57,39 @@ class DateUtilities {
     }
 
     return formattedDate;
+  }
+
+  String getDurationString(int input) {
+
+      String durationString = "";
+
+      double duration = input.toDouble();
+      double fraction = 0;
+      String fractionString = "";
+
+      if(duration > 3600) {
+        fraction = duration / 3600;
+        fractionString = zeroFill(fraction.floor().toStringAsFixed(0),2);
+        duration = duration  % 3600;
+        durationString = '''$durationString$fractionString:''';
+      }
+      
+      fraction = duration / 60;
+      fractionString = zeroFill(fraction.floor().toStringAsFixed(0),2);
+      duration = duration  % 60;
+      durationString = '''$durationString$fractionString:''';
+      
+      fractionString = zeroFill(duration.toStringAsFixed(0),2);
+      durationString = '''$durationString$fractionString''';
+
+      return durationString;
+  }
+
+  String zeroFill(String input, int finalLength) {
+    for (int i = input.length; i < finalLength; i++) {
+        input = '''0$input''';
+    }
+
+    return input;
   }
 }

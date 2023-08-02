@@ -199,7 +199,7 @@ class _AssetStore with Store {
               ? AppAssetType.PHOTO
               : AppAssetType.VIDEO;
           assetList.add(UniFiedAsset(
-              assetType, AssetSource.DEVICE, assetDate,
+              assetType, AssetSource.DEVICE, assetDate, asset.duration,
               assetEntity: asset));
         }
       }
@@ -212,14 +212,13 @@ class _AssetStore with Store {
     
     for (final asset in newAssets) {
       final assetDate = asset.metadata!.creationDateTime!;
-      asset.thumbnail!.thumbnailFile =
-          await ThumbnailService().readThumbnailFile(asset.thumbnail!.name!);
+      asset.thumbnail!.thumbnailFile = await ThumbnailService().readThumbnailFile(asset.thumbnail!.name!);
 
       AppAssetType assetType = asset.assetType == AppAssetType.PHOTO.id
           ? AppAssetType.PHOTO
           : AppAssetType.VIDEO;
       assetList.add(UniFiedAsset(
-          assetType, AssetSource.CLOUD, assetDate,
+          assetType, AssetSource.CLOUD, assetDate, asset.metadata!.duration!,
           asset: asset));
     }
   }

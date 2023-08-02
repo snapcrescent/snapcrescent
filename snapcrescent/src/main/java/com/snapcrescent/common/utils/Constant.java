@@ -1,8 +1,5 @@
 package com.snapcrescent.common.utils;
 
-import com.snapcrescent.common.utils.Constant.AssetType;
-import com.snapcrescent.common.utils.Constant.FILE_TYPE;
-
 public class Constant {
 	
 	public static final Long DEFAULT_ADMIN_USER_ID = 1L;
@@ -30,7 +27,7 @@ public class Constant {
 	
 	public static final String METADATA_MODEL = "Model";
 	public static final String METADATA_FSTOP = "F-Number";
-	public static final String METADATA_DURATION = "Duration";
+	public static final String METADATA_DURATION_IN_SECONDS = "Duration in Seconds";
 	
 	public static final String METADATA_ROTATION = "Rotation";
 	

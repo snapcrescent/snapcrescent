@@ -23,6 +23,28 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		
 	}
 	
+	public static Long getSecondsFromTimeString(String duration) {
+		
+		long totalSeconds = 0;
+		
+		try {
+			Date date = new SimpleDateFormat("hh:mm:ss").parse(duration);
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(date);
+			
+			int hours = calendar.get(Calendar.HOUR_OF_DAY);
+			int minutes = calendar.get(Calendar.MINUTE);
+			int seconds = calendar.get(Calendar.SECOND);
+			
+			totalSeconds = seconds + (minutes * 60) + (hours * 60 * 60);
+		} catch (ParseException e1) {
+			
+		}
+		
+		return totalSeconds;
+	}
+	
+	
 	public static Date parseCreateDate(String creationDateString) throws ParseException {
 		
 		List<String> formats = new ArrayList<>();

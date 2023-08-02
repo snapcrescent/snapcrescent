@@ -4,7 +4,6 @@ import { Asset, AssetType } from 'src/app/asset/asset.model';
 import { BaseComponent } from 'src/app/core/components/base.component';
 import { AssetService } from 'src/app/asset/asset.service';
 import { environment } from 'src/environments/environment';
-import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-asset-full-screen-view',

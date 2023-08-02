@@ -86,7 +86,7 @@ export class AssetService extends BaseService {
         return entity;
   }
 
-
+  
   getAssetTypesAsOptions(): Observable<Option[]> {
     const assetTypeOptions: Option[] = [];
 

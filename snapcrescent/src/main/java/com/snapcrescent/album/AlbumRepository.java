@@ -128,4 +128,13 @@ public class AlbumRepository extends BaseRepository<Album> {
 		typedQuery.setParameter("thumbnailId", thumbnailId);
 		return typedQuery.getResultList();
 	}
+	
+	public List<Album> getAlbumsByAssetId(Long assetId) {
+		
+		String queryString = "SELECT album FROM Album album JOIN album.albumAssetAssns albumAssetAssn JOIN albumAssetAssn.id.asset asset WHERE asset.id = :assetId ";
+	
+		TypedQuery<Album> typedQuery = entityManager.createQuery(queryString,Album.class);
+		typedQuery.setParameter("assetId", assetId);
+		return typedQuery.getResultList();
+	}
 }
