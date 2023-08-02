@@ -58,6 +58,10 @@ public class FileService {
 		return Files.size(Paths.get(path));
 	}
 	
+	public File getFile(AssetType assetType, Long userId, String path, String fileName) {
+		return new File(getBasePath(assetType, userId) + path + fileName);
+	}
+	
 	public File getFile(FILE_TYPE fileType, Long userId, String path, String fileName) {
 		return new File(getBasePath(fileType, userId) + path + fileName);
 	}

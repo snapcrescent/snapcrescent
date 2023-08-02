@@ -7,11 +7,15 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.lang.GeoLocation;
@@ -20,6 +24,7 @@ import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.GpsDirectory;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.snapcrescent.asset.Asset;
 import com.snapcrescent.bulk_import.google.GoogleTakeoutMetadata;
 import com.snapcrescent.common.services.BaseService;
 import com.snapcrescent.common.utils.Constant;
@@ -42,6 +47,9 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 	
 	@Autowired
 	private FileService fileService;
+	
+	@Autowired
+	private MetadataRepository metadataRepository;
 
 	@Override
 	public Metadata createMetadataEntity(File temporaryFile) throws Exception {
@@ -64,6 +72,28 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 		extractMetaData(assetType, temporaryFile, metadata);
 		
 		return metadata;
+	}
+	
+	@Override
+	@Transactional
+	@Async("threadPoolTaskExecutor")
+	public Future<Boolean> recomputeMetadata(Asset asset) {
+		Boolean completed = false;
+		
+		try {
+			Metadata metadata = asset.getMetadata();
+			File assetFile = fileService.getFile(asset.getAssetTypeEnum(), asset.getCreatedByUserId(), metadata.getPath(), metadata.getInternalName());
+			extractMetaData(asset.getAssetTypeEnum(), assetFile, metadata);
+			metadataRepository.update(metadata);
+			
+			completed = true;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return CompletableFuture.completedFuture(completed);
+		
 	}
 
 	private void extractMetaData(AssetType assetType, File file, Metadata metadata)
