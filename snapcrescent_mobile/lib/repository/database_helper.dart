@@ -1,11 +1,13 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'dart:developer' as developer;
 
 class DatabaseHelper {
   static const _dbName = 'snap-crescent.db';
-  static const _dbVersion = 20230717;
+  static const _dbVersion = 20230802;
 
   
 
@@ -70,7 +72,7 @@ class DatabaseHelper {
         );
       ''');
 
-    return database.execute('''
+    database.execute('''
       CREATE TABLE IF NOT EXISTS ALBUM (
         ID INTEGER PRIMARY KEY,
         NAME TEXT,
@@ -79,12 +81,16 @@ class DatabaseHelper {
         ALBUM_THUMBNAIL_ID INTEGER
         );
       ''');
+
+      return _onUpgrade(database, version, version);
   }
 
   Future _onUpgrade(Database database, int oldVersion, int newVersion) async {  
-    if (oldVersion < newVersion) {
-      
-    }
+    try {
+      database.execute("ALTER TABLE METADATA ADD COLUMN DURATION INTEGER");
+      } catch (ex) {
+        developer.log("Something went wrong!", error: ex);
+      }
   }
 
   Future<int> save(String tableName, Map<String, dynamic> row) async {

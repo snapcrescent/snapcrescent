@@ -10,6 +10,7 @@ class Metadata extends BaseUiBean {
   int? orientation;
   int? size;
   String? localAssetId;
+  int? duration;
 
   Metadata(
       {
@@ -21,6 +22,7 @@ class Metadata extends BaseUiBean {
       this.orientation,
       this.size,
       this.localAssetId,
+      this.duration
       })
       : super(
             id: bean.id);
@@ -35,7 +37,8 @@ class Metadata extends BaseUiBean {
         internalName: json['internalName'],
         mimeType: json['mimeType'],
         orientation: json['orientation'],
-        size : json['size']
+        size : json['size'],
+        duration : json['duration']
         );
   }
 
@@ -51,6 +54,7 @@ class Metadata extends BaseUiBean {
         orientation: map['ORIENTATION'],
         size : map['SIZE'],
         localAssetId: map['LOCAL_ASSET_ID'],
+        duration: map['DURATION'],
         );
   }
 
@@ -65,6 +69,7 @@ class Metadata extends BaseUiBean {
     map['ORIENTATION'] = orientation;
     map['SIZE'] = size;
     map['LOCAL_ASSET_ID'] = localAssetId;
+    map['DURATION'] = duration;
 
     return map;
   }

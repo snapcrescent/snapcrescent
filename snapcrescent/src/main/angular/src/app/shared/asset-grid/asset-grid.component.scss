@@ -74,8 +74,18 @@
 
             .video {
               position: absolute;
-              right: 0px;
+              top: 2px;
+              right: 2px;
               color: white;
+              font-size: 18px;
+            }
+
+            .video-duration {
+              position: absolute;
+              top: 2px;
+              right: 27px;
+              color: white;
+              font-size: 12px;
             }
 
             &:hover {

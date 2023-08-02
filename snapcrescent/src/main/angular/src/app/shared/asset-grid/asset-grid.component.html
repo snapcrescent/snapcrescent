@@ -34,6 +34,9 @@
                             <span *ngIf="tile.asset.assetType === AssetType.VIDEO.id" class="video material-symbols-outlined">
                                 play_circle
                             </span>
+                            <span *ngIf="tile.asset.assetType === AssetType.VIDEO.id" class="video-duration">
+                                {{tile.asset.metadata.duration * 1000 | date:'mm:ss'}}
+                            </span>
                             <img  class="asset img-fluid" alt="Asset"  [src]="tile.asset.thumbnail.url"/>
                         </div>
                     </ng-container>

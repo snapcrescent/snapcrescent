@@ -50,7 +50,7 @@ public class Asset extends BaseEntity {
 	
 	private Boolean favorite = false;
 	
-	@OneToMany(mappedBy = "id.asset", fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+	@OneToMany(mappedBy = "id.asset", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<AlbumAssetAssn> albumAssetAssns;
 	
 	@PostLoad

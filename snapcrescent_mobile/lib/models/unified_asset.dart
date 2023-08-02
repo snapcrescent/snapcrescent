@@ -10,11 +10,13 @@ class UniFiedAsset  {
   AppAssetType assetType;
   Asset? asset;
   AssetEntity? assetEntity;
+  int duration;
 
   UniFiedAsset(
         this.assetType,
         this.assetSource,
         this.assetCreationDate,
+        this.duration,
         {
           this.asset,
           this.assetEntity,

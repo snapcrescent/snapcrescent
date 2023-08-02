@@ -12,7 +12,7 @@ public interface AlbumService {
 	void createOrUpdateDefaultAlbum(User entity) throws Exception;
 	void createAlbumAssetAssociation(UiCreateAlbumAssetAssnRequest createAlbumAssetAssnRequest);
 	public void updateOrDeleteAlbumPostUserDeletion(Long userId);
-	public void updateAlbumPostThumbnailDeletion(Long thumbnailId);
+	public void updateAlbumPostAssetDeletion(Asset asset);
 	public UiAlbum getById(Long id);
 	UiAlbum getLiteById(Long id);
 	public void delete(Long id);

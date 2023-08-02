@@ -1,8 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable} from '@angular/core';
 import { BaseService } from '../core/services/base.service';
-import {  Observable } from "rxjs";
-import { BaseResponseBean } from '../core/models/base-response-bean';
 
 @Injectable({
     providedIn: "root"

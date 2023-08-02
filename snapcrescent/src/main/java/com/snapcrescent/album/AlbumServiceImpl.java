@@ -318,9 +318,12 @@ public class AlbumServiceImpl extends BaseService implements AlbumService {
 
 	@Override
 	@Transactional
-	public void updateAlbumPostThumbnailDeletion(Long thumbnailId) {
+	public void updateAlbumPostAssetDeletion(Asset asset) {
+		//Remove asset from album
+		//albumAssetAssnRepository.deleteByAssetId(asset.getId());
 		
-		List<Album> albums = albumRepository.getAlbumsByThumbnailId(thumbnailId);
+		//Find albums where this asset is set as cover and remove it
+		List<Album> albums = albumRepository.getAlbumsByThumbnailId(asset.getThumbnailId());
 
 		if (albums != null) {
 			for (Album album : albums) {
