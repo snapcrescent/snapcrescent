@@ -16,6 +16,7 @@
 	  <include relativeToChangelogFile="true" file="./album_asset_assn.sql"/>
 	  <include relativeToChangelogFile="true" file="./album_user_assn.sql"/>
 	  <include relativeToChangelogFile="true" file="./asset_import_batch.sql"/>
+	  <include relativeToChangelogFile="true" file="./metadata_recompute_batch.sql"/>
 	  
                    
 
