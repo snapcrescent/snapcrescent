@@ -26,5 +26,6 @@ public interface AssetService {
 	List<UiAssetTimeline> getAssetTimeline(AssetSearchCriteria searchCriteria);
 	public void update(Asset asset);
 	Future<Boolean> processAsset(File temporaryFile, Long userId);
+	String importAssets(List<File> files, Long userId) throws Exception;
 		
 }

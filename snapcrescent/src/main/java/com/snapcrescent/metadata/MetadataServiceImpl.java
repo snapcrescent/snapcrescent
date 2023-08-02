@@ -82,8 +82,25 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 		
 		try {
 			Metadata metadata = asset.getMetadata();
+			
+			String originalName = metadata.getInternalName();
 			File assetFile = fileService.getFile(asset.getAssetTypeEnum(), asset.getCreatedByUserId(), metadata.getPath(), metadata.getInternalName());
+			
+			if(metadata.getHash() == 0) {
+				long assetHash = 0;
+				
+				if(asset.getAssetTypeEnum() == AssetType.PHOTO) {
+					assetHash = ImageUtils.getPerceptualHash(ImageIO.read(assetFile));	
+				} else if (asset.getAssetTypeEnum() == AssetType.VIDEO) {
+					assetHash = StringUtils.generateHashFromFileName(originalName) + fileService.getFileSize(assetFile.getAbsolutePath());	
+				}
+				
+				metadata.setHash(assetHash);
+			}
+			
 			extractMetaData(asset.getAssetTypeEnum(), assetFile, metadata);
+
+			metadata.setInternalName(originalName);
 			metadataRepository.update(metadata);
 			
 			completed = true;
