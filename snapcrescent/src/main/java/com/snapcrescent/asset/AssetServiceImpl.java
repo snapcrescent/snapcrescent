@@ -2,6 +2,7 @@ package com.snapcrescent.asset;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -115,6 +116,31 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 				try {
 					String path = directoryPath + StringUtils.generateTemporaryFileName(multipartFile.getOriginalFilename());
 					multipartFile.transferTo(new File(path));
+				} catch (Exception e) {
+					log.error("Error saving multipar file", e);
+				}
+			}
+
+		}
+
+		return directoryPath;
+	}
+	
+	@Override
+	public String importAssets(List<File> files, Long userId) throws Exception {
+
+		String directoryPath = null;
+
+		String isDemoAppString = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_DEMO_APP);
+		if (isDemoAppString == null || Boolean.parseBoolean(isDemoAppString) == false) {
+			
+			directoryPath = fileService.getBasePath(coreService.getAppUserId()) + "/" + UUID.randomUUID().toString()+ "/";
+			fileService.mkdirs(directoryPath);
+
+			for (File file : files) {
+				try {
+					Path destinationDirectory = Paths.get(directoryPath + StringUtils.generateTemporaryFileName(file.getName()));
+					Files.move(Paths.get(file.getAbsolutePath()), destinationDirectory);
 				} catch (Exception e) {
 					log.error("Error saving multipar file", e);
 				}

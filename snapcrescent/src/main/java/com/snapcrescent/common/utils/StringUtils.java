@@ -13,8 +13,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 		String originalFilename = uploadedFilename.substring(0, uploadedFilename.lastIndexOf("."));
 		String extension = uploadedFilename.substring(uploadedFilename.lastIndexOf("."));
 
-		return UUID.randomUUID().toString() + Constant.UPLOAD_FILE_NAME_TEMPORARY_SEPARATOR + originalFilename
-				+ extension;
+		return UUID.randomUUID().toString() + Constant.UPLOAD_FILE_NAME_TEMPORARY_SEPARATOR + originalFilename + extension;
 	}
 
 	public static String generateFinalFileName(String temporaryFileName) {
@@ -23,9 +22,15 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 	}
 
 	public static String extractFileNameFromTemporary(String filename) {
-		int indexOfSeparator = filename.lastIndexOf(Constant.UPLOAD_FILE_NAME_TEMPORARY_SEPARATOR)
-				+ Constant.UPLOAD_FILE_NAME_TEMPORARY_SEPARATOR.length();
-		return filename.substring(indexOfSeparator);
+		int indexOfSeparator = filename.lastIndexOf(Constant.UPLOAD_FILE_NAME_TEMPORARY_SEPARATOR);
+		int separatorLength = Constant.UPLOAD_FILE_NAME_TEMPORARY_SEPARATOR.length();
+		
+		if(indexOfSeparator > -1) {
+			return filename.substring(indexOfSeparator + separatorLength);	
+		} else {
+			return filename;
+		}
+		
 	}
 
 	public static String generateDefaultAlbumName(String firstName, String lastName) {
