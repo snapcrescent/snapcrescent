@@ -122,25 +122,29 @@ class _AssetThumbnailState extends State<AssetThumbnail>
                           color: Colors.white,
                         ))),
               ),
-            Positioned.fill(
-                child: Align(
-              alignment: Alignment.topRight,
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12.0),
-                  topRight: Radius.circular(12.0),
-                  bottomLeft: Radius.circular(12.0),
-                  bottomRight: Radius.circular(12.0),
-                ),
-                child: Container(
-                  color: Colors.grey,
-                  child: Icon(
-                    Icons.play_arrow,
-                    color: Colors.white,
+            if ((unifiedAsset.assetSource == AssetSource.CLOUD &&
+                  unifiedAsset.asset!.assetType == AppAssetType.VIDEO.id) ||
+              (unifiedAsset.assetSource == AssetSource.DEVICE &&
+                  unifiedAsset.assetEntity!.type == AssetType.video)) 
+              Positioned.fill(
+                  child: Align(
+                alignment: Alignment.topRight,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12.0),
+                    topRight: Radius.circular(12.0),
+                    bottomLeft: Radius.circular(12.0),
+                    bottomRight: Radius.circular(12.0),
+                  ),
+                  child: Container(
+                    color: Colors.grey,
+                    child: Icon(
+                      Icons.play_arrow,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
-            ))
+              ))
           ],
         ),
       ),
