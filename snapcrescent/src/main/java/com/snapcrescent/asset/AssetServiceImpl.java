@@ -176,9 +176,6 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 				String directoryPath = fileService.getBasePath(assetType, userId) + metadata.getPath();
 				fileService.mkdirs(directoryPath);
 
-				File finalFile = new File(directoryPath + "/" + metadata.getInternalName());
-				Files.move(Paths.get(temporaryFile.getAbsolutePath()), Paths.get(finalFile.getAbsolutePath()));
-
 				asset = new Asset();
 				asset.setCreatedByUserId(userId);
 				asset.setAssetType(assetType.getId());
@@ -194,6 +191,8 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 				
 				assetRepository.save(asset);
 				
+				File finalFile = new File(directoryPath + "/" + metadata.getInternalName());
+				Files.move(Paths.get(temporaryFile.getAbsolutePath()), Paths.get(finalFile.getAbsolutePath()));
 				thumbnailService.generateThumbnail(asset);
 				
 				albumService.persistAlbumAssetAssociationForDefaultAlbum(userId, asset);

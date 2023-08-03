@@ -52,10 +52,18 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 		return thumbnail;
 
 	}
+	
+	@Override
+	@Transactional
+	public Future<Boolean> generateThumbnailAsync(Asset asset) {
+		Boolean completed = false;
+		completed = generateThumbnail(asset);
+		return CompletableFuture.completedFuture(completed);
+	}
 
 	@Override
 	@Transactional
-	public Future<Boolean> generateThumbnail(Asset asset) {
+	public Boolean generateThumbnail(Asset asset) {
 		
 		Boolean completed = false;
 
@@ -87,7 +95,7 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 			log.error("Error while generating thumbnail for asset=" + asset.getId(), e);
 		}
 		
-		return CompletableFuture.completedFuture(completed);
+		return completed;
 	}
 
 	@Override

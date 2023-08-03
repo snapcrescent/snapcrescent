@@ -228,6 +228,12 @@ public class AssetRepository extends BaseRepository<Asset>{
 			paramsMap.put("favorite", searchCriteria.getFavorite());
 		}
 		
+		if(searchCriteria.getAssetType() != null)
+		{
+			hql.append(" AND asset.assetType = :assetType ");
+			paramsMap.put("assetType", searchCriteria.getAssetType());
+		}
+		
 		if(searchCriteria.getAlbumId() != null)
 		{
 			hql.append(" AND album.id = :albumId ");

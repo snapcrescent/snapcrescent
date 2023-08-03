@@ -13,7 +13,7 @@ import 'package:snapcrescent_mobile/services/metadata_service.dart';
 import 'package:snapcrescent_mobile/services/notification_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
-
+import 'package:quiver/iterables.dart';
 class SyncService extends BaseService {
   static final SyncService _singleton = SyncService._internal();
 
@@ -63,7 +63,7 @@ class SyncService extends BaseService {
         if(autoBackupEnabled) {
           await _uploadAssetsToServer(syncMetadata, progressCallBack);
         }
-        
+
         await NotificationService().clearNotifications();
         await AppConfigService().updateFlag(Constants.appConfigSyncInProgress, false );
       }
@@ -207,10 +207,12 @@ class SyncService extends BaseService {
           refreshAssetStores = true;
         }
 
-        for (final File asset in filteredAssets) {
+        final Iterable<List<File>> partitionedFiles = partition(filteredAssets, 10);
+
+        for (final List<File> assets in partitionedFiles) {
           postUploadUpdates(syncMetadata, progressCallBack);
-          await AssetService().save([asset]);
-          syncMetadata.uploadedAssetCount = syncMetadata.uploadedAssetCount + 1;
+          await AssetService().save(assets);
+          syncMetadata.uploadedAssetCount = syncMetadata.uploadedAssetCount + assets.length;
           postUploadUpdates(syncMetadata, progressCallBack);
         }
     } catch (e) {
