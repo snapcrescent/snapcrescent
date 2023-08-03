@@ -39,6 +39,7 @@ class _DeviceFoldersSettingsViewState extends State<DeviceFoldersSettingsView> {
       _showDeviceAssetsFolders = await SettingsService().getFolderInfo(Constants.appConfigShowDeviceAssetsFolders);
 
       if (_showDeviceAssetsFolders.isEmpty) {
+        if (!mounted) return;
         Navigator.push(
                 context,
                 MaterialPageRoute(

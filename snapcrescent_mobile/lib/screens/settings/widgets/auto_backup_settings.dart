@@ -183,7 +183,7 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
       _autoBackupFolders = await SettingsService().getFolderInfo(Constants.appConfigAutoBackupFolders);
 
       if (_autoBackupFolders.isEmpty) {
-        
+        if (!mounted) return;
         Navigator.push(
             context,
             MaterialPageRoute(

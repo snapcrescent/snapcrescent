@@ -8,16 +8,11 @@ class PermissionUtilities {
   static FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  Future<void> askAllPermissions() async{
-      await [
-        Permission.photos,
-        Permission.notification,
-        Permission.manageExternalStorage,
-        Permission.mediaLibrary
-      ].request();
-  }     
+  Future<bool> checkAndAskForAllStoragePermission() async {
+    return await _checkAndAskForPermission(Permission.manageExternalStorage);
+  }
 
-  Future<bool> checkAndAskForStoragePermission() async {
+  Future<bool> checkAndAskForPhotosPermission() async {
     return await _checkAndAskForPermission(Permission.photos);
   }
 

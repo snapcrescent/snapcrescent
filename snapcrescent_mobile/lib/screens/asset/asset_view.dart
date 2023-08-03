@@ -152,7 +152,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
 
   Future<void> _downloadAsset(int assetIndex) async {
     _updateProcessingBarVisibility(true);
-    bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
+    bool permissionReady = await PermissionUtilities().checkAndAskForPhotosPermission();
 
     if (permissionReady) {
       final bool success =
@@ -165,7 +165,7 @@ class _AssetViewViewState extends State<_AssetViewView> {
   }
 
   _uploadAsset(int assetIndex) async {
-    bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
+    bool permissionReady = await PermissionUtilities().checkAndAskForPhotosPermission();
 
     if (permissionReady) {
       _updateProcessingBarVisibility(true);

@@ -53,7 +53,7 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
 
   _body() {
     return Container(
-        height: 100, alignment: Alignment.center, child: _getPrompt());
+        height: 100, width: 400, alignment: Alignment.center, child: _getPrompt());
   }
 
   _getPrompt() {
@@ -178,13 +178,7 @@ class ConfigServerPromptWidgetState extends State<ConfigServerPromptWidget> {
         future: _getAppConfigs(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
-            return Center(
-              child: SizedBox(
-                width: 60,
-                height: 60,
-                child: const CircularProgressIndicator(),
-              ),
-            );
+            return SizedBox();
           } else {
             return _body();
           }

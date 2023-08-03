@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:quiver/iterables.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snapcrescent_mobile/models/asset/asset.dart';
 import 'package:snapcrescent_mobile/models/asset/asset_search_criteria.dart';

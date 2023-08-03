@@ -57,7 +57,7 @@ class NotificationService {
               playSound: false,
               enableVibration: false,
               onlyAlertOnce: true,
-              importance:Importance.none,
+              importance:Importance.min,
               priority:Priority.min
             ),
           ),
