@@ -44,7 +44,7 @@ class Constants {
   
   static final DateFormat defaultYearFormatter = DateFormat('E, MMM dd, yyyy');
 
-  static final List<String> androidDefaultDeviceFolderList = ["Camera"];
+  static final List<String> androidDefaultDeviceFolderList = ["Camera", "Pictures"];
   static final List<String> iosDefaultDeviceFolderList = ["Recent"];
 
   static final DateTime defaultLastSyncActivityTimestamp = DateTime(2000, 1, 1, 0, 0, 0, 0, 0);

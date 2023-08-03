@@ -11,6 +11,7 @@ import 'package:snapcrescent_mobile/stores/asset/asset_store.dart';
 import 'package:snapcrescent_mobile/style.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
+import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
 
 class FilesSettingsView extends StatefulWidget {
   @override
@@ -126,6 +127,7 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
         DateUtilities.timeStampFormat);
     ToastService.showSuccess("Successfully deleted downloaded data.");
     setState(() {});
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
@@ -173,8 +175,7 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
                           ],
                         ),
                         if(_freeUpSpaceType == FreeUpSpaceType.XOLD)
-                          Container(
-                            child: TextFormField(
+                          TextFormField(
                                 autovalidateMode: _autovalidateMode,
                                 controller: freeUpSpaceDaysController,
                                 validator: (v) {
@@ -189,7 +190,6 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
                                 inputFormatters: <TextInputFormatter>[
                                   FilteringTextInputFormatter.digitsOnly,
                                 ]),
-                          ),
                       ])));
             },
           ),
@@ -213,20 +213,26 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
   }
 
   _freeUpDevice() async {
-    
-    DateTime tillDate = DateTime.now();
-    
-    if (_freeUpSpaceType == FreeUpSpaceType.XOLD && _formKey.currentState!.validate()){
-        int keepDataOfDays =  int.parse(freeUpSpaceDaysController.text);
-        tillDate = tillDate.subtract(Duration(days: keepDataOfDays));
-    }
 
-    await AssetService().deleteUploadedAssets(tillDate);
-    await _assetStore.refreshStore();
-    ToastService.showSuccess(
-        "Successfully deleted uploaded photos and videos.");
-    setState(() {});
-    Navigator.pop(context);
+    bool permissionReady = await PermissionUtilities().checkAndAskForAllStoragePermission();
+    
+    if(permissionReady) {
+      DateTime tillDate = DateTime.now();
+          
+          if (_freeUpSpaceType == FreeUpSpaceType.XOLD && _formKey.currentState!.validate()){
+              int keepDataOfDays =  int.parse(freeUpSpaceDaysController.text);
+              tillDate = tillDate.subtract(Duration(days: keepDataOfDays));
+          }
+
+          await AssetService().deleteUploadedAssets(tillDate);
+          await _assetStore.refreshStore();
+          ToastService.showSuccess(
+              "Successfully deleted uploaded photos and videos.");
+          setState(() {});
+          if (!mounted) return;
+          Navigator.pop(context);
+    }
+    
   }
 
   _settingsList(BuildContext context) {

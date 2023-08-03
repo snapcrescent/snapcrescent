@@ -54,19 +54,11 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
       await _setSystemSettings();
     }
 
-    Navigator.pushAndRemoveUntil<dynamic>(
-      context,
-      MaterialPageRoute<dynamic>(
-        builder: (BuildContext context) => AssetListScreen(),
-      ),
-      (route) => false, //if you want to disable back feature set to false
-    );
+    _goToDefaultLandingScreen();
+    
 
     if (!allPermissionsApproved) {
-      Navigator.push(
-          context,
-          MaterialPageRoute<dynamic>(
-              builder: (BuildContext context) => SettingsScreen()));
+      _goToFallbackScreen();
     }
   }
 
@@ -108,7 +100,24 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
   }
 
   Future<bool> _requestPermissions() async {
-    await PermissionUtilities().askAllPermissions();
+    await PermissionUtilities().checkAndAskForPhotosPermission();
     return true;
+  }
+
+  _goToDefaultLandingScreen() {
+    Navigator.pushAndRemoveUntil<dynamic>(
+      context,
+      MaterialPageRoute<dynamic>(
+        builder: (BuildContext context) => AssetListScreen(),
+      ),
+      (route) => false, //if you want to disable back feature set to false
+    );
+  }
+
+  _goToFallbackScreen() {
+    Navigator.push(
+          context,
+          MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) => SettingsScreen()));
   }
 }

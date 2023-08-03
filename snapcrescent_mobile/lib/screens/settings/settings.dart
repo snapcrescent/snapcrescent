@@ -179,6 +179,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
         await _getAccountInfo();
         await NotificationService().initialize();
         setState(() {});
+        if (!mounted) return;
         Navigator.pop(context);
       } else {
         ToastService.showError("Incorrect Username or Password");
@@ -203,6 +204,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     await AppConfigService().updateFlag(Constants.appConfigLoggedInFlag, false);
     await _getAccountInfo();
     setState(() {});
+    if (!mounted) return;
     Navigator.pop(context);
   }
 

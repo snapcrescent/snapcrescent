@@ -65,7 +65,7 @@ class _AssetListViewState extends State<_AssetListView> {
   }
 
   _downloadAssets() async {
-    bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
+    bool permissionReady = await PermissionUtilities().checkAndAskForPhotosPermission();
 
     if (permissionReady) {
       final bool success = await AssetService()
@@ -77,7 +77,7 @@ class _AssetListViewState extends State<_AssetListView> {
   }
 
   _uploadAssets() async {
-    bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
+    bool permissionReady = await PermissionUtilities().checkAndAskForPhotosPermission();
 
     if (permissionReady) {
       final bool success = await AssetService()
@@ -256,7 +256,6 @@ class _AssetListViewState extends State<_AssetListView> {
                                   }
                                 },
                                 child: AssetThumbnail(
-                                    index,
                                     asset,
                                     asset.assetSource == AssetSource.CLOUD
                                         ? Future.value(asset.asset)

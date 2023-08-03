@@ -40,10 +40,11 @@ class _FoldersScreenViewState extends State<_FoldersScreenView> {
   Future<List<AssetPathEntity>> _getDeviceFolderList() async {
     await _getFolderInfo();
   
-    bool permissionReady = await PermissionUtilities().checkAndAskForStoragePermission();
+    bool permissionReady = await PermissionUtilities().checkAndAskForPhotosPermission();
 
     if (!permissionReady) {
       ToastService.showError('Permission to device folders denied!');
+      if (!mounted) return Future.value([]);
       Navigator.pop(context);
       return Future.value([]);
     }

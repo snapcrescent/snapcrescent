@@ -9,13 +9,12 @@ import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 
 class AssetThumbnail extends StatefulWidget {
-  final index;
+  
   final UniFiedAsset unifiedAsset;
   final Future<Object?> assetThumbnail;
   final bool selected;
 
-  AssetThumbnail(
-      this.index, this.unifiedAsset, this.assetThumbnail, this.selected);
+  AssetThumbnail(this.unifiedAsset, this.assetThumbnail, this.selected);
 
   @override
   createState() => _AssetThumbnailState(unifiedAsset, assetThumbnail);

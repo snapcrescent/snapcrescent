@@ -22,7 +22,7 @@ class LoginService extends BaseService {
     UserLoginResponse? response;
 
     try {
-      saveAccountInformation(serverUrl, username, password);
+      await saveAccountInformation(serverUrl, username, password);
 
       UserLoginRequest request =
           UserLoginRequest(username: username, password: password);
