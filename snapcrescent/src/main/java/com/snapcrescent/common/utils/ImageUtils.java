@@ -3,6 +3,8 @@ package com.snapcrescent.common.utils;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,6 +15,7 @@ import java.math.RoundingMode;
 import javax.imageio.ImageIO;
 
 import com.snapcrescent.config.EnvironmentProperties;
+import com.snapcrescent.metadata.Metadata;
 
 public class ImageUtils {
 
@@ -89,8 +92,14 @@ public class ImageUtils {
 			}
 		}
 	}
+	
 
-	public static  BufferedImage cropAndResizeThumnail(BufferedImage original) {
+	public static  BufferedImage cropAndResizeThumnail(BufferedImage original, Metadata metadata) {
+        // Rotate Image based on EXIF orientation
+        AffineTransform transform = getExifTransformation(metadata.getOrientation(), metadata.getWidth(),metadata.getHeight());
+        AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
+        original = op.filter(original, null);
+		
 		int scaledHeightInteger = Constant.THUMBNAIL_HEIGHT;
 		BigDecimal scaledHeight = new BigDecimal(scaledHeightInteger);
 
@@ -109,6 +118,48 @@ public class ImageUtils {
 		bufferedImage.createGraphics().drawImage(scaledImage, 0, 0, null);
 
 		return bufferedImage;
+	}
+	
+	private static AffineTransform getExifTransformation(int orientation, Long width, Long height) {
+
+		AffineTransform t = new AffineTransform();
+
+		switch (orientation) {
+		case 1:
+			break;
+		case 2: // Flip X
+			t.scale(-1.0, 1.0);
+			t.translate(-width, 0);
+			break;
+		case 3: // PI rotation
+			t.translate(width, height);
+			t.rotate(Math.PI);
+			break;
+		case 4: // Flip Y
+			t.scale(1.0, -1.0);
+			t.translate(0, -height);
+			break;
+		case 5: // - PI/2 and Flip X
+			t.rotate(-Math.PI / 2);
+			t.scale(-1.0, 1.0);
+			break;
+		case 6: // -PI/2 and -width
+			t.translate(height, 0);
+			t.rotate(Math.PI / 2);
+			break;
+		case 7: // PI/2 and Flip
+			t.scale(-1.0, 1.0);
+			t.translate(-height, 0);
+			t.translate(0, width);
+			t.rotate(3 * Math.PI / 2);
+			break;
+		case 8: // PI / 2
+			t.translate(0, width);
+			t.rotate(3 * Math.PI / 2);
+			break;
+		}
+
+		return t;
 	}
 
 }
