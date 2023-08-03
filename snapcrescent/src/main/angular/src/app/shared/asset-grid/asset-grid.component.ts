@@ -244,7 +244,15 @@ constructor(
       let aspectRatios = assetGroup.assets.map((asset:Asset) => 
       { 
         const metadata:Metadata = asset.metadata;
-        return Math.ceil((metadata.width/metadata.height) * (10 ** 2)) / (10 ** 2);
+        let height = metadata.height ;
+        let width = metadata.width ;
+
+        if(metadata.orientation == 6 || metadata.orientation == 8) {
+          height = metadata.width ;
+          width = metadata.height ;
+        }
+        
+        return Math.ceil((width/height) * (10 ** 2)) / (10 ** 2);
       });
 
       const geometry: any = createJustifiedLayout(aspectRatios, {

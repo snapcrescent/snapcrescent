@@ -7,7 +7,7 @@
     text-align: center;
     min-height: 100vh;
 
-    img,video{
+    img,video, .panorama-container{
         max-height: calc(100vh - 100px);
         max-width: calc(90vw);
         transform: translate(-50%, -50%);

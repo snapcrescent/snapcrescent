@@ -4,6 +4,7 @@ import { Asset, AssetType } from 'src/app/asset/asset.model';
 import { BaseComponent } from 'src/app/core/components/base.component';
 import { AssetService } from 'src/app/asset/asset.service';
 import { environment } from 'src/environments/environment';
+declare var pannellum: any;
 
 @Component({
   selector: 'app-asset-full-screen-view',
@@ -20,6 +21,8 @@ export class AssetFullScreenViewComponent extends BaseComponent implements OnIni
 
   @Input()
   assetIds: number[] = [];
+
+  isPanorama : boolean = false;
 
   currentAsset: Asset;
 
@@ -48,7 +51,9 @@ export class AssetFullScreenViewComponent extends BaseComponent implements OnIni
   ngOnChanges(changes: SimpleChanges) {
 
     if (changes?.['currentAssetId']) {
-      this.getAsset();
+      if(this.currentAssetId != changes?.['currentAssetId'].previousValue) {
+        this.getAsset();
+      }
     }
 
   }
@@ -65,7 +70,21 @@ export class AssetFullScreenViewComponent extends BaseComponent implements OnIni
         newAsset.url = `${environment.backendUrl}/asset/${newAsset.token}/stream`;
       }
 
+      this.isPanorama = (newAsset.metadata.width / newAsset.metadata.height) >= 2
       this.currentAsset = newAsset;
+
+      if(this.isPanorama) {
+        setTimeout(function(){
+          pannellum.viewer('panoramaContainer', {
+            "type": "equirectangular",
+            "autoLoad": true,
+            "autoRotate": -1,
+            "preview": true,
+            "panorama": `${environment.backendUrl}${newAsset.url}`
+          })
+        }, 1000);
+      }
+      
     });
   }
 }
