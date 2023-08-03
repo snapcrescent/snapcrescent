@@ -83,7 +83,7 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 			String outputFilePath = directoryPath + "/" + thumbnail.getName();
 
 			BufferedImage extractedImage = extractImage(assetType, assetFile, metadata, outputFilePath);
-			BufferedImage resizedImage = ImageUtils.cropAndResizeThumnail(extractedImage);
+			BufferedImage resizedImage = ImageUtils.cropAndResizeThumnail(extractedImage, metadata);
 
 			// Save Image as generated thumbnail
 			

@@ -34,7 +34,9 @@
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.js"
+              "node_modules/bootstrap/dist/js/bootstrap.js",
+              "node_modules/pannellum/src/js/libpannellum.js",
+              "node_modules/pannellum/src/js/pannellum.js"
             ]
           },
           "configurations": {
