@@ -60,11 +60,9 @@ class AssetService extends BaseService {
         Dio dio = await getDio();
         Options options = await getHeaders();
 
-        final Iterable<List<File>> partitionedFiles = partition(files, 5);
-
-        for (final partitionedFile in partitionedFiles) {
+        
           List<MultipartFile> multipartFiles = [];
-          for (final File file in partitionedFile) {
+          for (final File file in files) {
             multipartFiles.add(await MultipartFile.fromFile(file.path,
                 filename: file.path.split('/').last));
           }
@@ -73,7 +71,7 @@ class AssetService extends BaseService {
             "files": multipartFiles,
           });
           await dio.post("/asset/upload", data: formData, options: options);
-        }
+        
       }
     } on DioException catch (ex) {
       if (ex.type == DioExceptionType.connectionTimeout) {

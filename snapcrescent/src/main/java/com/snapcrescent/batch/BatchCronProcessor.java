@@ -11,6 +11,8 @@ import com.snapcrescent.batch.assetImport.AssetImportBatch;
 import com.snapcrescent.batch.assetImport.AssetImportBatchService;
 import com.snapcrescent.batch.metadataRecompute.MetadataRecomputeBatch;
 import com.snapcrescent.batch.metadataRecompute.MetadataRecomputeService;
+import com.snapcrescent.batch.thumbnailRegenerate.ThumbnailRegenerateBatch;
+import com.snapcrescent.batch.thumbnailRegenerate.ThumbnailRegenerateService;
 import com.snapcrescent.common.utils.Constant.BatchStatus;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,9 @@ public class BatchCronProcessor {
 	
 	@Autowired
 	private MetadataRecomputeService metadataRecomputeService;
+	
+	@Autowired
+	private ThumbnailRegenerateService thumbnailRegenerateService;
 
 	// Execute after 10 seconds
 
@@ -80,6 +85,34 @@ public class BatchCronProcessor {
 			batch.setEndDateTime(new Date());
 
 			metadataRecomputeService.update(batch);
+		}
+	}
+	
+	@Async
+	@Scheduled(cron = "*/10 * * * * *")
+	public void processThumbnailRegenerateBatch() {
+		
+		
+		ThumbnailRegenerateBatch batch = thumbnailRegenerateService.findPendingBatch();
+
+		if(batch != null) {
+			batch.setBatchStatus(BatchStatus.IN_PROGRESS.getId());
+			batch.setStartDateTime(new Date());
+			thumbnailRegenerateService.update(batch);
+			
+			batch = thumbnailRegenerateService.findById(batch.getId());
+			
+			try {
+				thumbnailRegenerateService.process(batch);	
+			} catch (Exception e) {
+				log.error("Error processing asset import batch", e);
+			}
+			
+
+			batch.setBatchStatus(BatchStatus.COMPLETED.getId());
+			batch.setEndDateTime(new Date());
+
+			thumbnailRegenerateService.update(batch);
 		}
 	}
 }

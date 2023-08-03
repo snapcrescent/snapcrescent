@@ -10,9 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.snapcrescent.asset.Asset;
 import com.snapcrescent.asset.AssetRepository;
-import com.snapcrescent.asset.AssetSearchCriteria;
 import com.snapcrescent.common.services.BaseService;
-import com.snapcrescent.common.utils.Constant.AssetType;
 import com.snapcrescent.common.utils.Constant.BatchStatus;
 import com.snapcrescent.metadata.MetadataService;
 
@@ -21,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class MetadataRecomputeImpl extends BaseService implements MetadataRecomputeService {
+public class MetadataRecomputeServiceImpl extends BaseService implements MetadataRecomputeService {
 
 	@Autowired
 	private MetadataRecomputeRepository metadataRecomputeRepository;
@@ -56,13 +54,7 @@ public class MetadataRecomputeImpl extends BaseService implements MetadataRecomp
 
 	@Override
 	public void process(MetadataRecomputeBatch batch) throws Exception {
-		
-		AssetSearchCriteria assetSearchCriteria = new AssetSearchCriteria();
-		assetSearchCriteria.setAssetType(AssetType.VIDEO.getId());
-		
-		
-		List<Asset> assets = assetRepository.search(assetSearchCriteria, false);
-		
+		List<Asset> assets = assetRepository.findAll();
 		
 	    List<Future<Boolean>> processingStatusList = new ArrayList<>(assets.size());
 	    
