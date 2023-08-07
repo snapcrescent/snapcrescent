@@ -8,7 +8,7 @@
 	</appender>
 
 	<appender name="FILE-ERROR" class="ch.qos.logback.core.FileAppender">
-		<File>/var/log/snap-crescent-error.log</File>
+		<File>/var/log/snap-crescent/error.log</File>
 		<encoder>
 			<pattern>[%d{yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}] [%C] [%t] [%L] [%-5p] %m%n</pattern>
 		</encoder>
@@ -20,7 +20,7 @@
 	</appender>
 
 	<appender name="FILE-DEBUG" class="ch.qos.logback.core.FileAppender">
-		<File>/var/log/snap-crescent-debug.log</File>
+		<File>/var/log/snap-crescent/debug.log</File>
 		<encoder>
 			<pattern>[%d{yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}] [%C] [%t] [%L] [%-5p] %m%n</pattern>
 		</encoder>
@@ -32,7 +32,7 @@
 	</appender>
 
 	<appender name="FILE-INFO" class="ch.qos.logback.core.FileAppender">
-		<File>/var/log/snap-crescent-info.log</File>
+		<File>/var/log/snap-crescent/info.log</File>
 		<encoder>
 			<pattern>[%d{yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}] [%C] [%t] [%L] [%-5p] %m%n</pattern>
 		</encoder>
