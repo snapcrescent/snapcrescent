@@ -104,12 +104,13 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 	@Override
 	public String uploadAssets(List<MultipartFile> multipartFiles) throws Exception {
 
-		String directoryPath = null;
+		String batchPath = null;
 
 		String isDemoAppString = appConfigService.getValue(AppConfigKeys.APP_CONFIG_KEY_DEMO_APP);
 		if (isDemoAppString == null || Boolean.parseBoolean(isDemoAppString) == false) {
 			
-			directoryPath = fileService.getBasePath(coreService.getAppUserId()) + "/" + UUID.randomUUID().toString()+ "/";
+			batchPath = UUID.randomUUID().toString();
+			String directoryPath = fileService.getBasePath(coreService.getAppUserId()) + "/" + batchPath + "/";
 			fileService.mkdirs(directoryPath);
 
 			for (MultipartFile multipartFile : multipartFiles) {
@@ -123,7 +124,7 @@ public class AssetServiceImpl extends BaseService implements AssetService {
 
 		}
 
-		return directoryPath;
+		return batchPath;
 	}
 	
 	@Override

@@ -63,8 +63,10 @@ public class AssetImportBatchServiceImpl extends BaseService implements AssetImp
 	public void process(AssetImportBatch batch) throws Exception {
 		String filesBasePath = batch.getFilesBasePath();
 		
+		String directoryPath = fileService.getBasePath(batch.getCreatedByUserId()) + "/" + filesBasePath + "/";
+		
 		Set<String> fileSet = new HashSet<>();
-	    try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(filesBasePath))) {
+	    try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(directoryPath))) {
 	        for (Path path : stream) {
 	            if (!Files.isDirectory(path)) {
 	                fileSet.add(path.getFileName().toString());
@@ -75,7 +77,7 @@ public class AssetImportBatchServiceImpl extends BaseService implements AssetImp
 	    List<Future<Boolean>> processingStatusList = new ArrayList<>(fileSet.size());
 	    
 	    for (String fileName : fileSet) {
-			File temporaryFile = new File(filesBasePath + fileName);
+			File temporaryFile = new File(directoryPath + fileName);
 			
 			if(temporaryFile.exists()) {
 				processingStatusList.add(assetService.processAsset(temporaryFile, batch.getCreatedByUserId()));
@@ -91,7 +93,7 @@ public class AssetImportBatchServiceImpl extends BaseService implements AssetImp
         });
         
         
-        fileService.removeFile(filesBasePath);
+        fileService.removeFile(directoryPath);
         
 	}
 
