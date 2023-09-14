@@ -1,13 +1,9 @@
-import 'dart:io';
-
 import 'dart:ui';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:snapcrescent_mobile/models/sync_state.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/notification_service.dart';
 import 'package:snapcrescent_mobile/services/sync_service.dart';
@@ -16,7 +12,6 @@ import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
 
 class BackgroundService {
-  
   static final BackgroundService _singleton = BackgroundService._internal();
 
   factory BackgroundService() {
@@ -46,45 +41,30 @@ class BackgroundService {
     });
 
     // bring to foreground
-    Timer.periodic(const Duration(hours: 1), (timer) async {
-
-       // test using external plugin
-      final deviceInfo = DeviceInfoPlugin();
-      String? device;
-      if (Platform.isAndroid) {
-        final androidInfo = await deviceInfo.androidInfo;
-        device = androidInfo.model;
-      }
-
-      if (Platform.isIOS) {
-        final iosInfo = await deviceInfo.iosInfo;
-        device = iosInfo.model;
-      }
-
+    Timer.periodic(const Duration(days: 1), (timer) async {
+      // test using external plugin
       if (service is AndroidServiceInstance) {
         if (await service.isForegroundService()) {
-
-          DateTime? lastSyncTime = await AppConfigService().getDateConfig(Constants.appConfigLastSyncActivityTimestamp, DateUtilities.timeStampFormat);
+          DateTime? lastSyncTime = await AppConfigService().getDateConfig(
+              Constants.appConfigLastSyncActivityTimestamp,
+              DateUtilities.timeStampFormat);
           lastSyncTime ??= DateTime.now();
-          
 
-          int? autoBackupFrequency = await AppConfigService().getIntegerConfig(Constants.appConfigAutoBackupFrequency);
-          if(autoBackupFrequency != null) {
-            int minutesSinceLastBackup =  DateUtilities().calculateMinutesBetween(lastSyncTime, DateTime.now());
+          int? autoBackupFrequency = await AppConfigService()
+              .getIntegerConfig(Constants.appConfigAutoBackupFrequency);
+          if (autoBackupFrequency != null) {
+            int minutesSinceLastBackup = DateUtilities()
+                .calculateMinutesBetween(lastSyncTime, DateTime.now());
 
-            if(minutesSinceLastBackup > autoBackupFrequency) {
-            await PhotoManager.setIgnorePermissionCheck(true);
-            await SyncService().syncAssets((SyncState syncMetadata) => {
+            if (minutesSinceLastBackup > autoBackupFrequency) {
+              await PhotoManager.setIgnorePermissionCheck(true);
+              await SyncService().syncFromServer();
+              await SyncService().syncToServer();
               service.invoke(
-              'update',
-              {
-                "current_date": DateTime.now().toIso8601String(),
-                "device": device,
-                "syncMetadata": syncMetadata
-              },
-            )
-            });
-            } 
+                'update',
+                {"current_date": DateTime.now().toIso8601String()},
+              );
+            }
           }
         }
       }
@@ -100,64 +80,62 @@ class BackgroundService {
   }
 
   Future<void> initializeService() async {
-  
-      service = FlutterBackgroundService();
+    service = FlutterBackgroundService();
 
-      AndroidConfiguration androidConfiguration;
+    AndroidConfiguration androidConfiguration;
 
-      if(await PermissionUtilities().isNotificationPermissionGranted()) {
+    if (await PermissionUtilities().isNotificationPermissionGranted()) {
+      await NotificationService().registerBackgroundServiceNotification();
 
-        await NotificationService().registerBackgroundServiceNotification();
+      androidConfiguration = AndroidConfiguration(
+        // this will be executed when app is in foreground or background in separated isolate
+        onStart: onStart,
 
-        androidConfiguration = AndroidConfiguration(
-          // this will be executed when app is in foreground or background in separated isolate
-          onStart: onStart,
+        // auto start service
+        autoStart: true,
+        autoStartOnBoot: true,
+        isForegroundMode: true,
 
-          // auto start service
-          autoStart: true,
-          autoStartOnBoot: true,
-          isForegroundMode: true,
-
-          notificationChannelId: Constants.notificationChannelId.toString(), // this must match with notification channel you created above.
-          initialNotificationTitle: 'Snap-Crescent',
-          initialNotificationContent: 'Initializing Server Sync',
-          foregroundServiceNotificationId: Constants.notificationChannelId,
-        );
-      } else {
-        androidConfiguration = AndroidConfiguration(
-          // this will be executed when app is in foreground or background in separated isolate
-          onStart: onStart,
-
-          // auto start service
-          autoStart: true,
-          autoStartOnBoot: true,
-          isForegroundMode: true,  
-        );
-      }
-
-      IosConfiguration iosConfiguration = IosConfiguration(
-          // auto start service
-          autoStart: true,
-
-          // this will be executed when app is in foreground in separated isolate
-          onForeground: onStart,
-
-          // you have to enable background fetch capability on xcode project
-          onBackground: onIosBackground,
-        );
-      
-      await service!.configure(
-        androidConfiguration: androidConfiguration,
-        iosConfiguration: iosConfiguration,
+        notificationChannelId: Constants.notificationChannelId
+            .toString(), // this must match with notification channel you created above.
+        initialNotificationTitle: 'Snap-Crescent',
+        initialNotificationContent: 'Initializing Server Sync',
+        foregroundServiceNotificationId: Constants.notificationChannelId,
       );
+    } else {
+      androidConfiguration = AndroidConfiguration(
+        // this will be executed when app is in foreground or background in separated isolate
+        onStart: onStart,
 
-      service!.startService();
+        // auto start service
+        autoStart: true,
+        autoStartOnBoot: true,
+        isForegroundMode: true,
+      );
+    }
+
+    IosConfiguration iosConfiguration = IosConfiguration(
+      // auto start service
+      autoStart: true,
+
+      // this will be executed when app is in foreground in separated isolate
+      onForeground: onStart,
+
+      // you have to enable background fetch capability on xcode project
+      onBackground: onIosBackground,
+    );
+
+    await service!.configure(
+      androidConfiguration: androidConfiguration,
+      iosConfiguration: iosConfiguration,
+    );
+
+    service!.startService();
   }
 
-   Future<void> stopService() async {
-        if(service != null) {
-            service!.invoke("stopService");
-        }
-        
-   }
+  Future<void> stopService() async {
+    if (service != null) {
+      service!.invoke("stopService");
+    }
+  }
 }

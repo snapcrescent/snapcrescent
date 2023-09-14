@@ -7,15 +7,13 @@ import 'package:snapcrescent_mobile/services/base_service.dart';
 import 'package:snapcrescent_mobile/utils/common_utilities.dart';
 
 class ThumbnailService extends BaseService {
-
-   static final ThumbnailService _singleton = ThumbnailService._internal();
+  static final ThumbnailService _singleton = ThumbnailService._internal();
 
   factory ThumbnailService() {
     return _singleton;
   }
 
   ThumbnailService._internal();
-
 
   Future<File> readThumbnailFile(String name) async {
     String directory = await CommonUtilities().getThumbnailDirectory();
@@ -67,12 +65,12 @@ class ThumbnailService extends BaseService {
   }
 
   Future<void> deleteAll() async {
-     String directory = await CommonUtilities().getThumbnailDirectory();
-     Directory thumbnailDirectory = Directory(directory);
+    String directory = await CommonUtilities().getThumbnailDirectory();
+    Directory thumbnailDirectory = Directory(directory);
 
-     if(thumbnailDirectory.existsSync()) {
+    if (thumbnailDirectory.existsSync()) {
       thumbnailDirectory.deleteSync(recursive: true);
-     }
+    }
 
     await ThumbnailRepository().deleteAll();
   }

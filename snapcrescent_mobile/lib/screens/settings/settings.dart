@@ -20,13 +20,13 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-          appBar: AppBar(
-            title: Text('Settings'),
-            backgroundColor: Colors.black,
-          ),
-          bottomNavigationBar: Footer(),
-          body: _SettingsScreenView());
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Settings'),
+          backgroundColor: Colors.black,
+        ),
+        bottomNavigationBar: Footer(),
+        body: _SettingsScreenView());
   }
 }
 
@@ -40,7 +40,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
   String _loggedInUserName = "";
   String _loggedServerName = "";
   String _appVersion = "";
-  
+
   final _formKey = GlobalKey<FormState>();
 
   AutovalidateMode _autovalidateMode = AutovalidateMode.onUserInteraction;
@@ -75,15 +75,14 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     AccountInfo accountInfo = await LoginService().getAccountInformation();
 
     serverURLController.text = accountInfo.serverUrl;
-    _loggedServerName = serverURLController
-        .text
+    _loggedServerName = serverURLController.text
         .replaceAll("https://", "")
         .replaceAll("http://", "");
 
-    if(_loggedServerName.lastIndexOf(":") > -1) {
-      _loggedServerName = _loggedServerName.substring(0, _loggedServerName.lastIndexOf(":"));
-    }    
-    
+    if (_loggedServerName.lastIndexOf(":") > -1) {
+      _loggedServerName =
+          _loggedServerName.substring(0, _loggedServerName.lastIndexOf(":"));
+    }
 
     nameController.text = accountInfo.username;
     _loggedInUserName = nameController.text;
@@ -164,34 +163,31 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     );
   }
 
-  
-
   _onLoginPressed() async {
     if (_formKey.currentState!.validate()) {
-
       try {
+        UserLoginResponse? userLoginResponse = await LoginService().login(
+            serverURLController.text,
+            nameController.text,
+            passwordController.text);
 
-      UserLoginResponse? userLoginResponse = await LoginService().login(serverURLController.text, nameController.text, passwordController.text);
-
-      if (userLoginResponse != null) {
-        await AppConfigService()
-            .updateFlag(Constants.appConfigLoggedInFlag, true);
-        await _getAccountInfo();
-        await NotificationService().initialize();
-        setState(() {});
-        if (!mounted) return;
-        Navigator.pop(context);
-      } else {
-        ToastService.showError("Incorrect Username or Password");
-        setState(() {
-          _autovalidateMode = AutovalidateMode.always;
-        });
-      }
+        if (userLoginResponse != null) {
+          await AppConfigService()
+              .updateFlag(Constants.appConfigLoggedInFlag, true);
+          await _getAccountInfo();
+          await NotificationService().initialize();
+          setState(() {});
+          if (!mounted) return;
+          Navigator.pop(context);
+        } else {
+          ToastService.showError("Incorrect Username or Password");
+          setState(() {
+            _autovalidateMode = AutovalidateMode.always;
+          });
+        }
       } on Exception catch (ex) {
-          ToastService.showError(ex.toString());
+        ToastService.showError(ex.toString());
       }
-
-      
     } else {
       ToastService.showError("Please fix the errors");
       setState(() {
@@ -208,9 +204,6 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
     Navigator.pop(context);
   }
 
-
-
- 
   _settingsList(BuildContext context) {
     return ListView(padding: EdgeInsets.zero, children: <Widget>[
       ListTile(
@@ -227,8 +220,7 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
           _showAccountInfoDialog();
         },
       ),
-      if (_connectedToServer)
-        AutoBackupSettingsView(),
+      if (_connectedToServer) AutoBackupSettingsView(),
       DeviceFoldersSettingsView(),
       FilesSettingsView(),
       ListTile(
@@ -251,18 +243,11 @@ class _SettingsScreenViewState extends State<_SettingsScreenView> {
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<bool>(
         future: _getSettingsData(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
-            return Center(
-              child: SizedBox(
-                width: 60,
-                height: 60,
-                child: const CircularProgressIndicator(),
-              ),
-            );
+            return Center();
           } else {
             return _settingsList(context);
           }

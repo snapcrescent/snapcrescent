@@ -7,7 +7,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snapcrescent_mobile/models/asset/asset_view_arguments.dart';
-import 'package:snapcrescent_mobile/models/sync_state.dart';
 import 'package:snapcrescent_mobile/screens/asset/asset_view.dart';
 import 'package:snapcrescent_mobile/services/asset_service.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
@@ -44,12 +43,8 @@ class _AssetListViewState extends State<_AssetListView> {
   late AssetStore _assetStore;
   int gridPageNumber = 0;
 
-  Timer? timer;
-  int periodicInitializerPageNumber = 0;
-
   _onAssetTap(BuildContext context, int assetIndex) {
-    AssetViewArguments arguments =
-        AssetViewArguments(assetIndex: assetIndex);
+    AssetViewArguments arguments = AssetViewArguments(assetIndex: assetIndex);
 
     Navigator.pushNamed(
       context,
@@ -65,7 +60,8 @@ class _AssetListViewState extends State<_AssetListView> {
   }
 
   _downloadAssets() async {
-    bool permissionReady = await PermissionUtilities().checkAndAskForPhotosPermission();
+    bool permissionReady =
+        await PermissionUtilities().checkAndAskForPhotosPermission();
 
     if (permissionReady) {
       final bool success = await AssetService()
@@ -77,7 +73,8 @@ class _AssetListViewState extends State<_AssetListView> {
   }
 
   _uploadAssets() async {
-    bool permissionReady = await PermissionUtilities().checkAndAskForPhotosPermission();
+    bool permissionReady =
+        await PermissionUtilities().checkAndAskForPhotosPermission();
 
     if (permissionReady) {
       final bool success = await AssetService()
@@ -100,41 +97,25 @@ class _AssetListViewState extends State<_AssetListView> {
         Timer(Duration(seconds: 2), () => setState(() {}));
       }
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _periodicallyLoadAssets();
-      timer = Timer.periodic(
-          Duration(milliseconds: 500), (Timer t) => _periodicallyLoadAssets());
-    });
   }
 
   @override
   void dispose() {
-    timer?.cancel();
     super.dispose();
   }
 
   void _listenForNotificationData() {
     final backgroundService = FlutterBackgroundService();
     backgroundService.on('update').listen((Map<String, dynamic>? $event) {
-      SyncState syncMetadata = SyncState.fromJson($event!["syncMetadata"]);
-      if (syncMetadata.downloadedAssetCount % 500 == 0) {
-        _assetStore.refreshStore();
-      }
+      //SyncState syncMetadata = SyncState.fromJson($event!["syncMetadata"]);
+      //if (syncMetadata.downloadedAssetCount % 500 == 0) {
+      // _assetStore.refreshStore();
+      //}
     }, onError: (e, s) {
       print('error listening for updates: $e, $s');
     }, onDone: () {
       print('background listen closed');
     });
-  }
-
-  _periodicallyLoadAssets() {
-    if (periodicInitializerPageNumber <= 5) {
-      _assetStore.initStore(periodicInitializerPageNumber);
-      periodicInitializerPageNumber++;
-    } else {
-      timer?.cancel();
-    }
   }
 
   _getFormattedGroupKey(String key) {
@@ -164,11 +145,10 @@ class _AssetListViewState extends State<_AssetListView> {
 
   int getAssetGroupIndexInScrollView() {
     try {
-      final double currentAsset =
-          (AssetState().groupedAssets.length - 1) *
-              _scrollController.offset /
-              (_scrollController.position.maxScrollExtent -
-                  _scrollController.position.minScrollExtent);
+      final double currentAsset = (AssetState().groupedAssets.length - 1) *
+          _scrollController.offset /
+          (_scrollController.position.maxScrollExtent -
+              _scrollController.position.minScrollExtent);
       if (currentAsset.isNaN || currentAsset.isInfinite) {
         return 0;
       }
@@ -215,11 +195,10 @@ class _AssetListViewState extends State<_AssetListView> {
                       children: <Widget>[
                         Padding(
                           padding: EdgeInsets.all(5),
-                          child:
-                              Text(_getFormattedGroupKey(keys[groupIndex]),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                  )),
+                          child: Text(_getFormattedGroupKey(keys[groupIndex]),
+                              style: TextStyle(
+                                color: Colors.white,
+                              )),
                         ),
                         GridView.builder(
                             gridDelegate:
@@ -232,7 +211,8 @@ class _AssetListViewState extends State<_AssetListView> {
                                 NeverScrollableScrollPhysics(), // to disable GridView's scrolling
                             shrinkWrap: true,
                             itemCount: AssetState()
-                                .groupedAssets[keys[groupIndex]]!.length,
+                                .groupedAssets[keys[groupIndex]]!
+                                .length,
                             itemBuilder: (BuildContext context2, index) {
                               final asset = AssetState()
                                   .groupedAssets[keys[groupIndex]]![index];
@@ -249,10 +229,8 @@ class _AssetListViewState extends State<_AssetListView> {
                                     setState(() {});
                                   } //No asset is selected, proceed to asset detail page
                                   else {
-                                    _onAssetTap(
-                                        context,
-                                        AssetState().assetList
-                                            .indexOf(asset));
+                                    _onAssetTap(context,
+                                        AssetState().assetList.indexOf(asset));
                                   }
                                 },
                                 child: AssetThumbnail(
@@ -304,7 +282,8 @@ class _AssetListViewState extends State<_AssetListView> {
 
   _body() {
     return Scaffold(
-      appBar: AssetState().isAnyItemSelected() ? AppBar(
+      appBar: AssetState().isAnyItemSelected()
+          ? AppBar(
               automaticallyImplyLeading: false,
               leading: _getLeadingIcon(),
               title: Text(!AssetState().isAnyItemSelected()
@@ -329,7 +308,8 @@ class _AssetListViewState extends State<_AssetListView> {
                     },
                     icon: Icon(Icons.share, color: Colors.white))
               ],
-            ) : Header(),
+            )
+          : Header(),
       bottomNavigationBar: Footer(),
       body: Container(
         color: Colors.black,
@@ -366,7 +346,7 @@ class _AssetListViewState extends State<_AssetListView> {
   @override
   Widget build(BuildContext context) {
     _assetStore = Provider.of<AssetStore>(context);
-
+    _assetStore.initStore(0);
     return _body();
   }
 }

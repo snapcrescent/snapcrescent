@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:snapcrescent_mobile/services/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/asset_service.dart';
 import 'package:snapcrescent_mobile/services/metadata_service.dart';
+import 'package:snapcrescent_mobile/services/sync_service.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
 import 'package:snapcrescent_mobile/stores/asset/asset_store.dart';
 import 'package:snapcrescent_mobile/style.dart';
@@ -85,7 +86,7 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
     }
   }
 
-  _showDownloadsClearConfirmationDialog() {
+  _showClearSyncedDataConfirmationDialog() {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -108,7 +109,7 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
             TextButton(
               child: const Text('Ok'),
               onPressed: () {
-                _clearCache();
+                _clearSyncedAssets();
               },
             )
           ],
@@ -117,7 +118,11 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
     );
   }
 
-  _clearCache() async {
+  _clearSyncedAssets() async {
+    //Imedietly stop any sync process
+    AssetService().cancelSyncProcess();
+    SyncService().cancelSyncProcess();
+    await Future.delayed(Duration(seconds: 1));
     await AssetService().deleteAllData();
     await _assetStore.refreshStore();
     _lastSyncActivityDate = "Never";
@@ -174,22 +179,22 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
                             ),
                           ],
                         ),
-                        if(_freeUpSpaceType == FreeUpSpaceType.XOLD)
+                        if (_freeUpSpaceType == FreeUpSpaceType.XOLD)
                           TextFormField(
-                                autovalidateMode: _autovalidateMode,
-                                controller: freeUpSpaceDaysController,
-                                validator: (v) {
-                                  if (v!.isNotEmpty && v != "0") {
-                                    return null;
-                                  } else {
-                                    return 'Please enter a valid value';
-                                  }
-                                },
-                                decoration: InputDecoration(labelText: 'Days'),
-                                keyboardType: TextInputType.number,
-                                inputFormatters: <TextInputFormatter>[
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ]),
+                              autovalidateMode: _autovalidateMode,
+                              controller: freeUpSpaceDaysController,
+                              validator: (v) {
+                                if (v!.isNotEmpty && v != "0") {
+                                  return null;
+                                } else {
+                                  return 'Please enter a valid value';
+                                }
+                              },
+                              decoration: InputDecoration(labelText: 'Days'),
+                              keyboardType: TextInputType.number,
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.digitsOnly,
+                              ]),
                       ])));
             },
           ),
@@ -213,26 +218,26 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
   }
 
   _freeUpDevice() async {
+    bool permissionReady =
+        await PermissionUtilities().checkAndAskForAllStoragePermission();
 
-    bool permissionReady = await PermissionUtilities().checkAndAskForAllStoragePermission();
-    
-    if(permissionReady) {
+    if (permissionReady) {
       DateTime tillDate = DateTime.now();
-          
-          if (_freeUpSpaceType == FreeUpSpaceType.XOLD && _formKey.currentState!.validate()){
-              int keepDataOfDays =  int.parse(freeUpSpaceDaysController.text);
-              tillDate = tillDate.subtract(Duration(days: keepDataOfDays));
-          }
 
-          await AssetService().deleteUploadedAssets(tillDate);
-          await _assetStore.refreshStore();
-          ToastService.showSuccess(
-              "Successfully deleted uploaded photos and videos.");
-          setState(() {});
-          if (!mounted) return;
-          Navigator.pop(context);
+      if (_freeUpSpaceType == FreeUpSpaceType.XOLD &&
+          _formKey.currentState!.validate()) {
+        int keepDataOfDays = int.parse(freeUpSpaceDaysController.text);
+        tillDate = tillDate.subtract(Duration(days: keepDataOfDays));
+      }
+
+      await AssetService().deleteUploadedAssets(tillDate);
+      await _assetStore.refreshStore();
+      ToastService.showSuccess(
+          "Successfully deleted uploaded photos and videos.");
+      setState(() {});
+      if (!mounted) return;
+      Navigator.pop(context);
     }
-    
   }
 
   _settingsList(BuildContext context) {
@@ -245,16 +250,16 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
             title: Text("File Info"),
           ),
           ListTile(
-            title: Text("Downloaded Photos and Videos", style: titleTextStyle),
+            title: Text("Synced Photos and Videos", style: titleTextStyle),
             subtitle: Text(
-                "Last Download: ${_lastSyncActivityDate.isEmpty ? "Never" : _lastSyncActivityDate}\nTotal Pictures and Videos: $_downloadedAssetCount"),
+                "Last Synced: ${_lastSyncActivityDate.isEmpty ? "Never" : _lastSyncActivityDate}\nTotal Pictures and Videos: $_downloadedAssetCount"),
             leading: Container(
               width: 40,
               alignment: Alignment.center,
               child: const Icon(Icons.delete, color: Colors.teal),
             ),
             onTap: () {
-              _showDownloadsClearConfirmationDialog();
+              _showClearSyncedDataConfirmationDialog();
             },
           ),
           ListTile(
@@ -286,13 +291,7 @@ class _FilesSettingsViewState extends State<FilesSettingsView> {
         future: _getSettingsData(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
-            return Center(
-              child: SizedBox(
-                width: 60,
-                height: 60,
-                child: const CircularProgressIndicator(),
-              ),
-            );
+            return Center();
           } else {
             return _settingsList(context);
           }

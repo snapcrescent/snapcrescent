@@ -15,8 +15,6 @@ class DeviceFoldersSettingsView extends StatefulWidget {
 class _DeviceFoldersSettingsViewState extends State<DeviceFoldersSettingsView> {
   bool _showDeviceAssets = false;
   String _showDeviceAssetsFolders = "None";
-  
-
 
   FutureOr onBackFromChild(dynamic value) {
     _getSettingsData();
@@ -24,19 +22,22 @@ class _DeviceFoldersSettingsViewState extends State<DeviceFoldersSettingsView> {
   }
 
   Future<bool> _getSettingsData() async {
-    _showDeviceAssets = await AppConfigService().getFlag(Constants.appConfigShowDeviceAssetsFlag);
-    _showDeviceAssetsFolders = await SettingsService().getFolderInfo(Constants.appConfigShowDeviceAssetsFolders);
+    _showDeviceAssets = await AppConfigService()
+        .getFlag(Constants.appConfigShowDeviceAssetsFlag);
+    _showDeviceAssetsFolders = await SettingsService()
+        .getFolderInfo(Constants.appConfigShowDeviceAssetsFolders);
     return Future.value(true);
   }
 
-  
   _updateShowDeviceAssetsFlag(bool value) async {
     _showDeviceAssets = value;
-    await AppConfigService().updateFlag(Constants.appConfigShowDeviceAssetsFlag, value);
+    await AppConfigService()
+        .updateFlag(Constants.appConfigShowDeviceAssetsFlag, value);
     setState(() {});
 
     if (_showDeviceAssets) {
-      _showDeviceAssetsFolders = await SettingsService().getFolderInfo(Constants.appConfigShowDeviceAssetsFolders);
+      _showDeviceAssetsFolders = await SettingsService()
+          .getFolderInfo(Constants.appConfigShowDeviceAssetsFolders);
 
       if (_showDeviceAssetsFolders.isEmpty) {
         if (!mounted) return;
@@ -52,47 +53,49 @@ class _DeviceFoldersSettingsViewState extends State<DeviceFoldersSettingsView> {
 
   _settingsList(BuildContext context) {
     return ListView(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero, children: <Widget>[
-      ListTile(
-          title: Text("Local Library Settings"),
-      ),
-      ListTile(
-          title: Text("Show Local Photos And Videos", style: titleTextStyle),
-          subtitle:
-              Text("Show photos and videos on your device on snap crescent"),
-          leading: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: const Icon(Icons.photo_album, color: Colors.teal),
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          ListTile(
+            title: Text("Local Library Settings"),
           ),
-          trailing: Switch(
-              value: _showDeviceAssets,
-              onChanged: (bool value) {
-                _updateShowDeviceAssetsFlag(value);
-              })),
-      if (_showDeviceAssets)
-        ListTile(
-          title: Text("Local Folders", style: titleTextStyle),
-          subtitle: Text(_showDeviceAssetsFolders.isNotEmpty
-              ? _showDeviceAssetsFolders
-              : "None"),
-          leading: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: const Icon(Icons.folder, color: Colors.teal),
-          ),
-          onTap: () {
-            Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => FolderSelectionScreen(
-                            Constants.appConfigShowDeviceAssetsFolders)))
-                .then(onBackFromChild);
-          },
-        ),
-    ]);
+          ListTile(
+              title:
+                  Text("Show Local Photos And Videos", style: titleTextStyle),
+              subtitle: Text(
+                  "Show photos and videos on your device on snap crescent"),
+              leading: Container(
+                width: 40,
+                alignment: Alignment.center,
+                child: const Icon(Icons.photo_album, color: Colors.teal),
+              ),
+              trailing: Switch(
+                  value: _showDeviceAssets,
+                  onChanged: (bool value) {
+                    _updateShowDeviceAssetsFlag(value);
+                  })),
+          if (_showDeviceAssets)
+            ListTile(
+              title: Text("Local Folders", style: titleTextStyle),
+              subtitle: Text(_showDeviceAssetsFolders.isNotEmpty
+                  ? _showDeviceAssetsFolders
+                  : "None"),
+              leading: Container(
+                width: 40,
+                alignment: Alignment.center,
+                child: const Icon(Icons.folder, color: Colors.teal),
+              ),
+              onTap: () {
+                Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => FolderSelectionScreen(
+                                Constants.appConfigShowDeviceAssetsFolders)))
+                    .then(onBackFromChild);
+              },
+            ),
+        ]);
   }
 
   @override
@@ -100,20 +103,13 @@ class _DeviceFoldersSettingsViewState extends State<DeviceFoldersSettingsView> {
     super.initState();
   }
 
-    @override
+  @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<bool>(
         future: _getSettingsData(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
-            return Center(
-              child: SizedBox(
-                width: 60,
-                height: 60,
-                child: const CircularProgressIndicator(),
-              ),
-            );
+            return Center();
           } else {
             return _settingsList(context);
           }

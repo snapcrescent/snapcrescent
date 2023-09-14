@@ -30,7 +30,7 @@ class AssetService extends BaseService {
 
   AssetService._internal();
 
-  bool executionInProgress = false;
+  bool _cancelletionFlag = false;
 
   Future<BaseResponseBean<int, Asset>> search(
       AssetSearchCriteria searchCriteria) async {
@@ -59,18 +59,16 @@ class AssetService extends BaseService {
         Dio dio = await getDio();
         Options options = await getHeaders();
 
-        
-          List<MultipartFile> multipartFiles = [];
-          for (final File file in files) {
-            multipartFiles.add(await MultipartFile.fromFile(file.path,
-                filename: file.path.split('/').last));
-          }
+        List<MultipartFile> multipartFiles = [];
+        for (final File file in files) {
+          multipartFiles.add(await MultipartFile.fromFile(file.path,
+              filename: file.path.split('/').last));
+        }
 
-          FormData formData = FormData.fromMap({
-            "files": multipartFiles,
-          });
-          await dio.post("/asset/upload", data: formData, options: options);
-        
+        FormData formData = FormData.fromMap({
+          "files": multipartFiles,
+        });
+        await dio.post("/asset/upload", data: formData, options: options);
       }
     } on DioException catch (ex) {
       if (ex.type == DioExceptionType.connectionTimeout) {
@@ -82,11 +80,10 @@ class AssetService extends BaseService {
     return Future.value(true);
   }
 
-  Future<List<Asset>> searchAndSync(
-      AssetSearchCriteria searchCriteria, Function progressCallBack) async {
+  Future<List<Asset>> searchAndSync(AssetSearchCriteria searchCriteria) async {
     searchCriteria.sortOrder = Direction.DESC;
     final data = await search(searchCriteria);
-    await saveAllOnLocal(data.objects!, progressCallBack);
+    await saveAllOnLocal(data.objects!);
     return List<Asset>.from(data.objects!);
   }
 
@@ -97,7 +94,7 @@ class AssetService extends BaseService {
     final data = await search(searchCriteria);
 
     for (Asset entity in data.objects!) {
-      await saveOnLocal(entity, false, () => {}, 0);
+      await saveOnLocal(entity, false, 0);
     }
 
     return List<Asset>.from(data.objects!);
@@ -152,7 +149,8 @@ class AssetService extends BaseService {
         Dio dio = await getDio();
 
         BaseResponseBean<int, Asset> response = await getAssetById(assetId);
-        final url = downloadAssetByIdUrl(await getServerUrl(), response.object!.token!);
+        final url =
+            downloadAssetByIdUrl(await getServerUrl(), response.object!.token!);
 
         String directory = await CommonUtilities().getTempDownloadsDirectory();
         String fullPath = '$directory/$assetName';
@@ -177,24 +175,22 @@ class AssetService extends BaseService {
   }
 
   cancelSyncProcess() {
-    executionInProgress = false;
+    _cancelletionFlag = true;
   }
 
-  Future<int> saveAllOnLocal(
-      List<Asset> entities, Function progressCallBack) async {
-    executionInProgress = true;
+  Future<int> saveAllOnLocal(List<Asset> entities) async {
+    _cancelletionFlag = false;
     for (Asset entity in entities) {
-      if (executionInProgress) {
-        await saveOnLocal(
-            entity, true, progressCallBack, entities.indexOf(entity));
+      if (_cancelletionFlag == false) {
+        await saveOnLocal(entity, true, entities.indexOf(entity));
       }
     }
 
     return Future.value(0);
   }
 
-  Future<int> saveOnLocal(Asset entity, bool createIfNotFound,
-      Function progressCallBack, int assetIndex) async {
+  Future<int> saveOnLocal(
+      Asset entity, bool createIfNotFound, int assetIndex) async {
     final assetExistsById = await AssetRepository().existsById(entity.id!);
 
     if (assetExistsById == false) {
@@ -223,14 +219,12 @@ class AssetService extends BaseService {
       }
 
       if (createIfNotFound) {
-        progressCallBack(assetIndex + 1);
         return AssetRepository().saveOrUpdate(entity);
       }
 
       return Future.value(0);
     } else {
       AssetRepository().saveOrUpdate(entity);
-      progressCallBack(assetIndex + 1);
       return Future.value(0);
     }
   }
@@ -270,14 +264,16 @@ class AssetService extends BaseService {
   }
 
   Future<void> deleteUploadedAssets(DateTime tillDate) async {
-    List<Metadata>? localAssetsSyncedWithServer = await MetadataService().findByLocalAssetIdNotNull();
+    List<Metadata>? localAssetsSyncedWithServer =
+        await MetadataService().findByLocalAssetIdNotNull();
 
     if (localAssetsSyncedWithServer != null &&
         localAssetsSyncedWithServer.isNotEmpty) {
+      localAssetsSyncedWithServer = localAssetsSyncedWithServer
+          .where((metadata) =>
+              DateUtilities().isBefore(metadata.creationDateTime!, tillDate))
+          .toList();
 
-      localAssetsSyncedWithServer = localAssetsSyncedWithServer.where((metadata) => DateUtilities().isBefore(metadata.creationDateTime!, tillDate) ).toList();
-      
-      
       List<String> syncedAssetIds = localAssetsSyncedWithServer
           .map((metadata) => metadata.localAssetId!)
           .toList();
@@ -296,10 +292,9 @@ class AssetService extends BaseService {
         for (var assetIndex = 0; assetIndex < assets.length; assetIndex++) {
           AssetEntity assetEntity = assets[assetIndex];
           if (syncedAssetIds.contains(assetEntity.id)) {
-
             File? assetFile = await assetEntity.file;
 
-            if(assetFile != null && assetFile.existsSync()) {
+            if (assetFile != null && assetFile.existsSync()) {
               assetFile.deleteSync();
             }
           }
@@ -326,20 +321,30 @@ class AssetService extends BaseService {
   }
 
   Future<bool> downloadAssetFilesToDevice(List<int> assetIndexes) async {
-    NotificationService().showProgressNotification("Downloading", "Downloading files on device", assetIndexes.length, 0);
+    NotificationService().showProgressNotification(
+        "Downloading", "Downloading files on device", assetIndexes.length, 0);
     for (var assetIndex in assetIndexes) {
-      final UniFiedAsset unifiedAsset =
-          AssetState().assetList[assetIndex];
+      final UniFiedAsset unifiedAsset = AssetState().assetList[assetIndex];
 
       if (unifiedAsset.assetSource == AssetSource.CLOUD) {
         Asset asset = unifiedAsset.asset!;
-        await permanentDownloadAssetById(asset.id!, asset.metadata!.name!, unifiedAsset.assetType);
-        NotificationService().showProgressNotification("Downloading", "Downloading files on device", assetIndexes.length, assetIndexes.indexOf(assetIndex));
+        await permanentDownloadAssetById(
+            asset.id!, asset.metadata!.name!, unifiedAsset.assetType);
+        NotificationService().showProgressNotification(
+            "Downloading",
+            "Downloading files on device",
+            assetIndexes.length,
+            assetIndexes.indexOf(assetIndex));
       }
     }
-    NotificationService().showProgressNotification("Downloading", "Downloading files on device", assetIndexes.length, assetIndexes.length);
+    NotificationService().showProgressNotification(
+        "Downloading",
+        "Downloading files on device",
+        assetIndexes.length,
+        assetIndexes.length);
     NotificationService().clearNotifications();
-    NotificationService().showNotification("Download Complete", "Download Complete");
+    NotificationService()
+        .showNotification("Download Complete", "Download Complete");
     return true;
   }
 
@@ -347,8 +352,7 @@ class AssetService extends BaseService {
     List<File> assetFiles = [];
 
     for (var assetIndex in assetIndexes) {
-      final UniFiedAsset unifiedAsset =
-          AssetState().assetList[assetIndex];
+      final UniFiedAsset unifiedAsset = AssetState().assetList[assetIndex];
 
       File? assetFile;
 
@@ -371,8 +375,7 @@ class AssetService extends BaseService {
 
   Future<bool> uploadAssetFilesToServer(List<int> assetIndexes) async {
     for (var assetIndex in assetIndexes) {
-      final UniFiedAsset unifiedAsset =
-          AssetState().assetList[assetIndex];
+      final UniFiedAsset unifiedAsset = AssetState().assetList[assetIndex];
 
       if (unifiedAsset.assetSource == AssetSource.DEVICE) {
         AssetEntity asset = unifiedAsset.assetEntity!;
