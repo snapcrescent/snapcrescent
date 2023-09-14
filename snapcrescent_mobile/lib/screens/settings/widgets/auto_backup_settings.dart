@@ -18,9 +18,10 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
   String _autoBackupFolders = "None";
   String? _autoBackupFrequency = "";
   String _autoBackupFrequencyString = "";
-  
-  AutoBackupFrequencyType _autoBackupFrequencyType = AutoBackupFrequencyType.HOURS;
-  
+
+  AutoBackupFrequencyType _autoBackupFrequencyType =
+      AutoBackupFrequencyType.DAYS;
+
   final _formKey = GlobalKey<FormState>();
 
   AutovalidateMode _autovalidateMode = AutovalidateMode.onUserInteraction;
@@ -34,43 +35,43 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
 
   Future<bool> _getSettingsData() async {
     await _getAutoBackupFrequency();
-    
-    _autoBackup = await AppConfigService()
-        .getFlag(Constants.appConfigAutoBackupFlag);
-    _autoBackupFolders = await SettingsService().getFolderInfo(Constants.appConfigAutoBackupFolders);
-    
+
+    _autoBackup =
+        await AppConfigService().getFlag(Constants.appConfigAutoBackupFlag);
+    _autoBackupFolders = await SettingsService()
+        .getFolderInfo(Constants.appConfigAutoBackupFolders);
+
     return Future.value(true);
   }
 
   Future<void> _getAutoBackupFrequency() async {
-    _autoBackupFrequency = await AppConfigService().getConfig(Constants.appConfigAutoBackupFrequency);
-    
+    _autoBackupFrequency = await AppConfigService()
+        .getConfig(Constants.appConfigAutoBackupFrequency);
 
-    if(_autoBackupFrequency != null) {
-
-      _autoBackupFrequencyType = SettingsService().getReadableOfAutoBackupFrequency(_autoBackupFrequency!);
+    if (_autoBackupFrequency != null) {
+      _autoBackupFrequencyType = SettingsService()
+          .getReadableOfAutoBackupFrequency(_autoBackupFrequency!);
 
       double autoBackupFrequencyNumber = double.parse(_autoBackupFrequency!);
 
-    switch (_autoBackupFrequencyType) {
-      case AutoBackupFrequencyType.HOURS:
-        autoBackupFrequencyNumber = (autoBackupFrequencyNumber / 60);
-        _autoBackupFrequencyString =
-            "${autoBackupFrequencyNumber.toStringAsFixed(0)} Hour${autoBackupFrequencyNumber > 1 ? "s" : ""}";
-        break;
-      case AutoBackupFrequencyType.DAYS:
-        autoBackupFrequencyNumber = ((autoBackupFrequencyNumber / 60) / 24);
-        _autoBackupFrequencyString =
-            "${autoBackupFrequencyNumber.toStringAsFixed(0)} Day${autoBackupFrequencyNumber > 1 ? "s" : ""}";
-        break;
-      default:
-    }
+      switch (_autoBackupFrequencyType) {
+        case AutoBackupFrequencyType.DAYS:
+          autoBackupFrequencyNumber = ((autoBackupFrequencyNumber / 60) / 24);
+          _autoBackupFrequencyString =
+              "${autoBackupFrequencyNumber.toStringAsFixed(0)} Day${autoBackupFrequencyNumber > 1 ? "s" : ""}";
+          break;
+        case AutoBackupFrequencyType.WEEKS:
+          autoBackupFrequencyNumber =
+              (((autoBackupFrequencyNumber / 60) / 24) / 7);
+          _autoBackupFrequencyString =
+              "${autoBackupFrequencyNumber.toStringAsFixed(0)} Day${autoBackupFrequencyNumber > 1 ? "s" : ""}";
+          break;
+        default:
+      }
 
       autoBackUpFrequencyController.text =
           autoBackupFrequencyNumber.toStringAsFixed(0);
-
     }
-    
   }
 
   _showAutoBackupFrequencyInfoDialog() async {
@@ -107,9 +108,9 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
                         Column(
                           children: <Widget>[
                             ListTile(
-                              title: const Text('Hours'),
+                              title: const Text('Days'),
                               leading: Radio<AutoBackupFrequencyType>(
-                                value: AutoBackupFrequencyType.HOURS,
+                                value: AutoBackupFrequencyType.DAYS,
                                 groupValue: _autoBackupFrequencyType,
                                 onChanged: (AutoBackupFrequencyType? value) {
                                   setState(() {
@@ -119,9 +120,9 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
                               ),
                             ),
                             ListTile(
-                              title: const Text('Days'),
+                              title: const Text('Weeks'),
                               leading: Radio<AutoBackupFrequencyType>(
-                                value: AutoBackupFrequencyType.DAYS,
+                                value: AutoBackupFrequencyType.WEEKS,
                                 groupValue: _autoBackupFrequencyType,
                                 onChanged: (AutoBackupFrequencyType? value) {
                                   setState(() {
@@ -146,7 +147,7 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
               child: const Text('Save'),
               onPressed: () {
                 _saveAutoBackupFrequency();
-                 Navigator.pop(context);
+                Navigator.pop(context);
               },
             )
           ],
@@ -159,17 +160,18 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
     int selectedValue = int.parse(autoBackUpFrequencyController.text);
     int minutes = 0;
     switch (_autoBackupFrequencyType) {
-      case AutoBackupFrequencyType.HOURS:
-        minutes = selectedValue * 60;
-        break;
       case AutoBackupFrequencyType.DAYS:
         minutes = selectedValue * 60 * 24;
+        break;
+      case AutoBackupFrequencyType.WEEKS:
+        minutes = selectedValue * 60 * 24 * 7;
         break;
       default:
     }
     _autoBackupFrequency = minutes.toStringAsFixed(0);
 
-    await AppConfigService().updateConfig(Constants.appConfigAutoBackupFrequency, _autoBackupFrequency!);
+    await AppConfigService().updateConfig(
+        Constants.appConfigAutoBackupFrequency, _autoBackupFrequency!);
     await _getAutoBackupFrequency();
     setState(() {});
   }
@@ -180,75 +182,78 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
         .updateFlag(Constants.appConfigAutoBackupFlag, value);
     setState(() {});
     if (_autoBackup) {
-      _autoBackupFolders = await SettingsService().getFolderInfo(Constants.appConfigAutoBackupFolders);
+      _autoBackupFolders = await SettingsService()
+          .getFolderInfo(Constants.appConfigAutoBackupFolders);
 
       if (_autoBackupFolders.isEmpty) {
         if (!mounted) return;
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => FolderSelectionScreen(
-                    Constants.appConfigAutoBackupFolders))).then(onBackFromChild);
+                context,
+                MaterialPageRoute(
+                    builder: (context) => FolderSelectionScreen(
+                        Constants.appConfigAutoBackupFolders)))
+            .then(onBackFromChild);
       }
     }
   }
 
   _settingsList(BuildContext context) {
     return ListView(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero, children: <Widget>[
-      ListTile(
-          title: Text("Backup Settings"),
-      ),
-      ListTile(
-          title: Text("Auto Backup", style: titleTextStyle),
-          subtitle: Text(
-              "Automatically backup your photos and videos to your snap-crescent server"),
-          leading: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: const Icon(Icons.cloud_upload, color: Colors.teal),
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          ListTile(
+            title: Text("Backup Settings"),
           ),
-          trailing: Switch(
-              value: _autoBackup,
-              onChanged: (bool value) {
-                _updateAutoBackupFlag(value);
-              }),
-        ),
-      if (_autoBackup)
-        ListTile(
-          title: Text("Auto Backup Frequency ", style: titleTextStyle),
-          subtitle: Text(_autoBackupFrequencyString),
-          leading: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: const Icon(Icons.sync, color: Colors.teal),
+          ListTile(
+            title: Text("Auto Backup", style: titleTextStyle),
+            subtitle: Text(
+                "Automatically backup your photos and videos to your snap-crescent server"),
+            leading: Container(
+              width: 40,
+              alignment: Alignment.center,
+              child: const Icon(Icons.cloud_upload, color: Colors.teal),
+            ),
+            trailing: Switch(
+                value: _autoBackup,
+                onChanged: (bool value) {
+                  _updateAutoBackupFlag(value);
+                }),
           ),
-          onTap: () {
-            _showAutoBackupFrequencyInfoDialog();
-          },
-        ),
-      if (_autoBackup)
-        ListTile(
-          title: Text("Backup Folders", style: titleTextStyle),
-          subtitle:
-              Text(_autoBackupFolders.isNotEmpty ? _autoBackupFolders : "None"),
-          leading: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: const Icon(Icons.folder, color: Colors.teal),
-          ),
-          onTap: () {
-            Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => FolderSelectionScreen(
-                            Constants.appConfigAutoBackupFolders)))
-                .then(onBackFromChild);
-          },
-        ),
-    ]);
+          if (_autoBackup)
+            ListTile(
+              title: Text("Auto Backup Frequency ", style: titleTextStyle),
+              subtitle: Text(_autoBackupFrequencyString),
+              leading: Container(
+                width: 40,
+                alignment: Alignment.center,
+                child: const Icon(Icons.sync, color: Colors.teal),
+              ),
+              onTap: () {
+                _showAutoBackupFrequencyInfoDialog();
+              },
+            ),
+          if (_autoBackup)
+            ListTile(
+              title: Text("Backup Folders", style: titleTextStyle),
+              subtitle: Text(
+                  _autoBackupFolders.isNotEmpty ? _autoBackupFolders : "None"),
+              leading: Container(
+                width: 40,
+                alignment: Alignment.center,
+                child: const Icon(Icons.folder, color: Colors.teal),
+              ),
+              onTap: () {
+                Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => FolderSelectionScreen(
+                                Constants.appConfigAutoBackupFolders)))
+                    .then(onBackFromChild);
+              },
+            ),
+        ]);
   }
 
   @override
@@ -262,13 +267,7 @@ class _AutoBackupSettingsViewState extends State<AutoBackupSettingsView> {
         future: _getSettingsData(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.data == null) {
-            return Center(
-              child: SizedBox(
-                width: 60,
-                height: 60,
-                child: const CircularProgressIndicator(),
-              ),
-            );
+            return Center();
           } else {
             return _settingsList(context);
           }

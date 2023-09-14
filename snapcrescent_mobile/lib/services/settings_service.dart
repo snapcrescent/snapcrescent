@@ -13,16 +13,16 @@ class SettingsService extends BaseService {
   SettingsService._internal();
 
   Future<String> getFolderInfo(String appConfigKey) async {
-    List<String> autoBackupFolderIdList = await AppConfigService().getStringListConfig(appConfigKey, ",");
+    List<String> autoBackupFolderIdList =
+        await AppConfigService().getStringListConfig(appConfigKey, ",");
     return _getCombinedFolderString(autoBackupFolderIdList);
   }
 
-  Future<String> _getCombinedFolderString(List<String> assetsFolderIdList) async {
-
+  Future<String> _getCombinedFolderString(
+      List<String> assetsFolderIdList) async {
     String deviceAssetsFolders = "";
 
-    final List<AssetPathEntity> assets =
-        await PhotoManager.getAssetPathList();
+    final List<AssetPathEntity> assets = await PhotoManager.getAssetPathList();
     List<String> deviceAssetsFolderNameList = assets
         .where((asset) => assetsFolderIdList.contains(asset.id))
         .map((asset) => asset.name)
@@ -37,21 +37,21 @@ class SettingsService extends BaseService {
     return deviceAssetsFolders;
   }
 
-  AutoBackupFrequencyType getReadableOfAutoBackupFrequency(String autoBackupFrequencyString) {
-    AutoBackupFrequencyType autoBackupFrequencyType = AutoBackupFrequencyType.HOURS;
+  AutoBackupFrequencyType getReadableOfAutoBackupFrequency(
+      String autoBackupFrequencyString) {
+    AutoBackupFrequencyType autoBackupFrequencyType =
+        AutoBackupFrequencyType.DAYS;
 
     if (autoBackupFrequencyString.isNotEmpty) {
       int autoBackupFrequency = int.parse(autoBackupFrequencyString);
 
-      if (autoBackupFrequency < 60 * 24) {
-        autoBackupFrequencyType = AutoBackupFrequencyType.HOURS;
-      } else {
+      if (autoBackupFrequency < 60 * 24 * 7) {
         autoBackupFrequencyType = AutoBackupFrequencyType.DAYS;
+      } else {
+        autoBackupFrequencyType = AutoBackupFrequencyType.WEEKS;
       }
     }
 
     return autoBackupFrequencyType;
   }
-
-
 }

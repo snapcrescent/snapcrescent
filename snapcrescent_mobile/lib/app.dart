@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snapcrescent_mobile/models/asset/asset_view_arguments.dart';
+import 'package:snapcrescent_mobile/models/sync_state.dart';
 import 'package:snapcrescent_mobile/screens/album/album_list.dart';
 import 'package:snapcrescent_mobile/screens/asset/asset_view.dart';
 import 'package:snapcrescent_mobile/screens/asset/asset_list.dart';
@@ -18,6 +19,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => SyncState()),
         Provider<AssetStore>(create: (_) => AssetStore()),
       ],
       child: MaterialApp(
@@ -27,12 +29,12 @@ class App extends StatelessWidget {
         theme: _theme(),
         onGenerateRoute: _generateRoute,
         onUnknownRoute: (RouteSettings settings) {
-        return MaterialPageRoute<void>(
-          settings: settings,
-          builder: (BuildContext context) =>
-              Scaffold(body: Center(child: Text('Not Found'))),
-        );
-      },
+          return MaterialPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) =>
+                Scaffold(body: Center(child: Text('Not Found'))),
+          );
+        },
         navigatorKey: navigatorKey,
       ),
     );
@@ -46,26 +48,23 @@ class App extends StatelessWidget {
         return MaterialPageRoute(builder: (_) => SettingsScreen());
       case FolderSelectionScreen.routeName:
         return MaterialPageRoute(
-            builder: (_) => FolderSelectionScreen(settings.arguments as String));
+            builder: (_) =>
+                FolderSelectionScreen(settings.arguments as String));
       case AlbumListScreen.routeName:
-        return MaterialPageRoute(
-            builder: (_) => AlbumListScreen());
+        return MaterialPageRoute(builder: (_) => AlbumListScreen());
       case AssetListScreen.routeName:
-        return MaterialPageRoute(
-            builder: (_) => AssetListScreen());
+        return MaterialPageRoute(builder: (_) => AssetListScreen());
       case AssetViewScreen.routeName:
         return MaterialPageRoute(
             builder: (_) =>
                 AssetViewScreen(settings.arguments as AssetViewArguments));
-
     }
     return null;
   }
 
   ThemeData _theme() {
     return ThemeData(
-      appBarTheme:
-          AppBarTheme(toolbarTextStyle: appBarTextStyle),
+      appBarTheme: AppBarTheme(toolbarTextStyle: appBarTextStyle),
       textTheme:
           TextTheme(titleLarge: titleTextStyle, bodyMedium: body1TextStyle),
       primarySwatch: Colors.teal,
