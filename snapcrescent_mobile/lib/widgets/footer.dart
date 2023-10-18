@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:snapcrescent_mobile/screens/album/album_list.dart';
-import 'package:snapcrescent_mobile/screens/asset/asset_list.dart';
-import 'package:snapcrescent_mobile/screens/settings/settings.dart';
+import 'package:snapcrescent_mobile/album/screens/album_list.dart';
+import 'package:snapcrescent_mobile/asset/screens/asset_list.dart';
+import 'package:snapcrescent_mobile/settings/screens/settings_list.dart';
 import 'package:snapcrescent_mobile/services/global_service.dart';
 
 class Footer extends StatelessWidget {
@@ -67,7 +67,7 @@ class _FooterViewState extends State<_FooterView> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute<dynamic>(
-                builder: (BuildContext context) => SettingsScreen()));
+                builder: (BuildContext context) => SettingsListScreen()));
         break;
     }
   }

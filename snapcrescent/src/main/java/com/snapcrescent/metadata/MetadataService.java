@@ -1,6 +1,7 @@
 package com.snapcrescent.metadata;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.Future;
 
 import com.snapcrescent.asset.Asset;
@@ -11,5 +12,6 @@ public interface MetadataService {
 	Metadata createMetadataEntity(File temporaryFile) throws Exception;
 	Metadata extractMetaDataFromGoogleTakeout(AssetType assetType, File assetFile, File assetJsonFile, File temporaryFile) throws Exception;
 	Future<Boolean> recomputeMetadata(Asset asset);
+    void updateMetadataPostAssetDeletion(Asset asset) throws IOException;
 	
 }

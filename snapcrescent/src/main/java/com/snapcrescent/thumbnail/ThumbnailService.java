@@ -1,5 +1,6 @@
 package com.snapcrescent.thumbnail;
 
+import java.io.IOException;
 import java.util.concurrent.Future;
 
 import com.snapcrescent.asset.Asset;
@@ -17,4 +18,6 @@ public interface ThumbnailService {
 	SecuredAssetStreamDTO getAssetDetailsFromToken(String token) throws Exception;
 
 	Future<Boolean> generateThumbnailAsync(Asset asset);
+
+	public void updateThumbnailPostAssetDeletion(Asset asset) throws IOException;
 }

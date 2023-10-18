@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snapcrescent_mobile/models/asset/asset_view_arguments.dart';
-import 'package:snapcrescent_mobile/models/sync_state.dart';
-import 'package:snapcrescent_mobile/screens/album/album_list.dart';
-import 'package:snapcrescent_mobile/screens/asset/asset_view.dart';
-import 'package:snapcrescent_mobile/screens/asset/asset_list.dart';
-import 'package:snapcrescent_mobile/screens/settings/folder_selection/folder_selection.dart';
-import 'package:snapcrescent_mobile/screens/settings/settings.dart';
-import 'package:snapcrescent_mobile/screens/splash/splash.dart';
-import 'package:snapcrescent_mobile/stores/asset/asset_store.dart';
+import 'package:snapcrescent_mobile/album/screens/album_list.dart';
+import 'package:snapcrescent_mobile/asset/asset_view_arguments.dart';
+import 'package:snapcrescent_mobile/asset/screens/asset_list.dart';
+import 'package:snapcrescent_mobile/asset/screens/asset_view.dart';
+import 'package:snapcrescent_mobile/asset/stores/asset_store.dart';
+import 'package:snapcrescent_mobile/settings/screens/settings_list.dart';
+import 'package:snapcrescent_mobile/settings/widgets/folder_selection.dart';
+import 'package:snapcrescent_mobile/splash/splash.dart';
 import 'package:snapcrescent_mobile/style.dart';
+import 'package:snapcrescent_mobile/sync/state/sync_state.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -44,8 +44,8 @@ class App extends StatelessWidget {
     switch (settings.name) {
       case SplashScreen.routeName:
         return MaterialPageRoute(builder: (_) => SplashScreen());
-      case SettingsScreen.routeName:
-        return MaterialPageRoute(builder: (_) => SettingsScreen());
+      case SettingsListScreen.routeName:
+        return MaterialPageRoute(builder: (_) => SettingsListScreen());
       case FolderSelectionScreen.routeName:
         return MaterialPageRoute(
             builder: (_) =>

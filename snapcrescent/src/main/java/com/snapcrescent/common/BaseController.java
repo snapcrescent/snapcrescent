@@ -1,6 +1,7 @@
 package com.snapcrescent.common;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import org.springframework.core.io.support.ResourceRegion;
 
 import com.snapcrescent.common.beans.BaseSearchCriteria;
 import com.snapcrescent.common.security.CoreService;
+import com.snapcrescent.common.utils.StringUtils;
 import com.snapcrescent.common.utils.Constant.AssetType;
 import com.snapcrescent.common.utils.Constant.Direction;
 import com.snapcrescent.common.utils.Constant.ResourceRegionType;
@@ -64,6 +66,22 @@ public class BaseController {
 
 		if (searchParams.get("toDate") != null) {
 			searchCriteria.setToDate(new Date(Long.parseLong(searchParams.get("toDate"))));
+		}
+
+		if (searchParams.get("fromId") != null) {
+			searchCriteria.setFromId(Long.parseLong(searchParams.get("fromId")));
+		}
+
+		if (searchParams.get("toId") != null) {
+			searchCriteria.setToId(Long.parseLong(searchParams.get("toId")));
+		}
+
+		if (searchParams.get("selectedIds") != null) {
+			searchCriteria.setSelectedIds(StringUtils.idsStringToIdList(searchParams.get("selectedIds")));
+		}
+
+		if (searchParams.get("ignoreIds") != null) {
+			searchCriteria.setIgnoreIds(StringUtils.idsStringToIdList(searchParams.get("ignoreIds")));
 		}
 	}
 

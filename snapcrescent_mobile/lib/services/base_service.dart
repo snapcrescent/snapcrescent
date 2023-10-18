@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:snapcrescent_mobile/services/app_config_service.dart';
+import 'package:snapcrescent_mobile/appConfig/app_config_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class BaseService {
@@ -42,7 +42,11 @@ class BaseService {
     Map<String, String> headers = {};
 
     String? appConfigSessionTokenConfig = await AppConfigService().getConfig(Constants.appConfigSessionToken);
-    headers["Authorization"] = "Bearer ${appConfigSessionTokenConfig!}";
+
+    if(appConfigSessionTokenConfig != null) {
+      headers["Authorization"] = "Bearer $appConfigSessionTokenConfig";
+    }
+    
 
     return headers;
   }

@@ -1,7 +1,10 @@
 package com.snapcrescent.metadata;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.Date;
@@ -261,5 +264,17 @@ public class MetadataServiceImpl extends BaseService implements MetadataService 
 		}
 
 		return metadata;
+	}
+
+	@Override
+	@Transactional
+	public void updateMetadataPostAssetDeletion(Asset asset) throws IOException {
+		Metadata metadata = asset.getMetadata();
+		try {
+			fileService.removeFile(asset.getAssetTypeEnum(), asset.getCreatedByUserId(), metadata.getPath(), metadata.getInternalName());
+		} catch(NoSuchFileException e) {
+			log.error("Error while deleting asset " + e.getLocalizedMessage());
+		}
+		
 	}
 }

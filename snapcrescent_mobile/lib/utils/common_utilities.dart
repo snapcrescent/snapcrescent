@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:snapcrescent_mobile/services/app_config_service.dart';
+import 'package:snapcrescent_mobile/appConfig/app_config_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class CommonUtilities {

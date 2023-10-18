@@ -70,7 +70,7 @@ public class AssetRepository extends BaseRepository<Asset>{
 
 		if (searchCriteria != null && StringUtils.isNotBlank(searchCriteria.getSearchKeyword())) {
 			isSearchKeyword = Boolean.TRUE;
-			String[] stringFields = {"metadata.model"};
+			String[] stringFields = {""};
 			String[] numberFields = {};
 			hql.append(daoHelper.getSearchWhereStatement(stringFields, numberFields, searchCriteria.getSearchKeyword(),
 					true));
@@ -129,7 +129,22 @@ public class AssetRepository extends BaseRepository<Asset>{
 		{
 			hql.append(" AND album.id = :albumId ");
 			paramsMap.put("albumId", searchCriteria.getAlbumId());
-		} 
+		}
+		
+		if(searchCriteria.getFromId() != null) {
+			hql.append(" AND asset.id >= :fromId");
+			paramsMap.put("fromId", searchCriteria.getFromId());
+		}
+
+		if(searchCriteria.getToId() != null) {
+			hql.append(" AND asset.id <= :toId");
+			paramsMap.put("toId", searchCriteria.getToId());
+		}
+
+		if(!searchCriteria.getIgnoreIds().isEmpty()) {
+			hql.append(" AND asset.id NOT IN (:ignoreIds)");
+			paramsMap.put("ignoreIds", searchCriteria.getIgnoreIds());
+		}
 		
 		if(isCountQuery == false && searchCriteria.getSortBy() != null){
 			hql.append(" ORDER BY " + searchCriteria.getSortBy() + " " + searchCriteria.getSortOrder());
