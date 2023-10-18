@@ -2,7 +2,7 @@ import { Injectable} from '@angular/core';
 import { UserLoginResponse } from 'src/app/login/login.model';
 import { StorageService } from './storage.service';
 import { UserType } from 'src/app/user/user.model';
-import { ReplaySubject, Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 
 @Injectable({
     providedIn: "root"

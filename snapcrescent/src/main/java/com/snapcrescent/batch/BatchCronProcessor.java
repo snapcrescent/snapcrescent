@@ -7,6 +7,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.snapcrescent.batch.assetCleanup.AssetCleanupBatch;
+import com.snapcrescent.batch.assetCleanup.AssetCleanupBatchService;
 import com.snapcrescent.batch.assetImport.AssetImportBatch;
 import com.snapcrescent.batch.assetImport.AssetImportBatchService;
 import com.snapcrescent.batch.metadataRecompute.MetadataRecomputeBatch;
@@ -30,10 +32,12 @@ public class BatchCronProcessor {
 	@Autowired
 	private ThumbnailRegenerateService thumbnailRegenerateService;
 
+	@Autowired
+	private AssetCleanupBatchService assetCleanupBatchService;
+
 	// Execute after 10 seconds
 
 	@Async
-	@Scheduled(cron = "*/10 * * * * *")
 	public void processAssetImportBatch() {
 		
 		
@@ -113,6 +117,34 @@ public class BatchCronProcessor {
 			batch.setEndDateTime(new Date());
 
 			thumbnailRegenerateService.update(batch);
+		}
+	}
+
+	@Async
+	@Scheduled(cron = "*/10 * * * * *")
+	public void processAssetCleanupBatch() {
+		
+		
+		AssetCleanupBatch batch = assetCleanupBatchService.findPendingBatch();
+
+		if(batch != null) {
+			batch.setBatchStatus(BatchStatus.IN_PROGRESS.getId());
+			batch.setStartDateTime(new Date());
+			assetCleanupBatchService.update(batch);
+			
+			batch = assetCleanupBatchService.findById(batch.getId());
+			
+			try {
+				assetCleanupBatchService.process(batch);	
+			} catch (Exception e) {
+				log.error("Error processing asset cleanup batch", e);
+			}
+			
+
+			batch.setBatchStatus(BatchStatus.COMPLETED.getId());
+			batch.setEndDateTime(new Date());
+
+			assetCleanupBatchService.update(batch);
 		}
 	}
 }

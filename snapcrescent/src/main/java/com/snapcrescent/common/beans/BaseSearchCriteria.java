@@ -14,8 +14,12 @@ public class BaseSearchCriteria{
 
 	private Long createdByUserId;
 	private Long accessibleByUserId;
+
+	private Long fromId;
+	private Long toId;
 	
-	private List<String> selectedIds = new ArrayList<>();
+	private List<Long> selectedIds = new ArrayList<>();
+	private List<Long> ignoreIds = new ArrayList<>();
 	
 	private String searchKeyword;
 	private Boolean active;

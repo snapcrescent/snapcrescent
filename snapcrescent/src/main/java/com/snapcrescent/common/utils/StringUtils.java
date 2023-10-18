@@ -1,6 +1,9 @@
 package com.snapcrescent.common.utils;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
@@ -54,6 +57,10 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 		}
 
 		return hash;
+	}
+
+	public static List<Long> idsStringToIdList(String idsString) {
+		return Arrays.stream(idsString.split(",")).map(Long::parseLong).collect(Collectors.toList());
 	}
 
 }

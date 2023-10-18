@@ -202,4 +202,12 @@ public class AssetController extends BaseController {
 		return response;
 	}
 
+	@PostMapping("/asset/sync")
+	public @ResponseBody BaseResponseBean<Long, UiAsset> syncAssets(@RequestBody Map<String, String> searchParams) {
+		AssetSearchCriteria searchCriteria = new AssetSearchCriteria();
+		parseSearchParams(searchParams, searchCriteria);
+		return assetService.search(searchCriteria);
+
+	}
+
 }

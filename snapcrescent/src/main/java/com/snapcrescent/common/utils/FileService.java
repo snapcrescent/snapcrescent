@@ -69,6 +69,10 @@ public class FileService {
 	public InputStream getFileInputStream(FILE_TYPE fileType, Long userId, String path, String fileName) throws IOException {
 		return Files.newInputStream(Paths.get(getBasePath(fileType, userId) + path + fileName));
 	}
+
+	public void removeFile(AssetType assetType, Long userId, String path, String fileName) throws IOException {
+		Files.delete(Paths.get(getBasePath(assetType, userId) + path + fileName));
+	}
 	
 	public void removeFile(FILE_TYPE fileType, Long userId,String path, String fileName) throws IOException {
 		Files.delete(Paths.get(getBasePath(fileType, userId) + path + fileName));

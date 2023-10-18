@@ -67,7 +67,7 @@ public class HibernateConfig {
 	Map<String, Object> hibernateProperties() {
 		Map<String, Object> properties = new HashMap<String, Object>();
 	    properties.put("hibernate.hbm2ddl.auto", "validate");
-	    properties.put("hibernate.show_sql", true);
+	    properties.put("hibernate.show_sql", false);
 	    properties.put("hibernate.jdbc.batch_size", 10);
 	    properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
 	    properties.put("hibernate.session_factory.interceptor", daoSQLEntityInterceptor);

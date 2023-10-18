@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:snapcrescent_mobile/services/app_config_service.dart';
+import 'package:snapcrescent_mobile/appConfig/app_config_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
 class Header extends StatelessWidget implements PreferredSizeWidget {

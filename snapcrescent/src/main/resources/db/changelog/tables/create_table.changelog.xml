@@ -18,6 +18,7 @@
 	  <include relativeToChangelogFile="true" file="./asset_import_batch.sql"/>
 	  <include relativeToChangelogFile="true" file="./metadata_recompute_batch.sql"/>
 	  <include relativeToChangelogFile="true" file="./thumbnail_regenerate_batch.sql"/>
+      <include relativeToChangelogFile="true" file="./asset_cleanup_batch.sql"/>
 	  
 
 </databaseChangeLog>

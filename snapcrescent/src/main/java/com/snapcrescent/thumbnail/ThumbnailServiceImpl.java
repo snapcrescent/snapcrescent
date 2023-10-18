@@ -2,6 +2,9 @@ package com.snapcrescent.thumbnail;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -127,6 +130,17 @@ public class ThumbnailServiceImpl extends BaseService implements ThumbnailServic
 		}
 
 		return original;
+	}
+
+	@Override
+	public void updateThumbnailPostAssetDeletion(Asset asset) throws IOException {
+		Thumbnail thumbnail = asset.getThumbnail();		
+
+		try {
+			fileService.removeFile(asset.getAssetTypeEnum(), asset.getCreatedByUserId(), thumbnail.getPath(), thumbnail.getName());
+		} catch(NoSuchFileException e) {
+			log.error("Error while deleting thumbnail " + e.getLocalizedMessage());
+		}
 	}
 
 }
