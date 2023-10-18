@@ -38,6 +38,7 @@ public class BatchCronProcessor {
 	// Execute after 10 seconds
 
 	@Async
+	@Scheduled(cron = "*/10 * * * * *")
 	public void processAssetImportBatch() {
 		
 		
