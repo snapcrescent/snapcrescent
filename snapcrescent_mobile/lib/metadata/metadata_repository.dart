@@ -3,7 +3,7 @@ import 'package:snapcrescent_mobile/common/repository/base_repository.dart';
 import 'package:snapcrescent_mobile/common/repository/database_helper.dart';
 
 class MetadataRepository extends BaseRepository {
-  static const _tableName = 'METADATA';
+  
 
   static final MetadataRepository _singleton = MetadataRepository._internal();
 
@@ -11,7 +11,7 @@ class MetadataRepository extends BaseRepository {
     return _singleton;
   }
 
-  MetadataRepository._internal() : super(_tableName);
+  MetadataRepository._internal() : super(Metadata.tableName);
 
   Future<Metadata?> findByLocalAssetId(String localAssetId) async {
     final result = await DatabaseHelper().get(
@@ -61,14 +61,14 @@ class MetadataRepository extends BaseRepository {
 
   Future<int> countByLocalAssetIdNotNull() async {
     final result = await DatabaseHelper().get(
-      '''SELECT COUNT($_tableName.ID) from $tableName where LOCAL_ASSET_ID IS NOT NULL''',[]
+      '''SELECT COUNT($tableName.ID) from $tableName where LOCAL_ASSET_ID IS NOT NULL''',[]
     );
     return result != null ? result.columnAt(0) : 0;
   }
 
   Future<int?> sizeByLocalAssetIdNotNull() async {
     final result = await DatabaseHelper().get(
-      '''SELECT SUM($_tableName.SIZE) from $tableName where LOCAL_ASSET_ID IS NOT NULL''',[]
+      '''SELECT SUM($tableName.SIZE) from $tableName where LOCAL_ASSET_ID IS NOT NULL''',[]
     );
     return result != null ? result.columnAt(0) : 0;
   }

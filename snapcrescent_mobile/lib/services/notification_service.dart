@@ -69,9 +69,9 @@ class NotificationService {
         message,
         NotificationDetails(
           android: AndroidNotificationDetails("Snap-Crescent", channelName,
-              channelShowBadge: false,
-              importance: Importance.max,
-              priority: Priority.high,
+              channelShowBadge: true,
+              importance: Importance.low,
+              priority: Priority.low,
               onlyAlertOnce: true,
               showProgress: true,
               maxProgress: maxProgress,

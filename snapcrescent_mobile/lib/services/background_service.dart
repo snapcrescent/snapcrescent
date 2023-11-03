@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:snapcrescent_mobile/services/app_config_service.dart';
+import 'package:snapcrescent_mobile/appConfig/app_config_service.dart';
 import 'package:snapcrescent_mobile/services/notification_service.dart';
-import 'package:snapcrescent_mobile/services/sync_service.dart';
+import 'package:snapcrescent_mobile/sync/sync_service.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 import 'package:snapcrescent_mobile/utils/permission_utilities.dart';
@@ -42,7 +42,7 @@ class BackgroundService {
     });
 
     // bring to foreground
-    Timer.periodic(const Duration(days: 1), (timer) async {
+    Timer.periodic(const Duration(minutes: 15), (timer) async {
       // test using external plugin
       if (service is AndroidServiceInstance) {
         if (await service.isForegroundService()) {

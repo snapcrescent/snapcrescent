@@ -4,6 +4,9 @@
 import 'package:snapcrescent_mobile/common/model/base_model.dart';
 
 class Metadata extends BaseUiBean {
+
+  static const tableName = 'METADATA';
+
   DateTime? creationDateTime;
   String? name;
   String? internalName;
@@ -47,7 +50,7 @@ class Metadata extends BaseUiBean {
     return Metadata(
         bean: BaseUiBean.fromMap(map),
          creationDateTime: map['CREATION_DATE_TIME'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(map['CREATION_DATE_TIME'])
+            ? DateTime.fromMillisecondsSinceEpoch(map['CREATION_DATE_TIME']*1000)
             : null,
         name: map['NAME'],
         internalName: map['INTERNAL_NAME'],
@@ -63,7 +66,7 @@ class Metadata extends BaseUiBean {
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = super.toMap();
 
-    map['CREATION_DATE_TIME'] = creationDateTime!.millisecondsSinceEpoch;
+    map['CREATION_DATE_TIME'] = (creationDateTime!.millisecondsSinceEpoch)/1000;
     map['NAME'] = name;
     map['INTERNAL_NAME'] = internalName;
     map['MIME_TYPE'] = mimeType;

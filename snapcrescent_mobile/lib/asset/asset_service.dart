@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:snapcrescent_mobile/asset/asset.dart';
 import 'package:snapcrescent_mobile/asset/asset_repository.dart';
 import 'package:snapcrescent_mobile/asset/asset_search_criteria.dart';
+import 'package:snapcrescent_mobile/asset/asset_timeline.dart';
 import 'package:snapcrescent_mobile/asset/state/asset_state.dart';
 import 'package:snapcrescent_mobile/asset/unified_asset.dart';
 import 'package:snapcrescent_mobile/common/model/base_response_bean.dart';
@@ -279,6 +280,12 @@ class AssetService extends BaseService {
       AssetSearchCriteria assetSearchCriteria) async {
     return AssetRepository().searchOnLocal(assetSearchCriteria);
   }
+
+  Future<List<AssetTimeline>> getAssetTimeline() async {
+    return AssetRepository().getAssetTimeline();
+  }
+
+  
 
   Future<int> getLatestAssetId() async {
     return AssetRepository().findMaxId();

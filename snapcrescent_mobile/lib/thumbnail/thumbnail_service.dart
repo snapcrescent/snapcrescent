@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:isolate_pool_2/isolate_pool_2.dart';
 import 'package:snapcrescent_mobile/services/base_service.dart';
 import 'package:snapcrescent_mobile/thumbnail/thumbnail.dart';
@@ -77,11 +79,13 @@ class ThumbnailService extends BaseService {
 class ThumbnailFileDownloaderJob extends PooledJob<void> {
 
   final Thumbnail thumbnail;
+  RootIsolateToken rootIsolateToken = RootIsolateToken.instance!;
 
   ThumbnailFileDownloaderJob(this.thumbnail);
 
   @override
   Future<void> job() async {
+    BackgroundIsolateBinaryMessenger.ensureInitialized(rootIsolateToken);
     await ThumbnailService().writeThumbnailFile(thumbnail);
   }
 }

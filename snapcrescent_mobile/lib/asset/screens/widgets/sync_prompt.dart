@@ -12,9 +12,9 @@ class SyncPromptWidget extends StatelessWidget  {
   void _runSync(SyncState syncState ) async {
     SyncService().setSyncState(syncState);
     await SyncService().syncFromServer();
-    await NotificationService().clearNotifications();
+    //await NotificationService().clearNotifications();
     await SyncService().syncToServer();
-    await NotificationService().clearNotifications();
+    //await NotificationService().clearNotifications();
   }
 
   postDownloadUpdates(SyncState syncMetadata, AssetStore assetStore) {
@@ -24,7 +24,8 @@ class SyncPromptWidget extends StatelessWidget  {
           "Syncing",
           '''Syncing from Server : ${syncMetadata.downloadPercentageString()}''',
           syncMetadata.getTotalServerAssetCount(),
-          syncMetadata.getDownloadedAssetCount());
+          syncMetadata.getDownloadedAssetCount(),
+          "Sync Progress");
     }
   }
 
@@ -35,7 +36,8 @@ class SyncPromptWidget extends StatelessWidget  {
           "Syncing",
           '''Syncing to Server : ${syncMetadata.uploadPercentageString()}''',
           syncMetadata.getTotalLocalAssetCount(),
-          syncMetadata.getUploadedAssetCount());
+          syncMetadata.getUploadedAssetCount(),
+          "Sync Progress");
     }
   }
 

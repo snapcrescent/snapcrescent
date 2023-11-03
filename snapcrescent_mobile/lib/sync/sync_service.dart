@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:isolate_pool_2/isolate_pool_2.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:snapcrescent_mobile/appConfig/app_config_service.dart';
 import 'package:snapcrescent_mobile/asset/asset.dart';
@@ -36,6 +37,11 @@ class SyncService extends BaseService {
     bool syncNow = await _canSyncExecute();
 
     if (syncNow) {
+      
+      if(GlobalService.instance.pool.state == IsolatePoolState.notStarted) {
+        await GlobalService.instance.pool.start();
+      }
+
       await _startExecution();
       await _downloadAssetsFromServer();
       await _stopExecution();
@@ -195,8 +201,8 @@ class SyncService extends BaseService {
               searchCriteria.resultPerPage!)
           .ceil();
 
-      GlobalService.instance.pool.stop();
-      await GlobalService.instance.pool.start();
+      
+      
       for (var pageNumber = 0; pageNumber <= numberOfPages; pageNumber++) {
         searchCriteria.pageNumber = pageNumber;
 
@@ -218,7 +224,6 @@ class SyncService extends BaseService {
           }
         }
       }
-      GlobalService.instance.pool.stop();
       
     }
   }
@@ -231,10 +236,10 @@ class SyncService extends BaseService {
 
       List<File> filteredAssets = [];
       for (var asset in assets) {
-        Metadata? metadata =
-            await MetadataService().findByLocalAssetId(asset.id);
+        bool metadataExists =
+            await MetadataService().existByLocalAssetId(asset.id);
 
-        if (metadata == null) {
+        if (metadataExists == false) {
           //The asset is not uploaded to server yet;
           File? assetFile = await asset.file;
 
@@ -243,9 +248,6 @@ class SyncService extends BaseService {
           }
         }
       }
-
-      filteredAssets.sort((File a, File b) =>
-          a.lastModifiedSync().compareTo(b.lastModifiedSync()));
 
       if (filteredAssets.isNotEmpty) {
         refreshAssetStores = true;
@@ -299,12 +301,14 @@ class SyncService extends BaseService {
       for (int i = 0; i < autoBackupFolders.length; i++) {
         AssetPathEntity folder = autoBackupFolders[i];
 
+        /*
         final allAssets = await folder.getAssetListRange(
           start: 0, // start at index 0
           end: 100000, // end at a very big index (to get all the assets)
         );
+        */
 
-        assets = allAssets;
+        //assets = allAssets;
       }
     } catch (e) {
       print(e);

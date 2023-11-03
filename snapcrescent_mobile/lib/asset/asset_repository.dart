@@ -1,8 +1,10 @@
 import 'package:snapcrescent_mobile/asset/asset.dart';
 import 'package:snapcrescent_mobile/asset/asset_search_criteria.dart';
+import 'package:snapcrescent_mobile/asset/asset_timeline.dart';
 import 'package:snapcrescent_mobile/common/repository/base_repository.dart';
 import 'package:snapcrescent_mobile/common/repository/database_helper.dart';
 import 'package:snapcrescent_mobile/common/repository/query_bean.dart';
+import 'package:snapcrescent_mobile/metadata/metadata.dart';
 
 class AssetRepository extends BaseRepository{
 
@@ -64,6 +66,11 @@ class AssetRepository extends BaseRepository{
 
     return QueryBean(buffer.toString(), arguments);
   }
-  
+
+    Future<List<AssetTimeline>> getAssetTimeline() async {
+    final result = await DatabaseHelper().getAll(
+        '''SELECT COUNT(*) AS 'COUNT', CREATION_DATE_TIME from ${Metadata.tableName} GROUP BY strftime('%Y-%m-%d',CREATION_DATE_TIME,'unixepoch') ORDER BY CREATION_DATE_TIME DESC''',[]);
+    return result.map((e) => AssetTimeline.fromMap(e)).toList();
+  }  
 
 }

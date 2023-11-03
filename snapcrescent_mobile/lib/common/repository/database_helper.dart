@@ -72,7 +72,7 @@ class DatabaseHelper {
 
    await tx.execute('''
       CREATE TABLE IF NOT EXISTS ALBUM (
-        ID INTEGER PRIMARY KEY,
+        ID TEXT PRIMARY KEY,
         NAME TEXT,
         PUBLIC_ACCESS INTEGER,
         ALBUM_TYPE INTEGER,
@@ -82,6 +82,16 @@ class DatabaseHelper {
       ''');
 
     await tx.execute('''CREATE INDEX IDX_ALBUM_ID ON ALBUM (ID);''');
+
+    await tx.execute('''
+      CREATE TABLE IF NOT EXISTS LOCAL_ASSET ( 
+        ID TEXT PRIMARY KEY,
+        CREATION_DATE_TIME INTEGER,
+        SYNCED_TO_SERVER INTEGER,
+        );
+      ''');
+
+    await tx.execute('''CREATE INDEX IDX_LOCAL_ASSET_ID ON LOCAL_ASSET (ID);''');
     
   }));
 

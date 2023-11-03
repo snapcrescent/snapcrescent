@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:snapcrescent_mobile/asset/asset_timeline.dart';
 import 'package:snapcrescent_mobile/asset/unified_asset.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
 
@@ -16,6 +17,9 @@ class AssetState {
 
   List<String> groupedMapKeys = List.empty();
 
+  List<AssetTimeline> assetTimeLine = List.empty();
+  List<AssetYearlyTimeline> assetYearlyTimeLines = List.empty();
+
   List<int> getSelectedIndexes() {
     return assetList
         .where((asset) => asset.selected == true)
@@ -30,6 +34,26 @@ class AssetState {
 
   int getSelectedCount() {
     return assetList.where((asset) => asset.selected == true).length;
+  }
+
+  void setAssetTimeLine(List<AssetTimeline> assetTimeLine) {
+      this.assetTimeLine = assetTimeLine;
+      assetYearlyTimeLines = [];
+
+      for (var assetTimeLineItem in this.assetTimeLine) {
+        DateTime date = DateTime(assetTimeLineItem.creationDateTime.year);
+        
+        AssetYearlyTimeline? yearlyTimeline = assetYearlyTimeLines.firstWhereOrNull((element) => element.creationDateTime == date);
+
+        if(yearlyTimeline == null) {
+          yearlyTimeline = AssetYearlyTimeline(date, assetTimeLineItem.count);
+          yearlyTimeline.assetTimelines.add(assetTimeLineItem);
+          assetYearlyTimeLines.add(yearlyTimeline);
+        } else{
+          yearlyTimeline.count = yearlyTimeline.count + assetTimeLineItem.count;
+          yearlyTimeline.assetTimelines.add(assetTimeLineItem);
+        }
+       }
   }
 
   void addAsset(UniFiedAsset asset) {
