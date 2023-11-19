@@ -10,12 +10,10 @@ import 'package:snapcrescent_mobile/asset/asset_service.dart';
 import 'package:snapcrescent_mobile/asset/asset_view_arguments.dart';
 import 'package:snapcrescent_mobile/asset/screens/asset_view.dart';
 import 'package:snapcrescent_mobile/asset/screens/widgets/asset_thumbnail.dart';
-import 'package:snapcrescent_mobile/asset/screens/widgets/asset_year_grid.dart';
 import 'package:snapcrescent_mobile/asset/screens/widgets/config_server_prompt.dart';
 import 'package:snapcrescent_mobile/asset/screens/widgets/sync_prompt.dart';
 import 'package:snapcrescent_mobile/asset/state/asset_state.dart';
 import 'package:snapcrescent_mobile/asset/stores/asset_store.dart';
-import 'package:snapcrescent_mobile/asset/unified_asset.dart';
 import 'package:snapcrescent_mobile/services/toast_service.dart';
 import 'package:snapcrescent_mobile/utils/date_utilities.dart';
 import 'package:snapcrescent_mobile/utils/constants.dart';
@@ -120,8 +118,10 @@ class _AssetListViewState extends State<_AssetListView> {
     });
   }
 
-  _getFormattedGroupKey(DateTime groupDateTime) {
+  _getFormattedGroupKey(String key) {
     String formattedKey = "";
+    DateTime groupDateTime =
+        DateUtilities().parseDate(key, DateUtilities.defaultYearFormat);
     if (currentDateTime.year == groupDateTime.year) {
       if (DateUtilities().weekNumber(currentDateTime) ==
           DateUtilities().weekNumber(groupDateTime)) {
@@ -145,11 +145,10 @@ class _AssetListViewState extends State<_AssetListView> {
 
   int getAssetGroupIndexInScrollView() {
     try {
-      final double currentAsset =
-          (AssetState().assetYearlyTimeLines.length - 1) *
-              _scrollController.offset /
-              (_scrollController.position.maxScrollExtent -
-                  _scrollController.position.minScrollExtent);
+      final double currentAsset = (AssetState().groupedAssets.length - 1) *
+          _scrollController.offset /
+          (_scrollController.position.maxScrollExtent -
+              _scrollController.position.minScrollExtent);
       if (currentAsset.isNaN || currentAsset.isInfinite) {
         return 0;
       }
@@ -160,19 +159,92 @@ class _AssetListViewState extends State<_AssetListView> {
   }
 
   Text getScrollLabel() {
-    final keys = AssetState().assetYearlyTimeLines;
+    final keys = AssetState().groupedMapKeys;
     final label = keys[getAssetGroupIndexInScrollView()];
 
-    return Text(_getFormattedGroupKey(label.creationDateTime));
+    return Text(_getFormattedGroupKey(label));
   }
 
   _gridView(Orientation orientation) {
-    final assetYearlyTimeLines = AssetState().assetYearlyTimeLines;
+    final keys = AssetState().groupedMapKeys;
+
     return ListView.builder(
         controller: _scrollController,
-        itemCount: assetYearlyTimeLines.length,
-        itemBuilder: (BuildContext context, int assetYearlyTimeLineIndex) {
-          return AssetYearGrid(assetYearlyTimeLines[assetYearlyTimeLineIndex].assetTimelines);
+        itemCount: keys.length + 1,
+        itemBuilder: (BuildContext context, int groupIndex) {
+          if (groupIndex == keys.length) {
+            return Center(
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  height: 100,
+                )
+              ],
+            ));
+          } else {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                if (AssetState().groupedAssets[keys[groupIndex]]!.isNotEmpty)
+                  Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.all(5),
+                          child: Text(_getFormattedGroupKey(keys[groupIndex]),
+                              style: TextStyle(
+                                color: Colors.white,
+                              )),
+                        ),
+                        GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 150,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                            physics:
+                                NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+                            shrinkWrap: true,
+                            itemCount: AssetState()
+                                .groupedAssets[keys[groupIndex]]!
+                                .length,
+                            itemBuilder: (BuildContext context2, index) {
+                              final asset = AssetState()
+                                  .groupedAssets[keys[groupIndex]]![index];
+
+                              return GestureDetector(
+                                onLongPress: () {
+                                  asset.selected = !asset.selected;
+                                  setState(() {});
+                                },
+                                onTap: () {
+                                  //Grid is in selection mode
+                                  if (AssetState().isAnyItemSelected()) {
+                                    asset.selected = !asset.selected;
+                                    setState(() {});
+                                  } //No asset is selected, proceed to asset detail page
+                                  else {
+                                    _onAssetTap(context,
+                                        AssetState().assetList.indexOf(asset));
+                                  }
+                                },
+                                child: AssetThumbnail(
+                                    asset,
+                                    asset.assetSource == AssetSource.CLOUD
+                                        ? Future.value(asset.asset)
+                                        : asset.assetEntity!.thumbnailData,
+                                    asset.selected),
+                              );
+                            })
+                      ])
+              ],
+            );
+          }
         });
   }
 

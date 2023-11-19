@@ -90,7 +90,7 @@ class _SplashScreenViewState extends State<_SplashScreenView> {
 
     await AppConfigService().updateConfig(Constants.appConfigShowDeviceAssetsFolders, deviceAssetFolders.map((folder) => folder.id).join(","));
     await AppConfigService().updateIntConfig(Constants.appConfigAutoBackupFrequency, Constants.defaultAutoBackupFrequency);
-    await AppConfigService().updateDateConfig(Constants.appConfigLastSyncActivityTimestamp, Constants.defaultLastSyncActivityTimestamp, DateUtilities.timeStampFormat);    
+    await AppConfigService().updateDateConfig(Constants.appConfigLastSyncActivityTimestamp, Constants.lowDate, DateUtilities.timeStampFormat);    
   }
 
   _setSystemSettings() async {

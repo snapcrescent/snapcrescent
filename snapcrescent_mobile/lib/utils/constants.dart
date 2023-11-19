@@ -44,7 +44,10 @@ class Constants {
   static final List<String> androidDefaultDeviceFolderList = ["Camera"];
   static final List<String> iosDefaultDeviceFolderList = ["Recent"];
 
-  static final DateTime defaultLastSyncActivityTimestamp = DateTime(2000, 1, 1, 0, 0, 0, 0, 0);
+
+  static final DateTime lowDate = DateTime(1970, 1, 1, 0, 0, 0, 0, 0);
+  static final DateTime highDate = DateTime(9999, 12, 31, 23, 59, 59, 0, 0);
+
 
   static const int defaultSyncResultPerPage = 5;
 }

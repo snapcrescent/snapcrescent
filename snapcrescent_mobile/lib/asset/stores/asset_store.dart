@@ -7,6 +7,7 @@ import 'package:snapcrescent_mobile/asset/asset_search_criteria.dart';
 import 'package:snapcrescent_mobile/asset/asset_service.dart';
 import 'package:snapcrescent_mobile/asset/state/asset_state.dart';
 import 'package:snapcrescent_mobile/asset/unified_asset.dart';
+import 'package:snapcrescent_mobile/localAsset/local_asset_service.dart';
 import 'package:snapcrescent_mobile/metadata/metadata.dart';
 import 'package:snapcrescent_mobile/metadata/metadata_service.dart';
 import 'package:snapcrescent_mobile/appConfig/app_config_service.dart';
@@ -85,9 +86,13 @@ class _AssetStore with Store {
             .getStringListConfig(Constants.appConfigShowDeviceAssetsFolders);
 
         final albums = await PhotoManager.getAssetPathList();
-        
         for (final album in albums) {
           if (selectedDeviceFolders.contains(album.id)) {
+
+            
+
+          
+
             await _getUnifiedAssetsFromLocalAssets(
                 searchCriteria, assetList, album);
           }
@@ -116,9 +121,20 @@ class _AssetStore with Store {
   _getUnifiedAssetsFromLocalAssets(AssetSearchCriteria searchCriteria,
       List<UniFiedAsset> assetList, AssetPathEntity? album) async {
     if (album != null) {
+
+      //Look for latest entry in LOCAL_ASSET table for this album
+      DateTime latestLoggedLocalAsset = await LocalAssetService().getMaxAssetDateByAlbum(album.id);
+
+      
+      FilterOptionGroup filterOption = FilterOptionGroup();
+      filterOption.createTimeCond = DateTimeCond(min: latestLoggedLocalAsset, max: Constants.highDate);
+
+      album = AssetPathEntity(id: album.id, name: album.name, filterOption: filterOption);
+
       final allAssets = await album.getAssetListRange(start: 0, end: 10000);
 
       for (final asset in allAssets) {
+        
         bool metadataExists =
             await MetadataService().existByLocalAssetId(asset.id);
 

@@ -7,7 +7,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 
 class DatabaseHelper {
   static const _dbName = 'snap-crescent.db';
-  static const _dbVersion = 20230802;
+  static const _dbVersion = 20231103;
 
   
 
@@ -85,13 +85,17 @@ class DatabaseHelper {
 
     await tx.execute('''
       CREATE TABLE IF NOT EXISTS LOCAL_ASSET ( 
-        ID TEXT PRIMARY KEY,
+        ID INTEGER PRIMARY KEY,
+        LOCAL_ASSET_ID TEXT,
+        LOCAL_ALBUM_ID TEXT,
         CREATION_DATE_TIME INTEGER,
         SYNCED_TO_SERVER INTEGER,
         );
       ''');
 
     await tx.execute('''CREATE INDEX IDX_LOCAL_ASSET_ID ON LOCAL_ASSET (ID);''');
+    await tx.execute('''CREATE INDEX IDX_LOCAL_ASSET_LOCAL_ASSET_ID ON LOCAL_ASSET (LOCAL_ASSET_ID);''');
+    await tx.execute('''CREATE INDEX IDX_LOCAL_ASSET_LOCAL_ALBUM_ID ON LOCAL_ASSET (LOCAL_ALBUM_ID);''');
     
   }));
 
