@@ -3,6 +3,7 @@ import 'package:snapcrescent_mobile/metadata/metadata.dart';
 import 'package:snapcrescent_mobile/thumbnail/thumbnail.dart';
 
 class Asset extends BaseUiBean {
+  static const tableName = 'ASSET';
 
   bool? active;
 
@@ -17,20 +18,7 @@ class Asset extends BaseUiBean {
 
   String? token;
 
-  Asset(
-      {
-      bean,
-      this.active,
-      this.thumbnail,
-      this.thumbnailId,
-      this.metadata,
-      this.metadataId,
-      this.favorite,
-      this.assetType,
-      this.token
-      })
-      : super(
-            id: bean.id);
+  Asset({bean, this.active, this.thumbnail, this.thumbnailId, this.metadata, this.metadataId, this.favorite, this.assetType, this.token}) : super(id: bean.id);
 
   static Asset fromJsonModel(Map<String, dynamic> json) => Asset.fromJson(json);
 
@@ -38,13 +26,9 @@ class Asset extends BaseUiBean {
     return Asset(
       bean: BaseUiBean.fromJson(json),
       active: json['active'],
-      thumbnail: json['thumbnail'] == null
-          ? null
-          : Thumbnail.fromJson(json['thumbnail']),
+      thumbnail: json['thumbnail'] == null ? null : Thumbnail.fromJson(json['thumbnail']),
       thumbnailId: json['thumbnailId'],
-      metadata: json['metadata'] == null
-          ? null
-          : Metadata.fromJson(json['metadata']),
+      metadata: json['metadata'] == null ? null : Metadata.fromJson(json['metadata']),
       metadataId: json['metadataId'],
       favorite: json['favorite'],
       assetType: json['assetType'],
@@ -53,7 +37,6 @@ class Asset extends BaseUiBean {
   }
 
   factory Asset.fromMap(Map<String, dynamic> map) {
-
     return Asset(
       bean: BaseUiBean.fromMap(map),
       active: map['ACTIVE'] == 1 ? true : false,

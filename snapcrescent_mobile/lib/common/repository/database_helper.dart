@@ -9,17 +9,15 @@ class DatabaseHelper {
   static const _dbName = 'snap-crescent.db';
   static const _dbVersion = 20231103;
 
-  
-
   static final DatabaseHelper _singleton = DatabaseHelper._internal();
 
   factory DatabaseHelper() {
     return _singleton;
   }
 
-  DatabaseHelper._internal() ;
+  DatabaseHelper._internal();
 
-  SqliteDatabase ? _database;
+  SqliteDatabase? _database;
 
   Future<SqliteDatabase> get database async {
     _database ??= await _initiateDatabase();
@@ -27,9 +25,8 @@ class DatabaseHelper {
   }
 
   final migrations = SqliteMigrations()
-  ..add(SqliteMigration(_dbVersion, (tx) async {
-    
-    await tx.execute('''
+    ..add(SqliteMigration(_dbVersion, (tx) async {
+      await tx.execute('''
       CREATE TABLE IF NOT EXISTS ASSET ( 
         ID INTEGER PRIMARY KEY,
         ACTIVE INTEGER,
@@ -40,10 +37,9 @@ class DatabaseHelper {
         );
       ''');
 
-    await tx.execute('''CREATE INDEX IDX_ASSET_ID ON ASSET (ID);''');
+      await tx.execute('''CREATE INDEX IDX_ASSET_ID ON ASSET (ID);''');
 
-
-    await tx.execute('''
+      await tx.execute('''
       CREATE TABLE IF NOT EXISTS METADATA ( 
         ID INTEGER PRIMARY KEY,
         CREATION_DATE_TIME INTEGER,
@@ -57,20 +53,20 @@ class DatabaseHelper {
         );
       
       ''');
-    
-    await tx.execute('''CREATE INDEX IDX_METADATA_ID ON METADATA (ID);''');
 
-    await tx.execute('''
+      await tx.execute('''CREATE INDEX IDX_METADATA_ID ON METADATA (ID);''');
+
+      await tx.execute('''
       CREATE TABLE IF NOT EXISTS THUMBNAIL (
         ID INTEGER PRIMARY KEY,
         NAME TEXT
         );
       
       ''');
-    
-    await tx.execute('''CREATE INDEX IDX_THUMBNAIL_ID ON THUMBNAIL (ID);''');
 
-   await tx.execute('''
+      await tx.execute('''CREATE INDEX IDX_THUMBNAIL_ID ON THUMBNAIL (ID);''');
+
+      await tx.execute('''
       CREATE TABLE IF NOT EXISTS ALBUM (
         ID TEXT PRIMARY KEY,
         NAME TEXT,
@@ -81,26 +77,24 @@ class DatabaseHelper {
       
       ''');
 
-    await tx.execute('''CREATE INDEX IDX_ALBUM_ID ON ALBUM (ID);''');
+      await tx.execute('''CREATE INDEX IDX_ALBUM_ID ON ALBUM (ID);''');
 
-    await tx.execute('''
+      await tx.execute('''
       CREATE TABLE IF NOT EXISTS LOCAL_ASSET ( 
         ID INTEGER PRIMARY KEY,
         LOCAL_ASSET_ID TEXT,
         LOCAL_ALBUM_ID TEXT,
         CREATION_DATE_TIME INTEGER,
-        SYNCED_TO_SERVER INTEGER,
+        SYNCED_TO_SERVER INTEGER
         );
       ''');
 
-    await tx.execute('''CREATE INDEX IDX_LOCAL_ASSET_ID ON LOCAL_ASSET (ID);''');
-    await tx.execute('''CREATE INDEX IDX_LOCAL_ASSET_LOCAL_ASSET_ID ON LOCAL_ASSET (LOCAL_ASSET_ID);''');
-    await tx.execute('''CREATE INDEX IDX_LOCAL_ASSET_LOCAL_ALBUM_ID ON LOCAL_ASSET (LOCAL_ALBUM_ID);''');
-    
-  }));
+      await tx.execute('''CREATE INDEX IDX_LOCAL_ASSET_ID ON LOCAL_ASSET (ID);''');
+      await tx.execute('''CREATE INDEX IDX_LOCAL_ASSET_LOCAL_ASSET_ID ON LOCAL_ASSET (LOCAL_ASSET_ID);''');
+      await tx.execute('''CREATE INDEX IDX_LOCAL_ASSET_LOCAL_ALBUM_ID ON LOCAL_ASSET (LOCAL_ALBUM_ID);''');
+    }));
 
   _initiateDatabase() async {
-    
     var directory = (await getApplicationDocumentsDirectory()).path;
     String path = '$directory/$_dbName';
     final db = SqliteDatabase(path: path);
@@ -109,31 +103,27 @@ class DatabaseHelper {
   }
 
   Future<List<Row>> getAll(String query, List<Object?> arguments) async {
-
     SqliteDatabase database = await this.database;
     return await database.getAll(query, arguments);
   }
 
   Future<Row?> get(String query, List<Object?> arguments) async {
-
     SqliteDatabase database = await this.database;
     return await database.getOptional(query, arguments);
   }
-
 
   Future<void> save(String tableName, Map<String, dynamic> row) async {
     SqliteDatabase database = await this.database;
 
     String valueString = row.values.join(",");
     List<String> values = valueString.split(",");
-    
+
     String statement = _getCreateStatement(tableName, row, false);
     await database.execute(statement, values);
   }
 
   Future<void> saveAll(String tableName, List<Map<String, dynamic>> rows) async {
-
-    if(rows.isEmpty) {
+    if (rows.isEmpty) {
       return;
     }
 
@@ -149,40 +139,39 @@ class DatabaseHelper {
       buffer.write("(");
 
       for (int columnIndex = 0; columnIndex < row.values.length; columnIndex++) {
-        if(row.values.elementAt(columnIndex) != null) {
+        if (row.values.elementAt(columnIndex) != null) {
           buffer.write("'");
           buffer.write(row.values.elementAt(columnIndex));
           buffer.write("'");
         } else {
           buffer.write('NULL');
         }
-        if(columnIndex < row.values.length - 1) {
-            buffer.write(",");
+        if (columnIndex < row.values.length - 1) {
+          buffer.write(",");
         }
       }
 
       buffer.write(")");
     }
-    
+
     String statement = '''${_getCreateStatement(tableName, rows[0], true)} VALUES ${buffer.toString()}''';
     await database.execute(statement);
   }
 
   String _getCreateStatement(String tableName, Map<String, dynamic> row, bool isBulkInsert) {
-      String paramters = '';
-    
-      if(isBulkInsert == false) {
-        for (int index = 0; index < row.keys.length; index++) {
-          paramters = '''$paramters?''';
+    String paramters = '';
 
-          if(index < row.keys.length - 1) {
-              paramters = '''$paramters,''';  
-          }
+    if (isBulkInsert == false) {
+      for (int index = 0; index < row.keys.length; index++) {
+        paramters = '''$paramters?''';
+
+        if (index < row.keys.length - 1) {
+          paramters = '''$paramters,''';
         }
       }
-      
-      
-      return '''INSERT INTO $tableName(${row.keys.join(',')}) ${isBulkInsert == false ? '''VALUES ($paramters)''' : '' }''';
+    }
+
+    return '''INSERT INTO $tableName(${row.keys.join(',')}) ${isBulkInsert == false ? '''VALUES ($paramters)''' : ''}''';
   }
 
   Future<List<Row>> findAll(
@@ -194,40 +183,40 @@ class DatabaseHelper {
 
   Future<Row?> findById(String tableName, int id) async {
     SqliteDatabase database = await this.database;
-    return await database.getOptional('''SELECT * FROM $tableName WHERE ID = ?''' , [id]);
+    return await database.getOptional('''SELECT * FROM $tableName WHERE ID = ?''', [id]);
   }
 
   Future<void> update(String tableName, Map<String, dynamic> row, String where, String whereArgs) async {
     SqliteDatabase database = await this.database;
 
     String columns = '';
-    
+
     for (int index = 0; index < row.keys.length; index++) {
       columns = '''$columns${row.keys.elementAt(index)}=?''';
 
-      if(index < row.keys.length - 1) {
-          columns = '''$columns,''';  
+      if (index < row.keys.length - 1) {
+        columns = '''$columns,''';
       }
     }
 
     List<dynamic> values = [];
     for (int columnIndex = 0; columnIndex < row.values.length; columnIndex++) {
-        if(row.values.elementAt(columnIndex) != null) {
-            values.add(row.values.elementAt(columnIndex));
-        } else {
-            values.add(null);
-        }
+      if (row.values.elementAt(columnIndex) != null) {
+        values.add(row.values.elementAt(columnIndex));
+      } else {
+        values.add(null);
+      }
     }
 
     values.add(whereArgs);
-    
+
     String statement = '''UPDATE $tableName SET $columns WHERE $where''';
     await database.execute(statement, values);
   }
 
   Future<ResultSet> delete(String tableName, int id) async {
     SqliteDatabase database = await this.database;
-    return await database.execute('''DELETE FROM $tableName WHERE ID ?''' , [id]);
+    return await database.execute('''DELETE FROM $tableName WHERE ID ?''', [id]);
   }
 
   Future<ResultSet> deleteAll(String tableName) async {

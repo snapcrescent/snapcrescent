@@ -7,7 +7,6 @@ import 'package:snapcrescent_mobile/asset/asset.dart';
 import 'package:snapcrescent_mobile/asset/asset_search_criteria.dart';
 import 'package:snapcrescent_mobile/asset/asset_service.dart';
 import 'package:snapcrescent_mobile/common/model/base_response_bean.dart';
-import 'package:snapcrescent_mobile/metadata/metadata.dart';
 import 'package:snapcrescent_mobile/metadata/metadata_service.dart';
 import 'package:snapcrescent_mobile/services/base_service.dart';
 import 'package:snapcrescent_mobile/services/global_service.dart';

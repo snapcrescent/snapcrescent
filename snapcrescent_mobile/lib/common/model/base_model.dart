@@ -1,6 +1,5 @@
 class BaseUiBean {
   int? id;
-  
 
   BaseUiBean({
     this.id,
@@ -8,21 +7,23 @@ class BaseUiBean {
 
   factory BaseUiBean.fromJson(Map<String, dynamic> json) {
     return BaseUiBean(
-        id: json['id'],
-        );
+      id: json['id'],
+    );
   }
 
   factory BaseUiBean.fromMap(Map<String, dynamic> map) {
     return BaseUiBean(
-        id: map['ID'],
-        );
+      id: map['ID'],
+    );
   }
 
-  
-
   Map<String, dynamic> toMap() {
-    return {
-      'ID': id,
-    };
+    Map<String, dynamic> map = {};
+
+    if (id != null) {
+      map.putIfAbsent('ID', () => id);
+    }
+
+    return map;
   }
 }
